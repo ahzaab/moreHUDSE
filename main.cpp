@@ -32,8 +32,6 @@
 #include "skse64/GameMenus.h"
 using namespace std;
 
-#define AHZ_NON_ENGLISH		std::wstring
-#define AHZ_ENGLISH			std::wstring
 
 IDebugLog	gLog("AHZmoreHUDPlugin.log");
 
@@ -60,17 +58,9 @@ class SKSEScaleform_GetIngredientData : public GFxFunctionHandler
 {
 public:
 	virtual void	Invoke(Args * args)
-	{				
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+	{
+		CAHZUtility utility;
+		utility.ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -79,16 +69,8 @@ class SKSEScaleform_GetTargetObjectData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{	
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -96,17 +78,9 @@ class SKSEScaleform_GetPlayerData : public GFxFunctionHandler
 {
 public:
 	virtual void	Invoke(Args * args)
-	{		
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessPlayerData(args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessPlayerData(args);
-		}
+	{
+		CAHZUtility utility;
+		utility.ProcessPlayerData(args);
 	}
 };
 
@@ -124,16 +98,8 @@ class SKSEScaleform_GetTargetInventoryCount : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -142,16 +108,8 @@ class SKSEScaleform_GetTargetEffects : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -169,16 +127,8 @@ public:
 			return;
 		}
 
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			args->result->SetBool(utility.GetIsBookAndWasRead(pTargetReference));
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			args->result->SetBool(utility.GetIsBookAndWasRead(pTargetReference));
-		}
+		CAHZUtility utility;
+		args->result->SetBool(utility.GetIsBookAndWasRead(pTargetReference));
 	}
 };
 
@@ -187,16 +137,8 @@ class SKSEScaleform_GetArmorWeightClassString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -205,16 +147,8 @@ class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -223,16 +157,8 @@ class SKSEScaleform_GetIsValidTarget : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		if (IsEnglish())
-		{
-			CAHZUtility<AHZ_ENGLISH> utility;
-			utility.ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
-		}
-		else
-		{
-			CAHZUtility<AHZ_NON_ENGLISH> utility;
-			utility.ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
-		}
+		CAHZUtility utility;
+		utility.ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 

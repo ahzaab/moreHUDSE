@@ -16,16 +16,11 @@
 #include "FoodLUT.h"
 #include "AHZUtility.h"
 
-//RelocAddr<_GetMyEffectsName> GetMyEffectsName(0x009530B0);
-
 RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
-
-//RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x8912A0);
-
-//RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x890960);
-
-
 RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
+RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x891740);
+
+
 
 float GetBaseDamage(TESAmmo* pthisAmmo)
 {
@@ -736,45 +731,715 @@ bool CanPickUp(UInt32 formType)
 }
 
 
-bool IsEnglish()
+string CAHZUtility::GetTargetName(TESObjectREFR *thisObject)
 {
-	static bool settingsRead = false;
-	static bool isEnglish = false;
+	string name;
+	TESFullName* pFullName = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESFullName);
+	const char* displayName = thisObject->extraData.GetDisplayName(thisObject->baseForm);
 
-	// Only read from file once, others read from ram
-	if (!settingsRead)
+	// If the name can be created
+	if (displayName)
 	{
-		settingsRead = true;
-		Setting	* setting = GetINISetting("sLanguage:General");
-		if (setting && setting->GetType() == Setting::kType_String)
+		name.append(displayName);
+	}
+	// Use the base name
+	else if (pFullName)
+	{
+		name.append(pFullName->name.data);
+	}
+
+	// If this is a soul gem, also get the gem size name
+	if (thisObject->baseForm->formType == kFormType_SoulGem)
+	{
+		TESSoulGem *gem = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESSoulGem);
+		if (gem)
 		{
-			if (strstr(setting->data.s, "ENGLISH"))
+			char * soulName = NULL;
+			SettingCollectionMap	* settings = *g_gameSettingCollection;
+			switch (gem->soulSize)
 			{
-				isEnglish = true;
+			case 1: soulName = settings->Get("sSoulLevelNamePetty")->data.s; break;
+			case 2: soulName = settings->Get("sSoulLevelNameLesser")->data.s; break;
+			case 3: soulName = settings->Get("sSoulLevelNameCommon")->data.s; break;
+			case 4: soulName = settings->Get("sSoulLevelNameGreater")->data.s; break;
+			case 5: soulName = settings->Get("sSoulLevelNameGrand")->data.s; break;
+			default: break;
 			}
-			else
+
+			if (soulName)
 			{
-				isEnglish = false;
+				name.append(" (");
+				name.append(soulName);
+				name.append(")");
 			}
-		}
-		else
-		{
-			// default to english if the setting does not exist
-			isEnglish = true;
 		}
 	}
 
-	return isEnglish;
-}
+	return name;
+};
 
-UInt32 SafeRead32(UInt32 addr)
+bool CAHZUtility::GetIsBookAndWasRead(TESObjectREFR *theObject)
 {
-	UInt32	oldProtect;
-	UInt32 data;
+	if (!theObject)
+		return false;
 
-	VirtualProtect((void *)addr, 4, PAGE_EXECUTE_READ, &oldProtect);
-	data = *((UInt32 *)addr);
-	VirtualProtect((void *)addr, 4, oldProtect, &oldProtect);
-	return data;
+	if (theObject->baseForm->GetFormType() != kFormType_Book)
+		return false;
+
+	TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+	if (item && ((item->data.flags & TESObjectBOOK::Data::kType_Read) == TESObjectBOOK::Data::kType_Read))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+};
+
+
+string CAHZUtility::GetArmorWeightClass(TESObjectREFR *theObject)
+{
+	string desc;
+
+	if (!theObject)
+		return desc;
+
+	if (theObject->baseForm->GetFormType() != kFormType_Armor)
+		return desc;
+
+	TESObjectARMO *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectARMO);
+	if (!item)
+		return desc;
+
+	ActorValueList * avList = ActorValueList::GetSingleton();
+	if (avList && item->bipedObject.data.weightClass <= 1)
+	{
+		// Utilize the AV value to get the localized name for "Light Armor"
+		if (item->bipedObject.data.weightClass == 0)
+		{
+			ActorValueInfo * info = avList->GetActorValue(12);
+			if (info)
+			{
+				TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
+				if (fname && fname->name.data)
+				{
+					desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+					desc.append(fname->name.data);
+					desc.append("<\\FONT>");
+				}
+			}
+		}
+		// Utilize the AV value to get the localized name for "Heavy Armor"
+		else if (item->bipedObject.data.weightClass == 1)
+		{
+			ActorValueInfo * info = avList->GetActorValue(11);
+			if (info)
+			{
+				TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
+				if (fname && fname->name.data)
+				{
+					desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+					desc.append(fname->name.data);
+					desc.append("<\\FONT>");
+				}
+			}
+		}
+	}
+	return desc;
+};
+
+
+string CAHZUtility::GetBookSkill(TESObjectREFR *theObject)
+{
+	string desc;
+	if (theObject->baseForm->GetFormType() == kFormType_Book)
+	{
+		TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+
+		if (!item)
+			return desc;
+
+		// If this is a spell book, then it is not a skill book
+		if ((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell)
+			return desc;
+
+		if (((item->data.flags & TESObjectBOOK::Data::kType_Skill) == TESObjectBOOK::Data::kType_Skill) &&
+			item->data.teaches.skill)
+		{
+			ActorValueList * avList = ActorValueList::GetSingleton();
+			if (avList)
+			{
+				ActorValueInfo * info = avList->GetActorValue(item->data.teaches.skill);
+				if (info)
+				{
+					TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
+					if (fname && fname->name.data)
+					{
+						desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">       ");
+						desc.append(fname->name.data);
+						desc.append("<\\FONT>");
+					}
+				}
+			}
+		}
+	}
+	return desc;
 }
 
+void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description)
+{
+	BSString bsDescription;
+	string tempString = "";
+	CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 'DESC');
+
+	if (&bsDescription)
+	{
+		tempString.append(bsDescription.Get());
+
+		if (tempString != "LOOKUP FAILED!")
+		{
+			description.append(tempString);
+		}
+	}
+}
+
+string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
+{
+	BSString description;
+	string effectDescription;
+	string  desc;
+	string effectsString;
+	MagicItem * magicItem = NULL;
+	if (!theObject)
+		return desc;
+
+	tArray<MagicItem::EffectItem*> *effectList = NULL;
+	SettingCollectionMap *settings = *g_gameSettingCollection;
+
+	if (theObject->baseForm->GetFormType() == kFormType_Potion)
+	{
+		AlchemyItem *item = DYNAMIC_CAST(theObject->baseForm, TESForm, AlchemyItem);
+
+		if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+		{
+			if (extraEnchant->enchant)
+			{
+				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+				desc.append(effectDescription);
+			}
+		}
+
+
+		if (item)
+		{
+			GetMagicItemDescription(item, effectDescription);
+			desc.append(effectDescription);
+		}
+	}
+	else if (theObject->baseForm->GetFormType() == kFormType_Weapon)
+	{
+		TESObjectWEAP *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectWEAP);
+
+		//Get enchantment description
+		if (item && item->enchantable.enchantment)
+		{
+			GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+			desc.append(effectDescription);
+		}
+		// Items modified by the player
+		else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+		{
+			if (extraEnchant->enchant)
+			{
+				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+				desc.append(effectDescription);
+			}
+		}
+
+		// If there was no effects, then display athe description if available
+		if (item && !desc.length())
+		{
+			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
+			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
+			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
+			//desc.append(AHZT(description.Get()));
+			AppendDescription(&item->description, item, desc);
+		}
+	}
+	else if (theObject->baseForm->GetFormType() == kFormType_Armor)
+	{
+		TESObjectARMO *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectARMO);
+
+		//Get enchantment description
+		if (item && item->enchantable.enchantment)
+		{
+			GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+			desc.append(effectDescription);
+		}
+		// Items modified by the player
+		else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+		{
+			if (extraEnchant->enchant)
+			{
+				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+				desc.append(effectDescription);
+			}
+		}
+
+		// If there was no effects, then display athe description if available
+		if (item && !desc.length())
+		{
+			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
+			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
+			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
+			//desc.append(AHZT(description.Get()));
+			AppendDescription(&item->description, item, desc);
+		}
+	}
+	else if (theObject->baseForm->GetFormType() == kFormType_Ammo)
+	{
+		TESAmmo *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
+
+		if (item)
+		{
+			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
+			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');//)1129530692);
+			//desc.append(AHZT(description.Get()));
+			AppendDescription(&item->description, item, desc);
+		}
+
+		if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+		{
+			if (extraEnchant->enchant)
+			{
+				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+				desc.append(effectDescription);
+			}
+		}
+	}
+	else if (theObject->baseForm->GetFormType() == kFormType_Book)
+	{
+		TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+
+		if (item)
+		{
+			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
+			//CALL_MEMBER_FN(&item->description2, Get)(&description, NULL, 1296125507);
+			//CALL_MEMBER_FN(&item->description2, Get)(&description, item, 'DESC');
+			//desc.append(AHZT(description.Get()));
+			AppendDescription(&item->description2, item, desc);
+		}
+
+		if (item &&
+			((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell))
+		{
+			if (item->data.teaches.spell)
+			{
+				GetMagicItemDescription(item->data.teaches.spell, effectDescription);
+				desc.append(effectDescription);
+			}
+		}
+	}
+	else if (theObject->baseForm->GetFormType() == kFormType_ScrollItem)
+	{
+		ScrollItem *item = DYNAMIC_CAST(theObject->baseForm, TESForm, ScrollItem);
+		if (item)
+		{
+			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
+			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
+			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
+			//desc.append(AHZT(description.Get()));
+			AppendDescription(&item->description, item, desc);
+
+			GetMagicItemDescription(item, effectDescription);
+			desc.append(effectDescription);
+
+
+
+		}
+	}
+	return desc;
+};
+
+void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+
+	// See if its harvestable food
+	AlchemyItem *food = GetFood(pTargetReference);
+
+	// If the target is not valid or it can't be picked up by the player
+	if ((!pTargetReference) ||
+		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
+		(!food)))
+	{
+		args->args[0].DeleteMember("effectsObj");
+		return;
+	}
+
+	// Used to store the name
+	string name;
+
+
+	PlayerCharacter* pPC = (*g_thePlayer);
+
+	if (pPC)
+	{
+		InventoryEntryData objDesc(targetObject->baseForm, 0);
+
+		// Allocate a list to send
+		objDesc.extendDataList = new tList<BaseExtraList>();
+
+		objDesc.extendDataList->Insert(&targetObject->extraData);
+
+
+		const char *s;
+		s = CALL_MEMBER_FN(&objDesc, GenerateName)();
+
+		float fDamage = CALL_MEMBER_FN(pPC, GetDamage)(&objDesc);
+
+		// Delete the allocated dummy list
+		delete objDesc.extendDataList;
+
+		// This could be rounded, but the the script decide
+		float ff = mRound(fDamage);
+	}
+
+
+	// If this is harvestable food or normal food get the magic item description
+	if (food)
+	{
+		string effectDescription;
+		GetMagicItemDescription(food, effectDescription);
+		name.append(effectDescription);
+	}
+	else
+	{
+		// Get the effects description if it exists for this object
+		name = this->GetEffectsDescription(pTargetReference);
+	}
+
+	// If the name contains a string
+	if (name.length())
+	{
+		GFxValue obj;
+		args->movie->CreateObject(&obj);
+
+		RegisterString(&obj, args->movie, "effectsDescription", name.c_str());
+
+		// Add the object to the scaleform function
+		args->args[0].SetMember("effectsObj", &obj);
+	}
+	else
+	{
+		args->args[0].DeleteMember("effectsObj");
+	}
+};
+
+void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	static string weightClass;
+
+	// If the target is not valid or it can't be picked up by the player
+	if (!pTargetReference)
+	{
+		SetResultString(args, "");
+		return;
+	}
+
+	weightClass.clear();
+	weightClass.append(this->GetArmorWeightClass(pTargetReference).c_str());
+
+	SetResultString(args, weightClass.c_str());
+};
+
+void CAHZUtility::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	static string bookSkill;
+
+	// If the target is not valid or it can't be picked up by the player
+	if (!pTargetReference)
+	{
+		SetResultString(args, "");
+		return;
+	}
+
+	bookSkill.clear();
+	bookSkill.append(this->GetBookSkill(pTargetReference).c_str());
+
+	SetResultString(args,
+		bookSkill.c_str());
+};
+
+void CAHZUtility::SetResultString(GFxFunctionHandler::Args *args, const char * str)
+{
+	args->result->SetString(str);
+};
+
+void CAHZUtility::ReplaceStringInPlace(std::string& subject, const std::string& search,
+	const std::string& replace)
+{
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos)
+	{
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+};
+
+void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	float totalArmorOrWeapon = 0.0;
+	float difference = 0.0;
+
+	// If the target is not valid or it can't be picked up by the player
+	if (!CAHZUtility::ProcessValidTarget(targetObject, NULL))
+	{
+		args->args[0].DeleteMember("targetObj");
+		return;
+	}
+
+	GFxValue obj;
+	args->movie->CreateObject(&obj);
+
+	if (pTargetReference->baseForm->GetFormType() == kFormType_Weapon ||
+		pTargetReference->baseForm->GetFormType() == kFormType_Ammo)
+	{
+		TESForm *form = NULL;
+		TESAmmo *ammo = NULL;
+
+		// If ammo is NULL, it is OK
+		totalArmorOrWeapon = GetTotalActualWeaponDamage();
+		difference = GetWeaponDamageDiff(pTargetReference);
+	}
+	else if (pTargetReference->baseForm->GetFormType() == kFormType_Armor)
+	{
+		totalArmorOrWeapon = GetTotalActualArmorRating();
+		difference = GetArmorRatingDiff(pTargetReference);
+	}
+
+	// Enter the data into the Scaleform function
+	this->RegisterNumber(&obj, "ratingOrDamage", totalArmorOrWeapon);
+	this->RegisterNumber(&obj, "difference", difference);
+
+	float weight = CALL_MEMBER_FN(pTargetReference, GetWeight)();
+	if (pTargetReference->extraData.HasType(kExtraData_Count))
+	{
+		ExtraCount* xCount = static_cast<ExtraCount*>(pTargetReference->extraData.GetByType(kExtraData_Count));
+		if (xCount)
+		{
+			weight = weight * (float)(SInt16)(xCount->count & 0x7FFF);
+		}
+	}
+
+	this->RegisterNumber(&obj, "objWeight", weight);
+
+	// Used by the scaleform script to know if this is a weapon, armor, or something else
+	this->RegisterNumber(&obj, "formType", pTargetReference->baseForm->GetFormType());
+	args->args[0].SetMember("targetObj", &obj);
+};
+
+void CAHZUtility::ProcessIngredientData(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	IngredientItem * ingredient = GetIngredient(pTargetReference);
+	ofstream myfile;
+
+	// If no ingredient, then we are done here
+	if (!ingredient)
+	{
+		args->args[0].DeleteMember("ingredientObj");
+		return;
+	}
+
+	string strings[4];
+	for (int i = 0; i < 4; i++)
+	{
+		strings[i].clear();
+		if (GetIsNthEffectKnown(ingredient, i))
+		{
+			MagicItem::EffectItem* pEI = NULL;
+			ingredient->effectItemList.GetNthItem(i, pEI);
+			if (pEI)
+			{
+				TESFullName* pFullName = DYNAMIC_CAST(pEI->mgef, TESForm, TESFullName);
+				if (pFullName)
+				{
+					myfile << pFullName->name.data << endl;
+					strings[i].append(pFullName->name.data);
+					myfile << strings[i].c_str() << endl;
+				}
+			}
+		}
+	}
+	GFxValue obj2;
+	args->movie->CreateObject(&obj2);
+	this->RegisterString(&obj2, args->movie, "effect1", strings[0].c_str());
+	this->RegisterString(&obj2, args->movie, "effect2", strings[1].c_str());
+	this->RegisterString(&obj2, args->movie, "effect3", strings[2].c_str());
+	this->RegisterString(&obj2, args->movie, "effect4", strings[3].c_str());
+	args->args[0].SetMember("ingredientObj", &obj2);
+};
+
+void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+
+	IngredientItem * ingredient = GetIngredient(pTargetReference);
+	AlchemyItem *food = NULL;
+	// If not an ingredient, then see if its food
+	if (!ingredient)
+		food = GetFood(pTargetReference);
+
+	// If the target is not valid or it can't be picked up by the player
+	if ((!pTargetReference) ||
+		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
+		(!ingredient) &&
+			(!food)))
+	{
+		args->args[0].DeleteMember("dataObj");
+		return;
+	}
+
+	// Used to store the name
+	string name;
+	// Used to store the count of the item
+	UInt32 itemCount;
+
+	if (ingredient)
+	{
+		// Get the number of this in the inventory
+		itemCount = CAHZPlayerInfo::GetItemAmount(ingredient->formID);
+		TESFullName* pFullName = DYNAMIC_CAST(ingredient, TESForm, TESFullName);
+		if (pFullName)
+		{
+			name.append(pFullName->name.data);
+		}
+	}
+	else if (food)
+	{
+		// Get the number of this in the inventory
+		itemCount = CAHZPlayerInfo::GetItemAmount(food->formID);
+		TESFullName* pFullName = DYNAMIC_CAST(food, TESForm, TESFullName);
+		if (pFullName)
+		{
+			name.append(pFullName->name.data);
+		}
+	}
+	else
+	{
+		// Get the number of this in the inventory
+		itemCount = CAHZPlayerInfo::GetItemAmount(pTargetReference->baseForm->formID);
+		name = CAHZUtility::GetTargetName(pTargetReference);
+	}
+
+	// If the name contains a string
+	if (name.length())
+	{
+		GFxValue obj;
+		args->movie->CreateObject(&obj);
+
+		this->RegisterString(&obj, args->movie, "inventoryName", name.c_str());
+		this->RegisterNumber(&obj, "inventoryCount", itemCount);
+
+		// Add the object to the scaleform function
+		args->args[0].SetMember("dataObj", &obj);
+	}
+	else
+	{
+		args->args[0].DeleteMember("dataObj");
+	}
+};
+
+void CAHZUtility::RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str)
+{
+	//GFxValue	fxValue;
+	//view->CreateString(&fxValue, str);
+	//dst->SetMember(name, &fxValue);
+
+	//RegisterUnmanagedString()
+
+	GFxValue	fxValue;
+
+	fxValue.SetString(str);
+
+	dst->SetMember(name, &fxValue);
+};
+
+
+void CAHZUtility::RegisterNumber(GFxValue * dst, const char * name, double value)
+{
+	GFxValue	fxValue;
+	fxValue.SetNumber(value);
+	dst->SetMember(name, &fxValue);
+};
+
+bool CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	IngredientItem * ingredient = GetIngredient(pTargetReference);
+	AlchemyItem * food = NULL;
+
+	// If not an ingredient, then see if its food
+	if (!ingredient)
+	{
+		food = GetFood(pTargetReference);
+	}
+
+	// If the target is not valid or it can't be picked up by the player
+	if ((!pTargetReference) ||
+		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
+		(!ingredient) &&
+			(!food)))
+	{
+		if (args)
+		{
+			// return false, indicating that the target object is not valid for acquiring data
+			args->result->SetBool(false);
+		}
+		return false;
+	}
+	else
+	{
+		if (args)
+		{
+			// The object is valid
+			args->result->SetBool(true);
+		}
+		return true;
+	}
+}
+
+void CAHZUtility::ProcessPlayerData(GFxFunctionHandler::Args *args)
+{
+	GFxValue obj;
+	args->movie->CreateObject(&obj);
+
+	UInt32 actorValue = LookupActorValueByName("InventoryWeight");
+	float encumbranceNumber = ((*g_thePlayer)->actorValueOwner.GetCurrent(actorValue));
+	actorValue = LookupActorValueByName("CarryWeight");
+	float maxEncumbranceNumber = ((*g_thePlayer)->actorValueOwner.GetCurrent(actorValue));
+
+	// Enter the data into the Scaleform function
+	this->RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);
+	this->RegisterNumber(&obj, "maxEncumbranceNumber", maxEncumbranceNumber);
+	this->RegisterNumber(&obj, "goldNumber", CAHZPlayerInfo::GetGoldAmount());
+	args->args[0].SetMember("playerObj", &obj);
+}
+
+void CAHZUtility::GetMagicItemDescription(MagicItem * item, std::string& description)
+{
+	string outerString = "";
+	description.clear();
+
+	BSString temp;
+
+	GetMagicItemDescription2(NULL, item, &temp);
+	char *temp2 = ProcessSurvivalMode(&temp);
+
+	description.append(temp.Get());
+}
