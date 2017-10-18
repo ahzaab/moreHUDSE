@@ -70,6 +70,8 @@ public:
 	 bool ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	 void ProcessPlayerData(GFxFunctionHandler::Args *args);
 	 void ProcessIngredientData(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	 void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	 string GetValueToWeight(TESObjectREFR *theObject);
 
 private:
 	 void ReplaceStringInPlace(std::string& subject, const std::string& search,

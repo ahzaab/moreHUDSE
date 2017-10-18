@@ -849,6 +849,73 @@ string CAHZUtility::GetArmorWeightClass(TESObjectREFR *theObject)
 	return desc;
 };
 
+string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject)
+{
+	string desc;
+
+	if (!theObject)
+		return desc;
+
+	if (!theObject->baseForm)
+		return desc;
+
+	//<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
+
+
+	//double value = 0.0;
+	//bool gotValue = false;
+
+	//TESValueForm* pValue = DYNAMIC_CAST(theObject->baseForm, TESForm, TESValueForm);
+	//if (pValue)
+	//{
+	//	value = pValue->value;
+	//	gotValue = true;
+	//}
+	//else 
+	//{
+	//	AlchemyItem* alchemyItem = DYNAMIC_CAST(theObject->baseForm, TESForm, AlchemyItem);
+	//	if (alchemyItem)// && (alchemyItem->itemData.flags & AlchemyItem::kFlag_ManualCalc) == AlchemyItem::kFlag_ManualCalc)
+	//	{
+	//		value = alchemyItem->itemData.value;
+	//		gotValue = true;
+	//	}
+	//}
+
+	//if (!gotValue)
+	//	return desc;
+
+
+	//double weight = GetFormWeight(theObject->baseForm);
+
+	//if (weight <= 0.0)
+	//	return desc;
+
+	// Add the VW label
+	desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+	desc.append("VW");
+	desc.append("<\\FONT>");
+	desc.append(" ");
+
+	//double vW = round(value / weight);
+
+	//char vWString[256] = "";
+	//if (vW < 1.0)
+	//{
+	//	sprintf_s(vWString, "%.1f", vW);
+	//}
+	//else
+	//{
+	//	sprintf_s(vWString, "%.0f", vW);
+	//}
+	
+
+	desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+	//desc.append(vWString);
+	desc.append("0");
+	desc.append("<\\FONT>");
+
+	return desc;
+};
 
 string CAHZUtility::GetBookSkill(TESObjectREFR *theObject)
 {
@@ -1153,6 +1220,24 @@ void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHand
 	weightClass.append(this->GetArmorWeightClass(pTargetReference).c_str());
 
 	SetResultString(args, weightClass.c_str());
+};
+
+void CAHZUtility::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+{
+	TESObjectREFR * pTargetReference = targetObject;
+	static string valueToWeight;
+
+	// If the target is not valid or it can't be picked up by the player
+	if (!pTargetReference)
+	{
+		SetResultString(args, "");
+		return;
+	}
+
+	valueToWeight.clear();
+	valueToWeight.append(this->GetValueToWeight(pTargetReference).c_str());
+
+	SetResultString(args, valueToWeight.c_str());
 };
 
 void CAHZUtility::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)

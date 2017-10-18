@@ -142,6 +142,16 @@ public:
 	}
 };
 
+class SKSEScaleform_GetValueToWeightString : public GFxFunctionHandler
+{
+public:
+	virtual void	Invoke(Args * args)
+	{
+		CAHZUtility utility;
+		utility.ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+	}
+};
+
 class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
 {
 public:
@@ -193,6 +203,7 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	RegisterFunction <SKSEScaleform_GetIsBookAndWasRead>(root, view, "GetIsBookAndWasRead");
 	RegisterFunction <SKSEScaleform_GetArmorWeightClassString>(root, view, "GetArmorWeightClassString");
 	RegisterFunction <SKSEScaleform_GetBookSkillString>(root, view, "GetBookSkillString");
+	RegisterFunction <SKSEScaleform_GetValueToWeightString>(root, view, "GetValueToWeightString");
 
 	//InstallAHZHudComponents(view);
 
