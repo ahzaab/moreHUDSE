@@ -30,10 +30,11 @@
 #include "AHZScaleformHook.h"
 #include "skse64/GameEvents.h"
 #include "skse64/GameMenus.h"
+#include <shlobj.h>
 using namespace std;
 
 
-IDebugLog	gLog("AHZmoreHUDPlugin.log");
+IDebugLog	gLog;
 
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
@@ -223,12 +224,13 @@ extern "C"
 
 bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
 {
+	gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\moreHUDSE.log");
 	//_MESSAGE("AHZmoreHUDPlugin");
 
 	// populate info structure
 	info->infoVersion =	PluginInfo::kInfoVersion;
 	info->name =		"Ahzaab's moreHUD Plugin";
-	info->version =		300;
+	info->version =		304;
 
 	// store plugin handle so we can identify ourselves later
 	g_pluginHandle = skse->GetPluginHandle();
