@@ -1,4 +1,4 @@
-#include <wchar.h> 
+﻿#include <wchar.h> 
 #include <stdlib.h>
 #include <list>
 #include <algorithm>
@@ -18,8 +18,537 @@
 
 RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
 RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
+
+// Base Address = 7FF690BE0000
+//text:00007FF691471320; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
+//	.text:00007FF691471320
+//	.text : 00007FF691471320; Attributes: library function static bp - based frame fpd = 1000h
+//	.text : 00007FF691471320
+//	.text : 00007FF691471320 sub_7FF691471320 proc near; CODE XREF : sub_7FF69146F4C0 + D23↑p
+//	.text : 00007FF691471320; sub_7FF69146F4C0 + DA1↑p ...
+//	.text:00007FF691471320
+//	.text : 00007FF691471320 var_10E0 = qword ptr - 10E0h
+//	.text : 00007FF691471320 var_10D8 = qword ptr - 10D8h
+//	.text : 00007FF691471320 var_10D0 = qword ptr - 10D0h
+//	.text : 00007FF691471320 var_10C0 = qword ptr - 10C0h
+//	.text : 00007FF691471320 var_10B8 = qword ptr - 10B8h
+//	.text : 00007FF691471320 var_10B0 = qword ptr - 10B0h
+//	.text : 00007FF691471320 var_10A8 = qword ptr - 10A8h
+//	.text : 00007FF691471320 var_10A0 = qword ptr - 10A0h
+//	.text : 00007FF691471320 var_1098 = qword ptr - 1098h
+//	.text : 00007FF691471320 var_1090 = byte ptr - 1090h
+//	.text : 00007FF691471320 var_1088 = qword ptr - 1088h
+//	.text : 00007FF691471320 DstBuf = byte ptr - 1080h
+//	.text : 00007FF691471320 Dst = byte ptr - 880h
+//	.text : 00007FF691471320 var_80 = xmmword ptr - 80h
+//	.text : 00007FF691471320 var_70 = xmmword ptr - 70h
+//	.text : 00007FF691471320 var_60 = xmmword ptr - 60h
+//	.text : 00007FF691471320 var_50 = xmmword ptr - 50h
+//	.text : 00007FF691471320 var_40 = xmmword ptr - 40h
+//	.text : 00007FF691471320 var_30 = xmmword ptr - 30h
+//	.text : 00007FF691471320 var_20 = byte ptr - 20h
+//	.text : 00007FF691471320 arg_0 = qword ptr  10h
+//	.text : 00007FF691471320 arg_8 = dword ptr  18h
+//	.text : 00007FF691471320 arg_10 = dword ptr  20h
+//	.text : 00007FF691471320 arg_18 = qword ptr  28h
+//	.text : 00007FF691471320
+//	.text : 00007FF691471320; FUNCTION CHUNK AT.text:00007FF691471DE0 SIZE 0000000B BYTES
+//	.text : 00007FF691471320; FUNCTION CHUNK AT.text:00007FF69200010D SIZE 0000000C BYTES
+//	.text : 00007FF691471320
+//	.text : 00007FF691471320; __unwind{ // __CxxFrameHandler3
+//	.text:00007FF691471320                 push    rbp
+//	.text : 00007FF691471322                 push    rdi
+//	.text : 00007FF691471323                 push    r12
+//	.text : 00007FF691471325                 push    r14
+//	.text : 00007FF691471327                 push    r15
+//	.text : 00007FF691471329                 lea     rbp,[rsp - 0FE0h]
+//	.text : 00007FF691471331                 mov     eax, 10E0h
+//	.text : 00007FF691471336                 call    _alloca_probe
+//	.text : 00007FF69147133B                 sub     rsp, rax
+//	.text : 00007FF69147133E                 mov[rsp + 1100h + var_1088], 0FFFFFFFFFFFFFFFEh
+//	.text : 00007FF691471347                 mov[rsp + 1100h + arg_0], rbx
+//	.text : 00007FF69147134F                 mov[rsp + 1100h + arg_18], rsi
+//	.text : 00007FF691471357                 movaps[rsp + 1100h + var_30], xmm6
+//	.text : 00007FF69147135F                 movaps[rsp + 1100h + var_40], xmm7
+//	.text : 00007FF691471367                 movaps[rsp + 1100h + var_50], xmm8
+//	.text : 00007FF691471370                 movaps[rsp + 1100h + var_60], xmm9
+//	.text : 00007FF691471379                 movaps[rsp + 1100h + var_70], xmm10
+//	.text : 00007FF691471382                 movaps[rsp + 1100h + var_80], xmm11
+//	.text : 00007FF69147138B                 mov     r15, r8
+//	.text : 00007FF69147138E                 mov     rsi, rdx
+//	.text : 00007FF691471391                 xor     dil, dil
+//	.text : 00007FF691471394                 xor     r14d, r14d
+//	.text : 00007FF691471397                 test    rdx, rdx
+//	.text : 00007FF69147139A                 jz      short loc_7FF6914713B5
+//	.text : 00007FF69147139C                 cmp[rdx + 68h], r14d
+//	.text : 00007FF6914713A0                 jbe     short loc_7FF6914713AB
+//	.text : 00007FF6914713A2                 mov     rax,[rdx + 58h]
+//	.text : 00007FF6914713A6                 mov     rbx,[rax]
+//	.text : 00007FF6914713A9                 jmp     short loc_7FF6914713AD
+//	.text : 00007FF6914713AB; -------------------------------------------------------------------------- -
+//	.text:00007FF6914713AB
+//	.text : 00007FF6914713AB loc_7FF6914713AB : ; CODE XREF : sub_7FF691471320 + 80↑j
+//	.text : 00007FF6914713AB                 xor     ebx, ebx
+//	.text : 00007FF6914713AD
+//	.text : 00007FF6914713AD loc_7FF6914713AD : ; CODE XREF : sub_7FF691471320 + 89↑j
+//	.text : 00007FF6914713AD                 mov     r14d, 1
+//	.text : 00007FF6914713B3                 jmp     short loc_7FF6914713B7
+//	.text : 00007FF6914713B5; -------------------------------------------------------------------------- -
+//	.text:00007FF6914713B5
+//	.text : 00007FF6914713B5 loc_7FF6914713B5 : ; CODE XREF : sub_7FF691471320 + 7A↑j
+//	.text : 00007FF6914713B5                 xor     ebx, ebx
+//	.text : 00007FF6914713B7
+//	.text : 00007FF6914713B7 loc_7FF6914713B7 : ; CODE XREF : sub_7FF691471320 + 93↑j
+//	.text : 00007FF6914713B7                 xor     edx, edx; Val
+//	.text:00007FF6914713B9                 mov     r8d, 800h; Size
+//	.text:00007FF6914713BF                 lea     rcx,[rbp + 1000h + Dst]; Dst
+//	.text:00007FF6914713C6                 call    memset
+//	.text : 00007FF6914713CB                 xor     r8d, r8d
+//	.text : 00007FF6914713CE                 lea     rdx, Str1
+//	.text : 00007FF6914713D5                 mov     rcx, r15
+//	.text : 00007FF6914713D8                 call    sub_7FF690CD9F90
+//	.text : 00007FF6914713DD                 test    rsi, rsi
+//	.text : 00007FF6914713E0                 jz      short loc_7FF69147142A
+//	.text : 00007FF6914713E2                 xor     eax, eax
+//	.text : 00007FF6914713E4                 mov[rsp + 1100h + var_10B8], rax
+//	.text : 00007FF6914713E9                 lea     rax, ? ? _7GetMagicItemDescriptionFunctor@?A0x97efe095@@6B@; const `anonymous namespace'::GetMagicItemDescriptionFunctor::`vftable'
+//	.text:00007FF6914713F0                 mov[rsp + 1100h + var_10C0], rax
+//	.text : 00007FF6914713F5                 mov[rsp + 1100h + var_10B0], r15
+//	.text : 00007FF6914713FA                 mov     rax, cs : qword_7FF693B47750
+//	.text : 00007FF691471401                 mov[rsp + 1100h + var_10A8], rax
+//	.text : 00007FF691471406                 mov     rax, cs : qword_7FF693B47758
+//	.text : 00007FF69147140D                 mov[rsp + 1100h + var_10A0], rax
+//	.text : 00007FF691471412                 mov[rsp + 1100h + var_1098], rsi
+//	.text : 00007FF691471417                 mov[rsp + 1100h + var_1090], 0
+//	.text : 00007FF69147141C
+//	.text : 00007FF69147141C loc_7FF69147141C : ; DATA XREF : .rdata : 00007FF6927C4F10↓o
+//	.text : 00007FF69147141C;   try {
+//	.text:00007FF69147141C                 lea     rdx,[rsp + 1100h + var_10C0]
+//		.text : 00007FF691471421                 mov     rcx, rsi
+//		.text : 00007FF691471424                 call    sub_7FF690CE2130
+//		.text : 00007FF691471429                 nop
+//		.text : 00007FF691471429;
+//} // starts at 7FF69147141C
+//	 .text:00007FF69147142A
+//		 .text : 00007FF69147142A loc_7FF69147142A : ; CODE XREF : sub_7FF691471320 + C0↑j
+//		 .text : 00007FF69147142A; DATA XREF : .rdata : 00007FF6927C4F18↓o
+//		 .text : 00007FF69147142A                 movzx   eax, word ptr[r15 + 8]
+//		 .text : 00007FF69147142F                 mov     ecx, 0FFFFh
+//		 .text : 00007FF691471434                 cmp     ax, cx
+//		 .text : 00007FF691471437                 jnz     short loc_7FF69147144B
+//		 .text : 00007FF691471439                 mov     rcx,[r15]
+//		 .text : 00007FF69147143C or rax, 0FFFFFFFFFFFFFFFFh
+//		 .text : 00007FF691471440
+//		 .text : 00007FF691471440 loc_7FF691471440 : ; CODE XREF : sub_7FF691471320 + 127↓j
+//		 .text : 00007FF691471440                 inc     rax
+//		 .text : 00007FF691471443                 cmp     byte ptr[rcx + rax], 0
+//		 .text : 00007FF691471447                 jnz     short loc_7FF691471440
+//		 .text : 00007FF691471449                 jmp     short loc_7FF69147144E
+//		 .text : 00007FF69147144B; -------------------------------------------------------------------------- -
+//		 .text:00007FF69147144B
+//		 .text : 00007FF69147144B loc_7FF69147144B : ; CODE XREF : sub_7FF691471320 + 117↑j
+//		 .text : 00007FF69147144B                 movzx   eax, ax
+//		 .text : 00007FF69147144E
+//		 .text : 00007FF69147144E loc_7FF69147144E : ; CODE XREF : sub_7FF691471320 + 129↑j
+//		 .text : 00007FF69147144E                 test    eax, eax
+//		 .text : 00007FF691471450                 jnz     loc_7FF6914716FB
+//		 .text : 00007FF691471456                 test    rsi, rsi
+//		 .text : 00007FF691471459                 jz      loc_7FF6914716E9
+//		 .text : 00007FF69147145F                 lea     r12, asc_7FF6922A68AC; "+"
+//		 .text:00007FF691471466                 movss   xmm9, cs : dword_7FF69222C150
+//		 .text : 00007FF69147146F                 movss   xmm10, cs : dword_7FF692173404
+//		 .text : 00007FF691471478                 xorps   xmm7, xmm7
+//		 .text : 00007FF69147147B                 movss   xmm6, cs : dword_7FF692115318
+//		 .text : 00007FF691471483                 movss   xmm8, cs : dword_7FF69212B648
+//		 .text : 00007FF69147148C                 movss   xmm11, cs : dword_7FF69216E014
+//		 .text : 00007FF691471495
+//		 .text : 00007FF691471495 loc_7FF691471495 : ; CODE XREF : sub_7FF691471320 + 3C4↓j
+//		 .text : 00007FF691471495                 test    rbx, rbx
+//		 .text : 00007FF691471498                 jz      loc_7FF6914716E9
+//		 .text : 00007FF69147149E                 mov     rax,[rbx + 10h]
+//		 .text : 00007FF6914714A2                 mov     ecx,[rax + 68h]
+//		 .text : 00007FF6914714A5                 shr     ecx, 0Fh
+//		 .text : 00007FF6914714A8                 test    cl, 1
+//		 .text : 00007FF6914714AB                 jnz     loc_7FF6914716CC
+//		 .text : 00007FF6914714B1                 test    dil, dil
+//		 .text : 00007FF6914714B4                 jz      short loc_7FF6914714CF
+//		 .text : 00007FF6914714B6                 lea     r8, asc_7FF6922A68A8; ". "
+//		 .text:00007FF6914714BD                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF6914714C2                 lea     rcx,[rbp + 1000h + Dst]; Dst
+//		 .text:00007FF6914714C9                 call    cs : strcat_s
+//		 .text : 00007FF6914714CF
+//		 .text : 00007FF6914714CF loc_7FF6914714CF : ; CODE XREF : sub_7FF691471320 + 194↑j
+//		 .text : 00007FF6914714CF                 mov     rcx, rbx
+//		 .text : 00007FF6914714D2                 call    sub_7FF690CD8630
+//		 .text : 00007FF6914714D7                 movd    xmm0, eax
+//		 .text : 00007FF6914714DB                 cvtdq2ps xmm0, xmm0
+//		 .text : 00007FF6914714DE                 movss[rbp + 1000h + arg_8], xmm0
+//		 .text : 00007FF6914714E6                 mov     rcx, rbx
+//		 .text : 00007FF6914714E9                 call    sub_7FF690CD8570
+//		 .text : 00007FF6914714EE                 movss[rbp + 1000h + arg_10], xmm0
+//		 .text : 00007FF6914714F6                 lea     rax,[rbp + 1000h + arg_8]
+//		 .text : 00007FF6914714FD                 mov[rsp + 1100h + var_10E0], rax
+//		 .text : 00007FF691471502                 xor     r9d, r9d
+//		 .text : 00007FF691471505                 mov     r8, rsi
+//		 .text : 00007FF691471508                 mov     rdx, cs : g_ThePlayer
+//		 .text : 00007FF69147150F                 lea     ecx,[r9 + 1Eh]
+//		 .text : 00007FF691471513                 call    sub_7FF690F0EDB0
+//		 .text : 00007FF691471518                 lea     rax,[rbp + 1000h + arg_10]
+//		 .text : 00007FF69147151F                 mov[rsp + 1100h + var_10E0], rax
+//		 .text : 00007FF691471524                 xor     r9d, r9d
+//		 .text : 00007FF691471527                 mov     r8, rsi
+//		 .text : 00007FF69147152A                 mov     rdx, cs : g_ThePlayer
+//		 .text : 00007FF691471531                 lea     ecx,[r9 + 1Dh]
+//		 .text : 00007FF691471535                 call    sub_7FF690F0EDB0
+//		 .text : 00007FF69147153A                 cvttss2si rdi,[rbp + 1000h + arg_8]
+//		 .text : 00007FF691471543                 cvttss2si rcx,[rbp + 1000h + arg_10]
+//		 .text : 00007FF69147154C                 test    ecx, ecx
+//		 .text : 00007FF69147154E                 jz      short loc_7FF6914715A2
+//		 .text : 00007FF691471550                 lea     rdx, Str1
+//		 .text : 00007FF691471557                 cmovnz  rdx, r12
+//		 .text : 00007FF69147155B                 mov     rax, cs : qword_7FF693B47758
+//		 .text : 00007FF691471562                 mov[rsp + 1100h + var_10D0], rax
+//		 .text : 00007FF691471567                 mov     dword ptr[rsp + 1100h + var_10D8], ecx
+//		 .text : 00007FF69147156B                 mov[rsp + 1100h + var_10E0], rdx
+//		 .text : 00007FF691471570                 mov     r9, cs : qword_7FF693B47750
+//		 .text : 00007FF691471577                 lea     r8, aSSUS; "%s%s%u%s "
+//		 .text:00007FF69147157E                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF691471583                 lea     rcx,[rbp + 1000h + DstBuf]; DstBuf
+//		 .text:00007FF691471587                 call    sprintf_s
+//		 .text : 00007FF69147158C                 lea     r8,[rbp + 1000h + DstBuf]; Src
+//		 .text:00007FF691471590                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF691471595                 lea     rcx,[rbp + 1000h + Dst]; Dst
+//		 .text:00007FF69147159C                 call    cs : strcat_s
+//		 .text : 00007FF6914715A2
+//		 .text : 00007FF6914715A2 loc_7FF6914715A2 : ; CODE XREF : sub_7FF691471320 + 22E↑j
+//		 .text : 00007FF6914715A2                 mov     rcx, rbx
+//		 .text : 00007FF6914715A5                 call    sub_7FF690CD86E0
+//		 .text : 00007FF6914715AA                 mov     rcx, rax
+//		 .text : 00007FF6914715AD                 call    sub_7FF690D9AFD0
+//		 .text : 00007FF6914715B2                 mov     r8, rax; Src
+//		 .text:00007FF6914715B5                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF6914715BA                 lea     rcx,[rbp + 1000h + Dst]; Dst
+//		 .text:00007FF6914715C1                 call    cs : strcat_s
+//		 .text : 00007FF6914715C7                 test    edi, edi
+//		 .text : 00007FF6914715C9                 jz      loc_7FF6914716C9
+//		 .text : 00007FF6914715CF                 mov     eax, edi
+//		 .text : 00007FF6914715D1                 xorps   xmm1, xmm1
+//		 .text : 00007FF6914715D4                 cvtsi2ss xmm1, rax
+//		 .text : 00007FF6914715D9                 comiss  xmm1, xmm9
+//		 .text : 00007FF6914715DD                 jb      short loc_7FF691471614
+//		 .text : 00007FF6914715DF                 mulss   xmm1, xmm10
+//		 .text : 00007FF6914715E4                 cvttss2si eax, xmm1
+//		 .text : 00007FF6914715E8                 movd    xmm2, eax
+//		 .text : 00007FF6914715EC                 cvtdq2ps xmm2, xmm2
+//		 .text : 00007FF6914715EF                 movaps  xmm0, xmm1
+//		 .text : 00007FF6914715F2                 subss   xmm0, xmm2
+//		 .text : 00007FF6914715F6                 comiss  xmm0, xmm7
+//		 .text : 00007FF6914715F9                 jnb     short loc_7FF6914715FF
+//		 .text : 00007FF6914715FB                 subss   xmm2, xmm6
+//		 .text : 00007FF6914715FF
+//		 .text : 00007FF6914715FF loc_7FF6914715FF : ; CODE XREF : sub_7FF691471320 + 2D9↑j
+//		 .text : 00007FF6914715FF                 ucomiss xmm2, xmm6
+//		 .text : 00007FF691471602                 mov     rax, cs : off_7FF6929E1938
+//		 .text : 00007FF691471609                 jz      short loc_7FF69147167D
+//		 .text : 00007FF69147160B                 mov     rax, cs : off_7FF6929E18F0
+//		 .text : 00007FF691471612                 jmp     short loc_7FF69147167D
+//		 .text : 00007FF691471614; -------------------------------------------------------------------------- -
+//		 .text:00007FF691471614
+//		 .text : 00007FF691471614 loc_7FF691471614 : ; CODE XREF : sub_7FF691471320 + 2BD↑j
+//		 .text : 00007FF691471614                 comiss  xmm1, xmm8
+//		 .text : 00007FF691471618                 jb      short loc_7FF69147164F
+//		 .text : 00007FF69147161A                 mulss   xmm1, xmm11
+//		 .text : 00007FF69147161F                 cvttss2si eax, xmm1
+//		 .text : 00007FF691471623                 movd    xmm2, eax
+//		 .text : 00007FF691471627                 cvtdq2ps xmm2, xmm2
+//		 .text : 00007FF69147162A                 movaps  xmm0, xmm1
+//		 .text : 00007FF69147162D                 subss   xmm0, xmm2
+//		 .text : 00007FF691471631                 comiss  xmm0, xmm7
+//		 .text : 00007FF691471634                 jnb     short loc_7FF69147163A
+//		 .text : 00007FF691471636                 subss   xmm2, xmm6
+//		 .text : 00007FF69147163A
+//		 .text : 00007FF69147163A loc_7FF69147163A : ; CODE XREF : sub_7FF691471320 + 314↑j
+//		 .text : 00007FF69147163A                 ucomiss xmm2, xmm6
+//		 .text : 00007FF69147163D                 mov     rax, cs : off_7FF6929E1920
+//		 .text : 00007FF691471644                 jz      short loc_7FF69147167D
+//		 .text : 00007FF691471646                 mov     rax, cs : off_7FF6929E18D8
+//		 .text : 00007FF69147164D                 jmp     short loc_7FF69147167D
+//		 .text : 00007FF69147164F; -------------------------------------------------------------------------- -
+//		 .text:00007FF69147164F
+//		 .text : 00007FF69147164F loc_7FF69147164F : ; CODE XREF : sub_7FF691471320 + 2F8↑j
+//		 .text : 00007FF69147164F                 cvttss2si eax, xmm1
+//		 .text : 00007FF691471653                 movd    xmm2, eax
+//		 .text : 00007FF691471657                 cvtdq2ps xmm2, xmm2
+//		 .text : 00007FF69147165A                 movaps  xmm0, xmm1
+//		 .text : 00007FF69147165D                 subss   xmm0, xmm2
+//		 .text : 00007FF691471661                 comiss  xmm0, xmm7
+//		 .text : 00007FF691471664                 jnb     short loc_7FF69147166A
+//		 .text : 00007FF691471666                 subss   xmm2, xmm6
+//		 .text : 00007FF69147166A
+//		 .text : 00007FF69147166A loc_7FF69147166A : ; CODE XREF : sub_7FF691471320 + 344↑j
+//		 .text : 00007FF69147166A                 ucomiss xmm2, xmm6
+//		 .text : 00007FF69147166D                 mov     rax, cs : off_7FF6929E1908
+//		 .text : 00007FF691471674                 jz      short loc_7FF69147167D
+//		 .text : 00007FF691471676                 mov     rax, cs : off_7FF6929DFE80
+//		 .text : 00007FF69147167D
+//		 .text : 00007FF69147167D loc_7FF69147167D : ; CODE XREF : sub_7FF691471320 + 2E9↑j
+//		 .text : 00007FF69147167D; sub_7FF691471320 + 2F2↑j ...
+//		 .text:00007FF69147167D                 mov[rsp + 1100h + var_10D0], rax
+//		 .text : 00007FF691471682                 mov     rax, cs : qword_7FF693B47758
+//		 .text : 00007FF691471689                 mov[rsp + 1100h + var_10D8], rax
+//		 .text : 00007FF69147168E                 cvtps2pd xmm0, xmm1
+//		 .text : 00007FF691471691                 movsd[rsp + 1100h + var_10E0], xmm0
+//		 .text : 00007FF691471697                 mov     r9, cs : qword_7FF693B47750
+//		 .text : 00007FF69147169E                 lea     r8, aS0fSS; " %s%.0f%s %s"
+//		 .text:00007FF6914716A5                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF6914716AA                 lea     rcx,[rbp + 1000h + DstBuf]; DstBuf
+//		 .text:00007FF6914716AE                 call    sprintf_s
+//		 .text : 00007FF6914716B3                 lea     r8,[rbp + 1000h + DstBuf]; Src
+//		 .text:00007FF6914716B7                 mov     edx, 800h; SizeInBytes
+//		 .text:00007FF6914716BC                 lea     rcx,[rbp + 1000h + Dst]; Dst
+//		 .text:00007FF6914716C3                 call    cs : strcat_s
+//		 .text : 00007FF6914716C9
+//		 .text : 00007FF6914716C9 loc_7FF6914716C9 : ; CODE XREF : sub_7FF691471320 + 2A9↑j
+//		 .text : 00007FF6914716C9                 mov     dil, 1
+//		 .text : 00007FF6914716CC
+//		 .text : 00007FF6914716CC loc_7FF6914716CC : ; CODE XREF : sub_7FF691471320 + 18B↑j
+//		 .text : 00007FF6914716CC                 cmp     r14d,[rsi + 68h]
+//		 .text : 00007FF6914716D0                 jnb     short loc_7FF6914716DF
+//		 .text : 00007FF6914716D2                 mov     ecx, r14d
+//		 .text : 00007FF6914716D5                 mov     rax,[rsi + 58h]
+//		 .text : 00007FF6914716D9                 mov     rbx,[rax + rcx * 8]
+//		 .text : 00007FF6914716DD                 jmp     short loc_7FF6914716E1
+//		 .text : 00007FF6914716DF; -------------------------------------------------------------------------- -
+//		 .text:00007FF6914716DF
+//		 .text : 00007FF6914716DF loc_7FF6914716DF : ; CODE XREF : sub_7FF691471320 + 3B0↑j
+//		 .text : 00007FF6914716DF                 xor     ebx, ebx
+//		 .text : 00007FF6914716E1
+//		 .text : 00007FF6914716E1 loc_7FF6914716E1 : ; CODE XREF : sub_7FF691471320 + 3BD↑j
+//		 .text : 00007FF6914716E1                 inc     r14d
+//		 .text : 00007FF6914716E4                 jmp     loc_7FF691471495
+//		 .text : 00007FF6914716E9; -------------------------------------------------------------------------- -
+//		 .text:00007FF6914716E9
+//		 .text : 00007FF6914716E9 loc_7FF6914716E9 : ; CODE XREF : sub_7FF691471320 + 139↑j
+//		 .text : 00007FF6914716E9; sub_7FF691471320 + 178↑j
+//		 .text:00007FF6914716E9                 xor     r8d, r8d
+//		 .text : 00007FF6914716EC                 lea     rdx,[rbp + 1000h + Dst]
+//		 .text : 00007FF6914716F3                 mov     rcx, r15
+//		 .text : 00007FF6914716F6                 call    sub_7FF690CD9F90
+//		 .text : 00007FF6914716FB
+//		 .text : 00007FF6914716FB loc_7FF6914716FB : ; CODE XREF : sub_7FF691471320 + 130↑j
+//		 .text : 00007FF6914716FB                 lea     r11,[rsp + 1100h + var_20]
+//		 .text : 00007FF691471703                 mov     rbx,[r11 + 30h]
+//		 .text : 00007FF691471707                 mov     rsi,[r11 + 48h]
+//		 .text : 00007FF69147170B                 movaps  xmm6, xmmword ptr[r11 - 10h]
+//		 .text : 00007FF691471710                 movaps  xmm7, xmmword ptr[r11 - 20h]
+//		 .text : 00007FF691471715                 movaps  xmm8, xmmword ptr[r11 - 30h]
+//		 .text : 00007FF69147171A                 movaps  xmm9, xmmword ptr[r11 - 40h]
+//		 .text : 00007FF69147171F                 movaps  xmm10, xmmword ptr[r11 - 50h]
+//		 .text : 00007FF691471724                 movaps  xmm11, xmmword ptr[r11 - 60h]
+//		 .text : 00007FF691471729                 mov     rsp, r11
+//		 .text : 00007FF69147172C                 pop     r15
+//		 .text : 00007FF69147172E                 pop     r14
+//		 .text : 00007FF691471730                 pop     r12
+//		 .text : 00007FF691471732                 pop     rdi
+//		 .text : 00007FF691471733                 pop     rbp
+//		 .text : 00007FF691471734                 retn
+//		 .text : 00007FF691471734; } // starts at 7FF691471320
+//	.text:00007FF691471734 sub_7FF691471320 endp
+//		 .text : 00007FF691471734
+
+
 RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x891740);
 
+// Base Address = 7FF690BE0000
+//.text:00007FF691471740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
+//.text:00007FF691471740
+//.text : 00007FF691471740
+//.text : 00007FF691471740 sub_7FF691471740 proc near; CODE XREF : sub_7FF69146F4C0 + 96B↑p
+//.text : 00007FF691471740; sub_7FF69146F4C0 + D2F↑p ...
+//.text:00007FF691471740
+//.text : 00007FF691471740 var_18 = qword ptr - 18h
+//.text : 00007FF691471740 var_10 = qword ptr - 10h
+//.text : 00007FF691471740 arg_0 = qword ptr  8
+//.text : 00007FF691471740 arg_8 = qword ptr  10h
+//.text : 00007FF691471740 arg_10 = qword ptr  18h
+//.text : 00007FF691471740
+//.text : 00007FF691471740                 push    r14
+//.text : 00007FF691471742                 sub     rsp, 30h
+//.text : 00007FF691471746                 mov     rax, [rcx]
+//.text : 00007FF691471749                 mov     r14, rcx
+//.text : 00007FF69147174C                 test    rax, rax
+//.text : 00007FF69147174F                 lea     rcx, Str1
+//.text : 00007FF691471756                 mov     edx, 5Bh; Val
+//.text:00007FF69147175B                 cmovnz  rcx, rax; Str
+//.text:00007FF69147175F                 call    cs : __imp_strchr
+//.text : 00007FF691471765                 test    rax, rax
+//.text : 00007FF691471768                 jz      loc_7FF69147194F
+//.text : 00007FF69147176E                 movzx   eax, word ptr[r14 + 8]
+//.text : 00007FF691471773                 mov     ecx, 0FFFFh
+//.text : 00007FF691471778
+//.text : 00007FF691471778 loc_7FF691471778 : ; DATA XREF : .rdata : 00007FF6927C4F3C↓o
+//.text : 00007FF691471778;.rdata:00007FF6927C4F50↓o ...
+//.text : 00007FF691471778                 mov[rsp + 38h + arg_0], rbx
+//.text : 00007FF69147177D                 mov[rsp + 38h + arg_8], rbp
+//.text : 00007FF691471782                 mov[rsp + 38h + var_10], rdi
+//.text : 00007FF691471787                 mov[rsp + 38h + var_18], r15
+//.text : 00007FF69147178C                 cmp     ax, cx
+//.text : 00007FF69147178F                 jnz     short loc_7FF6914717AB
+//.text : 00007FF691471791                 mov     rcx, [r14]
+//.text : 00007FF691471794 or rax, 0FFFFFFFFFFFFFFFFh
+//.text : 00007FF691471798                 nop     dword ptr[rax + rax + 00000000h]
+//.text : 00007FF6914717A0
+//.text : 00007FF6914717A0 loc_7FF6914717A0 : ; CODE XREF : sub_7FF691471740 + 67↓j
+//.text : 00007FF6914717A0                 inc     rax
+//.text : 00007FF6914717A3                 cmp     byte ptr[rcx + rax], 0
+//.text : 00007FF6914717A7                 jnz     short loc_7FF6914717A0
+//.text : 00007FF6914717A9                 jmp     short loc_7FF6914717AE
+//.text : 00007FF6914717AB; -------------------------------------------------------------------------- -
+//.text:00007FF6914717AB
+//.text : 00007FF6914717AB loc_7FF6914717AB : ; CODE XREF : sub_7FF691471740 + 4F↑j
+//.text : 00007FF6914717AB                 movzx   eax, ax
+//.text : 00007FF6914717AE
+//.text : 00007FF6914717AE loc_7FF6914717AE : ; CODE XREF : sub_7FF691471740 + 69↑j
+//.text : 00007FF6914717AE                 cmp     cs : dword_7FF692AB6C88, 2
+//.text : 00007FF6914717B5                 lea     ebx, [rax + 1]
+//.text : 00007FF6914717B8                 jz      short loc_7FF6914717CD
+//.text : 00007FF6914717BA                 lea     rdx, dword_7FF692AB6C88
+//.text : 00007FF6914717C1                 lea     rcx, unk_7FF692AB6800
+//.text : 00007FF6914717C8                 call    sub_7FF6917E0D30
+//.text : 00007FF6914717CD
+//.text : 00007FF6914717CD loc_7FF6914717CD : ; CODE XREF : sub_7FF691471740 + 78↑j
+//.text : 00007FF6914717CD                 xor     edx, edx
+//.text : 00007FF6914717CF                 lea     rcx, unk_7FF692AB6800
+//.text : 00007FF6914717D6                 call    sub_7FF6917DFE60
+//.text : 00007FF6914717DB                 mov     rcx, rax
+//.text : 00007FF6914717DE                 mov     r8d, 8
+//.text : 00007FF6914717E4                 mov     rdx, rbx
+//.text : 00007FF6914717E7                 call    sub_7FF6917E1B00
+//.text : 00007FF6914717EC                 mov     rcx, [r14]
+//.text : 00007FF6914717EF                 lea     r8, Str1
+//.text : 00007FF6914717F6                 test    rcx, rcx
+//.text : 00007FF6914717F9                 mov     rdx, rbx; SizeInBytes
+//.text:00007FF6914717FC                 mov     r15, rax
+//.text : 00007FF6914717FF                 cmovnz  r8, rcx; Src
+//.text:00007FF691471803                 mov     rcx, rax; Dst
+//.text:00007FF691471806                 call    cs : __imp_strcpy_s
+//.text : 00007FF69147180C                 xor     r8d, r8d
+//.text : 00007FF69147180F                 lea     rdx, Str1
+//.text : 00007FF691471816                 mov     rcx, r14
+//.text : 00007FF691471819                 call    sub_7FF690CD9F90
+//.text : 00007FF69147181E                 mov     edx, 5Bh; Val
+//.text:00007FF691471823                 mov     rcx, r15; Str
+//.text:00007FF691471826                 mov     rbp, r15
+//.text : 00007FF691471829                 call    cs : __imp_strchr
+//.text : 00007FF69147182F                 mov     rdi, rax
+//.text : 00007FF691471832                 test    rax, rax
+//.text : 00007FF691471835                 jz      loc_7FF6914718FB
+//.text : 00007FF69147183B
+//.text : 00007FF69147183B loc_7FF69147183B : ; DATA XREF : .rdata : 00007FF6927C4F50↓o
+//.text : 00007FF69147183B;.rdata:00007FF6927C4F60↓o ...
+//.text : 00007FF69147183B                 mov[rsp + 38h + arg_10], rsi
+//.text : 00007FF691471840
+//.text : 00007FF691471840 loc_7FF691471840 : ; CODE XREF : sub_7FF691471740 + 1B0↓j
+//.text : 00007FF691471840                 mov     edx, 5Dh; Val
+//.text:00007FF691471845                 mov     rcx, rdi; Str
+//.text:00007FF691471848                 call    cs : __imp_strchr
+//.text : 00007FF69147184E                 mov     rsi, rax
+//.text : 00007FF691471851                 test    rax, rax
+//.text : 00007FF691471854                 jz      short loc_7FF6914718BB
+//.text : 00007FF691471856                 mov     edx, 3Dh; Val
+//.text:00007FF69147185B                 mov     byte ptr[rax], 0
+//.text : 00007FF69147185E                 mov     rcx, rdi; Str
+//.text:00007FF691471861                 call    cs : __imp_strchr
+//.text : 00007FF691471867                 mov     rbx, rax
+//.text : 00007FF69147186A                 test    rax, rax
+//.text : 00007FF69147186D                 jz      short loc_7FF69147187E
+//.text : 00007FF69147186F                 cmp     rax, rsi
+//.text : 00007FF691471872                 jbe     short loc_7FF691471878
+//.text : 00007FF691471874                 xor     ebx, ebx
+//.text : 00007FF691471876                 jmp     short loc_7FF69147187E
+//.text : 00007FF691471878; -------------------------------------------------------------------------- -
+//.text:00007FF691471878
+//.text : 00007FF691471878 loc_7FF691471878 : ; CODE XREF : sub_7FF691471740 + 132↑j
+//.text : 00007FF691471878                 mov     byte ptr[rax], 0
+//.text : 00007FF69147187B                 inc     rbx
+//.text : 00007FF69147187E
+//.text : 00007FF69147187E loc_7FF69147187E : ; CODE XREF : sub_7FF691471740 + 12D↑j
+//.text : 00007FF69147187E; sub_7FF691471740 + 136↑j
+//.text:00007FF69147187E                 mov     rdx, rbp
+//.text : 00007FF691471881                 mov     byte ptr[rdi], 0
+//.text : 00007FF691471884                 mov     rcx, r14
+//.text : 00007FF691471887                 call    sub_7FF690CD9290
+//.text : 00007FF69147188C                 lea     rcx, [rdi + 1]; Str1
+//.text:00007FF691471890                 lea     rdx, aSurv; "SURV"
+//.text:00007FF691471897                 call    cs : __imp__stricmp
+//.text : 00007FF69147189D                 test    eax, eax
+//.text : 00007FF69147189F                 jnz     short loc_7FF6914718B5
+//.text : 00007FF6914718A1                 call    sub_7FF6914B9220
+//.text : 00007FF6914718A6                 test    al, al
+//.text : 00007FF6914718A8                 jz      short loc_7FF6914718B5
+//.text : 00007FF6914718AA                 mov     rdx, rbx
+//.text : 00007FF6914718AD                 mov     rcx, r14
+//.text : 00007FF6914718B0                 call    sub_7FF690CD9290
+//.text : 00007FF6914718B5
+//.text : 00007FF6914718B5 loc_7FF6914718B5 : ; CODE XREF : sub_7FF691471740 + 15F↑j
+//.text : 00007FF6914718B5; sub_7FF691471740 + 168↑j
+//.text:00007FF6914718B5                 lea     rbp, [rsi + 1]
+//.text : 00007FF6914718B9                 jmp     short loc_7FF6914718DC
+//.text : 00007FF6914718BB; -------------------------------------------------------------------------- -
+//.text:00007FF6914718BB
+//.text : 00007FF6914718BB loc_7FF6914718BB : ; CODE XREF : sub_7FF691471740 + 114↑j
+//.text : 00007FF6914718BB                 mov     rdx, rbp
+//.text : 00007FF6914718BE                 mov     byte ptr[rdi], 0
+//.text : 00007FF6914718C1                 mov     rcx, r14
+//.text : 00007FF6914718C4                 call    sub_7FF690CD9290
+//.text : 00007FF6914718C9                 lea     rdx, asc_7FF6922A66D0; "["
+//.text:00007FF6914718D0                 mov     rcx, r14
+//.text : 00007FF6914718D3                 call    sub_7FF690CD9290
+//.text : 00007FF6914718D8                 lea     rbp, [rdi + 1]
+//.text : 00007FF6914718DC
+//.text : 00007FF6914718DC loc_7FF6914718DC : ; CODE XREF : sub_7FF691471740 + 179↑j
+//.text : 00007FF6914718DC                 mov     edx, 5Bh; Val
+//.text:00007FF6914718E1                 mov     rcx, rbp; Str
+//.text:00007FF6914718E4                 call    cs : __imp_strchr
+//.text : 00007FF6914718EA                 mov     rdi, rax
+//.text : 00007FF6914718ED                 test    rax, rax
+//.text : 00007FF6914718F0                 jnz     loc_7FF691471840
+//.text : 00007FF6914718F6                 mov     rsi, [rsp + 38h + arg_10]
+//.text : 00007FF6914718FB
+//.text : 00007FF6914718FB loc_7FF6914718FB : ; CODE XREF : sub_7FF691471740 + F5↑j
+//.text : 00007FF6914718FB; DATA XREF : .pdata : 00007FF69411E4B8↓o ...
+//.text : 00007FF6914718FB                 mov     rdx, rbp
+//.text : 00007FF6914718FE                 mov     rcx, r14
+//.text : 00007FF691471901                 call    sub_7FF690CD9290
+//.text : 00007FF691471906                 cmp     cs : dword_7FF692AB6C88, 2
+//.text : 00007FF69147190D                 mov     rdi, [rsp + 38h + var_10]
+//.text : 00007FF691471912                 mov     rbp, [rsp + 38h + arg_8]
+//.text : 00007FF691471917                 mov     rbx, [rsp + 38h + arg_0]
+//.text : 00007FF69147191C                 jz      short loc_7FF691471931
+//.text : 00007FF69147191E
+//.text : 00007FF69147191E loc_7FF69147191E : ; DATA XREF : .pdata : 00007FF69411E4C4↓o
+//.text : 00007FF69147191E;.pdata:00007FF69411E4D0↓o
+//.text : 00007FF69147191E                 lea     rdx, dword_7FF692AB6C88
+//.text : 00007FF691471925                 lea     rcx, unk_7FF692AB6800
+//.text : 00007FF69147192C                 call    sub_7FF6917E0D30
+//.text : 00007FF691471931
+//.text : 00007FF691471931 loc_7FF691471931 : ; CODE XREF : sub_7FF691471740 + 1DC↑j
+//.text : 00007FF691471931                 xor     edx, edx
+//.text : 00007FF691471933                 lea     rcx, unk_7FF692AB6800
+//.text : 00007FF69147193A                 call    sub_7FF6917DFE60
+//.text : 00007FF69147193F                 mov     rcx, rax
+//.text : 00007FF691471942                 mov     rdx, r15
+//.text : 00007FF691471945                 call    sub_7FF6917E2120
+//.text : 00007FF69147194A                 mov     r15, [rsp + 38h + var_18]
+//.text : 00007FF69147194F
+//.text : 00007FF69147194F loc_7FF69147194F : ; CODE XREF : sub_7FF691471740 + 28↑j
+//.text : 00007FF69147194F; DATA XREF : .pdata : 00007FF69411E4D0↓o ...
+//.text : 00007FF69147194F                 add     rsp, 30h
+//.text : 00007FF691471953                 pop     r14
+//.text : 00007FF691471955                 retn
+//.text : 00007FF691471955 sub_7FF691471740 endp
+//.text : 00007FF691471955
+//.text : 00007FF691471955; -------------------------------------------------------------------------- -
 
 
 float GetBaseDamage(TESAmmo* pthisAmmo)
@@ -525,45 +1054,6 @@ bool IsCrossBow(TESObjectWEAP * thisWeapon)
 			thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 }
 
-
-
-
-
-//bool GetIsNthEffectKnown(IngredientItem* thisMagic, UInt32 index)
-//{
-//	bool isKnown = false;
-//	
-//	enum	// type - these are flags
-//	{
-//		kType_NoEffect	=		0,
-//		kType_FirstEffect =		1 << 0,
-//		kType_SecondEffect =	1 << 1,
-//		kType_ThirdEffect =		1 << 2,
-//		kType_FourthEffect =	1 << 3
-//	};
-//	
-//	if (!thisMagic)
-//		return false;
-//	switch (index)
-//	{
-//	case 0:
-//		isKnown = (((thisMagic->unkA8.unk00 & 0xFF) & kType_FirstEffect)== kType_FirstEffect);
-//		break;
-//	case 1:
-//		isKnown = (((thisMagic->unkA8.unk00 & 0xFF) & kType_SecondEffect) == kType_SecondEffect);
-//		break;
-//	case 2:
-//		isKnown = (((thisMagic->unkA8.unk00 & 0xFF) & kType_ThirdEffect) == kType_ThirdEffect);
-//		break;
-//	case 3:
-//		isKnown = (((thisMagic->unkA8.unk00 & 0xFF) & kType_FourthEffect) == kType_FourthEffect);
-//		break;
-//	default:
-//		break;
-//	}
-//	return isKnown;
-//}
-
 IngredientItem* GetIngredient(TESObjectREFR *thisObject)
 {
 	if (!thisObject)
@@ -849,7 +1339,7 @@ string CAHZUtility::GetArmorWeightClass(TESObjectREFR *theObject)
 	return desc;
 };
 
-string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject)
+string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD)
 {
 	string desc;
 
@@ -859,60 +1349,69 @@ string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject)
 	if (!theObject->baseForm)
 		return desc;
 
+	if (!stringFromHUD)
+		return desc;
+
 	//<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
-
-
-	//double value = 0.0;
-	//bool gotValue = false;
-
-	//TESValueForm* pValue = DYNAMIC_CAST(theObject->baseForm, TESForm, TESValueForm);
-	//if (pValue)
-	//{
-	//	value = pValue->value;
-	//	gotValue = true;
-	//}
-	//else 
-	//{
-	//	AlchemyItem* alchemyItem = DYNAMIC_CAST(theObject->baseForm, TESForm, AlchemyItem);
-	//	if (alchemyItem)// && (alchemyItem->itemData.flags & AlchemyItem::kFlag_ManualCalc) == AlchemyItem::kFlag_ManualCalc)
-	//	{
-	//		value = alchemyItem->itemData.value;
-	//		gotValue = true;
-	//	}
-	//}
-
-	//if (!gotValue)
-	//	return desc;
-
-
-	//double weight = GetFormWeight(theObject->baseForm);
-
-	//if (weight <= 0.0)
-	//	return desc;
-
-	// Add the VW label
-	desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-	desc.append("VW");
-	desc.append("<\\FONT>");
-	desc.append(" ");
-
-	//double vW = round(value / weight);
-
-	//char vWString[256] = "";
-	//if (vW < 1.0)
-	//{
-	//	sprintf_s(vWString, "%.1f", vW);
-	//}
-	//else
-	//{
-	//	sprintf_s(vWString, "%.0f", vW);
-	//}
 	
+	// Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
+	std::regex rgx(R"(^(<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="\$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(?:<\/FONT><FONT FACE="\$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(<\/FONT>([\w\s]+|)<\/P><\/TEXTFORMAT>)$)");
+	std::smatch match;
+	string s = stringFromHUD;
+	const string cs = const_cast<string &>(s);
 
-	desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
-	//desc.append(vWString);
-	desc.append("0");
-	desc.append("<\\FONT>");
+	if (regex_search(cs.begin(), cs.end(), match, rgx))
+	{
+		if (match.size() < 7)
+		{
+			return desc;
+		}
+
+		// The fixed positions of the matches (containing groups)
+		string weight = match[3];
+		string value = match[5];
+		char *end;
+
+		float weightValue = strtof(weight.c_str(), &end);
+		float valueValue = strtof(value.c_str(), &end);
+
+		// Don't show a neg or 0 ratio, its pointless
+		if (weightValue <= 0.0 || valueValue <= 0.0)
+		{
+			return desc;
+		}
+
+		float vW = valueValue / weightValue;
+
+		// Add the VW label
+		desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+		desc.append("VW");
+		desc.append("<\\FONT>");
+
+		char floatHold[64];
+		size_t size = 64;
+
+		//Rounding trick
+		sprintf_s(floatHold, size, "%.2f", vW);
+		vW = strtof(floatHold, &end);
+
+		if (vW < 1.0)
+		{
+			sprintf_s(floatHold, size, "%.3g", vW);
+		}
+		else if (vW < 10.0)
+		{
+			sprintf_s(floatHold, size, "%.2g", vW);
+		}
+		else
+		{
+			sprintf_s(floatHold, size, "%.0f", vW);
+		}
+
+		desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+		desc.append(floatHold);
+		desc.append("<\\FONT>");
+	}
 
 	return desc;
 };
@@ -1235,7 +1734,7 @@ void CAHZUtility::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionH
 	}
 
 	valueToWeight.clear();
-	valueToWeight.append(this->GetValueToWeight(pTargetReference).c_str());
+	valueToWeight.append(this->GetValueToWeight(pTargetReference, args->args[0].GetString()).c_str());
 
 	SetResultString(args, valueToWeight.c_str());
 };
