@@ -20,7 +20,6 @@
 #include "skse64/GameExtraData.h"
 #include <list>
 #include <algorithm>
-#include "PluginProcessInfo.h"
 #include "IngredientLUT.h"
 #include "skse64/PapyrusObjectReference.h"
 #include "AHZWeaponInfo.h"

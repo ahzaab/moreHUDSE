@@ -21,7 +21,6 @@
 #include "skse64/PapyrusEvents.h"
 #include "skse64/GameExtraData.h"
 #include "skse64/PapyrusUtility.h"
-#include "PluginProcessInfo.h"
 #include "AHZPlayerInfo.h"
 #include "AHZUtility.h"
 #include "AHZScaleformHook.h"

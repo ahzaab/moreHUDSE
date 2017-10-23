@@ -40,6 +40,7 @@ bool isBolt(TESAmmo *thisAmmo);
 double mRound(double d);
 IngredientItem* GetIngredient(TESObjectREFR *thisObject);
 AlchemyItem* GetFood(TESObjectREFR *thisObject);
+SpellItem* GetBlessing(TESObjectREFR *thisObject);
 const char * GetTargetName(TESObjectREFR *thisObject);
 bool CanPickUp(UInt32 formType);
 

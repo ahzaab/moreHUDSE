@@ -14,6 +14,7 @@
 #include "AHZWeaponInfo.h"
 #include "IngredientLUT.h"
 #include "FoodLUT.h"
+#include "ShrineLUT.h"
 #include "AHZUtility.h"
 
 RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
@@ -1129,6 +1130,21 @@ IngredientItem* GetIngredient(TESObjectREFR *thisObject)
 	return NULL;
 }
 
+SpellItem* GetBlessing(TESObjectREFR *thisObject)
+{
+	if (!thisObject)
+		return NULL;
+
+	if (thisObject->baseForm->GetFormType() == kFormType_Activator)
+	{
+		CShrineLUT lut;
+		return lut.GetBlessing(thisObject->baseForm->formID);
+	}
+
+	return NULL;
+}
+
+
 AlchemyItem* GetFood(TESObjectREFR *thisObject)
 {
 	if (!thisObject)
@@ -1523,9 +1539,6 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		if (item && !desc.length())
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
-			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
-			//desc.append(AHZT(description.Get()));
 			AppendDescription(&item->description, item, desc);
 		}
 	}
@@ -1553,9 +1566,6 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		if (item && !desc.length())
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
-			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
-			//desc.append(AHZT(description.Get()));
 			AppendDescription(&item->description, item, desc);
 		}
 	}
@@ -1566,8 +1576,6 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		if (item)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');//)1129530692);
-			//desc.append(AHZT(description.Get()));
 			AppendDescription(&item->description, item, desc);
 		}
 
@@ -1587,9 +1595,6 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		if (item)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-			//CALL_MEMBER_FN(&item->description2, Get)(&description, NULL, 1296125507);
-			//CALL_MEMBER_FN(&item->description2, Get)(&description, item, 'DESC');
-			//desc.append(AHZT(description.Get()));
 			AppendDescription(&item->description2, item, desc);
 		}
 
@@ -1609,16 +1614,9 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		if (item)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-			//CALL_MEMBER_FN(&item->description, Get)(&description, NULL, 1129530692);
-			//CALL_MEMBER_FN(&item->description, Get)(&description, item, 'DESC');
-			//desc.append(AHZT(description.Get()));
 			AppendDescription(&item->description, item, desc);
-
 			GetMagicItemDescription(item, effectDescription);
 			desc.append(effectDescription);
-
-
-
 		}
 	}
 	return desc;
@@ -1628,11 +1626,27 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 {
 	TESObjectREFR * pTargetReference = targetObject;
 
+	// No valid reference
+	if (!pTargetReference)
+	{
+		args->args[0].DeleteMember("effectsObj");
+		return;
+	}
+
 	// See if its harvestable food
 	AlchemyItem *food = GetFood(pTargetReference);
+	SpellItem * blessing = NULL;
+	// Used to store the name
+	string name;
+
+	// Check if it is a shrine blessing
+	if (!food)
+	{
+		blessing = GetBlessing(pTargetReference);
+	}
 
 	// If the target is not valid or it can't be picked up by the player
-	if ((!pTargetReference) ||
+	if (!blessing &&
 		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
 		(!food)))
 	{
@@ -1640,40 +1654,17 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 		return;
 	}
 
-	// Used to store the name
-	string name;
-
-
-	PlayerCharacter* pPC = (*g_thePlayer);
-
-	if (pPC)
-	{
-		InventoryEntryData objDesc(targetObject->baseForm, 0);
-
-		// Allocate a list to send
-		objDesc.extendDataList = new tList<BaseExtraList>();
-
-		objDesc.extendDataList->Insert(&targetObject->extraData);
-
-
-		const char *s;
-		s = CALL_MEMBER_FN(&objDesc, GenerateName)();
-
-		float fDamage = CALL_MEMBER_FN(pPC, GetDamage)(&objDesc);
-
-		// Delete the allocated dummy list
-		delete objDesc.extendDataList;
-
-		// This could be rounded, but the the script decide
-		float ff = mRound(fDamage);
-	}
-
-
 	// If this is harvestable food or normal food get the magic item description
 	if (food)
 	{
 		string effectDescription;
 		GetMagicItemDescription(food, effectDescription);
+		name.append(effectDescription);
+	}
+	else if (blessing)
+	{
+		string effectDescription;
+		GetMagicItemDescription(blessing, effectDescription);
 		name.append(effectDescription);
 	}
 	else
@@ -1869,15 +1860,34 @@ void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunction
 {
 	TESObjectREFR * pTargetReference = targetObject;
 
+	// If the target is not valid or it can't be picked up by the player
+	if (!pTargetReference)
+	{
+		args->args[0].DeleteMember("dataObj");
+		return;
+	}
+
 	IngredientItem * ingredient = GetIngredient(pTargetReference);
 	AlchemyItem *food = NULL;
+	SpellItem*blessing = NULL;
 	// If not an ingredient, then see if its food
 	if (!ingredient)
 		food = GetFood(pTargetReference);
 
+	if (!food)
+	{
+		blessing = GetBlessing(pTargetReference);
+	}
+
+	// Blessings from shrines cannot exist in the inventory
+	if (blessing)
+	{
+		args->args[0].DeleteMember("dataObj");
+		return;
+	}
+
 	// If the target is not valid or it can't be picked up by the player
-	if ((!pTargetReference) ||
-		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
+	if (((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
 		(!ingredient) &&
 			(!food)))
 	{
@@ -1937,16 +1947,8 @@ void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunction
 
 void CAHZUtility::RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str)
 {
-	//GFxValue	fxValue;
-	//view->CreateString(&fxValue, str);
-	//dst->SetMember(name, &fxValue);
-
-	//RegisterUnmanagedString()
-
 	GFxValue	fxValue;
-
 	fxValue.SetString(str);
-
 	dst->SetMember(name, &fxValue);
 };
 
@@ -1961,8 +1963,20 @@ void CAHZUtility::RegisterNumber(GFxValue * dst, const char * name, double value
 bool CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
+
+	if (!pTargetReference)
+	{
+		if (args)
+		{
+			// return false, indicating that the target object is not valid for acquiring data
+			args->result->SetBool(false);
+		}
+		return false;
+	}
+
 	IngredientItem * ingredient = GetIngredient(pTargetReference);
 	AlchemyItem * food = NULL;
+	SpellItem *blessing = NULL;
 
 	// If not an ingredient, then see if its food
 	if (!ingredient)
@@ -1970,8 +1984,14 @@ bool CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHan
 		food = GetFood(pTargetReference);
 	}
 
+	// See if it is a shrine, if its not food
+	if (!food)
+	{
+		blessing = GetBlessing(pTargetReference);
+	}
+
 	// If the target is not valid or it can't be picked up by the player
-	if ((!pTargetReference) ||
+	if (!blessing && 
 		((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
 		(!ingredient) &&
 			(!food)))

@@ -263,7 +263,6 @@
     <ClCompile Include="FoodLUT.cpp" />
     <ClCompile Include="IngredientLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PluginProcessInfo.cpp" />
     <ClCompile Include="..\skse64_common\SafeWrite.cpp" />
     <ClCompile Include="..\skse64_common\Utilities.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
@@ -451,6 +450,7 @@
     <ClCompile Include="..\skse64\Serialization.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
+    <ClCompile Include="ShrineLUT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -469,8 +469,8 @@
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="FoodLUT.h" />
     <ClInclude Include="IngredientLUT.h" />
-    <ClInclude Include="PluginProcessInfo.h" />
     <ClInclude Include="resource2.h" />
+    <ClInclude Include="ShrineLUT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
