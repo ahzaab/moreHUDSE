@@ -1385,7 +1385,7 @@ string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject, const char * stri
 
 		// Add the VW label
 		desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-		desc.append("VW");
+		desc.append("V/W ");
 		desc.append("<\\FONT>");
 
 		char floatHold[64];
@@ -1397,11 +1397,7 @@ string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject, const char * stri
 
 		if (vW < 1.0)
 		{
-			sprintf_s(floatHold, size, "%.3g", vW);
-		}
-		else if (vW < 10.0)
-		{
-			sprintf_s(floatHold, size, "%.2g", vW);
+			sprintf_s(floatHold, size, "%.1g", vW);
 		}
 		else
 		{
