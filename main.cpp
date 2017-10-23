@@ -30,19 +30,17 @@
 #include "AHZScaleformHook.h"
 #include "skse64/GameEvents.h"
 #include "skse64/GameMenus.h"
+#include <shlobj.h>
 using namespace std;
 
 
-IDebugLog	gLog("AHZmoreHUDPlugin.log");
-
+IDebugLog	gLog;
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
 SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-TESObjectREFR*	g_MycurCrosshairRef = NULL;
-InventoryEntryData *g_objDec;
 
 /**** scaleform functions ****/
 
@@ -142,6 +140,16 @@ public:
 	}
 };
 
+class SKSEScaleform_GetValueToWeightString : public GFxFunctionHandler
+{
+public:
+	virtual void	Invoke(Args * args)
+	{
+		CAHZUtility utility;
+		utility.ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+	}
+};
+
 class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
 {
 public:
@@ -162,24 +170,6 @@ public:
 	}
 };
 
-
-
-bool __cdecl Hook_Crosshair_LookupREFRByHandle2(UInt32 * refHandle, TESObjectREFR ** refrOut)
-{
-	bool result = LookupREFRByHandle(refHandle, refrOut);
-
-	if (refrOut)
-	{
-		g_MycurCrosshairRef = *refrOut;
-	}
-	else
-	{
-		g_MycurCrosshairRef = NULL;
-	}
-
-	return result;
-}
-
 bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 {
 	RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
@@ -193,18 +183,9 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	RegisterFunction <SKSEScaleform_GetIsBookAndWasRead>(root, view, "GetIsBookAndWasRead");
 	RegisterFunction <SKSEScaleform_GetArmorWeightClassString>(root, view, "GetArmorWeightClassString");
 	RegisterFunction <SKSEScaleform_GetBookSkillString>(root, view, "GetBookSkillString");
-
-	//InstallAHZHudComponents(view);
-
+	RegisterFunction <SKSEScaleform_GetValueToWeightString>(root, view, "GetValueToWeightString");
 	MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
-
-
 	return true;
-}
-
-void AhzInventoryData(GFxMovieView * view, GFxValue * object, InventoryEntryData * item)
-{
-	g_objDec = item;
 }
 
 extern "C"
@@ -212,12 +193,12 @@ extern "C"
 
 bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
 {
-	//_MESSAGE("AHZmoreHUDPlugin");
+	gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\moreHUDSE.log");
 
 	// populate info structure
 	info->infoVersion =	PluginInfo::kInfoVersion;
 	info->name =		"Ahzaab's moreHUD Plugin";
-	info->version =		300;
+	info->version =		305;
 
 	// store plugin handle so we can identify ourselves later
 	g_pluginHandle = skse->GetPluginHandle();
@@ -233,12 +214,6 @@ bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
 		_ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 
 		return false;
-	}
-	else if (skse->skseVersion < MAKE_EXE_VERSION(1,6,16))
-	{
-		_ERROR("unsupported skse version %08X", skse->skseVersion);
-
-		return false;		
 	}
 	else if (SKSE_VERSION_RELEASEIDX < 53)
 	{
@@ -281,7 +256,6 @@ bool SKSEPlugin_Load(const SKSEInterface * skse)
 {
 	// register scaleform callbacks
 	g_scaleform->Register("AHZmoreHUDPlugin", RegisterScaleform);
-	g_scaleform->RegisterForInventory(AhzInventoryData);
 
 	EventDispatcher<SKSECrosshairRefEvent> * dispatcher = (EventDispatcher<SKSECrosshairRefEvent> *)g_skseMessaging->GetEventDispatcher(SKSEMessagingInterface::kDispatcher_CrosshairEvent);
 	dispatcher->AddEventSink(&crossHairEvent);
