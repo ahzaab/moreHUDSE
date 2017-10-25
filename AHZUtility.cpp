@@ -18,8 +18,10 @@
 #include "AHZUtility.h"
 
 RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
-RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
 
+RelocAddr<_GetScaleFormDescription> GetScaleFormDescription(0x190820);
+
+RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
 // Base Address = 7FF690BE0000
 //text:00007FF691471320; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //	.text:00007FF691471320
@@ -1474,10 +1476,15 @@ void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std
 	if (&bsDescription)
 	{
 		tempString.append(bsDescription.Get());
-
-		if (tempString != "LOOKUP FAILED!")
+		if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
 		{
-			description.append(tempString);
+			TrimHelper(tempString);
+			if (tempString.length() > 1)
+			{
+				string formatted = "";
+				FormatDescription(tempString, formatted);
+				description.append(formatted);
+			}
 		}
 	}
 }
@@ -1519,54 +1526,60 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 	{
 		TESObjectWEAP *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectWEAP);
 
-		//Get enchantment description
-		if (item && item->enchantable.enchantment)
-		{
-			GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
-			desc.append(effectDescription);
-		}
-		// Items modified by the player
-		else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
-		{
-			if (extraEnchant->enchant)
-			{
-				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
-				desc.append(effectDescription);
-			}
-		}
-
 		// If there was no effects, then display athe description if available
-		if (item && !desc.length())
+		if (item)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
 			AppendDescription(&item->description, item, desc);
+		}
+
+		if (item && !desc.length())
+		{
+			//Get enchantment description
+			if (item && item->enchantable.enchantment)
+			{
+				GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+				desc.append(effectDescription);
+			}
+			// Items modified by the player
+			else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+			{
+				if (extraEnchant->enchant)
+				{
+					GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+					desc.append(effectDescription);
+				}
+			}
 		}
 	}
 	else if (theObject->baseForm->GetFormType() == kFormType_Armor)
 	{
 		TESObjectARMO *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectARMO);
 
-		//Get enchantment description
-		if (item && item->enchantable.enchantment)
-		{
-			GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
-			desc.append(effectDescription);
-		}
-		// Items modified by the player
-		else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
-		{
-			if (extraEnchant->enchant)
-			{
-				GetMagicItemDescription(extraEnchant->enchant, effectDescription);
-				desc.append(effectDescription);
-			}
-		}
-
 		// If there was no effects, then display athe description if available
-		if (item && !desc.length())
+		if (item)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
 			AppendDescription(&item->description, item, desc);
+		}
+
+		if (item && !desc.length())
+		{
+			//Get enchantment description
+			if (item && item->enchantable.enchantment)
+			{
+				GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+				desc.append(effectDescription);
+			}
+			// Items modified by the player
+			else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+			{
+				if (extraEnchant->enchant)
+				{
+					GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+					desc.append(effectDescription);
+				}
+			}
 		}
 	}
 	else if (theObject->baseForm->GetFormType() == kFormType_Ammo)
@@ -1599,7 +1612,7 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		}
 
 		if (item &&
-			((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell))
+			((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell) && !desc.length())
 		{
 			if (item->data.teaches.spell)
 			{
@@ -1615,8 +1628,12 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 		{
 			// Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
 			AppendDescription(&item->description, item, desc);
-			GetMagicItemDescription(item, effectDescription);
-			desc.append(effectDescription);
+
+			if (!desc.length())
+			{
+				GetMagicItemDescription(item, effectDescription);
+				desc.append(effectDescription);
+			}
 		}
 	}
 	return desc;
@@ -1663,9 +1680,14 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 	}
 	else if (blessing)
 	{
-		string effectDescription;
-		GetMagicItemDescription(blessing, effectDescription);
-		name.append(effectDescription);
+		AppendDescription(&(blessing->description), blessing, name);
+
+		if (!name.length())
+		{
+			string effectDescription;
+			GetMagicItemDescription(blessing, effectDescription);
+			name.append(effectDescription);
+		}
 	}
 	else
 	{
@@ -2042,4 +2064,92 @@ void CAHZUtility::GetMagicItemDescription(MagicItem * item, std::string& descrip
 	char *temp2 = ProcessSurvivalMode(&temp);
 
 	description.append(temp.Get());
+}
+
+
+void CAHZUtility::FormatDescription(std::string& unFormated, std::string& formatted)
+{
+	string outerString = "";
+	formatted.clear();
+
+	const char numberFormatter[] = "<font face = '$EverywhereMediumFont' size = '20' color = '#FFFFFF'>%.0f</font>";
+	const char stringFormatter[] = "<font face = '$EverywhereMediumFont' size = '20' color = '#FFFFFF'>%s</font>";
+	char tempformatter[1000];
+	bool canBeAdded = true;
+
+	std::regex survivalRegex("\\[SURV=.+\\]");
+	std::smatch survivalMatch;
+	const string survivalConst = const_cast<string &>(unFormated);
+	if ((regex_search(survivalConst.begin(), survivalConst.end(), survivalMatch, survivalRegex)))
+	{
+		ReplaceStringInPlace(unFormated, "[SURV=", "");
+		size_t offset = (size_t)(unFormated.length() - 1);
+		size_t count = 1;
+		unFormated.erase(offset, count);
+		canBeAdded = IsSurvivalMode();
+	}
+	else
+	{
+		canBeAdded = true;
+	}
+
+	if (canBeAdded)
+	{
+		std::regex rgx("\\<\\d+?\\.?\\d*\\>|\\<\\w*\\>");
+		std::smatch match;
+		
+		const string cs = const_cast<string &>(unFormated);
+		string::const_iterator searchStart(cs.cbegin());
+		string workingString = unFormated;
+
+		while (regex_search(searchStart, cs.end(), match, rgx))
+		{
+			string temps = match[0];
+			ReplaceStringInPlace(temps, "<", "");
+			ReplaceStringInPlace(temps, ">", "");
+			string origMatch = match[0];
+
+			sprintf_s(tempformatter, 1000, stringFormatter, temps.c_str());
+			ReplaceStringInPlace(workingString, origMatch, tempformatter);
+
+			searchStart += match.position() + match.length();
+		}
+		outerString.append(workingString);
+	}
+	TrimHelper(outerString);
+	formatted.append(outerString);
+}
+
+
+void CAHZUtility::TrimHelper(std::string& unFormated) {
+	//end will point to the first non-trimmed character on the right
+	//start will point to the first non-trimmed character on the Left
+	unsigned int end = unFormated.length() - 1;
+	unsigned int start = 0;
+
+	//Trim specified characters.
+	for (start = 0; start < unFormated.length(); start++) {
+		if (!isspace(unFormated[start])) break;
+	}
+
+	for (end = unFormated.length() - 1; end >= start; end--) {
+		if (!isspace(unFormated[end])) break;
+	}
+
+	CreateTrimmedString(start, end, unFormated);
+}
+
+void CAHZUtility::CreateTrimmedString(unsigned int start, unsigned int end, std::string& unFormated){
+	//Create a new STRINGREF and initialize it from the range determined above.
+	unsigned int len = end - start + 1;
+	if (len == unFormated.length()) {
+		// Don't allocate a new string as the trimmed string has not changed.
+		return;
+	}
+
+	if (len == 0) {
+		unFormated.clear();
+		return;
+	}
+	unFormated = unFormated.substr(start, len);
 }

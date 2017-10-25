@@ -47,6 +47,9 @@ bool CanPickUp(UInt32 formType);
 typedef  void(*GET_MAGIC_ITEM_DESCRIPTION)(void *, TESForm* a1, BSString *a2);// , SInt64 a3, const char *a4, const char *a5, unsigned int a6);
 extern RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2;
 
+typedef  char * (*_GetScaleFormDescription)(BSString *a1, BSString *a2);
+extern RelocAddr<_GetScaleFormDescription> GetScaleFormDescription;
+
 typedef  char * (*PROCESS_SURVIVAL_MODE)(BSString *a2);// , SInt64 a3, const char *a4, const char *a5, unsigned int a6);
 extern RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode;
 
@@ -76,6 +79,7 @@ public:
 	 void ProcessIngredientData(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	 void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	 string GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD );
+	 void TrimHelper(std::string& unFormated);
 
 private:
 	 void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -89,6 +93,10 @@ private:
 	 void GetMagicItemDescription(MagicItem * item, std::string& description);
 
 	 void AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description);
+
+	 void FormatDescription(std::string& unFormated, std::string& formatted);
+
+	 void CreateTrimmedString(unsigned int start, unsigned int end, std::string& unFormated);
 };
 
 
