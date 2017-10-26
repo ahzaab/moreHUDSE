@@ -56,8 +56,7 @@ class SKSEScaleform_GetIngredientData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -66,8 +65,7 @@ class SKSEScaleform_GetTargetObjectData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{	
-		CAHZUtility utility;
-		utility.ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -76,8 +74,7 @@ class SKSEScaleform_GetPlayerData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessPlayerData(args);
+      CAHZUtility::ProcessPlayerData(args);
 	}
 };
 
@@ -95,8 +92,7 @@ class SKSEScaleform_GetTargetInventoryCount : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -105,8 +101,7 @@ class SKSEScaleform_GetTargetEffects : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -123,9 +118,7 @@ public:
 			args->result->SetBool(false);
 			return;
 		}
-
-		CAHZUtility utility;
-		args->result->SetBool(utility.GetIsBookAndWasRead(pTargetReference));
+		args->result->SetBool(CAHZUtility::GetIsBookAndWasRead(pTargetReference));
 	}
 };
 
@@ -134,8 +127,7 @@ class SKSEScaleform_GetArmorWeightClassString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -144,8 +136,7 @@ class SKSEScaleform_GetValueToWeightString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -154,8 +145,7 @@ class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -164,8 +154,7 @@ class SKSEScaleform_GetIsValidTarget : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility utility;
-		utility.ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZUtility::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
