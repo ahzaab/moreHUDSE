@@ -16,7 +16,6 @@
 #include "FoodLUT.h"
 #include "ShrineLUT.h"
 #include "AHZUtility.h"
-
 RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
 
 //RelocAddr<_GetScaleFormDescription> GetScaleFormDescription(0x190820);
@@ -1470,18 +1469,36 @@ string CAHZUtility::GetBookSkill(TESObjectREFR *theObject)
 void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description)
 {
    BSString bsDescription;
-   BSString bsDescription2;
    string tempString = "";
-   CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 'DESC');
 
+   CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 0x43534544);
    if (&bsDescription)
    {
       tempString.append(bsDescription.Get());
-      if (tempString != "LOOKUP FAILED!" && !IsEmptyOrWhiteSpace(tempString))
+      if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
       {
          string formatted = "";
          FormatDescription(tempString, formatted);
          description.append(formatted);
+      }
+      else
+      {
+         BSString bsDescription2;
+         TESDescription * desc = DYNAMIC_CAST(parent, TESForm, TESDescription);
+         if (desc)
+         {
+            CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0x43534544);
+            if (&bsDescription2)
+            {
+               tempString.append(bsDescription2.Get());
+               if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
+               {
+                  string formatted = "";
+                  FormatDescription(tempString, formatted);
+                  description.append(formatted);
+               }
+            }
+         }
       }
    }
 }
@@ -2115,49 +2132,4 @@ void CAHZUtility::FormatDescription(std::string& unFormated, std::string& format
    }
    //TrimHelper(outerString);
    formatted.append(outerString);
-}
-
-
-void CAHZUtility::TrimHelper(std::string& unFormated) {
-   //end will point to the first non-trimmed character on the right
-   //start will point to the first non-trimmed character on the Left
-   unsigned int end = unFormated.length() - 1;
-   unsigned int start = 0;
-
-   //Trim specified characters.
-   for (start = 0; start < unFormated.length(); start++) {
-      if (!isspace(unFormated[start])) break;
-   }
-
-   for (end = unFormated.length() - 1; end >= start; end--) {
-      if (!isspace(unFormated[end])) break;
-   }
-
-   CreateTrimmedString(start, end, unFormated);
-}
-
-void CAHZUtility::CreateTrimmedString(unsigned int start, unsigned int end, std::string& unFormated){
-   //Create a new STRINGREF and initialize it from the range determined above.
-   unsigned int len = end - start + 1;
-   if (len == unFormated.length()) {
-      // Don't allocate a new string as the trimmed string has not changed.
-      return;
-   }
-
-   if (len == 0) {
-      unFormated.clear();
-      return;
-   }
-   unFormated = unFormated.substr(start, len);
-}
-
-bool CAHZUtility::IsEmptyOrWhiteSpace(std::string& unFormated) {
-
-   if (unFormated.length() == 0) return true;
-
-   for (int i = 0; i < unFormated.length(); i++) {
-      if (!isspace(unFormated[i])) return false;
-   }
-
-   return true;
 }

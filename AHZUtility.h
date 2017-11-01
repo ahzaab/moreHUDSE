@@ -57,7 +57,6 @@ private:
    static void GetMagicItemDescription(MagicItem * item, std::string& description);
    static void AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description);
    static void FormatDescription(std::string& unFormated, std::string& formatted);
-   static void CreateTrimmedString(unsigned int start, unsigned int end, std::string& unFormated);
 
    static string GetTargetName(TESObjectREFR *thisObject);
    static string GetArmorWeightClass(TESObjectREFR *theObject);
@@ -83,8 +82,6 @@ private:
    static SpellItem* GetBlessing(TESObjectREFR *thisObject);
    // const char * GetTargetName(TESObjectREFR *thisObject);
    static bool CanPickUp(UInt32 formType);
-   static void TrimHelper(std::string& unFormated);
-   static bool IsEmptyOrWhiteSpace(std::string& unFormated);
 };
 
 
