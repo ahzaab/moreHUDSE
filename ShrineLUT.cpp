@@ -2,12 +2,28 @@
 #include "skse64/GameObjects.h"
 #include "skse64/GameForms.h"
 #include "skse64/GameRTTI.h"
+#include "skse64/GameData.h"
 #include "ShrineLUT.h"
 using namespace std;
 
+CShrineLUT CShrineLUT::GetSingleton()
+{
+   static CShrineLUT s_shrineLUT;
+   if (!s_shrineLUT.s_dawnguardIndex)
+   {
+      DataHandler * dataHandler = DataHandler::GetSingleton();
+      BSFixedString b("Dawnguard.esm");
+      s_shrineLUT.s_dawnguardIndex = dataHandler->GetModIndex(b.data) << 24;
+
+      //DLC1ShrineofAuriel "Shrine of Auriel"[ACTI:0200C86B]  DLC1AltarAurielSpell "Blessing of Auriel"[SPEL:02011360]
+      s_shrineLUT.m_shrineLUT[0x0000C86B | s_shrineLUT.s_dawnguardIndex] = 0x02011360;
+   }
+
+   return s_shrineLUT;
+}
+
 CShrineLUT::CShrineLUT(void)
 {	
-
 	//ShrineofArkay "Shrine of Arkay"[ACTI:00071854]   AltarArkaySpell "Blessing of Arkay"[SPEL:000FB994]
 	//	ShrineOfZenithar "Shrine of Zenithar"[ACTI:000D987B] AltarZenitharSpell "Blessing of Zenithar"[SPEL:000FB99B]
 	//	ShrineofStendarr "Shrine of Stendarr"[ACTI:000D987D]  AltarStendarrSpell "Blessing of Stendarr"[SPEL:000FB999]
@@ -17,8 +33,9 @@ CShrineLUT::CShrineLUT(void)
 	//	ShrineofJulianos "Shrine of Julianos"[ACTI:000D9885] AltarJulianosSpell "Blessing of Julianos"[SPEL:000FB996]
 	//	ShrineofMara "Shrine of Mara"[ACTI:000D9887] AltarMaraSpell "Blessing of Mara"[SPEL:000FB998]
 	//	ShrineofTalos "Shrine of Talos"[ACTI:00100780] AltarTalosSpell "Blessing of Talos"[SPEL:000FB99A]
-
-
+   //ShrineOfNocturnal "Shrine of Nocturnal"[ACTI:0010E8B0]  AltarNocturnalSpell "Blessing of Nocturnal"[SPEL:0010E8AE]
+   
+   s_dawnguardIndex = 0;
 	m_shrineLUT[0x00071854] = 0x000FB994;
 	m_shrineLUT[0x000D987B] = 0x000FB99B;
 	m_shrineLUT[0x000D987D] = 0x000FB999;
@@ -28,7 +45,7 @@ CShrineLUT::CShrineLUT(void)
 	m_shrineLUT[0x000D9885] = 0x000FB996;
 	m_shrineLUT[0x000D9887] = 0x000FB998;
 	m_shrineLUT[0x00100780] = 0x000FB99A;
-
+   m_shrineLUT[0x0010E8B0] = 0x0010E8AE;
 }
 
 CShrineLUT::~CShrineLUT(void)

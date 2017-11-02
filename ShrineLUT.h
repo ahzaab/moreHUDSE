@@ -2,13 +2,14 @@
 class CShrineLUT
 {
 public:
-	CShrineLUT(void);
-	~CShrineLUT(void);
 
+   static CShrineLUT GetSingleton();
 	SpellItem *GetBlessing(UInt32 formID);
 
+   ~CShrineLUT(void);
 private:
-	std::map<UInt32,UInt32> m_shrineLUT;
-
+   CShrineLUT(void);
+   std::map<UInt32, UInt32> m_shrineLUT;
+   UInt32 s_dawnguardIndex;
 };
 
