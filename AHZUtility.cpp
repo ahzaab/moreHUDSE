@@ -1470,42 +1470,48 @@ void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std
    BSString bsDescription;
    string tempString = "";
 
-   UInt32 formType = 0x43534544;
-
-   // Books are special they only look at the CNAM description, never the normal description because that is the book text
    if (parent->GetFormType() == kFormType_Book)
    {
-      formType = 0x4D414E43;
-   }
-
-   CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, formType);
-   if (&bsDescription)
-   {
-      tempString.clear();
-      tempString.append(bsDescription.Get());
-      if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
+      CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 0x4D414E43);
+      if (&bsDescription)
       {
-         string formatted = "";
-         FormatDescription(tempString, formatted);
-         description.append(formatted);
-      }
-      else if (parent->GetFormType() != kFormType_Book)
-      {
-         BSString bsDescription2;
-         TESDescription * desc = DYNAMIC_CAST(parent, TESForm, TESDescription);
-         if (desc)
+         tempString.clear();
+         tempString.append(bsDescription.Get());
+         if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
          {
-            CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, formType);
+            string formatted = "";
+            FormatDescription(tempString, formatted);
+            description.append(formatted);
+         }
+      }
+   }
+   else
+   {
+      BSString bsDescription2;
+      TESDescription * desc = DYNAMIC_CAST(parent, TESForm, TESDescription);
+      if (desc)
+      {         
+         CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0x43534544);
+         tempString.clear();
+         if (&bsDescription2)
+            tempString.append(bsDescription2.Get());
+         if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
+         {
+            string formatted = "";
+            FormatDescription(tempString, formatted);
+            description.append(formatted);
+         }
+         else
+         {
+            CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0);
+            tempString.clear();
             if (&bsDescription2)
-            {
-               tempString.clear();
                tempString.append(bsDescription2.Get());
-               if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
-               {
-                  string formatted = "";
-                  FormatDescription(tempString, formatted);
-                  description.append(formatted);
-               }
+            if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
+            {
+               string formatted = "";
+               FormatDescription(tempString, formatted);
+               description.append(formatted);
             }
          }
       }

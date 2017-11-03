@@ -186,7 +186,7 @@ bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
    // populate info structure
    info->infoVersion =	PluginInfo::kInfoVersion;
    info->name =		"Ahzaab's moreHUD Plugin";
-   info->version =		306;
+   info->version =		308;
 
    // store plugin handle so we can identify ourselves later
    g_pluginHandle = skse->GetPluginHandle();
