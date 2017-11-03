@@ -335,7 +335,7 @@
     <ClCompile Include="FoodLUT.cpp" />
     <ClCompile Include="IngredientLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PluginProcessInfo.cpp" />
+    <ClCompile Include="ShrineLUT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h" />
@@ -348,8 +348,8 @@
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="FoodLUT.h" />
     <ClInclude Include="IngredientLUT.h" />
-    <ClInclude Include="PluginProcessInfo.h" />
     <ClInclude Include="resource2.h" />
+    <ClInclude Include="ShrineLUT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
