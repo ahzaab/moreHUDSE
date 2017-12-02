@@ -18,12 +18,13 @@
 #include "AHZUtility.h"
 
 
-//03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
-RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DA6D0);
+
+//HxD 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
+RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DA700);
 
 
-//8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
-RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x8927D0);
+//HxD 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
+RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00892800);
 
 
 
@@ -364,8 +365,9 @@ RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x8927D0);
 //	.text:00007FF691471734 sub_7FF691471320 endp
 //		 .text : 00007FF691471734
 
-//1C 91 00 00 00 48 8B 0D 2C 7F 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48
-RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x892BF0);
+//HxD 1C 91 00 00 00 48 8B 0D 2C 7F 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.16
+//HxD 1C 91 00 00 00 48 8B 0D FC 7E 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.23
+RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x00892C20);
 
 // Base Address = 7FF690BE0000
 //.text:00007FF691471740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -594,23 +596,6 @@ double CAHZUtility::GetActualDamage(AHZWeaponData *weaponData)
 
    return 0.0;
 }
-
-//const char * GetTargetName(TESObjectREFR *thisObject)
-//{
-//	PlayerCharacter* pPC = (*g_thePlayer);
-//
-//	if(pPC) 
-//	{
-//		const char * test2 = thisObject->extraData.GetDisplayName(thisObject->baseForm);
-//		InventoryEntryData objDesc(thisObject->baseForm, 0);
-//		objDesc.extendDataList = new tList<BaseExtraList>();
-//		objDesc.extendDataList->Insert(&thisObject->extraData);
-//		const char * test = CALL_MEMBER_FN(&objDesc, GenerateName)();
-//		delete objDesc.extendDataList;
-//		return test;
-//	}
-//	return NULL;
-//}
 
 double CAHZUtility::GetActualArmorRating(AHZArmorData* armorData)
 {	
