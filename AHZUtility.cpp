@@ -16,11 +16,17 @@
 #include "FoodLUT.h"
 #include "ShrineLUT.h"
 #include "AHZUtility.h"
-RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008D9220);
 
-//RelocAddr<_GetScaleFormDescription> GetScaleFormDescription(0x190820);
 
-RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
+//03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
+RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DA6D0);
+
+
+//8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
+RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x8927D0);
+
+
+
 // Base Address = 7FF690BE0000
 //text:00007FF691471320; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //	.text:00007FF691471320
@@ -358,8 +364,8 @@ RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x891320);
 //	.text:00007FF691471734 sub_7FF691471320 endp
 //		 .text : 00007FF691471734
 
-
-RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x891740);
+//1C 91 00 00 00 48 8B 0D 2C 7F 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48
+RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x892BF0);
 
 // Base Address = 7FF690BE0000
 //.text:00007FF691471740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =

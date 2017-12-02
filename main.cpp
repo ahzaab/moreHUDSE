@@ -186,7 +186,7 @@ bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
    // populate info structure
    info->infoVersion =	PluginInfo::kInfoVersion;
    info->name =		"Ahzaab's moreHUD Plugin";
-   info->version =		308;
+   info->version =		309;
 
    // store plugin handle so we can identify ourselves later
    g_pluginHandle = skse->GetPluginHandle();
@@ -197,7 +197,7 @@ bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
 
       return false;
    }
-   else if(skse->runtimeVersion != RUNTIME_VERSION_1_5_3)
+   else if(skse->runtimeVersion != RUNTIME_VERSION_1_5_16)
    {
       _ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 

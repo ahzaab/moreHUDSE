@@ -451,6 +451,9 @@
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
     <ClCompile Include="ShrineLUT.cpp" />
+    <ClCompile Include="..\skse64\InternalTasks.cpp">
+      <Filter>skse64\SKSE64 Dependencies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
