@@ -30,6 +30,9 @@
 #include "skse64/GameEvents.h"
 #include "skse64/GameMenus.h"
 #include <shlobj.h>
+#include <stdio.h>  
+#include <stdlib.h> 
+#include "AHZConsole.h"
 using namespace std;
 
 
@@ -155,6 +158,29 @@ public:
    virtual void	Invoke(Args * args)
    {
       CAHZUtility::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
+
+     AHZLOG("%i\n", CAHZPlayerInfo::GetTargetRef()->baseForm->formID);
+     // AllocConsole();
+     //    //MessageBox(NULL, L"The console window was not created", NULL, MB_ICONEXCLAMATION);
+
+     // FILE* fp;
+
+     // freopen_s(&fp, "CONOUT$", "w", stdout);
+
+     // printf("Hello console on\n");
+
+     // std::cout.clear();
+
+     // //std::cout << "Cout line one." << std::endl;
+
+     // //cout << "Cout line two." << std::endl;
+
+     //// MessageBox(NULL, (L"Pause to see console output."), (L"Pause Here"), MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
+
+     // //fclose(fp);
+
+     // //if (!FreeConsole())
+     //   // MessageBox(NULL, L"Failed to free the console!", NULL, MB_ICONEXCLAMATION);
    }
 };
 

@@ -454,6 +454,7 @@
     <ClCompile Include="..\skse64\InternalTasks.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
+    <ClCompile Include="AHZConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -474,6 +475,7 @@
     <ClInclude Include="IngredientLUT.h" />
     <ClInclude Include="resource2.h" />
     <ClInclude Include="ShrineLUT.h" />
+    <ClInclude Include="AHZConsole.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
