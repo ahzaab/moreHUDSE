@@ -23,6 +23,7 @@
     <ProjectGuid>{547171CB-F934-40B9-B788-3C520FE66363}</ProjectGuid>
     <RootNamespace>plugin_example</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -333,12 +334,9 @@
     <ClCompile Include="AHZPlayerInfo.cpp" />
     <ClCompile Include="AHZScaleformHook.cpp" />
     <ClCompile Include="AHZUtility.cpp" />
-    <ClCompile Include="AHZVM.cpp" />
+    <ClCompile Include="AHZACTIHelper.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
-    <ClCompile Include="FoodLUT.cpp" />
-    <ClCompile Include="IngredientLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ShrineLUT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h" />
@@ -349,12 +347,9 @@
     <ClInclude Include="AHZPlayerInfo.h" />
     <ClInclude Include="AHZScaleformHook.h" />
     <ClInclude Include="AHZUtility.h" />
-    <ClInclude Include="AHZVM.h" />
+    <ClInclude Include="AHZACTIHelper.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
-    <ClInclude Include="FoodLUT.h" />
-    <ClInclude Include="IngredientLUT.h" />
     <ClInclude Include="resource2.h" />
-    <ClInclude Include="ShrineLUT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

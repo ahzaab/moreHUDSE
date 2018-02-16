@@ -1,5 +1,5 @@
 #pragma once
-#include <wchar.h> 
+#include <wchar.h>
 #include <stdlib.h>
 #include <list>
 #include <algorithm>
@@ -16,7 +16,6 @@
 #include "AHZArmorInfo.h"
 #include "AHZPlayerInfo.h"
 #include "AHZWeaponInfo.h"
-#include "IngredientLUT.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -36,52 +35,51 @@ extern RelocAddr<_IsSurvivalMode> IsSurvivalMode;
 class CAHZUtility
 {
 public:
-   static void ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static void ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static void ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static void ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static bool ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static void ProcessPlayerData(GFxFunctionHandler::Args *args);
-   static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
+	static void ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static void ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static void ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static void ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static bool ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static void ProcessPlayerData(GFxFunctionHandler::Args *args);
+	static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
 
 private:
-   static void ReplaceStringInPlace(std::string& subject, const std::string& search,
-      const std::string& replace);
+	static void ReplaceStringInPlace(std::string& subject, const std::string& search,
+		const std::string& replace);
 
-   static void RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str);
-   static void RegisterNumber(GFxValue * dst, const char * name, double value);
-   static void SetResultString(GFxFunctionHandler::Args *args, const char * str);
-   static void GetMagicItemDescription(MagicItem * item, std::string& description);
-   static void AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description);
-   static void FormatDescription(std::string& unFormated, std::string& formatted);
+	static void RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str);
+	static void RegisterNumber(GFxValue * dst, const char * name, double value);
+	static void SetResultString(GFxFunctionHandler::Args *args, const char * str);
+	static void GetMagicItemDescription(MagicItem * item, std::string& description);
+	static void AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description);
+	static void FormatDescription(std::string& unFormated, std::string& formatted);
 
-   static string GetTargetName(TESObjectREFR *thisObject);
-   static string GetArmorWeightClass(TESObjectREFR *theObject);
-   static string GetEffectsDescription(TESObjectREFR *theObject);
-   static string GetBookSkill(TESObjectREFR *theObject);
-   static string GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD);
-   static float GetBaseDamage(TESAmmo* pthisAmmo);
-   static double GetActualDamage(AHZWeaponData *weaponData);
-   static double GetActualArmorRating(AHZArmorData* armorData);
-   static double GetTotalActualArmorRating(void);
-   static double GetArmorRatingDiff(TESObjectREFR *targetArmor);
-   static double GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo);
-   static double GetTotalActualWeaponDamage(void);
-   static void BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args);
-   static void BuildInventoryObject(TESObjectREFR* targetObject, TESForm* form, GFxFunctionHandler::Args *args);
+	static string GetTargetName(TESForm *thisObject);
+	static string GetArmorWeightClass(TESObjectREFR *theObject);
+	static string GetEffectsDescription(TESObjectREFR *theObject);
+	static string GetBookSkill(TESObjectREFR *theObject);
+	static string GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD);
+	static float GetBaseDamage(TESAmmo* pthisAmmo);
+	static double GetActualDamage(AHZWeaponData *weaponData);
+	static double GetActualArmorRating(AHZArmorData* armorData);
+	static double GetTotalActualArmorRating(void);
+	static double GetArmorRatingDiff(TESObjectREFR *targetArmor);
+	static double GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo);
+	static double GetTotalActualWeaponDamage(void);
+	static void BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args);
+	static void BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *args);
 
-   static bool IsTwoHanded(TESObjectWEAP * thisWeapon);
-   static bool IsOneHanded(TESObjectWEAP * thisWeapon);
-   static  bool IsBow(TESObjectWEAP * thisWeapon);
-   static bool IsCrossBow(TESObjectWEAP * thisWeapon);
-   static bool isBolt(TESAmmo *thisAmmo);
-   static double mRound(double d);
-   static IngredientItem* GetIngredient(TESForm *initialTarget);
-   static AlchemyItem* GetAlchemyItem(TESForm *initialTarget);
-   static SpellItem* GetSpellItem(TESForm *initialTarget);
-   // const char * GetTargetName(TESObjectREFR *thisObject);
-   static bool CanPickUp(UInt32 formType);
+	static bool IsTwoHanded(TESObjectWEAP * thisWeapon);
+	static bool IsOneHanded(TESObjectWEAP * thisWeapon);
+	static  bool IsBow(TESObjectWEAP * thisWeapon);
+	static bool IsCrossBow(TESObjectWEAP * thisWeapon);
+	static bool isBolt(TESAmmo *thisAmmo);
+	static double mRound(double d);
+	static IngredientItem* GetIngredient(TESForm *initialTarget);
+	static AlchemyItem* GetAlchemyItem(TESForm *initialTarget);
+	static SpellItem* GetSpellItem(TESForm *initialTarget);
+
+	// const char * GetTargetName(TESObjectREFR *thisObject);
+	static bool CanPickUp(UInt32 formType);
 };
-
-
