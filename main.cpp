@@ -23,6 +23,7 @@
 #include "skse64/PapyrusUtility.h"
 #include "AHZPlayerInfo.h"
 #include "AHZUtility.h"
+#include "AHZVM.h"
 #include "AHZScaleformHook.h"
 #include "../common/IErrors.h"
 #include "skse64/PapyrusIngredient.h"
@@ -35,7 +36,6 @@
 #include "AHZConsole.h"
 using namespace std;
 
-
 IDebugLog	gLog;
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
@@ -44,6 +44,9 @@ SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
 
+// Just initialize to start routing to the console window
+CAHZDebugConsole theDebugConsole;
+
 /**** scaleform functions ****/
 
 class SKSEScaleform_InstallHooks : public GFxFunctionHandler
@@ -51,15 +54,6 @@ class SKSEScaleform_InstallHooks : public GFxFunctionHandler
 public:
    virtual void	Invoke(Args * args)
    {
-   }
-};
-
-class SKSEScaleform_GetIngredientData : public GFxFunctionHandler
-{
-public:
-   virtual void	Invoke(Args * args)
-   {
-      CAHZUtility::ProcessIngredientData(CAHZPlayerInfo::GetTargetRef(), args);
    }
 };
 
@@ -87,15 +81,6 @@ public:
    virtual void	Invoke(Args * args)
    {		
       args->result->SetBool(CAHZPlayerInfo::GetIsInCombat());
-   }
-};
-
-class SKSEScaleform_GetTargetInventoryCount : public GFxFunctionHandler
-{
-public:
-   virtual void	Invoke(Args * args)
-   {
-      CAHZUtility::ProcessInventoryCount(CAHZPlayerInfo::GetTargetRef(), args);
    }
 };
 
@@ -158,41 +143,16 @@ public:
    virtual void	Invoke(Args * args)
    {
       CAHZUtility::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
-
-     AHZLOG("%i\n", CAHZPlayerInfo::GetTargetRef()->baseForm->formID);
-     // AllocConsole();
-     //    //MessageBox(NULL, L"The console window was not created", NULL, MB_ICONEXCLAMATION);
-
-     // FILE* fp;
-
-     // freopen_s(&fp, "CONOUT$", "w", stdout);
-
-     // printf("Hello console on\n");
-
-     // std::cout.clear();
-
-     // //std::cout << "Cout line one." << std::endl;
-
-     // //cout << "Cout line two." << std::endl;
-
-     //// MessageBox(NULL, (L"Pause to see console output."), (L"Pause Here"), MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
-
-     // //fclose(fp);
-
-     // //if (!FreeConsole())
-     //   // MessageBox(NULL, L"Failed to free the console!", NULL, MB_ICONEXCLAMATION);
    }
 };
 
 bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 {
    RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
-   RegisterFunction <SKSEScaleform_GetIngredientData>(root, view, "GetIngredientData");
    RegisterFunction <SKSEScaleform_GetTargetObjectData>(root, view, "GetTargetObjectData");
    RegisterFunction <SKSEScaleform_GetPlayerData>(root, view, "GetPlayerData");
    RegisterFunction <SKSEScaleform_GetIsValidTarget>(root, view, "GetIsValidTarget");
    RegisterFunction <SKSEScaleform_GetIsPlayerInCombat>(root, view, "GetIsPlayerInCombat");
-   RegisterFunction <SKSEScaleform_GetTargetInventoryCount>(root, view, "GetTargetInventoryCount");
    RegisterFunction <SKSEScaleform_GetTargetEffects>(root, view, "GetTargetEffects");
    RegisterFunction <SKSEScaleform_GetIsBookAndWasRead>(root, view, "GetIsBookAndWasRead");
    RegisterFunction <SKSEScaleform_GetArmorWeightClassString>(root, view, "GetArmorWeightClassString");

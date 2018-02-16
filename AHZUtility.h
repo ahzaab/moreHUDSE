@@ -37,13 +37,11 @@ class CAHZUtility
 {
 public:
    static void ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-   static void ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static void ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static void ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static void ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static bool ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static void ProcessPlayerData(GFxFunctionHandler::Args *args);
-   static void ProcessIngredientData(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
 
@@ -70,6 +68,8 @@ private:
    static double GetArmorRatingDiff(TESObjectREFR *targetArmor);
    static double GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo);
    static double GetTotalActualWeaponDamage(void);
+   static void BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args);
+   static void BuildInventoryObject(TESObjectREFR* targetObject, TESForm* form, GFxFunctionHandler::Args *args);
 
    static bool IsTwoHanded(TESObjectWEAP * thisWeapon);
    static bool IsOneHanded(TESObjectWEAP * thisWeapon);
@@ -77,9 +77,9 @@ private:
    static bool IsCrossBow(TESObjectWEAP * thisWeapon);
    static bool isBolt(TESAmmo *thisAmmo);
    static double mRound(double d);
-   static IngredientItem* GetIngredient(TESObjectREFR *thisObject);
-   static AlchemyItem* GetFood(TESObjectREFR *thisObject);
-   static SpellItem* GetBlessing(TESObjectREFR *thisObject);
+   static IngredientItem* GetIngredient(TESForm *initialTarget);
+   static AlchemyItem* GetAlchemyItem(TESForm *initialTarget);
+   static SpellItem* GetSpellItem(TESForm *initialTarget);
    // const char * GetTargetName(TESObjectREFR *thisObject);
    static bool CanPickUp(UInt32 formType);
 };

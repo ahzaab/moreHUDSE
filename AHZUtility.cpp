@@ -16,7 +16,7 @@
 #include "FoodLUT.h"
 #include "ShrineLUT.h"
 #include "AHZUtility.h"
-
+#include "AHZVM.h"
 
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
@@ -1052,17 +1052,17 @@ bool CAHZUtility::IsCrossBow(TESObjectWEAP * thisWeapon)
          thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 }
 
-IngredientItem* CAHZUtility::GetIngredient(TESObjectREFR *thisObject)
+IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
 {
    if (!thisObject)
       return NULL;
    
-   if (thisObject->baseForm->GetFormType() == kFormType_Ingredient)
-      return DYNAMIC_CAST(thisObject->baseForm, TESForm, IngredientItem);
+   if (thisObject->GetFormType() == kFormType_Ingredient)
+      return DYNAMIC_CAST(thisObject, TESForm, IngredientItem);
 
-   if (thisObject->baseForm->GetFormType() == kFormType_Flora)
+   if (thisObject->GetFormType() == kFormType_Flora)
    {
-      TESFlora *flora = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESFlora);
+      TESFlora *flora = DYNAMIC_CAST(thisObject, TESForm, TESFlora);
       if (flora)
       {
          TESForm *form = (TESForm *)flora->produce.produce;
@@ -1089,9 +1089,9 @@ IngredientItem* CAHZUtility::GetIngredient(TESObjectREFR *thisObject)
          }
       }
    }
-   else if (thisObject->baseForm->GetFormType() == kFormType_Tree)
+   else if (thisObject->GetFormType() == kFormType_Tree)
    {
-      TESObjectTREE *tree = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectTREE);
+      TESObjectTREE *tree = DYNAMIC_CAST(thisObject, TESForm, TESObjectTREE);
       if (tree)
       {
          TESForm *form = (TESForm *)tree->produce.produce;//DYNAMIC_CAST(tree->produce.produce, IngredientItem, TESForm);
@@ -1118,40 +1118,30 @@ IngredientItem* CAHZUtility::GetIngredient(TESObjectREFR *thisObject)
          }
       }
    }
-   else if (thisObject->baseForm->GetFormType() == kFormType_Activator)
-   {
-      CIngredientLUT lut;
-      return lut.GetIngredient(thisObject->baseForm->formID);
-   }
 
    return NULL;
 }
 
-SpellItem* CAHZUtility::GetBlessing(TESObjectREFR *thisObject)
+SpellItem* CAHZUtility::GetSpellItem(TESForm *thisObject)
 {
    if (!thisObject)
       return NULL;
 
-   if (thisObject->baseForm->GetFormType() == kFormType_Activator)
-   {
-      return CShrineLUT::GetSingleton().GetBlessing(thisObject->baseForm->formID);
-   }
-
-   return NULL;
+   return DYNAMIC_CAST(thisObject, TESForm, SpellItem);
 }
 
 
-AlchemyItem* CAHZUtility::GetFood(TESObjectREFR *thisObject)
+AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
 {
    if (!thisObject)
       return NULL;
    
-   if (thisObject->baseForm->GetFormType() == kFormType_Potion)
-      return DYNAMIC_CAST(thisObject->baseForm, TESForm, AlchemyItem);
+   if (thisObject->GetFormType() == kFormType_Potion)
+      return DYNAMIC_CAST(thisObject, TESForm, AlchemyItem);
 
-   if (thisObject->baseForm->GetFormType() == kFormType_Flora)
+   if (thisObject->GetFormType() == kFormType_Flora)
    {
-      TESFlora *flora = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESFlora);
+      TESFlora *flora = DYNAMIC_CAST(thisObject, TESForm, TESFlora);
       if (flora)
       {
          TESForm *form = (TESForm *)flora->produce.produce;
@@ -1178,9 +1168,9 @@ AlchemyItem* CAHZUtility::GetFood(TESObjectREFR *thisObject)
          }
       }
    }
-   else if (thisObject->baseForm->GetFormType() == kFormType_Tree)
+   else if (thisObject->GetFormType() == kFormType_Tree)
    {
-      TESObjectTREE *tree = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectTREE);
+      TESObjectTREE *tree = DYNAMIC_CAST(thisObject, TESForm, TESObjectTREE);
       if (tree)
       {
          TESForm *form = (TESForm *)tree->produce.produce;
@@ -1207,11 +1197,6 @@ AlchemyItem* CAHZUtility::GetFood(TESObjectREFR *thisObject)
          }
       }
    }
-   else if (thisObject->baseForm->GetFormType() == kFormType_Activator)
-   {
-      CFoodLUT lut;
-      return lut.GetFood(thisObject->baseForm->formID);
-   }
 
    return NULL;
 }
@@ -1229,7 +1214,8 @@ bool CAHZUtility::CanPickUp(UInt32 formType)
          formType == kFormType_ScrollItem ||
          formType == kFormType_LeveledItem ||
          formType == kFormType_Outfit ||
-         formType == kFormType_Key); 
+         formType == kFormType_Key || 
+         formType == kFormType_Activator);  //Some but not all
 }
 
 
@@ -1667,57 +1653,132 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
    TESObjectREFR * pTargetReference = targetObject;
+   TESForm *initialTarget = NULL;
+   AlchemyItem *alchemyItem = NULL;
+   SpellItem *spellItem = NULL;
+   IngredientItem *ingredientItem = NULL;
+   string name;
+
+   bool calculateInvenotry = args->args[1].GetBool();
+
+   if (!calculateInvenotry)
+   {
+      args->args[0].DeleteMember("inventoryObj");
+   }
 
    // No valid reference
    if (!pTargetReference)
    {
       args->args[0].DeleteMember("effectsObj");
+      args->args[0].DeleteMember("ingredientObj");
+      args->args[0].DeleteMember("inventoryObj");
       return;
    }
 
-   // See if its harvestable food
-   AlchemyItem *food = GetFood(pTargetReference);
-   SpellItem * blessing = NULL;
-   // Used to store the name
-   string name;
-
-   // Check if it is a shrine blessing
-   if (!food)
-   {
-      blessing = GetBlessing(pTargetReference);
-   }
-
-   // If the target is not valid or it can't be picked up by the player
-   if (!blessing &&
-      ((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
-      (!food)))
+   // If cannot pickup or process
+   if (!CanPickUp(pTargetReference->baseForm->GetFormType()))
    {
       args->args[0].DeleteMember("effectsObj");
+      args->args[0].DeleteMember("ingredientObj");
+      args->args[0].DeleteMember("inventoryObj");
       return;
    }
 
-   // If this is harvestable food or normal food get the magic item description
-   if (food)
+   // If the form is an activator, then get the variable from the attached script
+   if (pTargetReference->baseForm->formType == kFormType_Activator)
+   {
+      initialTarget = CAHZTargetFinder::Instance().GetAttachedForm(pTargetReference);
+   }
+
+   // See if its an ingredient.  Note they are formated differently with known effects;
+   if ((ingredientItem = GetIngredient(initialTarget)) != NULL)
+   {
+      args->args[0].DeleteMember("effectsObj");
+      BuildIngredientObject(ingredientItem, args);
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, ingredientItem, args);
+      }
+
+      return;
+   }
+   else if ((ingredientItem = GetIngredient(pTargetReference->baseForm)) != NULL)
+   {
+      args->args[0].DeleteMember("effectsObj");
+      BuildIngredientObject(ingredientItem, args);
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, NULL, args);
+      }
+      return;
+   }
+   // See if its harvestable food
+   else if ((alchemyItem = GetAlchemyItem(initialTarget)) != NULL)
    {
       string effectDescription;
-      GetMagicItemDescription(food, effectDescription);
+      GetMagicItemDescription(alchemyItem, effectDescription);
       name.append(effectDescription);
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, alchemyItem, args);
+      }
    }
-   else if (blessing)
+   else if ((alchemyItem = GetAlchemyItem(pTargetReference->baseForm)) != NULL)
    {
-      AppendDescription(&(blessing->description), blessing, name);
+      string effectDescription;
+      GetMagicItemDescription(alchemyItem, effectDescription);
+      name.append(effectDescription);
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, NULL, args);
+      }
+   }
+   // Spell items like blessings
+   else if ((spellItem = GetSpellItem(initialTarget)) != NULL)
+   {
+      AppendDescription(&(spellItem->description), spellItem, name);
 
       if (!name.length())
       {
          string effectDescription;
-         GetMagicItemDescription(blessing, effectDescription);
+         GetMagicItemDescription(spellItem, effectDescription);
          name.append(effectDescription);
       }
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, spellItem, args);
+      }
    }
-   else
+   else if ((spellItem = GetSpellItem(pTargetReference->baseForm)) != NULL)
+   {
+      AppendDescription(&(spellItem->description), spellItem, name);
+
+      if (!name.length())
+      {
+         string effectDescription;
+         GetMagicItemDescription(spellItem, effectDescription);
+         name.append(effectDescription);
+      }
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, NULL, args);
+      }
+   }
+   else //For all effects from books, potions, weapon enchantments, etc.
    {
       // Get the effects description if it exists for this object
       name = GetEffectsDescription(pTargetReference);
+
+      if (calculateInvenotry)
+      {
+         BuildInventoryObject(pTargetReference, NULL, args);
+      }
    }
 
    // If the name contains a string
@@ -1861,10 +1922,8 @@ void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHa
    args->args[0].SetMember("targetObj", &obj);
 };
 
-void CAHZUtility::ProcessIngredientData(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args)
 {
-   TESObjectREFR * pTargetReference = targetObject;
-   IngredientItem * ingredient = GetIngredient(pTargetReference);
    ofstream myfile;
 
    // If no ingredient, then we are done here
@@ -1903,65 +1962,18 @@ void CAHZUtility::ProcessIngredientData(TESObjectREFR* targetObject, GFxFunction
    args->args[0].SetMember("ingredientObj", &obj2);
 };
 
-void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZUtility::BuildInventoryObject(TESObjectREFR* targetObject, TESForm* form, GFxFunctionHandler::Args *args)
 {
-   TESObjectREFR * pTargetReference = targetObject;
-
-   // If the target is not valid or it can't be picked up by the player
-   if (!pTargetReference)
-   {
-      args->args[0].DeleteMember("dataObj");
-      return;
-   }
-
-   IngredientItem * ingredient = GetIngredient(pTargetReference);
-   AlchemyItem *food = NULL;
-   SpellItem*blessing = NULL;
-   // If not an ingredient, then see if its food
-   if (!ingredient)
-      food = GetFood(pTargetReference);
-
-   if (!food)
-   {
-      blessing = GetBlessing(pTargetReference);
-   }
-
-   // Blessings from shrines cannot exist in the inventory
-   if (blessing)
-   {
-      args->args[0].DeleteMember("dataObj");
-      return;
-   }
-
-   // If the target is not valid or it can't be picked up by the player
-   if (((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
-      (!ingredient) &&
-         (!food)))
-   {
-      args->args[0].DeleteMember("dataObj");
-      return;
-   }
-
    // Used to store the name
    string name;
    // Used to store the count of the item
    UInt32 itemCount;
 
-   if (ingredient)
+   if (form)
    {
       // Get the number of this in the inventory
-      itemCount = CAHZPlayerInfo::GetItemAmount(ingredient->formID);
-      TESFullName* pFullName = DYNAMIC_CAST(ingredient, TESForm, TESFullName);
-      if (pFullName)
-      {
-         name.append(pFullName->name.data);
-      }
-   }
-   else if (food)
-   {
-      // Get the number of this in the inventory
-      itemCount = CAHZPlayerInfo::GetItemAmount(food->formID);
-      TESFullName* pFullName = DYNAMIC_CAST(food, TESForm, TESFullName);
+      itemCount = CAHZPlayerInfo::GetItemAmount(form->formID);
+      TESFullName* pFullName = DYNAMIC_CAST(form, TESForm, TESFullName);
       if (pFullName)
       {
          name.append(pFullName->name.data);
@@ -1970,8 +1982,8 @@ void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunction
    else
    {
       // Get the number of this in the inventory
-      itemCount = CAHZPlayerInfo::GetItemAmount(pTargetReference->baseForm->formID);
-      name = CAHZUtility::GetTargetName(pTargetReference);
+      itemCount = CAHZPlayerInfo::GetItemAmount(targetObject->baseForm->formID);
+      name = CAHZUtility::GetTargetName(targetObject);
    }
 
    // If the name contains a string
@@ -1984,11 +1996,11 @@ void CAHZUtility::ProcessInventoryCount(TESObjectREFR* targetObject, GFxFunction
       RegisterNumber(&obj, "inventoryCount", itemCount);
 
       // Add the object to the scaleform function
-      args->args[0].SetMember("dataObj", &obj);
+      args->args[0].SetMember("inventoryObj", &obj);
    }
    else
    {
-      args->args[0].DeleteMember("dataObj");
+      args->args[0].DeleteMember("inventoryObj");
    }
 };
 
@@ -2021,27 +2033,8 @@ bool CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHan
       return false;
    }
 
-   IngredientItem * ingredient = GetIngredient(pTargetReference);
-   AlchemyItem * food = NULL;
-   SpellItem *blessing = NULL;
-
-   // If not an ingredient, then see if its food
-   if (!ingredient)
-   {
-      food = GetFood(pTargetReference);
-   }
-
-   // See if it is a shrine, if its not food
-   if (!food)
-   {
-      blessing = GetBlessing(pTargetReference);
-   }
-
    // If the target is not valid or it can't be picked up by the player
-   if (!blessing && 
-      ((!CanPickUp(pTargetReference->baseForm->GetFormType())) &&
-      (!ingredient) &&
-         (!food)))
+   if (!CanPickUp(pTargetReference->baseForm->GetFormType()))
    {
       if (args)
       {

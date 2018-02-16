@@ -333,6 +333,7 @@
     <ClCompile Include="AHZPlayerInfo.cpp" />
     <ClCompile Include="AHZScaleformHook.cpp" />
     <ClCompile Include="AHZUtility.cpp" />
+    <ClCompile Include="AHZVM.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
     <ClCompile Include="FoodLUT.cpp" />
     <ClCompile Include="IngredientLUT.cpp" />
@@ -348,6 +349,7 @@
     <ClInclude Include="AHZPlayerInfo.h" />
     <ClInclude Include="AHZScaleformHook.h" />
     <ClInclude Include="AHZUtility.h" />
+    <ClInclude Include="AHZVM.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="FoodLUT.h" />
     <ClInclude Include="IngredientLUT.h" />
