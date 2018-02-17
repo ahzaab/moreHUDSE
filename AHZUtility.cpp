@@ -776,7 +776,7 @@ double CAHZUtility::GetTotalActualWeaponDamage(void)
 
 bool CAHZUtility::isBolt(TESAmmo *thisAmmo)
 {
-	return (thisAmmo->settings.flags >= 0 && thisAmmo->settings.flags <= 3);
+	return (thisAmmo->isBolt());
 }
 
 double CAHZUtility::GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo)
@@ -793,6 +793,8 @@ double CAHZUtility::GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo)
 
 	targetWeapon = CAHZWeaponInfo::GetWeaponInfo(targetWeaponOrAmmo);
 	equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
+
+   //DumpClass(targetWeapon.ammo, 256);
 
 	// Must be a weapon or armor targeted
 	if (targetWeapon.weapon)
@@ -1051,6 +1053,12 @@ IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
 	if (!thisObject)
 		return NULL;
 
+   TESObjectREFR*reference = AHZGetReference(thisObject);
+   if (reference)
+   {
+      thisObject = reference->baseForm;
+   }
+
 	if (thisObject->GetFormType() == kFormType_Ingredient)
 		return DYNAMIC_CAST(thisObject, TESForm, IngredientItem);
 
@@ -1083,6 +1091,21 @@ IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
 					}
 				}
 			}
+         else if (form->formType == kFormType_List)
+         {
+            BGSListForm *lvli = DYNAMIC_CAST(form, TESForm, BGSListForm);
+
+            // Get the first form and see if it is an ingredient
+            if (lvli->forms.count > 0)
+            {
+               TESForm *itemform = (TESForm *)lvli->forms.entries[0];
+               if (itemform)
+               {
+                  IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+                  return ingredient;
+               }
+            }
+         }
 		}
 	}
 	else if (thisObject->GetFormType() == kFormType_Tree)
@@ -1114,6 +1137,21 @@ IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
 					}
 				}
 			}
+         else if (form->formType == kFormType_List)
+         {
+            BGSListForm *lvli = DYNAMIC_CAST(form, TESForm, BGSListForm);
+
+            // Get the first form and see if it is an ingredient
+            if (lvli->forms.count > 0)
+            {
+               TESForm *itemform = (TESForm *)lvli->forms.entries[0];
+               if (itemform)
+               {
+                  IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+                  return ingredient;
+               }
+            }
+         }
 		}
 	}
 
@@ -1125,6 +1163,12 @@ SpellItem* CAHZUtility::GetSpellItem(TESForm *thisObject)
 	if (!thisObject)
 		return NULL;
 
+   TESObjectREFR*reference = AHZGetReference(thisObject);
+   if (reference)
+   {
+      thisObject = reference->baseForm;
+   }
+
 	return DYNAMIC_CAST(thisObject, TESForm, SpellItem);
 }
 
@@ -1132,6 +1176,12 @@ AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
 {
 	if (!thisObject)
 		return NULL;
+
+   TESObjectREFR*reference = AHZGetReference(thisObject);
+   if (reference)
+   {
+      thisObject = reference->baseForm;
+   }
 
 	if (thisObject->GetFormType() == kFormType_Potion)
 		return DYNAMIC_CAST(thisObject, TESForm, AlchemyItem);
@@ -1165,6 +1215,21 @@ AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
 					}
 				}
 			}
+         else if (form->formType == kFormType_List)
+         {
+            BGSListForm *lvli = DYNAMIC_CAST(form, TESForm, BGSListForm);
+
+            // Get the first form and see if it is an ingredient
+            if (lvli->forms.count > 0)
+            {
+               TESForm *itemform = (TESForm *)lvli->forms.entries[0];
+               if (itemform)
+               {
+                  AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
+                  return alchmyItem;
+               }
+            }
+         }
 		}
 	}
 	else if (thisObject->GetFormType() == kFormType_Tree)
@@ -1196,6 +1261,21 @@ AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
 					}
 				}
 			}
+         else if (form->formType == kFormType_List)
+         {
+            BGSListForm *lvli = DYNAMIC_CAST(form, TESForm, BGSListForm);
+
+            // Get the first form and see if it is an ingredient
+            if (lvli->forms.count > 0)
+            {
+               TESForm *itemform = (TESForm *)lvli->forms.entries[0];
+               if (itemform)
+               {
+                  AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
+                  return alchmyItem;
+               }
+            }
+         }
 		}
 	}
 
@@ -1213,7 +1293,6 @@ bool CAHZUtility::CanPickUp(UInt32 formType)
 		formType == kFormType_Book ||
 		formType == kFormType_Ammo ||
 		formType == kFormType_ScrollItem ||
-		formType == kFormType_LeveledItem ||
 		formType == kFormType_Outfit ||
 		formType == kFormType_Key);
 }
@@ -1514,6 +1593,7 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 	string  desc;
 	string effectsString;
 	MagicItem * magicItem = NULL;
+
 	if (!theObject)
 		return desc;
 
@@ -1666,6 +1746,11 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 	IngredientItem *ingredientItem = NULL;
 	string name;
 
+   if (!args)
+   {
+      return;
+   }
+
 	bool calculateInvenotry = args->args[1].GetBool();
 
 	if (!calculateInvenotry)
@@ -1758,6 +1843,11 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 
 void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
+   if (!args)
+   {
+      return;
+   }
+
 	TESObjectREFR * pTargetReference = targetObject;
 	static string weightClass;
 
@@ -1776,6 +1866,11 @@ void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHand
 
 void CAHZUtility::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
+   if (!args)
+   {
+      return;
+   }
+
 	TESObjectREFR * pTargetReference = targetObject;
 	static string valueToWeight;
 
@@ -1833,8 +1928,12 @@ void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHa
 	float totalArmorOrWeapon = 0.0;
 	float difference = 0.0;
 
-	// If the target is not valid or it can't be picked up by the player
-	if (!CAHZUtility::ProcessValidTarget(targetObject, NULL))
+   if (!args)
+   {
+      return;
+   }
+
+	if (!targetObject)
 	{
 		args->args[0].DeleteMember("targetObj");
 		return;
@@ -1882,7 +1981,10 @@ void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHa
 
 void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args)
 {
-	ofstream myfile;
+   if (!args)
+   {
+      return;
+   }
 
 	// If no ingredient, then we are done here
 	if (!ingredient)
@@ -1904,9 +2006,7 @@ void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionH
 				TESFullName* pFullName = DYNAMIC_CAST(pEI->mgef, TESForm, TESFullName);
 				if (pFullName)
 				{
-					myfile << pFullName->name.data << endl;
 					strings[i].append(pFullName->name.data);
-					myfile << strings[i].c_str() << endl;
 				}
 			}
 		}
@@ -1922,6 +2022,11 @@ void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionH
 
 void CAHZUtility::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *args)
 {
+   if (!args)
+   {
+      return;
+   }
+
 	// Used to store the name
 	string name;
 
@@ -1979,49 +2084,78 @@ void CAHZUtility::RegisterNumber(GFxValue * dst, const char * name, double value
 	dst->SetMember(name, &fxValue);
 };
 
-bool CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZUtility::RegisterBoolean(GFxValue * dst, const char * name, bool value)
+{
+   GFxValue	fxValue;
+   fxValue.SetBool(value);
+   dst->SetMember(name, &fxValue);
+};
+
+void CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
 
+   if (!args)
+   {
+      return;
+   }
+
 	if (!pTargetReference)
 	{
-		if (args)
-		{
-			// return false, indicating that the target object is not valid for acquiring data
-			args->result->SetBool(false);
-		}
-		return false;
+      // return false, indicating that the target object is not valid for acquiring data
+		args->result->SetBool(false);
+      args->args[0].DeleteMember("dataObj");
 	}
+
+   bool canCarry = false;
 
 	TESForm *targetForm = AHZGetForm(pTargetReference);
-
+   TESForm *spellItem = NULL;
 	// If the target is not valid or it can't be picked up by the player
-	if ((CanPickUp(pTargetReference->baseForm->GetFormType()) ||
-		(pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)) ||
-		GetIngredient(targetForm) ||
-		GetAlchemyItem(targetForm) ||
-		GetSpellItem(targetForm))
-	{
-		if (args)
-		{
-			// return false, indicating that the target object is not valid for acquiring data
-			args->result->SetBool(true);
-		}
-		return false;
-	}
+   if ((canCarry = (GetIngredient(targetForm) != NULL)) ||
+      (canCarry = (GetAlchemyItem(targetForm) != NULL)) || 
+      (canCarry = CanPickUp(pTargetReference->baseForm->GetFormType()) ||
+      (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)) ||
+      ((spellItem = GetSpellItem(targetForm)) != NULL))
+   {
+      if (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm && !CanPickUp(targetForm->formType))
+      {
+         canCarry = false;
+      }
+
+      if (spellItem)
+      {
+         canCarry = false;
+      }
+
+      GFxValue obj;
+      args->movie->CreateObject(&obj);
+
+      RegisterBoolean(&obj, "canCarry", canCarry);
+
+      // Add the object to the scaleform function
+      args->args[0].SetMember("outObj", &obj);
+
+      // return false, indicating that the target object is not valid for acquiring data
+      args->result->SetBool(true);
+   }
 	else
 	{
-		if (args)
-		{
-			// The object is valid
-			args->result->SetBool(false);
-		}
-		return true;
+      // Add the object to the scaleform function
+      args->args[0].DeleteMember("outObj");
+
+		// The object is valid
+		args->result->SetBool(false);
 	}
 }
 
 void CAHZUtility::ProcessPlayerData(GFxFunctionHandler::Args *args)
 {
+   if (!args)
+   {
+      return;
+   }
+
 	GFxValue obj;
 	args->movie->CreateObject(&obj);
 

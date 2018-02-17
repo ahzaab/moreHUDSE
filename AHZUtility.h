@@ -39,7 +39,7 @@ public:
 	static void ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	static void ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	static void ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
-	static bool ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
+	static void ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	static void ProcessPlayerData(GFxFunctionHandler::Args *args);
 	static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
@@ -50,6 +50,7 @@ private:
 
 	static void RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str);
 	static void RegisterNumber(GFxValue * dst, const char * name, double value);
+   static void RegisterBoolean(GFxValue * dst, const char * name, bool value);
 	static void SetResultString(GFxFunctionHandler::Args *args, const char * str);
 	static void GetMagicItemDescription(MagicItem * item, std::string& description);
 	static void AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description);

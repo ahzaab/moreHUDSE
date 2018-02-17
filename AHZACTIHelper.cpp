@@ -27,23 +27,25 @@ public:
 		VMClassInfo * classInfo = script->classInfo;
 		if (!classInfo)
 		{
-			return true;
+         m_result.type = VMValue::kType_None;
+			return false;
 		}
 
 		BSFixedString varName(m_variable.c_str());
 		UInt32 variableId = CALL_MEMBER_FN(classInfo, GetVariable)(&varName);
 		if (variableId == -1) {
-			return true;
+         m_result.type = VMValue::kType_None;
+			return false;
 		}
 
 		if (m_registry->ExtractValue(m_handle, &classInfo->name, variableId, &m_result))
 		{
 			// Found
-			_MESSAGE("Found at Class: %s, Property, %s", classInfo->name, m_variable.c_str());
+			//_MESSAGE("Found at Class: %s, Property, %s", classInfo->name, m_variable.c_str());
 			return false;
 		}
 
-		return true;
+		return false;
 	}
 
 	VMValue * getResult() { return m_result.type == VMValue::kType_None ? NULL : &m_result; }
@@ -64,6 +66,8 @@ CAHZACTIHelper& CAHZACTIHelper::Instance() {
 		theInstance.m_vanillaItems.push_back("::Nirnroot_var");
 		theInstance.m_vanillaItems.push_back("::TempleBlessing_var");
 		theInstance.m_vanillaItems.push_back("::nonIngredientLootable_var");
+      theInstance.m_vanillaItems.push_back("::myIngredient_var");
+      theInstance.m_vanillaItems.push_back("::myFood_var");
 	}
 	return theInstance;
 }
@@ -95,7 +99,7 @@ TESForm * CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form)
 	}
 
 	for (p = m_vanillaItems.begin(); p != m_vanillaItems.end(); p++) {
-		_MESSAGE("GetAttachedForm");
+		//_MESSAGE("GetAttachedForm");
 		TESForm* attachedForm = NULL;
 		if ((attachedForm = GetAttachedForm(form, *p)) != NULL)
 		{
