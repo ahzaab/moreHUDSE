@@ -2105,6 +2105,8 @@ void CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHan
       // return false, indicating that the target object is not valid for acquiring data
 		args->result->SetBool(false);
       args->args[0].DeleteMember("dataObj");
+      return;
+
 	}
 
    bool canCarry = false;
