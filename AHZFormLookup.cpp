@@ -1,4 +1,4 @@
-#include "AHZACTIHelper.h"
+#include "AHZFormLookup.h"
 
 class CAHZGetScriptVariableFunctor : public IForEachScriptObjectFunctor
 {
@@ -27,14 +27,14 @@ public:
 		VMClassInfo * classInfo = script->classInfo;
 		if (!classInfo)
 		{
-         m_result.type = VMValue::kType_None;
+			m_result.type = VMValue::kType_None;
 			return false;
 		}
 
 		BSFixedString varName(m_variable.c_str());
 		UInt32 variableId = CALL_MEMBER_FN(classInfo, GetVariable)(&varName);
 		if (variableId == -1) {
-         m_result.type = VMValue::kType_None;
+			m_result.type = VMValue::kType_None;
 			return false;
 		}
 
@@ -57,8 +57,8 @@ private:
 	VMValue			m_result;
 };
 
-CAHZACTIHelper& CAHZACTIHelper::Instance() {
-	static CAHZACTIHelper theInstance;
+CAHZFormLookup& CAHZFormLookup::Instance() {
+	static CAHZFormLookup theInstance;
 
 	if (theInstance.m_vanillaItems.empty())
 	{
@@ -66,13 +66,13 @@ CAHZACTIHelper& CAHZACTIHelper::Instance() {
 		theInstance.m_vanillaItems.push_back("::Nirnroot_var");
 		theInstance.m_vanillaItems.push_back("::TempleBlessing_var");
 		theInstance.m_vanillaItems.push_back("::nonIngredientLootable_var");
-      theInstance.m_vanillaItems.push_back("::myIngredient_var");
-      theInstance.m_vanillaItems.push_back("::myFood_var");
+		theInstance.m_vanillaItems.push_back("::myIngredient_var");
+		theInstance.m_vanillaItems.push_back("::myFood_var");
 	}
 	return theInstance;
 }
 
-TESForm * CAHZACTIHelper::GetTESForm(TESObjectREFR * targetReference)
+TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 {
 	if (targetReference->baseForm->formType == kFormType_Activator)
 	{
@@ -84,7 +84,12 @@ TESForm * CAHZACTIHelper::GetTESForm(TESObjectREFR * targetReference)
 	}
 }
 
-TESForm * CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form)
+void CAHZFormLookup::AddScriptVarable(string vmVariableName)
+{
+	m_vanillaItems
+}
+
+TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
 {
 	vector<string>::iterator p;
 
@@ -99,6 +104,7 @@ TESForm * CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form)
 	}
 
 	for (p = m_vanillaItems.begin(); p != m_vanillaItems.end(); p++) {
+
 		//_MESSAGE("GetAttachedForm");
 		TESForm* attachedForm = NULL;
 		if ((attachedForm = GetAttachedForm(form, *p)) != NULL)
@@ -135,7 +141,7 @@ TESForm * CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form)
 	return NULL;
 }
 
-TESForm* CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form, string variableName)
+TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableName)
 {
 	if (form) {
 		VMClassRegistry		* registry = (*g_skyrimVM)->GetClassRegistry();
@@ -162,10 +168,10 @@ TESForm* CAHZACTIHelper::GetAttachedForm(TESObjectREFR *form, string variableNam
 	return NULL;
 }
 
-CAHZACTIHelper::CAHZACTIHelper()
+CAHZFormLookup::CAHZFormLookup()
 {
 }
 
-CAHZACTIHelper::~CAHZACTIHelper()
+CAHZFormLookup::~CAHZFormLookup()
 {
 }

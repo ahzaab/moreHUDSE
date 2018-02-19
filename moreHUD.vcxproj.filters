@@ -452,7 +452,7 @@
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
     <ClCompile Include="AHZConsole.cpp" />
-    <ClCompile Include="AHZACTIHelper.cpp" />
+    <ClCompile Include="AHZFormLookup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -471,7 +471,7 @@
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="resource2.h" />
     <ClInclude Include="AHZConsole.h" />
-    <ClInclude Include="AHZACTIHelper.h" />
+    <ClInclude Include="AHZFormLookup.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -26,34 +26,35 @@
 #include "string.h"
 using namespace std;
 
-class CAHZACTIHelper
+class CAHZFormLookup
 {
 public:
-	static CAHZACTIHelper& Instance();
+	static CAHZFormLookup& Instance();
 	TESForm * GetTESForm(TESObjectREFR * targetReference);
+	void AddScriptVarable(string vmVariableName);
 
 	inline static TESObjectREFR * GetReference(TESForm * theForm)
 	{
-      if (theForm->GetFormType() == kFormType_Reference)
-      {
-         TESObjectREFR *reference = DYNAMIC_CAST(theForm, TESForm, TESObjectREFR);
-         return reference;
-      }
-      else
-      {
-         return NULL;
-      }
+		if (theForm->GetFormType() == kFormType_Reference)
+		{
+			TESObjectREFR *reference = DYNAMIC_CAST(theForm, TESForm, TESObjectREFR);
+			return reference;
+		}
+		else
+		{
+			return NULL;
+		}
 	}
 
 private:
-	CAHZACTIHelper();
-	~CAHZACTIHelper();
+	CAHZFormLookup();
+	~CAHZFormLookup();
 	TESForm * GetAttachedForm(TESObjectREFR *form);
 	static TESForm * GetAttachedForm(TESObjectREFR *form, string variableName);
-	CAHZACTIHelper(CAHZACTIHelper const&);      // copy ctor is hidden
-	CAHZACTIHelper& operator=(CAHZACTIHelper const&) {}; // assign op is hidden
+	CAHZFormLookup(CAHZFormLookup const&);      // copy ctor is hidden
+	CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
 	std::vector<string> m_vanillaItems;
 };
 
-#define AHZGetForm(x) (CAHZACTIHelper::Instance().GetTESForm((x)))
-#define AHZGetReference(x) (CAHZACTIHelper::Instance().GetReference((x)))
+#define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))
+#define AHZGetReference(x) (CAHZFormLookup::Instance().GetReference((x)))
