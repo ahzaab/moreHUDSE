@@ -60,14 +60,14 @@ private:
 CAHZFormLookup& CAHZFormLookup::Instance() {
 	static CAHZFormLookup theInstance;
 
-	if (theInstance.m_vanillaItems.empty())
+	if (theInstance.m_scriptVMVariables.empty())
 	{
-		theInstance.m_vanillaItems.push_back("::lootable_var");
-		theInstance.m_vanillaItems.push_back("::Nirnroot_var");
-		theInstance.m_vanillaItems.push_back("::TempleBlessing_var");
-		theInstance.m_vanillaItems.push_back("::nonIngredientLootable_var");
-		theInstance.m_vanillaItems.push_back("::myIngredient_var");
-		theInstance.m_vanillaItems.push_back("::myFood_var");
+		theInstance.m_scriptVMVariables.push_back("::lootable_var");
+		theInstance.m_scriptVMVariables.push_back("::Nirnroot_var");
+		theInstance.m_scriptVMVariables.push_back("::TempleBlessing_var");
+		theInstance.m_scriptVMVariables.push_back("::nonIngredientLootable_var");
+		theInstance.m_scriptVMVariables.push_back("::myIngredient_var");
+		theInstance.m_scriptVMVariables.push_back("::myFood_var");
 	}
 	return theInstance;
 }
@@ -78,10 +78,26 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 	{
 		return GetAttachedForm(targetReference);
 	}
-	else
+
+	//else if ()
+	//else
+	//{
+	//	return targetReference;
+	//}
+}
+
+TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
+{
+	map<UInt32, UInt32>::iterator p;
+
+	if (m_shrineLUT.find(formID) != m_shrineLUT.end())
 	{
-		return targetReference;
+		UInt32 spellFormID = m_shrineLUT.find(formID)->second;
+		TESForm * form = LookupFormByID(spellFormID);
+		return DYNAMIC_CAST(form, TESForm, SpellItem);
 	}
+
+	return NULL;
 }
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
@@ -99,9 +115,31 @@ void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 		vmVariableName.append(suffix);
 	}
 
-	if (find(m_vanillaItems.begin(), m_vanillaItems.end(), vmVariableName) == m_vanillaItems.end())
+	if (find(m_scriptVMVariables.begin(), m_scriptVMVariables.end(), vmVariableName) == m_scriptVMVariables.end())
 	{
-		m_vanillaItems.push_back(vmVariableName);
+		m_scriptVMVariables.push_back(vmVariableName);
+	}
+}
+
+void CAHZFormLookup::AddFormID(string modName, UInt32 baseFormID, UInt32 targetFormID)
+{
+	// If not exists
+	if (m_modLUT.find(modName) == m_modLUT.end())
+	{
+		DataHandler * dataHandler = DataHandler::GetSingleton();
+		BSFixedString b(modName.c_str());
+		UInt32 modIndex = (UInt32)dataHandler->GetModIndex(b.data) << 24;
+		m_modLUT[modName] = modIndex;
+	}
+
+	// If exists
+	if (m_modLUT.find(modName) != m_modLUT.end())
+	{
+		UInt8 modIndex = m_modLUT[modName];
+		if (modIndex != 0xFF000000)
+		{
+			m_LUT[(baseFormID & 0x00FFFFFF) | modIndex] = (targetFormID & 0x00FFFFFF | modIndex);
+		}
 	}
 }
 
@@ -119,7 +157,7 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
 		return NULL;
 	}
 
-	for (p = m_vanillaItems.begin(); p != m_vanillaItems.end(); p++) {
+	for (p = m_scriptVMVariables.begin(); p != m_scriptVMVariables.end(); p++) {
 
 		//_MESSAGE("GetAttachedForm");
 		TESForm* attachedForm = NULL;
