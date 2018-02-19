@@ -74,29 +74,29 @@ CAHZFormLookup& CAHZFormLookup::Instance() {
 
 TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 {
-	if (targetReference->baseForm->formType == kFormType_Activator)
+	TESForm * lutForm = NULL;
+	if ((lutForm = GetFormFromLookup(targetReference)) != NULL)
+	{
+		return lutForm;
+	}
+	else if (targetReference->baseForm->formType == kFormType_Activator)
 	{
 		return GetAttachedForm(targetReference);
 	}
-
-	//else if ()
-	//else
-	//{
-	//	return targetReference;
-	//}
+	else
+	{
+		return targetReference;
+	}
 }
 
 TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
 {
-	map<UInt32, UInt32>::iterator p;
-
-	if (m_shrineLUT.find(formID) != m_shrineLUT.end())
+	if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
 	{
-		UInt32 spellFormID = m_shrineLUT.find(formID)->second;
-		TESForm * form = LookupFormByID(spellFormID);
-		return DYNAMIC_CAST(form, TESForm, SpellItem);
+		UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
+		TESForm * form = LookupFormByID(formID);
+		return form;
 	}
-
 	return NULL;
 }
 
