@@ -23,7 +23,7 @@
 #include "skse64/PapyrusUtility.h"
 #include "AHZPlayerInfo.h"
 #include "AHZUtility.h"
-#include "AHZACTIHelper.h"
+#include "AHZFormLookup.h"
 #include "AHZScaleformHook.h"
 #include "../common/IErrors.h"
 #include "skse64/PapyrusIngredient.h"

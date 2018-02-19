@@ -86,7 +86,23 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 {
-	m_vanillaItems
+	string prefix = "::";
+	string suffix = "_var";
+
+	if (vmVariableName.length() < prefix.length() || vmVariableName.substr(0, prefix.length()) != prefix)
+	{
+		vmVariableName.insert(0, prefix);
+	}
+
+	if (vmVariableName.length() < suffix.length() || vmVariableName.substr(vmVariableName.length() - suffix.length(), suffix.length()) != suffix)
+	{
+		vmVariableName.append(suffix);
+	}
+
+	if (find(m_vanillaItems.begin(), m_vanillaItems.end(), vmVariableName) == m_vanillaItems.end())
+	{
+		m_vanillaItems.push_back(vmVariableName);
+	}
 }
 
 TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
