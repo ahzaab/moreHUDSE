@@ -12,7 +12,7 @@
 #include "skse64/skse64_common/Utilities.h"
 #include "AHZArmorInfo.h"
 #include "AHZWeaponInfo.h"
-#include "AHZUtility.h"
+#include "AHZScaleform.h"
 #include "AHZFormLookup.h"
 
 //Unpacked
@@ -560,12 +560,12 @@ RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x00892C20);
 //.text : 00007FF691471955
 //.text : 00007FF691471955; -------------------------------------------------------------------------- -
 
-float CAHZUtility::GetBaseDamage(TESAmmo* pthisAmmo)
+float CAHZScaleform::GetBaseDamage(TESAmmo* pthisAmmo)
 {
 	return pthisAmmo->settings.damage;
 }
 
-double CAHZUtility::GetActualDamage(AHZWeaponData *weaponData)
+double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
 {
 	if (!weaponData)
 		return 0.0;
@@ -596,7 +596,7 @@ double CAHZUtility::GetActualDamage(AHZWeaponData *weaponData)
 	return 0.0;
 }
 
-double CAHZUtility::GetActualArmorRating(AHZArmorData* armorData)
+double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
 {
 	if (!armorData->armor)
 		return 0.0;
@@ -627,7 +627,7 @@ double CAHZUtility::GetActualArmorRating(AHZArmorData* armorData)
 	return 0.0;
 }
 
-double CAHZUtility::GetTotalActualArmorRating(void)
+double CAHZScaleform::GetTotalActualArmorRating(void)
 {
 	double totalRating = 0.0;
 
@@ -652,12 +652,12 @@ double CAHZUtility::GetTotalActualArmorRating(void)
 	return mRound(totalRating);
 }
 
-double CAHZUtility::mRound(double r)
+double CAHZScaleform::mRound(double r)
 {
 	return (r >= 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
 }
 
-double CAHZUtility::GetArmorRatingDiff(TESObjectREFR *thisArmor)
+double CAHZScaleform::GetArmorRatingDiff(TESObjectREFR *thisArmor)
 {
 	UInt64 slot = 1;
 	float oldArmorRating = 0.0;
@@ -693,7 +693,7 @@ double CAHZUtility::GetArmorRatingDiff(TESObjectREFR *thisArmor)
 	return deltaRating;
 }
 
-double CAHZUtility::GetTotalActualWeaponDamage(void)
+double CAHZScaleform::GetTotalActualWeaponDamage(void)
 {
 	float totalWeaponDamage = 0.0;
 	bool is2Handed = FALSE;
@@ -774,12 +774,12 @@ double CAHZUtility::GetTotalActualWeaponDamage(void)
 	return totalWeaponDamage;
 }
 
-bool CAHZUtility::isBolt(TESAmmo *thisAmmo)
+bool CAHZScaleform::isBolt(TESAmmo *thisAmmo)
 {
 	return (thisAmmo->isBolt());
 }
 
-double CAHZUtility::GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo)
+double CAHZScaleform::GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo)
 {
 	double totalWeaponDamage = 0.0;
 	double targetArrowDamage = 0.0;
@@ -904,7 +904,7 @@ double CAHZUtility::GetWeaponDamageDiff(TESObjectREFR *targetWeaponOrAmmo)
 	return 0.0;
 }
 
-bool CAHZUtility::IsTwoHanded(TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsTwoHanded(TESObjectWEAP * thisWeapon)
 {
 	//kType_HandToHandMelee = 0,
 	//kType_OneHandSword,
@@ -936,7 +936,7 @@ bool CAHZUtility::IsTwoHanded(TESObjectWEAP * thisWeapon)
 		thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 }
 
-bool CAHZUtility::IsOneHanded(TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsOneHanded(TESObjectWEAP * thisWeapon)
 {
 	//kType_HandToHandMelee = 0,
 	//kType_OneHandSword,
@@ -996,7 +996,7 @@ bool CAHZUtility::IsOneHanded(TESObjectWEAP * thisWeapon)
 //			thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 //}
 
-bool CAHZUtility::IsBow(TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsBow(TESObjectWEAP * thisWeapon)
 {
 	//kType_HandToHandMelee = 0,
 	//kType_OneHandSword,
@@ -1022,7 +1022,7 @@ bool CAHZUtility::IsBow(TESObjectWEAP * thisWeapon)
 		thisWeapon->type() == TESObjectWEAP::GameData::kType_Bow2);
 }
 
-bool CAHZUtility::IsCrossBow(TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsCrossBow(TESObjectWEAP * thisWeapon)
 {
 	//kType_HandToHandMelee = 0,
 	//kType_OneHandSword,
@@ -1048,7 +1048,7 @@ bool CAHZUtility::IsCrossBow(TESObjectWEAP * thisWeapon)
 		thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 }
 
-IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
+IngredientItem* CAHZScaleform::GetIngredient(TESForm *thisObject)
 {
 	if (!thisObject)
 		return NULL;
@@ -1158,7 +1158,7 @@ IngredientItem* CAHZUtility::GetIngredient(TESForm *thisObject)
 	return NULL;
 }
 
-SpellItem* CAHZUtility::GetSpellItem(TESForm *thisObject)
+SpellItem* CAHZScaleform::GetSpellItem(TESForm *thisObject)
 {
 	if (!thisObject)
 		return NULL;
@@ -1172,7 +1172,7 @@ SpellItem* CAHZUtility::GetSpellItem(TESForm *thisObject)
 	return DYNAMIC_CAST(thisObject, TESForm, SpellItem);
 }
 
-AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
+AlchemyItem* CAHZScaleform::GetAlchemyItem(TESForm *thisObject)
 {
 	if (!thisObject)
 		return NULL;
@@ -1282,7 +1282,7 @@ AlchemyItem* CAHZUtility::GetAlchemyItem(TESForm *thisObject)
 	return NULL;
 }
 
-bool CAHZUtility::CanPickUp(UInt32 formType)
+bool CAHZScaleform::CanPickUp(UInt32 formType)
 {
 	return (formType == kFormType_Weapon ||
 		formType == kFormType_Armor ||
@@ -1297,7 +1297,7 @@ bool CAHZUtility::CanPickUp(UInt32 formType)
 		formType == kFormType_Key);
 }
 
-string CAHZUtility::GetTargetName(TESForm *thisObject)
+string CAHZScaleform::GetTargetName(TESForm *thisObject)
 {
 	string name;
 	TESFullName* pFullName = DYNAMIC_CAST(thisObject, TESForm, TESFullName);
@@ -1352,7 +1352,7 @@ string CAHZUtility::GetTargetName(TESForm *thisObject)
 	return name;
 };
 
-bool CAHZUtility::GetIsBookAndWasRead(TESObjectREFR *theObject)
+bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 {
 	if (!theObject)
 		return false;
@@ -1371,7 +1371,7 @@ bool CAHZUtility::GetIsBookAndWasRead(TESObjectREFR *theObject)
 	}
 };
 
-string CAHZUtility::GetArmorWeightClass(TESObjectREFR *theObject)
+string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
 {
 	string desc;
 
@@ -1423,7 +1423,7 @@ string CAHZUtility::GetArmorWeightClass(TESObjectREFR *theObject)
 	return desc;
 };
 
-string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD)
+string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD)
 {
 	string desc;
 
@@ -1496,7 +1496,7 @@ string CAHZUtility::GetValueToWeight(TESObjectREFR *theObject, const char * stri
 	return desc;
 };
 
-string CAHZUtility::GetBookSkill(TESObjectREFR *theObject)
+string CAHZScaleform::GetBookSkill(TESObjectREFR *theObject)
 {
 	string desc;
 	if (theObject->baseForm->GetFormType() == kFormType_Book)
@@ -1533,7 +1533,7 @@ string CAHZUtility::GetBookSkill(TESObjectREFR *theObject)
 	return desc;
 }
 
-void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description)
+void CAHZScaleform::AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description)
 {
 	BSString bsDescription;
 	string tempString = "";
@@ -1586,7 +1586,7 @@ void CAHZUtility::AppendDescription(TESDescription *desObj, TESForm *parent, std
 	}
 }
 
-string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
+string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
 {
 	BSString description;
 	string effectDescription;
@@ -1738,7 +1738,7 @@ string CAHZUtility::GetEffectsDescription(TESObjectREFR *theObject)
 	return desc;
 };
 
-void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
 	AlchemyItem *alchemyItem = NULL;
@@ -1841,7 +1841,7 @@ void CAHZUtility::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionH
 	}
 };
 
-void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	if (!args)
 	{
@@ -1864,7 +1864,7 @@ void CAHZUtility::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHand
 	SetResultString(args, weightClass.c_str());
 };
 
-void CAHZUtility::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	if (!args)
 	{
@@ -1887,7 +1887,7 @@ void CAHZUtility::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionH
 	SetResultString(args, valueToWeight.c_str());
 };
 
-void CAHZUtility::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
 	static string bookSkill;
@@ -1906,12 +1906,12 @@ void CAHZUtility::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandl
 		bookSkill.c_str());
 };
 
-void CAHZUtility::SetResultString(GFxFunctionHandler::Args *args, const char * str)
+void CAHZScaleform::SetResultString(GFxFunctionHandler::Args *args, const char * str)
 {
 	args->result->SetString(str);
 };
 
-void CAHZUtility::ReplaceStringInPlace(std::string& subject, const std::string& search,
+void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string& search,
 	const std::string& replace)
 {
 	size_t pos = 0;
@@ -1922,7 +1922,7 @@ void CAHZUtility::ReplaceStringInPlace(std::string& subject, const std::string& 
 	}
 };
 
-void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
 	float totalArmorOrWeapon = 0.0;
@@ -1979,7 +1979,7 @@ void CAHZUtility::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHa
 	args->args[0].SetMember("targetObj", &obj);
 };
 
-void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args)
+void CAHZScaleform::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args)
 {
 	if (!args)
 	{
@@ -2020,7 +2020,7 @@ void CAHZUtility::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionH
 	args->args[0].SetMember("ingredientObj", &obj2);
 };
 
-void CAHZUtility::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *args)
+void CAHZScaleform::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *args)
 {
 	if (!args)
 	{
@@ -2039,7 +2039,7 @@ void CAHZUtility::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *
 	{
 		// Get the number of this in the inventory
 		itemCount = CAHZPlayerInfo::GetItemAmount(reference->baseForm->formID);
-		name = CAHZUtility::GetTargetName(reference);
+		name = CAHZScaleform::GetTargetName(reference);
 	}
 	else if (form)
 	{
@@ -2070,28 +2070,28 @@ void CAHZUtility::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *
 	}
 };
 
-void CAHZUtility::RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str)
+void CAHZScaleform::RegisterString(GFxValue * dst, GFxMovieView * view, const char * name, const char * str)
 {
 	GFxValue	fxValue;
 	fxValue.SetString(str);
 	dst->SetMember(name, &fxValue);
 };
 
-void CAHZUtility::RegisterNumber(GFxValue * dst, const char * name, double value)
+void CAHZScaleform::RegisterNumber(GFxValue * dst, const char * name, double value)
 {
 	GFxValue	fxValue;
 	fxValue.SetNumber(value);
 	dst->SetMember(name, &fxValue);
 };
 
-void CAHZUtility::RegisterBoolean(GFxValue * dst, const char * name, bool value)
+void CAHZScaleform::RegisterBoolean(GFxValue * dst, const char * name, bool value)
 {
 	GFxValue	fxValue;
 	fxValue.SetBool(value);
 	dst->SetMember(name, &fxValue);
 };
 
-void CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
 {
 	TESObjectREFR * pTargetReference = targetObject;
 
@@ -2151,7 +2151,7 @@ void CAHZUtility::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionHan
 	}
 }
 
-void CAHZUtility::ProcessPlayerData(GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessPlayerData(GFxFunctionHandler::Args *args)
 {
 	if (!args)
 	{
@@ -2173,7 +2173,7 @@ void CAHZUtility::ProcessPlayerData(GFxFunctionHandler::Args *args)
 	args->args[0].SetMember("playerObj", &obj);
 }
 
-void CAHZUtility::GetMagicItemDescription(MagicItem * item, std::string& description)
+void CAHZScaleform::GetMagicItemDescription(MagicItem * item, std::string& description)
 {
 	string outerString = "";
 	description.clear();
@@ -2186,7 +2186,7 @@ void CAHZUtility::GetMagicItemDescription(MagicItem * item, std::string& descrip
 	description.append(temp.Get());
 }
 
-void CAHZUtility::FormatDescription(std::string& unFormated, std::string& formatted)
+void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& formatted)
 {
 	string outerString = "";
 	formatted.clear();

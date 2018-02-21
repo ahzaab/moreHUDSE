@@ -22,7 +22,7 @@
 #include "skse64/GameExtraData.h"
 #include "skse64/PapyrusUtility.h"
 #include "AHZPlayerInfo.h"
-#include "AHZUtility.h"
+#include "AHZScaleform.h"
 #include "AHZFormLookup.h"
 #include "AHZScaleformHook.h"
 #include "../common/IErrors.h"
@@ -33,7 +33,10 @@
 #include <shlobj.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "AHZConsole.h"
+#include "AHZUtilities.h"
+
 using namespace std;
 
 IDebugLog	gLog;
@@ -62,7 +65,7 @@ class SKSEScaleform_GetTargetObjectData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -71,7 +74,7 @@ class SKSEScaleform_GetPlayerData : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessPlayerData(args);
+		CAHZScaleform::ProcessPlayerData(args);
 	}
 };
 
@@ -89,7 +92,7 @@ class SKSEScaleform_GetTargetEffects : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -106,7 +109,7 @@ public:
 			args->result->SetBool(false);
 			return;
 		}
-		args->result->SetBool(CAHZUtility::GetIsBookAndWasRead(pTargetReference));
+		args->result->SetBool(CAHZScaleform::GetIsBookAndWasRead(pTargetReference));
 	}
 };
 
@@ -115,7 +118,7 @@ class SKSEScaleform_GetArmorWeightClassString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -124,7 +127,7 @@ class SKSEScaleform_GetValueToWeightString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -133,7 +136,7 @@ class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -142,7 +145,7 @@ class SKSEScaleform_GetIsValidTarget : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZUtility::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
+		CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
 	}
 };
 
@@ -231,38 +234,32 @@ extern "C"
 		EventDispatcher<SKSECrosshairRefEvent> * dispatcher = (EventDispatcher<SKSECrosshairRefEvent> *)g_skseMessaging->GetEventDispatcher(SKSEMessagingInterface::kDispatcher_CrosshairEvent);
 		dispatcher->AddEventSink(&crossHairEvent);
 
-      // When NULL is passed to GetModuleHandle, the handle of the exe itself is returned
-      HMODULE hModule = GetModuleHandle(NULL);
-      if (hModule != NULL)
-      {
-         char skyrimPath[_MAX_PATH];
-         char skyrimDir[_MAX_DIR];
-         char skyrimName[_MAX_FNAME];
-         char skyrimExt[_MAX_EXT];
-         char skyrimDrive[_MAX_DRIVE];
-         // Use GetModuleFileName() with module handle to get the path
-         GetModuleFileName(hModule, skyrimPath, (sizeof(skyrimPath)));
-        
-         _splitpath_s(
-            (const char*)skyrimPath,
-            &skyrimDrive[0],
-            (size_t)sizeof(skyrimDrive),
-            &skyrimDir[0],
-            (size_t)sizeof(skyrimDir),
-            &skyrimName[0],
-            (size_t) sizeof(skyrimName),
-            &skyrimExt[0],
-            (size_t)sizeof(skyrimExt)
-         );
+      string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+      vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
 
-         string dataPath(skyrimDir);
-         dataPath.append("Data");
+      vector<string>::iterator p;
+      for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
+         string fullPath = skyrimDataPath + *p;
+         int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
+         cout << iNumOfEntries << endl;
 
+         for (int i = 0; i < iNumOfEntries; i++)
+         {
+            char value[32];
+            char returnValue[1024];
+            sprintf_s(value, (size_t)32, "%d", i + 1);
+            string entrName("oEntry");
+            entrName.append(value);
+            GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
+            AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(string(returnValue));
 
+            if (lutObject.BaseMod.length() && lutObject.TargetMod.length())
+            {
+               CAHZFormLookup::Instance().AddFormID(lutObject.BaseMod, lutObject.BaseFormID, lutObject.TargetMod, lutObject.TargetFormID);
+            }
+         }
 
       }
-
-      //CAHZFormLookup::Instance().AddFormID()
 
 		return true;
 	}

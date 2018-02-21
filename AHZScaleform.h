@@ -32,7 +32,7 @@ extern RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode;
 typedef bool(*_IsSurvivalMode)();
 extern RelocAddr<_IsSurvivalMode> IsSurvivalMode;
 
-class CAHZUtility
+class CAHZScaleform
 {
 public:
 	static void ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);

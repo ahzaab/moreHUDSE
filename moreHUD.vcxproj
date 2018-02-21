@@ -331,10 +331,12 @@
     <ClCompile Include="..\skse64_common\Utilities.cpp" />
     <ClCompile Include="AHZArmorInfo.cpp" />
     <ClCompile Include="AHZConsole.cpp" />
+    <ClCompile Include="AHZLUTObject.cpp" />
     <ClCompile Include="AHZPlayerInfo.cpp" />
     <ClCompile Include="AHZScaleformHook.cpp" />
-    <ClCompile Include="AHZUtility.cpp" />
+    <ClCompile Include="AHZScaleform.cpp" />
     <ClCompile Include="AHZFormLookup.cpp" />
+    <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ShrineLUT.cpp" />
@@ -345,10 +347,12 @@
     <ClInclude Include="..\skse64\ScaleformCallbacks.h" />
     <ClInclude Include="AHZArmorInfo.h" />
     <ClInclude Include="AHZConsole.h" />
+    <ClInclude Include="AHZLUTObject.h" />
     <ClInclude Include="AHZPlayerInfo.h" />
     <ClInclude Include="AHZScaleformHook.h" />
-    <ClInclude Include="AHZUtility.h" />
+    <ClInclude Include="AHZScaleform.h" />
     <ClInclude Include="AHZFormLookup.h" />
+    <ClInclude Include="AHZUtilities.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="resource2.h" />
     <ClInclude Include="ShrineLUT.h" />
