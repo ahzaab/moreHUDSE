@@ -121,24 +121,34 @@ void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 	}
 }
 
-void CAHZFormLookup::AddFormID(string modName, UInt32 baseFormID, UInt32 targetFormID)
+void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID)
 {
 	// If not exists
-	if (m_modLUT.find(modName) == m_modLUT.end())
+	if (m_modIndexLUT.find(baseFormModName) == m_modIndexLUT.end())
 	{
 		DataHandler * dataHandler = DataHandler::GetSingleton();
-		BSFixedString b(modName.c_str());
+		BSFixedString b(baseFormModName.c_str());
 		UInt32 modIndex = (UInt32)dataHandler->GetModIndex(b.data) << 24;
-		m_modLUT[modName] = modIndex;
+		m_modIndexLUT[baseFormModName] = modIndex;
 	}
 
+   // If not exists
+   if (m_modIndexLUT.find(targetFormModName) == m_modIndexLUT.end())
+   {
+      DataHandler * dataHandler = DataHandler::GetSingleton();
+      BSFixedString b(targetFormModName.c_str());
+      UInt32 modIndex = (UInt32)dataHandler->GetModIndex(b.data) << 24;
+      m_modIndexLUT[targetFormModName] = modIndex;
+   }
+
 	// If exists
-	if (m_modLUT.find(modName) != m_modLUT.end())
+	if (m_modIndexLUT.find(baseFormModName) != m_modIndexLUT.end() && m_modIndexLUT.find(targetFormModName) != m_modIndexLUT.end())
 	{
-		UInt8 modIndex = m_modLUT[modName];
-		if (modIndex != 0xFF000000)
+		UInt8 baseModIndex = m_modIndexLUT[baseFormModName];
+      UInt8 targetModIndex = m_modIndexLUT[targetFormModName];
+		if (baseModIndex != 0xFF000000 && baseModIndex != 0xFF000000)
 		{
-			m_LUT[(baseFormID & 0x00FFFFFF) | modIndex] = (targetFormID & 0x00FFFFFF | modIndex);
+			m_LUT[(baseFormID & 0x00FFFFFF) | baseModIndex] = (targetFormID & 0x00FFFFFF | targetModIndex);
 		}
 	}
 }

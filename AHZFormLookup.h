@@ -32,7 +32,7 @@ public:
 	static CAHZFormLookup& Instance();
 	TESForm * GetTESForm(TESObjectREFR * targetReference);
 	void AddScriptVarable(string vmVariableName);
-	void AddFormID(string modName, UInt32 baseFormID, UInt32 targetFormID);
+   void AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID);
 
 	inline static TESObjectREFR * GetReference(TESForm * theForm)
 	{
@@ -57,7 +57,7 @@ private:
 	CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
 	std::vector<string> m_scriptVMVariables;
 	std::map<UInt32, UInt32> m_LUT;
-	std::map<string, UInt32> m_modLUT;
+	std::map<string, UInt32> m_modIndexLUT;
 };
 
 #define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))

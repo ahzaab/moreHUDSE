@@ -231,6 +231,39 @@ extern "C"
 		EventDispatcher<SKSECrosshairRefEvent> * dispatcher = (EventDispatcher<SKSECrosshairRefEvent> *)g_skseMessaging->GetEventDispatcher(SKSEMessagingInterface::kDispatcher_CrosshairEvent);
 		dispatcher->AddEventSink(&crossHairEvent);
 
+      // When NULL is passed to GetModuleHandle, the handle of the exe itself is returned
+      HMODULE hModule = GetModuleHandle(NULL);
+      if (hModule != NULL)
+      {
+         char skyrimPath[_MAX_PATH];
+         char skyrimDir[_MAX_DIR];
+         char skyrimName[_MAX_FNAME];
+         char skyrimExt[_MAX_EXT];
+         char skyrimDrive[_MAX_DRIVE];
+         // Use GetModuleFileName() with module handle to get the path
+         GetModuleFileName(hModule, skyrimPath, (sizeof(skyrimPath)));
+        
+         _splitpath_s(
+            (const char*)skyrimPath,
+            &skyrimDrive[0],
+            (size_t)sizeof(skyrimDrive),
+            &skyrimDir[0],
+            (size_t)sizeof(skyrimDir),
+            &skyrimName[0],
+            (size_t) sizeof(skyrimName),
+            &skyrimExt[0],
+            (size_t)sizeof(skyrimExt)
+         );
+
+         string dataPath(skyrimDir);
+         dataPath.append("Data");
+
+
+
+      }
+
+      //CAHZFormLookup::Instance().AddFormID()
+
 		return true;
 	}
 };
