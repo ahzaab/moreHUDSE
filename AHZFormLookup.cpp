@@ -144,8 +144,8 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
 	// If exists
 	if (m_modIndexLUT.find(baseFormModName) != m_modIndexLUT.end() && m_modIndexLUT.find(targetFormModName) != m_modIndexLUT.end())
 	{
-		UInt8 baseModIndex = m_modIndexLUT[baseFormModName];
-      UInt8 targetModIndex = m_modIndexLUT[targetFormModName];
+		UInt32 baseModIndex = m_modIndexLUT[baseFormModName];
+      UInt32 targetModIndex = m_modIndexLUT[targetFormModName];
 		if (baseModIndex != 0xFF000000 && baseModIndex != 0xFF000000)
 		{
 			m_LUT[(baseFormID & 0x00FFFFFF) | baseModIndex] = (targetFormID & 0x00FFFFFF | targetModIndex);

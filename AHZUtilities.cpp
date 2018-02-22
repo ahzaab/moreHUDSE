@@ -73,7 +73,7 @@ AHZLUTObject CAHZUtilities::ParseLUTObject(string & stringValue)
    return AHZLUTObject();
 }
 
-string& CAHZUtilities::GetSkyrimDataPath()
+string CAHZUtilities::GetSkyrimDataPath()
 {
    HMODULE hModule = GetModuleHandle(NULL);
    if (hModule != NULL)
