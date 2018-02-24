@@ -1049,6 +1049,94 @@ bool CAHZScaleform::IsCrossBow(TESObjectWEAP * thisWeapon)
 		thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 }
 
+AlchemyItem * CAHZScaleform::GetAlchemyItemFromLeveledList(TESForm *thisObject)
+{
+   if (thisObject->formType == kFormType_LeveledItem)
+   {
+      TESLevItem *lvli = DYNAMIC_CAST(thisObject, TESForm, TESLevItem);
+
+      // Get the first form and see if it is an ingredient
+      if (lvli->leveledList.length > 0)
+      {
+         for (int i = 0; i < lvli->leveledList.length; i++)
+         {
+            TESForm *itemform = (TESForm *)lvli->leveledList.entries[i].form;
+            if (itemform)
+            {
+               if (itemform->formType == kFormType_Potion)
+               {
+                  AlchemyItem *alchemyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
+                  return alchemyItem;
+               }
+            }
+         }
+         //for (int i = 0; i < lvli->leveledList.length; i++)
+         //{
+         //   TESForm *itemform = (TESForm *)lvli->leveledList.entries[i].form;
+         //   if (itemform)
+         //   {
+         //      if (itemform->formType == kFormType_Ingredient)
+         //      {
+         //         IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+         //         return ingredient;
+         //      }
+         //      // Nested leveled lists
+         //      else if (itemform->formType == kFormType_LeveledItem)
+         //      {
+         //         return GetIngredientFromLeveledList(itemform);
+         //      }
+         //   }
+         //}
+      }
+   }
+
+   return NULL;
+}
+
+IngredientItem* CAHZScaleform::GetIngredientFromLeveledList(TESForm *thisObject)
+{
+   if (thisObject->formType == kFormType_LeveledItem)
+   {
+      TESLevItem *lvli = DYNAMIC_CAST(thisObject, TESForm, TESLevItem);
+
+      // Get the first form and see if it is an ingredient
+      if (lvli->leveledList.length > 0)
+      {
+         for (int i = 0; i < lvli->leveledList.length; i++)
+         {
+            TESForm *itemform = (TESForm *)lvli->leveledList.entries[i].form;
+            if (itemform)
+            {
+               if (itemform->formType == kFormType_Ingredient)
+               {
+                  IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+                  return ingredient;
+               }
+            }
+         }
+         //for (int i = 0; i < lvli->leveledList.length; i++)
+         //{
+         //   TESForm *itemform = (TESForm *)lvli->leveledList.entries[i].form;
+         //   if (itemform)
+         //   {
+         //      if (itemform->formType == kFormType_Ingredient)
+         //      {
+         //         IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+         //         return ingredient;
+         //      }
+         //      // Nested leveled lists
+         //      else if (itemform->formType == kFormType_LeveledItem)
+         //      {
+         //         return GetIngredientFromLeveledList(itemform);
+         //      }
+         //   }
+         //}
+      }
+   }
+
+   return NULL;
+}
+
 IngredientItem* CAHZScaleform::GetIngredient(TESForm *thisObject)
 {
 	if (!thisObject)
@@ -1079,18 +1167,17 @@ IngredientItem* CAHZScaleform::GetIngredient(TESForm *thisObject)
 			// If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
 			else if (form->formType == kFormType_LeveledItem)
 			{
-				TESLevItem *lvli = DYNAMIC_CAST(form, TESForm, TESLevItem);
+            TESForm *itemform = GetIngredientFromLeveledList(form);
 
-				// Get the first form and see if it is an ingredient
-				if (lvli->leveledList.length > 0)
-				{
-					TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
-					if (itemform)
-					{
-						IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
-						return ingredient;
-					}
-				}
+            if (!itemform)
+            {
+               return NULL;
+            }
+            else if (itemform->formType == kFormType_Ingredient)
+            {
+               IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+               return ingredient;
+            }
 			}
 			else if (form->formType == kFormType_List)
 			{
@@ -1125,18 +1212,17 @@ IngredientItem* CAHZScaleform::GetIngredient(TESForm *thisObject)
 			// If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
 			else if (form->formType == kFormType_LeveledItem)
 			{
-				TESLevItem *lvli = DYNAMIC_CAST(form, TESForm, TESLevItem);
+            TESForm *itemform = GetIngredientFromLeveledList(form);
 
-				// Get the first form and see if it is an ingredient
-				if (lvli->leveledList.length > 0)
-				{
-					TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
-					if (itemform)
-					{
-						IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
-						return ingredient;
-					}
-				}
+            if (!itemform)
+            {
+               return NULL;
+            }
+            else if (itemform->formType == kFormType_Ingredient)
+            {
+               IngredientItem *ingredient = DYNAMIC_CAST(itemform, TESForm, IngredientItem);
+               return ingredient;
+            }
 			}
 			else if (form->formType == kFormType_List)
 			{
@@ -1203,18 +1289,17 @@ AlchemyItem* CAHZScaleform::GetAlchemyItem(TESForm *thisObject)
 			// If the food is actually a levelitem (Harvest overhaul mod or a coin purse)
 			else if (form->formType == kFormType_LeveledItem)
 			{
-				TESLevItem *lvli = DYNAMIC_CAST(form, TESForm, TESLevItem);
+            TESForm *itemform = GetAlchemyItemFromLeveledList(form);
 
-				// Get the first form and see if it is food
-				if (lvli->leveledList.length > 0)
-				{
-					TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
-					if (itemform)
-					{
-						AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
-						return alchmyItem;
-					}
-				}
+            if (!itemform)
+            {
+               return NULL;
+            }
+            else if (itemform->formType == kFormType_Potion)
+            {
+               AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
+               return alchmyItem;
+            }
 			}
 			else if (form->formType == kFormType_List)
 			{
@@ -1249,18 +1334,17 @@ AlchemyItem* CAHZScaleform::GetAlchemyItem(TESForm *thisObject)
 			// If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
 			else if (form->formType == kFormType_LeveledItem)
 			{
-				TESLevItem *lvli = DYNAMIC_CAST(form, TESForm, TESLevItem);
+            TESForm *itemform = GetAlchemyItemFromLeveledList(form);
 
-				// Get the first form and see if it is food
-				if (lvli->leveledList.length > 0)
-				{
-					TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
-					if (itemform)
-					{
-						AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
-						return alchmyItem;
-					}
-				}
+            if (!itemform)
+            {
+               return NULL;
+            }
+            else if (itemform->formType == kFormType_Potion)
+            {
+               AlchemyItem *alchmyItem = DYNAMIC_CAST(itemform, TESForm, AlchemyItem);
+               return alchmyItem;
+            }
 			}
 			else if (form->formType == kFormType_List)
 			{

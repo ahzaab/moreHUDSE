@@ -79,7 +79,9 @@ private:
 	static bool isBolt(TESAmmo *thisAmmo);
 	static double mRound(double d);
 	static IngredientItem* GetIngredient(TESForm *initialTarget);
+   static IngredientItem* GetIngredientFromLeveledList(TESForm *thisObject);
 	static AlchemyItem* GetAlchemyItem(TESForm *initialTarget);
+   static AlchemyItem * GetAlchemyItemFromLeveledList(TESForm *thisObject);
 	static SpellItem* GetSpellItem(TESForm *initialTarget);
 
 	// const char * GetTargetName(TESObjectREFR *thisObject);
