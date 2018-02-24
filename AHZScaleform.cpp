@@ -14,6 +14,7 @@
 #include "AHZWeaponInfo.h"
 #include "AHZScaleform.h"
 #include "AHZFormLookup.h"
+#include "AHZUtilities.h"
 
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
@@ -1423,7 +1424,7 @@ string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
 	return desc;
 };
 
-string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD)
+string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated)
 {
 	string desc;
 
@@ -1469,8 +1470,8 @@ string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * st
 
 		// Add the VW label
 		desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-		desc.append("V/W ");
-		desc.append("<\\FONT>");
+      desc.append(vmTranslated);
+		desc.append(" <\\FONT>");
 
 		char floatHold[64];
 		size_t size = 64;
@@ -1882,7 +1883,7 @@ void CAHZScaleform::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctio
 	}
 
 	valueToWeight.clear();
-	valueToWeight.append(GetValueToWeight(pTargetReference, args->args[0].GetString()).c_str());
+	valueToWeight.append(GetValueToWeight(pTargetReference, args->args[0].GetString(), args->args[1].GetString()).c_str());
 
 	SetResultString(args, valueToWeight.c_str());
 };

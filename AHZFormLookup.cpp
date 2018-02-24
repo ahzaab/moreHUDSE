@@ -62,12 +62,12 @@ CAHZFormLookup& CAHZFormLookup::Instance() {
 
 	if (theInstance.m_scriptVMVariables.empty())
 	{
-		theInstance.m_scriptVMVariables.push_back("::lootable_var");
-		theInstance.m_scriptVMVariables.push_back("::Nirnroot_var");
-		theInstance.m_scriptVMVariables.push_back("::TempleBlessing_var");
-		theInstance.m_scriptVMVariables.push_back("::nonIngredientLootable_var");
-		theInstance.m_scriptVMVariables.push_back("::myIngredient_var");
-		theInstance.m_scriptVMVariables.push_back("::myFood_var");
+		//theInstance.m_scriptVMVariables.push_back("::lootable_var");
+		//theInstance.m_scriptVMVariables.push_back("::Nirnroot_var");
+		//theInstance.m_scriptVMVariables.push_back("::TempleBlessing_var");
+		//theInstance.m_scriptVMVariables.push_back("::nonIngredientLootable_var");
+		//theInstance.m_scriptVMVariables.push_back("::myIngredient_var");
+		//theInstance.m_scriptVMVariables.push_back("::myFood_var");
 	}
 	return theInstance;
 }

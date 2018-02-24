@@ -11,6 +11,7 @@
 #include "skse64/GameExtraData.h"
 #include "skse64/ScaleformCallbacks.h"
 #include "skse64/ScaleformMovie.h"
+#include "skse64/ScaleformLoader.h"
 #include "skse64/PapyrusIngredient.h"
 #include "skse64/PapyrusSpell.h"
 #include "AHZArmorInfo.h"
@@ -60,7 +61,7 @@ private:
 	static string GetArmorWeightClass(TESObjectREFR *theObject);
 	static string GetEffectsDescription(TESObjectREFR *theObject);
 	static string GetBookSkill(TESObjectREFR *theObject);
-	static string GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD);
+	static string GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated);
 	static float GetBaseDamage(TESAmmo* pthisAmmo);
 	static double GetActualDamage(AHZWeaponData *weaponData);
 	static double GetActualArmorRating(AHZArmorData* armorData);

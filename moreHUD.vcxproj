@@ -339,7 +339,6 @@
     <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ShrineLUT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h" />
@@ -355,7 +354,6 @@
     <ClInclude Include="AHZUtilities.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
     <ClInclude Include="resource2.h" />
-    <ClInclude Include="ShrineLUT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

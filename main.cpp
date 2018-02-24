@@ -165,6 +165,96 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	return true;
 }
 
+// Listens to events dispatched by SKSE
+void EventListener(SKSEMessagingInterface::Message* msg)
+{
+   if (!msg)
+   {
+      return;
+   }
+
+   if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_PostLoadGame)
+   {
+      // Read all .mhuf files and load in the lookup tables
+      string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+
+      // Get all .mhud files from the skyrim data folder
+      vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+
+      // Foreach mhud file, load in the lookup table entries
+      vector<string>::iterator p;
+      for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
+         _MESSAGE("Loading %s", (*p).c_str());
+         gLog.Indent();
+         string fullPath = skyrimDataPath + *p;
+
+         /*************************************************************************************************/
+         #pragma region Loading Lookup tables
+
+         // Get the number of entries
+         int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
+         _MESSAGE("Loading %d Lookup Entries", iNumOfEntries);
+         cout << iNumOfEntries << endl;
+
+         // Get each entry and load into the lookup table
+         for (int i = 0; i < iNumOfEntries; i++)
+         {
+            char value[32] = "";
+            char returnValue[1024] = "";
+            sprintf_s(value, (size_t)32, "%d", i + 1);
+            string entrName("oEntry");
+            entrName.append(value);
+            GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
+            if (strlen(returnValue))
+            {
+               AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(string(returnValue));
+
+               if (!lutObject.IsEmpty())
+               {
+                  CAHZFormLookup::Instance().AddFormID(lutObject.BaseMod, lutObject.BaseFormID, lutObject.TargetMod, lutObject.TargetFormID);
+               }
+               else
+               {
+                  _MESSAGE("Could not entry Entry: %s", returnValue);
+               }
+            }
+         }
+         #pragma endregion
+         /*************************************************************************************************/
+
+         /*************************************************************************************************/
+         #pragma region Loading Scripts Variables
+
+         // Get the number of entries
+         iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
+         _MESSAGE("Loading %d Script Variable(s)", iNumOfEntries);
+         cout << iNumOfEntries << endl;
+
+         // Get each entry and load into the lookup table
+         for (int i = 0; i < iNumOfEntries; i++)
+         {
+            char value[32] = "";
+            char returnValue[1024] = "";
+            sprintf_s(value, (size_t)32, "%d", i + 1);
+            string entrName("sVariable");
+            entrName.append(value);
+            GetPrivateProfileString("ScriptVariables", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
+
+            if (strlen(returnValue))
+            {
+               CAHZFormLookup::Instance().AddScriptVarable(string(returnValue));
+            }
+            else
+            {
+               _MESSAGE("Could not load script variable: %s", returnValue);
+            }
+         }
+         #pragma endregion
+         /*************************************************************************************************/
+      }
+   }
+}
+
 extern "C"
 {
 	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
@@ -226,87 +316,6 @@ extern "C"
 		return true;
 	}
 
-   // Listens to events dispatched by SKSE
-   void EventListener(SKSEMessagingInterface::Message* msg)
-   {
-      if (!msg)
-      {
-         return;
-      }
-
-      if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_PostLoadGame)
-      {
-         // Read all .mhuf files and load in the lookup tables
-         string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
-
-         // Get all .mhud files from the skyrim data folder
-         vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
-
-         // Foreach mhud file, load in the lookup table entries
-         vector<string>::iterator p;
-         for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
-            _MESSAGE("Loading %s", (*p).c_str());
-            gLog.Indent();
-            string fullPath = skyrimDataPath + *p;
-
-            //////LOAD Lookup Table Items per mod
-
-            // Get the number of entries
-            int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
-            _MESSAGE("Loading %d Lookup Entries", iNumOfEntries);
-            cout << iNumOfEntries << endl;
-
-            // Get each entry and load into the lookup table
-            for (int i = 0; i < iNumOfEntries; i++)
-            {
-               char value[32] = "";
-               char returnValue[1024] = "";
-               sprintf_s(value, (size_t)32, "%d", i + 1);
-               string entrName("oEntry");
-               entrName.append(value);
-               GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
-               if (strlen(returnValue))
-               {
-                  _MESSAGE("Loading Entry: %s", returnValue);
-                  AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(string(returnValue));
-
-                  if (!lutObject.IsEmpty())
-                  {
-                     CAHZFormLookup::Instance().AddFormID(lutObject.BaseMod, lutObject.BaseFormID, lutObject.TargetMod, lutObject.TargetFormID);
-                  }
-               }
-            }
-
-            //////LOAD Script Variables per mod
-
-            // Get the number of entries
-            iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfEntries", 0, fullPath.c_str());
-            _MESSAGE("Loading %d Script Variable(s)", iNumOfEntries);
-            cout << iNumOfEntries << endl;
-
-            // Get each entry and load into the lookup table
-            for (int i = 0; i < iNumOfEntries; i++)
-            {
-               char value[32] = "";
-               char returnValue[1024] = "";
-               sprintf_s(value, (size_t)32, "%d", i + 1);
-               string entrName("sVariable");
-               entrName.append(value);
-               GetPrivateProfileString("ScriptVariables", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
-
-               if (strlen(returnValue))
-               {
-                  _MESSAGE("Loading Variable: %s", returnValue);
-                  CAHZFormLookup::Instance().AddScriptVarable(string(returnValue));
-               }
-            }
-
-            gLog.Outdent();
-         }
-         gLog.Outdent();
-      }
-   }
-
 	bool SKSEPlugin_Load(const SKSEInterface * skse)
 	{
 		// register scaleform callbacks
@@ -315,16 +324,8 @@ extern "C"
 		EventDispatcher<SKSECrosshairRefEvent> * dispatcher = (EventDispatcher<SKSECrosshairRefEvent> *)g_skseMessaging->GetEventDispatcher(SKSEMessagingInterface::kDispatcher_CrosshairEvent);
 		dispatcher->AddEventSink(&crossHairEvent);
 
-      //while (!IsDebuggerPresent())
-      //{
-      //   Sleep(10);
-      //}
-
-      //Sleep(1000 * 2);
-
+      // Register listener for the gme loaded event
       g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
-
-
 
 		return true;
 	}
