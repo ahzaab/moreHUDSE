@@ -23,6 +23,7 @@
     <ProjectGuid>{547171CB-F934-40B9-B788-3C520FE66363}</ProjectGuid>
     <RootNamespace>plugin_example</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -112,7 +113,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050100;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050170;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
@@ -163,7 +164,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050100;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050170;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -329,28 +330,30 @@
     <ClCompile Include="..\skse64_common\SafeWrite.cpp" />
     <ClCompile Include="..\skse64_common\Utilities.cpp" />
     <ClCompile Include="AHZArmorInfo.cpp" />
+    <ClCompile Include="AHZConsole.cpp" />
+    <ClCompile Include="AHZLUTObject.cpp" />
     <ClCompile Include="AHZPlayerInfo.cpp" />
     <ClCompile Include="AHZScaleformHook.cpp" />
-    <ClCompile Include="AHZUtility.cpp" />
+    <ClCompile Include="AHZScaleform.cpp" />
+    <ClCompile Include="AHZFormLookup.cpp" />
+    <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
-    <ClCompile Include="FoodLUT.cpp" />
-    <ClCompile Include="IngredientLUT.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ShrineLUT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h" />
     <ClInclude Include="..\skse64\ScaleformAPI.h" />
     <ClInclude Include="..\skse64\ScaleformCallbacks.h" />
     <ClInclude Include="AHZArmorInfo.h" />
+    <ClInclude Include="AHZConsole.h" />
+    <ClInclude Include="AHZLUTObject.h" />
     <ClInclude Include="AHZPlayerInfo.h" />
     <ClInclude Include="AHZScaleformHook.h" />
-    <ClInclude Include="AHZUtility.h" />
+    <ClInclude Include="AHZScaleform.h" />
+    <ClInclude Include="AHZFormLookup.h" />
+    <ClInclude Include="AHZUtilities.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
-    <ClInclude Include="FoodLUT.h" />
-    <ClInclude Include="IngredientLUT.h" />
     <ClInclude Include="resource2.h" />
-    <ClInclude Include="ShrineLUT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

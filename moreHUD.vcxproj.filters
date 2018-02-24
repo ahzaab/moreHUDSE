@@ -258,10 +258,7 @@
     <ClCompile Include="AHZArmorInfo.cpp" />
     <ClCompile Include="AHZPlayerInfo.cpp" />
     <ClCompile Include="AHZScaleformHook.cpp" />
-    <ClCompile Include="AHZUtility.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
-    <ClCompile Include="FoodLUT.cpp" />
-    <ClCompile Include="IngredientLUT.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="..\skse64_common\SafeWrite.cpp" />
     <ClCompile Include="..\skse64_common\Utilities.cpp">
@@ -450,10 +447,14 @@
     <ClCompile Include="..\skse64\Serialization.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
-    <ClCompile Include="ShrineLUT.cpp" />
     <ClCompile Include="..\skse64\InternalTasks.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
+    <ClCompile Include="AHZConsole.cpp" />
+    <ClCompile Include="AHZFormLookup.cpp" />
+    <ClCompile Include="AHZScaleform.cpp" />
+    <ClCompile Include="AHZUtilities.cpp" />
+    <ClCompile Include="AHZLUTObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -468,12 +469,13 @@
     <ClInclude Include="AHZArmorInfo.h" />
     <ClInclude Include="AHZPlayerInfo.h" />
     <ClInclude Include="AHZScaleformHook.h" />
-    <ClInclude Include="AHZUtility.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
-    <ClInclude Include="FoodLUT.h" />
-    <ClInclude Include="IngredientLUT.h" />
     <ClInclude Include="resource2.h" />
-    <ClInclude Include="ShrineLUT.h" />
+    <ClInclude Include="AHZConsole.h" />
+    <ClInclude Include="AHZFormLookup.h" />
+    <ClInclude Include="AHZScaleform.h" />
+    <ClInclude Include="AHZUtilities.h" />
+    <ClInclude Include="AHZLUTObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
