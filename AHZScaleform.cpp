@@ -9,6 +9,7 @@
 #include "skse64/GameExtraData.h"
 #include "skse64/ScaleformCallbacks.h"
 #include "skse64/ScaleformMovie.h"
+#include "skse64/GameMenus.h"
 #include "skse64/skse64_common/Utilities.h"
 #include "AHZArmorInfo.h"
 #include "AHZWeaponInfo.h"
@@ -1456,43 +1457,37 @@ bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 	}
 }
 
-static UInt32 hostileIndex = 0xFFFFFFFF;
-
 void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 {
    PlayerCharacter* pPC = (*g_thePlayer);
    if (pPC)
    {
       TESObjectREFR * reference = NULL;
-      UInt32 handle = pPC->targetHandle;
-      // Sometimes the handle will be invalid, in that case we will have to relay on the array of hostiles
-      if (!(handle == (*g_invalidRefHandle) || handle == 0))
+      UIStringHolder	* stringHolder = UIStringHolder::GetSingleton();
+      HUDMenu *hudMenu = static_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&stringHolder->hudMenu));
+      EnemyHealth *realEnemyHud;
+
+      if (hudMenu)
       {
-         for (int i = 0; i < pPC->hostileHandles.count; i++)
+         for (int i = 0; i < hudMenu->hudComponents.count; i++)
          {
-            if (handle == pPC->hostileHandles.entries[i])
+            HUDObject *enemyHud;
+            
+            hudMenu->hudComponents.GetNthItem(i, enemyHud);
+
+            realEnemyHud = dynamic_cast<EnemyHealth*>(enemyHud);
+
+            if (realEnemyHud)
             {
-               hostileIndex = i;
                break;
             }
          }
       }
 
-      if (hostileIndex < pPC->hostileHandles.count)
+      if (realEnemyHud)
       {
-         // use the last known handle
-         handle = pPC->hostileHandles.entries[hostileIndex];
+         reference = realEnemyHud->GetTarget();
       }
-       
-      if ((handle == (*g_invalidRefHandle) || handle == 0))
-      {
-         hostileIndex = 0xFFFFFFFF;
-         args->args[0].DeleteMember("outObj");
-         return;
-      }
-
-      LookupREFRByHandle(&handle, &reference);
-
       if (!reference)
       {
          args->args[0].DeleteMember("outObj");
@@ -1504,14 +1499,8 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
          TESNPC * pNPC = DYNAMIC_CAST(reference->baseForm, TESForm, TESNPC);
          if (pNPC)
          {
-            //if (pNPC->fullName.name.data)
-               //RegisterUnmanagedString(pFxVal, "fullName", pNPC->fullName.name.data);
-           // if (pNPC->shortName.data)
-               //RegisterUnmanagedString(pFxVal, "shortName", pNPC->shortName.data);
-
-            //RegisterNumber(pFxVal, "weight", pNPC->weight);
             double npcLevel = 0;
-            double playerLevel = pPC->skills->data->levelData->level;
+            UInt16 playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
 
             bool isLevelMult = (pNPC->actorData.flags & TESActorBaseData::kFlag_PCLevelMult) == TESActorBaseData::kFlag_PCLevelMult;
             if (isLevelMult) {
@@ -1524,10 +1513,8 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
             GFxValue obj;
             args->movie->CreateObject(&obj);
             RegisterNumber(&obj, "EnemyLevel", npcLevel);
-            RegisterNumber(&obj, "PlayerLevel", playerLevel);
+            RegisterNumber(&obj, "PlayerLevel", (double)playerLevel);
             args->args[0].SetMember("outObj", &obj);
-
-
             return;
          }
       }
