@@ -127,8 +127,17 @@ class SKSEScaleform_GetValueToWeightString : public GFxFunctionHandler
 public:
 	virtual void	Invoke(Args * args)
 	{
-		CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+      CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
 	}
+};
+
+class SKSEScaleform_AHZLog : public GFxFunctionHandler
+{
+public:
+   virtual void	Invoke(Args * args)
+   {
+      _MESSAGE(args->args[0].GetString());
+   }
 };
 
 class SKSEScaleform_GetBookSkillString : public GFxFunctionHandler
@@ -149,6 +158,15 @@ public:
 	}
 };
 
+class SKSEScaleform_GetEnemyInformation : public GFxFunctionHandler
+{
+public:
+   virtual void	Invoke(Args * args)
+   {
+      CAHZScaleform::ProcessEnemyInformation(args);
+   }
+};
+
 bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 {
 	RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
@@ -161,6 +179,8 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	RegisterFunction <SKSEScaleform_GetArmorWeightClassString>(root, view, "GetArmorWeightClassString");
 	RegisterFunction <SKSEScaleform_GetBookSkillString>(root, view, "GetBookSkillString");
 	RegisterFunction <SKSEScaleform_GetValueToWeightString>(root, view, "GetValueToWeightString");
+   RegisterFunction <SKSEScaleform_GetEnemyInformation>(root, view, "GetEnemyInformation");
+   RegisterFunction <SKSEScaleform_AHZLog>(root, view, "AHZLog");
 	MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
 	return true;
 }

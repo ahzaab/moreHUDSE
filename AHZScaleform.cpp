@@ -1454,7 +1454,88 @@ bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 	{
 		return false;
 	}
-};
+}
+
+static UInt32 hostileIndex = 0xFFFFFFFF;
+
+void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
+{
+   PlayerCharacter* pPC = (*g_thePlayer);
+   if (pPC)
+   {
+      TESObjectREFR * reference = NULL;
+      UInt32 handle = pPC->targetHandle;
+      // Sometimes the handle will be invalid, in that case we will have to relay on the array of hostiles
+      if (!(handle == (*g_invalidRefHandle) || handle == 0))
+      {
+         for (int i = 0; i < pPC->hostileHandles.count; i++)
+         {
+            if (handle == pPC->hostileHandles.entries[i])
+            {
+               hostileIndex = i;
+               break;
+            }
+         }
+      }
+
+      if (hostileIndex < pPC->hostileHandles.count)
+      {
+         // use the last known handle
+         handle = pPC->hostileHandles.entries[hostileIndex];
+      }
+       
+      if ((handle == (*g_invalidRefHandle) || handle == 0))
+      {
+         hostileIndex = 0xFFFFFFFF;
+         args->args[0].DeleteMember("outObj");
+         return;
+      }
+
+      LookupREFRByHandle(&handle, &reference);
+
+      if (!reference)
+      {
+         args->args[0].DeleteMember("outObj");
+         return;
+      }
+
+      if (reference->baseForm->formType == kFormType_NPC)
+      {
+         TESNPC * pNPC = DYNAMIC_CAST(reference->baseForm, TESForm, TESNPC);
+         if (pNPC)
+         {
+            //if (pNPC->fullName.name.data)
+               //RegisterUnmanagedString(pFxVal, "fullName", pNPC->fullName.name.data);
+           // if (pNPC->shortName.data)
+               //RegisterUnmanagedString(pFxVal, "shortName", pNPC->shortName.data);
+
+            //RegisterNumber(pFxVal, "weight", pNPC->weight);
+            double npcLevel = 0;
+            double playerLevel = pPC->skills->data->levelData->level;
+
+            bool isLevelMult = (pNPC->actorData.flags & TESActorBaseData::kFlag_PCLevelMult) == TESActorBaseData::kFlag_PCLevelMult;
+            if (isLevelMult) {
+               npcLevel = (double)pNPC->actorData.level / 1000.0;
+            }
+            else {
+               npcLevel = (double)pNPC->actorData.level;
+            }
+
+            GFxValue obj;
+            args->movie->CreateObject(&obj);
+            RegisterNumber(&obj, "EnemyLevel", npcLevel);
+            RegisterNumber(&obj, "PlayerLevel", playerLevel);
+            args->args[0].SetMember("outObj", &obj);
+
+
+            return;
+         }
+      }
+
+   }
+
+   args->args[0].DeleteMember("outObj");
+}
 
 string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
 {
