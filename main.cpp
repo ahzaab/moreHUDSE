@@ -284,7 +284,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 322;
+		info->version = 330;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();

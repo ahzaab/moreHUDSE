@@ -1494,21 +1494,21 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
          return;
       }
 
-      if (reference->baseForm->formType == kFormType_NPC)
-      {
-         TESNPC * pNPC = DYNAMIC_CAST(reference->baseForm, TESForm, TESNPC);
+      //if (reference->baseForm->formType == kFormType_NPC)
+      //{
+         Actor * pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
          if (pNPC)
          {
-            double npcLevel = 0;
+            UInt16 npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
             UInt16 playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
 
-            bool isLevelMult = (pNPC->actorData.flags & TESActorBaseData::kFlag_PCLevelMult) == TESActorBaseData::kFlag_PCLevelMult;
-            if (isLevelMult) {
-               npcLevel = (double)pNPC->actorData.level / 1000.0;
-            }
-            else {
-               npcLevel = (double)pNPC->actorData.level;
-            }
+            //bool isLevelMult = (pNPC->actorData.flags & TESActorBaseData::kFlag_PCLevelMult) == TESActorBaseData::kFlag_PCLevelMult;
+            //if (isLevelMult) {
+            //   npcLevel = (double)pNPC->actorData.level / 1000.0;
+            //}
+            //else {
+            //   npcLevel = (double)pNPC->actorData.level;
+            //}
 
             GFxValue obj;
             args->movie->CreateObject(&obj);
@@ -1517,7 +1517,7 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
             args->args[0].SetMember("outObj", &obj);
             return;
          }
-      }
+      //}
 
    }
 
