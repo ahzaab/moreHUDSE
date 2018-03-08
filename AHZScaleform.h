@@ -44,6 +44,7 @@ public:
 	static void ProcessPlayerData(GFxFunctionHandler::Args *args);
 	static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
 	static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
+   static void ProcessEnemyInformation(GFxFunctionHandler::Args *args);
 
 private:
 	static void ReplaceStringInPlace(std::string& subject, const std::string& search,
