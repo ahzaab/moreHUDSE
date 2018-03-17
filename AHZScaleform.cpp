@@ -567,6 +567,40 @@ float CAHZScaleform::GetBaseDamage(TESAmmo* pthisAmmo)
 	return pthisAmmo->settings.damage;
 }
 
+bool CAHZScaleform::GetIsKnownEnchantment(TESObjectREFR *targetRef)
+{
+   PlayerCharacter* pPC = (*g_thePlayer);
+   TESForm *baseForm;
+   if (pPC && targetRef && (baseForm = targetRef->baseForm) && 
+      (baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo)) 
+   {
+      //tList<ActiveEffect> * effects = pPC->magicTarget.GetActiveEffects();
+      //for (UInt32 i = 0; i < effects->Count(); i++) {
+        // ActiveEffect* effect = effects->GetNthItem(i);
+         //if (effect->sourceItem == baseForm) { // Check the item
+            EnchantmentItem * enchantment = NULL;
+            TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
+            if (enchantable) { // Check the item for a base enchantment
+               enchantment = enchantable->enchantment;
+            }
+            if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(targetRef->extraData.GetByType(kExtraData_Enchantment)))
+            {
+               enchantment = extraEnchant->enchant;
+            }
+
+            if (enchantment && enchantment->data.baseEnchantment)
+            {
+               //if (effect->item->formID == enchantment->formID) {
+               if ((enchantment->data.baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
+                  return true;
+               }
+            }
+         //}
+      //}
+   }
+   return false;
+}
+
 double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
 {
 	if (!weaponData)
