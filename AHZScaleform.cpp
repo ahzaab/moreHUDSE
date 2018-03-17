@@ -14,6 +14,7 @@
 #include "AHZArmorInfo.h"
 #include "AHZWeaponInfo.h"
 #include "AHZScaleform.h"
+#include "AHZScaleformHook.h"
 #include "AHZFormLookup.h"
 #include "AHZUtilities.h"
 
@@ -1504,68 +1505,41 @@ bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 {
    PlayerCharacter* pPC = (*g_thePlayer);
+   UInt16 npcLevel = 0;
+   UInt16 playerLevel = 0;
+
    if (pPC)
    {
       TESObjectREFR * reference = NULL;
-      UIStringHolder	* stringHolder = UIStringHolder::GetSingleton();
-      HUDMenu *hudMenu = static_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&stringHolder->hudMenu));
-      EnemyHealth *realEnemyHud;
 
-      if (hudMenu)
+      if (ahzrealEnemyHud)
       {
-         for (int i = 0; i < hudMenu->hudComponents.count; i++)
+         reference = ahzrealEnemyHud->GetTarget();
+      }
+
+      if (reference)
+      {
+         if (reference->baseForm->GetFormType() == kFormType_NPC ||
+            reference->baseForm->GetFormType() == kFormType_Character)
          {
-            HUDObject *enemyHud;
-            
-            hudMenu->hudComponents.GetNthItem(i, enemyHud);
-
-            realEnemyHud = dynamic_cast<EnemyHealth*>(enemyHud);
-
-            if (realEnemyHud)
+            Actor * pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
+            if (pNPC)
             {
-               break;
+               npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
+               playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
             }
          }
       }
-
-      if (realEnemyHud)
-      {
-         reference = realEnemyHud->GetTarget();
-      }
-      if (!reference)
-      {
-         args->args[0].DeleteMember("outObj");
-         return;
-      }
-
-      //if (reference->baseForm->formType == kFormType_NPC)
-      //{
-         Actor * pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
-         if (pNPC)
-         {
-            UInt16 npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
-            UInt16 playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
-
-            //bool isLevelMult = (pNPC->actorData.flags & TESActorBaseData::kFlag_PCLevelMult) == TESActorBaseData::kFlag_PCLevelMult;
-            //if (isLevelMult) {
-            //   npcLevel = (double)pNPC->actorData.level / 1000.0;
-            //}
-            //else {
-            //   npcLevel = (double)pNPC->actorData.level;
-            //}
-
-            GFxValue obj;
-            args->movie->CreateObject(&obj);
-            RegisterNumber(&obj, "EnemyLevel", npcLevel);
-            RegisterNumber(&obj, "PlayerLevel", (double)playerLevel);
-            args->args[0].SetMember("outObj", &obj);
-            return;
-         }
-      //}
-
    }
 
-   args->args[0].DeleteMember("outObj");
+   GFxValue obj;
+   args->movie->CreateObject(&obj);
+   RegisterNumber(&obj, "EnemyLevel", npcLevel);
+   RegisterNumber(&obj, "PlayerLevel", playerLevel);
+   if (args->args[0].HasMember("outObj"))
+   {
+      args->args[0].SetMember("outObj", &obj);
+   }
 }
 
 string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
@@ -2027,7 +2001,9 @@ void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctio
 		GFxValue obj;
 		args->movie->CreateObject(&obj);
 
-		RegisterString(&obj, args->movie, "effectsDescription", name.c_str());
+      name = CAHZUtilities::trim(name);
+
+		RegisterString(&obj, args->movie, "effectsDescription",  name.c_str());
 
 		// Add the object to the scaleform function
 		args->args[0].SetMember("effectsObj", &obj);

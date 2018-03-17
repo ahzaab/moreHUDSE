@@ -48,7 +48,7 @@ AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
 
 // Just initialize to start routing to the console window
-CAHZDebugConsole theDebugConsole;
+//CAHZDebugConsole theDebugConsole;
 
 /**** scaleform functions ****/
 
@@ -306,7 +306,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 340;
+		info->version = 341;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
