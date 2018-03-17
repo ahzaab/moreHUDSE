@@ -574,29 +574,39 @@ bool CAHZScaleform::GetIsKnownEnchantment(TESObjectREFR *targetRef)
    if (pPC && targetRef && (baseForm = targetRef->baseForm) && 
       (baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo)) 
    {
-      //tList<ActiveEffect> * effects = pPC->magicTarget.GetActiveEffects();
-      //for (UInt32 i = 0; i < effects->Count(); i++) {
-        // ActiveEffect* effect = effects->GetNthItem(i);
-         //if (effect->sourceItem == baseForm) { // Check the item
-            EnchantmentItem * enchantment = NULL;
-            TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
-            if (enchantable) { // Check the item for a base enchantment
-               enchantment = enchantable->enchantment;
-            }
-            if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(targetRef->extraData.GetByType(kExtraData_Enchantment)))
-            {
-               enchantment = extraEnchant->enchant;
-            }
+      EnchantmentItem * enchantment = NULL;
+      TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
+      bool wasExtra = false;
+      if (enchantable) { // Check the item for a base enchantment
+         enchantment = enchantable->enchantment;
+      }
+      if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(targetRef->extraData.GetByType(kExtraData_Enchantment)))
+      {
+         wasExtra = true;
+         enchantment = extraEnchant->enchant;
+      }
 
-            if (enchantment && enchantment->data.baseEnchantment)
-            {
-               //if (effect->item->formID == enchantment->formID) {
-               if ((enchantment->data.baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
-                  return true;
-               }
+      if (enchantment)
+      {
+         if ((enchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
+            return true;
+         }
+
+         if (enchantment->data.baseEnchantment)
+         {
+            if ((enchantment->data.baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
+               return true;
             }
-         //}
-      //}
+         }
+      }
+
+      // Its safe to assume that if it not a base enchanted item, that it was enchanted by the player and therefore, they
+      // know the enchantment
+      if (wasExtra)
+      {
+         return true;
+      }
+
    }
    return false;
 }
