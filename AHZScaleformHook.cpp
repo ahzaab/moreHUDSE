@@ -13,6 +13,7 @@
 using namespace std;
 static bool ahzMenuLoaded = false;
 TESObjectREFR *ahzTargetReference = NULL;
+EnemyHealth *ahzrealEnemyHud = NULL;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
 {
@@ -25,6 +26,28 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 		if (view)
 		{
 			InstallAHZHudComponents(view);
+
+         UIStringHolder	* stringHolder = UIStringHolder::GetSingleton();
+         HUDMenu *hudMenu = static_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&stringHolder->hudMenu));
+         if (hudMenu)
+         {
+            for (int i = 0; i < hudMenu->hudComponents.count; i++)
+            {
+               HUDObject *componant;
+               hudMenu->hudComponents.GetNthItem(i, componant);
+               ahzrealEnemyHud = dynamic_cast<EnemyHealth*>(componant);
+               if (ahzrealEnemyHud)
+               {
+                  break;
+               }
+            }
+         }
+
+         if (!ahzrealEnemyHud)
+         {
+            _ERROR("Could not find the enemy hud component!.  The enemy level feature will not work");
+         }
+
 			ahzMenuLoaded = true;
 			return EventResult::kEvent_Abort;
 		}
@@ -61,41 +84,7 @@ void InstallAHZHudComponents(GFxMovieView * view)
 		return;
 	}
 
-	//BSFixedString bs1("Interface/HUDMenu.swf");
-	//BSFixedString bs2("Interface/exported/HUDMenu.gfx");
-	//BSFixedString bs1("HUDMenu.swf");
-	// Determine which file is loaded for the hud menu
-	//if (MenuManager::GetSingleton()->GetMovieView(&bs1))
-	//{
-
-	//GFxValue result;
-
-	//while (!IsDebuggerPresent())
-	//{
-	//	Sleep(10);
-	//}
-
-	//Sleep(1000 * 2);
-
-		args[0].SetString("AHZHudInfo.swf");
-		hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-		
-		//args[0].SetString("exported/AHZHudInfo.swf");
-		//hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-
-		//args[0].SetString("Interface/exported/AHZHudInfo.swf");
-		//hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-	
-		
-	//}
-	//else if (MenuManager::GetSingleton()->GetMovieView(&bs2))
-	//{
-	//	args[0].SetString("AHZHudInfo.swf");
-	//	hudComponent.Invoke("loadMovie", NULL, &args[0], 1);
-	//}
-	//else
-	//{
-	//	_ERROR("No valid HUDMenu movie clip found.  The moreHUD widgets will not be loaded.");
-	//}
+	args[0].SetString("AHZHudInfo.swf");
+	hudComponent.Invoke("loadMovie", &result, &args[0], 1);
 }
 

@@ -136,7 +136,7 @@ class SKSEScaleform_AHZLog : public GFxFunctionHandler
 public:
    virtual void	Invoke(Args * args)
    {
-      _MESSAGE(args->args[0].GetString());
+      _MESSAGE("%s", args->args[0].GetString());
    }
 };
 
@@ -167,6 +167,23 @@ public:
    }
 };
 
+class SKSEScaleform_IsAKnownEnchantedItem : public GFxFunctionHandler
+{
+public:
+   virtual void	Invoke(Args * args)
+   {
+      TESObjectREFR * pTargetReference = CAHZPlayerInfo::GetTargetRef();
+
+      // If the target is not valid or it can't be picked up by the player
+      if (!pTargetReference)
+      {
+         args->result->SetBool(false);
+         return;
+      }
+      args->result->SetBool(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
+   }
+};
+
 bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 {
 	RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
@@ -180,6 +197,9 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	RegisterFunction <SKSEScaleform_GetBookSkillString>(root, view, "GetBookSkillString");
 	RegisterFunction <SKSEScaleform_GetValueToWeightString>(root, view, "GetValueToWeightString");
    RegisterFunction <SKSEScaleform_GetEnemyInformation>(root, view, "GetEnemyInformation");
+   RegisterFunction <SKSEScaleform_IsAKnownEnchantedItem>(root, view, "IsAKnownEnchantedItem");
+   
+
    RegisterFunction <SKSEScaleform_AHZLog>(root, view, "AHZLog");
 	MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
 	return true;
@@ -193,7 +213,7 @@ void EventListener(SKSEMessagingInterface::Message* msg)
       return;
    }
 
-   if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_PostLoadGame)
+   if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_DataLoaded)
    {
       // Read all .mhuf files and load in the lookup tables
       string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
@@ -280,11 +300,13 @@ extern "C"
 	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
 	{
 		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\moreHUDSE.log");
+      gLog.SetPrintLevel(IDebugLog::kLevel_VerboseMessage);
+      gLog.SetLogLevel(IDebugLog::kLevel_Message);
 
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 330;
+		info->version = 342;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
