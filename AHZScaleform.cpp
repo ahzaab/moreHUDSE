@@ -1507,7 +1507,7 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
    PlayerCharacter* pPC = (*g_thePlayer);
    UInt16 npcLevel = 0;
    UInt16 playerLevel = 0;
-
+   //_MESSAGE("%d",GetTickCount());
    if (pPC)
    {
       TESObjectREFR * reference = NULL;
