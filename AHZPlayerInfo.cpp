@@ -103,7 +103,7 @@ UInt32 CAHZPlayerInfo::GetGoldAmount(void)
 
 TESObjectREFR * CAHZPlayerInfo::GetTargetRef()
 {
-	return ahzTargetReference;
+	return g_ahzTargetReference;
 }
 
 bool CAHZPlayerInfo::GetIsInCombat(void)

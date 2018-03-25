@@ -1,13 +1,9 @@
 #pragma once
-#include <string>
 #include "skse64/PapyrusEvents.h"
-#include "skse64/GameMenus.h"
 
-void InstallAHZHudComponents(GFxMovieView * view);
-using namespace std;
-
-extern TESObjectREFR *ahzTargetReference;
-extern EnemyHealth *ahzrealEnemyHud;
+void AHZInstallEnemyHealthUpdateHook();
+UInt16 GetCurrentEnemyLevel();
+extern TESObjectREFR *g_ahzTargetReference;
 
 class AHZEventHandler : public BSTEventSink <MenuOpenCloseEvent> {
 
@@ -17,4 +13,12 @@ class AHZEventHandler : public BSTEventSink <MenuOpenCloseEvent> {
 class AHZCrosshairRefEventHandler : public BSTEventSink <SKSECrosshairRefEvent>
 {
 	EventResult ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher);
+};
+
+
+class SafeEnemyLevelDataHolder: public SafeDataHolder<UInt16>
+{
+public:
+   SafeEnemyLevelDataHolder() {};
+   ~SafeEnemyLevelDataHolder() {};
 };

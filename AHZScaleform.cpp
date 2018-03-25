@@ -1436,99 +1436,85 @@ string CAHZScaleform::GetTargetName(TESForm *thisObject)
 
 	if (!reference)
 	{
-		return name;
-	}
+return name;
+   }
 
-	const char* displayName = reference->extraData.GetDisplayName(reference->baseForm);
+   const char* displayName = reference->extraData.GetDisplayName(reference->baseForm);
 
-	// If the name can be created
-	if (displayName)
-	{
-		name.append(displayName);
-	}
+   // If the name can be created
+   if (displayName)
+   {
+      name.append(displayName);
+   }
 
-	// Use the base name
-	else if (pFullName)
-	{
-		name.append(pFullName->name.data);
-	}
+   // Use the base name
+   else if (pFullName)
+   {
+      name.append(pFullName->name.data);
+   }
 
-	// If this is a soul gem, also get the gem size name
-	if (reference->baseForm->formType == kFormType_SoulGem)
-	{
-		TESSoulGem *gem = DYNAMIC_CAST(reference->baseForm, TESForm, TESSoulGem);
-		if (gem)
-		{
-			char * soulName = NULL;
-			SettingCollectionMap	* settings = *g_gameSettingCollection;
-			switch (gem->soulSize)
-			{
-			case 1: soulName = settings->Get("sSoulLevelNamePetty")->data.s; break;
-			case 2: soulName = settings->Get("sSoulLevelNameLesser")->data.s; break;
-			case 3: soulName = settings->Get("sSoulLevelNameCommon")->data.s; break;
-			case 4: soulName = settings->Get("sSoulLevelNameGreater")->data.s; break;
-			case 5: soulName = settings->Get("sSoulLevelNameGrand")->data.s; break;
-			default: break;
-			}
+   // If this is a soul gem, also get the gem size name
+   if (reference->baseForm->formType == kFormType_SoulGem)
+   {
+      TESSoulGem *gem = DYNAMIC_CAST(reference->baseForm, TESForm, TESSoulGem);
+      if (gem)
+      {
+         char * soulName = NULL;
+         SettingCollectionMap	* settings = *g_gameSettingCollection;
+         switch (gem->soulSize)
+         {
+         case 1: soulName = settings->Get("sSoulLevelNamePetty")->data.s; break;
+         case 2: soulName = settings->Get("sSoulLevelNameLesser")->data.s; break;
+         case 3: soulName = settings->Get("sSoulLevelNameCommon")->data.s; break;
+         case 4: soulName = settings->Get("sSoulLevelNameGreater")->data.s; break;
+         case 5: soulName = settings->Get("sSoulLevelNameGrand")->data.s; break;
+         default: break;
+         }
 
-			if (soulName)
-			{
-				name.append(" (");
-				name.append(soulName);
-				name.append(")");
-			}
-		}
-	}
+         if (soulName)
+         {
+            name.append(" (");
+            name.append(soulName);
+            name.append(")");
+         }
+      }
+   }
 
-	return name;
+   return name;
 };
 
 bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 {
-	if (!theObject)
-		return false;
+   if (!theObject)
+      return false;
 
-	if (theObject->baseForm->GetFormType() != kFormType_Book)
-		return false;
+   if (theObject->baseForm->GetFormType() != kFormType_Book)
+      return false;
 
-	TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
-	if (item && ((item->data.flags & TESObjectBOOK::Data::kType_Read) == TESObjectBOOK::Data::kType_Read))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+   TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+   if (item && ((item->data.flags & TESObjectBOOK::Data::kType_Read) == TESObjectBOOK::Data::kType_Read))
+   {
+      return true;
+   }
+   else
+   {
+      return false;
+   }
 }
 
+static UInt32 lasttargetRef;
 void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 {
    PlayerCharacter* pPC = (*g_thePlayer);
    UInt16 npcLevel = 0;
    UInt16 playerLevel = 0;
-   //_MESSAGE("%d",GetTickCount());
+
    if (pPC)
    {
-      TESObjectREFR * reference = NULL;
-
-      if (ahzrealEnemyHud)
+      npcLevel = GetCurrentEnemyLevel();
+      if (npcLevel >= 1)
       {
-         reference = ahzrealEnemyHud->GetTarget();
-      }
-
-      if (reference)
-      {
-         if (reference->baseForm->GetFormType() == kFormType_NPC ||
-            reference->baseForm->GetFormType() == kFormType_Character)
-         {
-            Actor * pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
-            if (pNPC)
-            {
-               npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
-               playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
-            }
-         }
+         playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
       }
    }
 
