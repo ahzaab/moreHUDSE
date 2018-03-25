@@ -36,6 +36,7 @@
 #include <locale.h>
 #include "AHZConsole.h"
 #include "AHZUtilities.h"
+#include "xbyak/xbyak.h"
 
 using namespace std;
 
@@ -306,7 +307,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 342;
+		info->version = 30403;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
@@ -369,6 +370,19 @@ extern "C"
       // Register listener for the gme loaded event
       g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
 
+      if (!g_branchTrampoline.Create(1024 * 64))
+      {
+         _ERROR("couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
+         return false;
+      }
+
+      if (!g_localTrampoline.Create(1024 * 64, nullptr))
+      {
+         _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
+         return false;
+      }
+
+      AHZInstallEnemyHealthUpdateHook();
 		return true;
 	}
 };
