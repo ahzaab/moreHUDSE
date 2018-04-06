@@ -307,7 +307,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 30403;
+		info->version = 30404;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
@@ -318,7 +318,7 @@ extern "C"
 
 			return false;
 		}
-		else if (skse->runtimeVersion != RUNTIME_VERSION_1_5_23)
+		else if (skse->runtimeVersion != RUNTIME_VERSION_1_5_39)
 		{
 			_ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 
