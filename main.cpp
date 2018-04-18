@@ -137,7 +137,9 @@ class SKSEScaleform_AHZLog : public GFxFunctionHandler
 public:
    virtual void	Invoke(Args * args)
    {
+#if _DEBUG
       _MESSAGE("%s", args->args[0].GetString());
+#endif
    }
 };
 
@@ -307,7 +309,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 30404;
+		info->version = 30405;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
