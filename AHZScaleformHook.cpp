@@ -20,14 +20,14 @@ TESObjectREFR *g_ahzTargetReference;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
 {
-	string menuName(evn->menuName.data);
+   string menuName(evn->menuName.data);
 
-	if ((ahzMenuLoaded == false) && (menuName == "HUD Menu") && (evn->opening))
-	{
-		GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
+   if ((ahzMenuLoaded == false) && (menuName == "HUD Menu") && (evn->opening))
+   {
+      GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
       HUDMenu *hudMenu = dynamic_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&evn->menuName));
-		if (view)
-		{
+      if (view)
+      {
          GFxValue hudComponent;
          GFxValue result;
          GFxValue args[2];
@@ -49,18 +49,18 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 
          args[0].SetString("AHZHudInfo.swf");
          hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-			ahzMenuLoaded = true;
-			return EventResult::kEvent_Abort;
-		}
-	}
+         ahzMenuLoaded = true;
+         return EventResult::kEvent_Abort;
+      }
+   }
 
-	return EventResult::kEvent_Continue;
+   return EventResult::kEvent_Continue;
 }
 
 EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher)
 {
-	g_ahzTargetReference = evn->crosshairRef;
-	return EventResult::kEvent_Continue;
+   g_ahzTargetReference = evn->crosshairRef;
+   return EventResult::kEvent_Continue;
 }
 
 //Unpacked
