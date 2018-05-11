@@ -47,6 +47,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
+#define PLUGIN_VERSION  (30407)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -218,11 +219,18 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
    if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_DataLoaded)
    {
+      _MESSAGE("Processing .mhud Files...");
+
       // Read all .mhuf files and load in the lookup tables
       string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
 
       // Get all .mhud files from the skyrim data folder
       vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+
+      if (!mHudFiles.size())
+      {
+         _MESSAGE("No .mHud file detected");
+      }
 
       // Foreach mhud file, load in the lookup table entries
       vector<string>::iterator p;
@@ -295,6 +303,11 @@ void EventListener(SKSEMessagingInterface::Message* msg)
          #pragma endregion
          /*************************************************************************************************/
       }
+
+      if (mHudFiles.size())
+      {
+         _MESSAGE("%d .mHud file(s) processed", mHudFiles.size());
+      }
    }
 }
 
@@ -309,7 +322,7 @@ extern "C"
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "Ahzaab's moreHUD Plugin";
-		info->version = 30405;
+		info->version = PLUGIN_VERSION;
 
 		// store plugin handle so we can identify ourselves later
 		g_pluginHandle = skse->GetPluginHandle();
@@ -385,6 +398,8 @@ extern "C"
       }
 
       AHZInstallEnemyHealthUpdateHook();
+
+      _MESSAGE("%s -v%d Loaded", "AHZmoreHUDPlugin", PLUGIN_VERSION);
 		return true;
 	}
 };
