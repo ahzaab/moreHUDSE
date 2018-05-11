@@ -1433,13 +1433,15 @@ bool CAHZScaleform::CanPickUp(UInt32 formType)
 string CAHZScaleform::GetTargetName(TESForm *thisObject)
 {
 	string name;
-	TESFullName* pFullName = DYNAMIC_CAST(thisObject, TESForm, TESFullName);
+	
 	TESObjectREFR * reference = AHZGetReference(thisObject);
 
 	if (!reference)
 	{
-return name;
+      return name;
    }
+
+   TESFullName* pFullName = DYNAMIC_CAST(reference->baseForm, TESForm, TESFullName);
 
    const char* displayName = reference->extraData.GetDisplayName(reference->baseForm);
 
@@ -1448,11 +1450,14 @@ return name;
    {
       name.append(displayName);
    }
-
    // Use the base name
    else if (pFullName)
    {
       name.append(pFullName->name.data);
+   }
+   else // second attempt to get the name
+   {
+      name.append(reference->baseForm->GetFullName());
    }
 
    // If this is a soul gem, also get the gem size name
