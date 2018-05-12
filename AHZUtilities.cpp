@@ -4,8 +4,9 @@
 vector<string> CAHZUtilities::GetMHudFileList(string& folder)
 {
    vector<string> names;
-   string search_path = folder + "/*.*";
+   string search_path = folder + "/*.MHUD";
    WIN32_FIND_DATA fd;
+   _MESSAGE("Search the '%s' directory...", folder.c_str());
    HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
    if (hFind != INVALID_HANDLE_VALUE) {
       do {
@@ -14,11 +15,13 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
          if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
             string fileName(fd.cFileName);
             transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
-            size_t found = fileName.find(".MHUD");
-            if (found != string::npos)
-            {
+            //size_t found = fileName.find(".MHUD");
+            //_MESSAGE("-> file '%s'", fileName.c_str());
+           // if (found != string::npos)
+            //{
+               _MESSAGE("--> FOUND '%s'", fileName.c_str());
                names.push_back(fd.cFileName);
-            }
+           // }
          }
       } while (::FindNextFile(hFind, &fd));
       ::FindClose(hFind);
@@ -101,6 +104,7 @@ string & CAHZUtilities::GetSkyrimDataPath()
             0
          );
 
+         s_dataPath.append(skyrimDrive);
          s_dataPath.append(skyrimDir);
          s_dataPath.append("Data\\");
       }
