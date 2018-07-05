@@ -18,6 +18,12 @@
 #include "AHZFormLookup.h"
 #include "AHZUtilities.h"
 
+RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating(0x3BD850);
+
+
+
+RelocAddr<GET_WARMTH_RATING>GetWarmthRating(0x003BD770);
+
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
 //CFF Explorer .text 030300008891FC0303008891FE030300488DB9A0020300488BCFE821A191FF40
@@ -645,6 +651,52 @@ double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
    return 0.0;
 }
 
+double CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
+{
+   if (!armorData->armor)
+      return 0.0;
+
+   InventoryEntryData objDesc(armorData->equipData.pForm, 0);
+
+   // Allocate a dummy list so skyrim does not crash. For armor information
+   // skyrim doesn't appear to need the list
+   objDesc.extendDataList = new tList<BaseExtraList>();
+   if (armorData->equipData.pExtraData)
+   {
+      objDesc.extendDataList->Insert(armorData->equipData.pExtraData);
+   }
+
+   double fRating = GetWarmthRating(objDesc.type);
+
+   // Delete the allocated dummy list
+   delete objDesc.extendDataList;
+
+   // This could be rounded, but the the script decide
+   return mRound(fRating);
+
+   return 0.0;
+}
+
+double CAHZScaleform::GetArmorWarmthRating(TESObjectREFR* targetRef)
+{
+   if (!targetRef || !targetRef->baseForm)
+      return 0.0;
+
+   if (targetRef->baseForm->GetFormType() != kFormType_Armor)
+   {
+      return 0.0;
+   }
+
+   AHZArmorData armorData(targetRef);
+   return GetArmorWarmthRating(&armorData);
+}
+
+double CAHZScaleform::GetPlayerWarmthRating(void)
+{
+
+   return 0.0;
+}
+
 double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
 {
    if (!armorData->armor)
@@ -679,7 +731,7 @@ double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
 double CAHZScaleform::GetTotalActualArmorRating(void)
 {
    double totalRating = 0.0;
-
+   double rating = 0.0;
    // Keep a list of items to make sure they are not added more than once
    // Some items take up more than one slot
    std::list<TESForm*> clist;
@@ -699,6 +751,18 @@ double CAHZScaleform::GetTotalActualArmorRating(void)
       }
    }
    return mRound(totalRating);
+}
+
+double CAHZScaleform::GetTotalWarmthRating(void)
+{
+   PlayerCharacter* pPC = (*g_thePlayer);
+
+   if (!pPC)
+   {
+      return 0.0;
+   }
+
+   return GetActorWarmthRating(pPC, 0.0);
 }
 
 double CAHZScaleform::mRound(double r)
@@ -734,6 +798,42 @@ double CAHZScaleform::GetArmorRatingDiff(TESObjectREFR *thisArmor)
 
    // Get the total
    oldTotalArmorRating = GetTotalActualArmorRating();
+
+   newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
+
+   deltaRating = newTotalArmorRating - oldTotalArmorRating;
+
+   return deltaRating;
+}
+
+double CAHZScaleform::GetWarmthRatingDiff(TESObjectREFR *thisArmor)
+{
+   UInt64 slot = 1;
+   float oldArmorRating = 0.0;
+   float newArmorRating = 0.0;
+   float oldTotalArmorRating = 0.0;
+   float newTotalArmorRating = 0.0;
+   double deltaRating = 0.0;
+   if (!thisArmor)
+      return 0.0;
+
+   // Get the new armor rating
+   AHZArmorData armorData(thisArmor);
+   if (!armorData.armor)
+      return 0.0;
+
+   newArmorRating = GetArmorWarmthRating(&armorData);
+
+   // Get the armor rating from the armor that shares the same slot
+   AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(
+      armorData.armor->bipedObject.GetSlotMask());
+   if (sameSlotData.armor)
+   {
+      oldArmorRating = GetArmorWarmthRating(&sameSlotData);
+   }
+
+   // Get the total
+   oldTotalArmorRating = GetTotalWarmthRating();
 
    newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
 
@@ -2093,6 +2193,10 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    TESObjectREFR * pTargetReference = targetObject;
    float totalArmorOrWeapon = 0.0;
    float difference = 0.0;
+   float totalWarmthRating = 0.0;
+   float warmthDifference = 0.0;
+   bool isSurvivalMode = false;
+   float warmthRating = 0.0;
 
    if (!args)
    {
@@ -2122,11 +2226,27 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    {
       totalArmorOrWeapon = GetTotalActualArmorRating();
       difference = GetArmorRatingDiff(pTargetReference);
+
+      if (IsSurvivalMode())
+      {
+         isSurvivalMode = true;
+         totalWarmthRating = GetTotalWarmthRating();
+         warmthDifference = GetWarmthRatingDiff(pTargetReference);
+         warmthRating = GetArmorWarmthRating(pTargetReference);
+
+
+         _MESSAGE("Total Warmth %g, Warmth Difference %g, Warmth %g", totalWarmthRating, warmthDifference, warmthRating);
+      }
+
    }
 
    // Enter the data into the Scaleform function
    RegisterNumber(&obj, "ratingOrDamage", totalArmorOrWeapon);
    RegisterNumber(&obj, "difference", difference);
+   RegisterNumber(&obj, "totalWarmthRating", totalWarmthRating);
+   RegisterNumber(&obj, "warmthRating", warmthRating);
+   RegisterNumber(&obj, "warmthDifference", warmthDifference);
+   RegisterBoolean(&obj, "isSurvivalMode", isSurvivalMode);
 
    float weight = CALL_MEMBER_FN(pTargetReference, GetWeight)();
    if (pTargetReference->extraData.HasType(kExtraData_Count))
