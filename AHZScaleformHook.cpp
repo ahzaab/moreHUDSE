@@ -20,14 +20,14 @@ TESObjectREFR *g_ahzTargetReference;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
 {
-	string menuName(evn->menuName.data);
+   string menuName(evn->menuName.data);
 
-	if ((ahzMenuLoaded == false) && (menuName == "HUD Menu") && (evn->opening))
-	{
-		GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
+   if ((ahzMenuLoaded == false) && (menuName == "HUD Menu") && (evn->opening))
+   {
+      GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
       HUDMenu *hudMenu = dynamic_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&evn->menuName));
-		if (view)
-		{
+      if (view)
+      {
          GFxValue hudComponent;
          GFxValue result;
          GFxValue args[2];
@@ -49,25 +49,26 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 
          args[0].SetString("AHZHudInfo.swf");
          hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-			ahzMenuLoaded = true;
-			return EventResult::kEvent_Abort;
-		}
-	}
+         ahzMenuLoaded = true;
+         return EventResult::kEvent_Abort;
+      }
+   }
 
-	return EventResult::kEvent_Continue;
+   return EventResult::kEvent_Continue;
 }
 
 EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher)
 {
-	g_ahzTargetReference = evn->crosshairRef;
-	return EventResult::kEvent_Continue;
+   g_ahzTargetReference = evn->crosshairRef;
+   return EventResult::kEvent_Continue;
 }
 
 //Unpacked
-//HxD Raw 49 8B CA E8 48 6F 64 00 48 8D 4D F0 E8 0F 6D 65 00 48 8D 4D 30 E8 06 6D 65 00 66 44 89 65 70 4C
+//HxD Raw 49 8B CA E8 48 6F 64 00 48 8D 4D F0 E8 0F 6D 65 00 48 8D 4D 30 E8 06 6D 65 00 66 44 89 65 70 4C    8814A0
+//HxD Raw 49 8B CA E8 E8 6F 64 00 48 8D 4D F0 E8 AF 6D 65 00 48 8D 4D 30 E8 A6 6D 65 00 66 44 89 65 70 4C -->1.5.39
 //CFF Explorer .text  53 20 48 8B 4B 10 E8 B5 67 64 00 84 C0 0F 84 F4 00 00 00 8B 43 18 24 8F 3C 08 0F 94 C0 88 44 24
 //ida 48 8B C4 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 18 FF FF FF 48 81 EC B0 01 00 00 48 C7 45 A8
-uintptr_t Enemy_Update_Hook_Base = 0x008820A0;
+uintptr_t Enemy_Update_Hook_Base = 0x008829D0;
 //.text:00007FF62B5220A0
 //.text : 00007FF62B5220A0; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //.text:00007FF62B5220A0

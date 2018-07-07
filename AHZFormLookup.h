@@ -29,35 +29,35 @@ using namespace std;
 class CAHZFormLookup
 {
 public:
-	static CAHZFormLookup& Instance();
-	TESForm * GetTESForm(TESObjectREFR * targetReference);
-	void AddScriptVarable(string vmVariableName);
+   static CAHZFormLookup& Instance();
+   TESForm * GetTESForm(TESObjectREFR * targetReference);
+   void AddScriptVarable(string vmVariableName);
    void AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID);
 
-	inline static TESObjectREFR * GetReference(TESForm * theForm)
-	{
-		if (theForm->GetFormType() == kFormType_Reference)
-		{
-			TESObjectREFR *reference = DYNAMIC_CAST(theForm, TESForm, TESObjectREFR);
-			return reference;
-		}
-		else
-		{
-			return NULL;
-		}
-	}
+   inline static TESObjectREFR * GetReference(TESForm * theForm)
+   {
+      if (theForm->GetFormType() == kFormType_Reference)
+      {
+         TESObjectREFR *reference = DYNAMIC_CAST(theForm, TESForm, TESObjectREFR);
+         return reference;
+      }
+      else
+      {
+         return NULL;
+      }
+   }
 
 private:
-	CAHZFormLookup();
-	~CAHZFormLookup();
-	TESForm * GetAttachedForm(TESObjectREFR *form);
-	TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef);
-	static TESForm * GetAttachedForm(TESObjectREFR *form, string variableName);
-	CAHZFormLookup(CAHZFormLookup const&);      // copy ctor is hidden
-	CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
-	std::vector<string> m_scriptVMVariables;
-	std::map<UInt32, UInt32> m_LUT;
-	std::map<string, UInt32> m_modIndexLUT;
+   CAHZFormLookup();
+   ~CAHZFormLookup();
+   TESForm * GetAttachedForm(TESObjectREFR *form);
+   TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef);
+   static TESForm * GetAttachedForm(TESObjectREFR *form, string variableName);
+   CAHZFormLookup(CAHZFormLookup const&);      // copy ctor is hidden
+   CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
+   std::vector<string> m_scriptVMVariables;
+   std::map<UInt32, UInt32> m_LUT;
+   std::map<string, UInt32> m_modIndexLUT;
 };
 
 #define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))
