@@ -33,11 +33,11 @@ extern RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode;
 typedef bool(*_IsSurvivalMode)();
 extern RelocAddr<_IsSurvivalMode> IsSurvivalMode;
 
-typedef float(*GET_WARMTH_RATING)(TESForm* a1);
-extern RelocAddr<GET_WARMTH_RATING> GetWarmthRating;
+typedef float(*GET_ARMOR_WARMTH_RATING)(TESForm* a1);
+extern RelocAddr<GET_ARMOR_WARMTH_RATING> GetArmorWarmthRating_Native;
 
 typedef float(*GET_ACTOR_WARMTH_RATING)(Actor* a1, float s2);
-extern RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating;
+extern RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native;
 
 //3BD850
 
@@ -55,6 +55,7 @@ public:
    static void ProcessEnemyInformation(GFxFunctionHandler::Args *args);
    static bool GetIsKnownEnchantment(TESObjectREFR *targetRef);
    static double GetTotalWarmthRating(void);
+   static double GetArmorWarmthRating(TESObjectREFR* targetRef);
 
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -77,7 +78,6 @@ private:
    static double GetActualDamage(AHZWeaponData *weaponData);
    static double GetActualArmorRating(AHZArmorData* armorData);
    static double GetArmorWarmthRating(AHZArmorData* armorData);
-   static double GetArmorWarmthRating(TESObjectREFR* targetRef);
    static double GetPlayerWarmthRating(void);
    static double GetTotalActualArmorRating(void);
    static double GetArmorRatingDiff(TESObjectREFR *targetArmor);

@@ -47,7 +47,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30408)
+#define PLUGIN_VERSION  (30500)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -133,6 +133,15 @@ public:
    }
 };
 
+class SKSEScaleform_GetTargetWarmthRating : public GFxFunctionHandler
+{
+public:
+   virtual void	Invoke(Args * args)
+   {
+      args->result->SetNumber(CAHZScaleform::GetArmorWarmthRating(CAHZPlayerInfo::GetTargetRef()));
+   }
+};
+
 class SKSEScaleform_AHZLog : public GFxFunctionHandler
 {
 public:
@@ -200,6 +209,7 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
    RegisterFunction <SKSEScaleform_GetArmorWeightClassString>(root, view, "GetArmorWeightClassString");
    RegisterFunction <SKSEScaleform_GetBookSkillString>(root, view, "GetBookSkillString");
    RegisterFunction <SKSEScaleform_GetValueToWeightString>(root, view, "GetValueToWeightString");
+   RegisterFunction <SKSEScaleform_GetTargetWarmthRating>(root, view, "GetTargetWarmthRating");
    RegisterFunction <SKSEScaleform_GetEnemyInformation>(root, view, "GetEnemyInformation");
    RegisterFunction <SKSEScaleform_IsAKnownEnchantedItem>(root, view, "IsAKnownEnchantedItem");
    

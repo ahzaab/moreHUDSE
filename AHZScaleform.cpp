@@ -18,11 +18,151 @@
 #include "AHZFormLookup.h"
 #include "AHZUtilities.h"
 
-RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating(0x3BD850);
+//Unpacked
+//HxD Raw FF C0 83 F8 07 77 0A F3 0F 10 8A 70 01 00 00 EB 54 4C 8D 0D 80 B3 A7 01 C7 44 24 20 00 00 00 00
+RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD850);
 
+//text:00007FF7F661D850; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
+//   .text:00007FF7F661D850
+//   .text : 00007FF7F661D850
+//   .text : 00007FF7F661D850                         sub_7FF7F661D850 proc near; CODE XREF : sub_7FF7F6537280 + 2E↑p
+//   .text : 00007FF7F661D850; sub_7FF7F6B0F2F0 + 129↓p ...
+//   .text:00007FF7F661D850
+//   .text : 00007FF7F661D850                         var_38 = qword ptr - 38h
+//   .text : 00007FF7F661D850                         var_30 = qword ptr - 30h
+//   .text : 00007FF7F661D850                         var_28 = dword ptr - 28h
+//   .text : 00007FF7F661D850                         var_18 = xmmword ptr - 18h
+//   .text : 00007FF7F661D850
+//   .text : 00007FF7F661D850; FUNCTION CHUNK AT.text:00007FF7F661DCD0 SIZE 0000000B BYTES
+//   .text : 00007FF7F661D850; FUNCTION CHUNK AT.text:00007FF7F7605A05 SIZE 0000000C BYTES
+//   .text : 00007FF7F661D850
+//   .text : 00007FF7F661D850; __unwind{ // __CxxFrameHandler3
+//   .text:00007FF7F661D850 40 53                                   push    rbx
+//   .text : 00007FF7F661D852 48 83 EC 50                             sub     rsp, 50h
+//   .text : 00007FF7F661D856 48 C7 44 24 20 FE FF FF + mov[rsp + 58h + var_38], 0FFFFFFFFFFFFFFFEh
+//   .text : 00007FF7F661D85F 0F 29 74 24 40                          movaps[rsp + 58h + var_18], xmm6
+//   .text : 00007FF7F661D864 48 8B D9                                mov     rbx, rcx
+//   .text : 00007FF7F661D867 0F 57 F6                                xorps   xmm6, xmm6
+//   .text : 00007FF7F661D86A E8 91 B7 E1 FF                          call    sub_7FF7F6439000
+//   .text : 00007FF7F661D86F 48 85 C0                                test    rax, rax
+//   .text : 00007FF7F661D872 74 27                                   jz      short loc_7FF7F661D89B
+//   .text : 00007FF7F661D874 48 8D 0D E5 44 21 01                    lea     rcx, ? ? _7WarmthCalcFunc@?A0x527f96c7@@6B@; const `anonymous namespace'::WarmthCalcFunc::`vftable'
+//   .text:00007FF7F661D87B 48 89 4C 24 28                          mov[rsp + 58h + var_30], rcx
+//   .text : 00007FF7F661D880 C7 44 24 30 00 00 00 00                 mov[rsp + 58h + var_28], 0
+//   .text : 00007FF7F661D888
+//   .text : 00007FF7F661D888                         loc_7FF7F661D888 : ; DATA XREF : .rdata : 00007FF7F7CBDB9C↓o
+//   .text : 00007FF7F661D888;   try {
+//   .text:00007FF7F661D888 48 8D 54 24 28                          lea     rdx,[rsp + 58h + var_30]
+//      .text : 00007FF7F661D88D 48 8B C8                                mov     rcx, rax
+//      .text : 00007FF7F661D890 E8 1B 7B E2 FF                          call    sub_7FF7F64453B0
+//      .text : 00007FF7F661D895 F3 0F 10 74 24 30                       movss   xmm6,[rsp + 58h + var_28]
+//      .text : 00007FF7F661D895;
+//} // starts at 7FF7F661D888
+//     .text:00007FF7F661D89B
+//        .text : 00007FF7F661D89B                         loc_7FF7F661D89B : ; CODE XREF : sub_7FF7F661D850 + 22↑j
+//        .text : 00007FF7F661D89B; DATA XREF : .rdata : 00007FF7F7CBDBA4↓o
+//        .text : 00007FF7F661D89B 48 8D 8B B0 00 00 00                    lea     rcx,[rbx + 0B0h]
+//        .text : 00007FF7F661D8A2 48 8B 01                                mov     rax,[rcx]
+//        .text : 00007FF7F661D8A5 BA 4C 00 00 00                          mov     edx, 4Ch
+//        .text : 00007FF7F661D8AA FF 50 08                                call    qword ptr[rax + 8]
+//        .text:00007FF7F661D8AD F3 0F 58 C6                             addss   xmm0, xmm6
+//        .text : 00007FF7F661D8B1 0F 28 74 24 40                          movaps  xmm6,[rsp + 58h + var_18]
+//        .text : 00007FF7F661D8B6 48 83 C4 50                             add     rsp, 50h
+//        .text : 00007FF7F661D8BA 5B                                      pop     rbx
+//        .text : 00007FF7F661D8BB C3                                      retn
+//        .text : 00007FF7F661D8BB; } // starts at 7FF7F661D850
+//   .text:00007FF7F661D8BB                         sub_7FF7F661D850 endp
+//        .text : 00007FF7F661D8BB
+//        .text : 00007FF7F661D8BB; -------------------------------------------------------------------------- -
+//        .text:00007FF7F661D8BC                         algn_7FF7F661D8BC : ; DATA XREF : .pdata : 00007FF7F97668D0↓o
+//        .text : 00007FF7F661D8BC CC CC CC CC                             align 20h
 
+//Unpacked 
+//Hxd Raw F0 44 0F 28 44 24 30 0F 28 C6 0F 28 74 24 50 48 83 C4 60 5F C3 0F 1F 00 7D E2 3B 00 7D E2 3B 00
+RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD770);
 
-RelocAddr<GET_WARMTH_RATING>GetWarmthRating(0x003BD770);
+//text:00007FF7F661D770
+//   .text : 00007FF7F661D770; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
+//   .text:00007FF7F661D770
+//   .text : 00007FF7F661D770
+//   .text : 00007FF7F661D770; float __fastcall GetWarmth(TESForm *a1)
+//   .text:00007FF7F661D770                         GetWarmth       proc near; CODE XREF : sub_7FF7F661DF90 + 11↓p
+//   .text : 00007FF7F661D770; GetTotalArmorAndWarmth + 1FB↓p ...
+//   .text:00007FF7F661D770
+//   .text : 00007FF7F661D770                         var_38 = qword ptr - 38h
+//   .text : 00007FF7F661D770                         var_30 = qword ptr - 30h
+//   .text : 00007FF7F661D770                         var_28 = qword ptr - 28h
+//   .text : 00007FF7F661D770                         var_18 = xmmword ptr - 18h
+//   .text : 00007FF7F661D770                         arg_0 = byte ptr  8
+//   .text : 00007FF7F661D770                         arg_8 = dword ptr  10h
+//   .text : 00007FF7F661D770                         arg_10 = qword ptr  18h
+//   .text : 00007FF7F661D770
+//   .text : 00007FF7F661D770 48 83 EC 58                             sub     rsp, 58h
+//   .text : 00007FF7F661D774 0F B6 41 1A                             movzx   eax, byte ptr[rcx + 1Ah]
+//   .text : 00007FF7F661D778 0F 29 74 24 40                          movaps[rsp + 58h + var_18], xmm6
+//   .text : 00007FF7F661D77D 0F 57 F6                                xorps   xmm6, xmm6
+//   .text : 00007FF7F661D780 83 F8 1A                                cmp     eax, 1Ah
+//   .text : 00007FF7F661D783 74 1B                                   jz      short loc_7FF7F661D7A0
+//   .text : 00007FF7F661D785 83 F8 1F                                cmp     eax, 1Fh
+//   .text : 00007FF7F661D788 0F 85 A1 00 00 00                       jnz     loc_7FF7F661D82F
+//   .text : 00007FF7F661D78E F3 0F 10 05 B2 37 A4 01                 movss   xmm0, cs : dword_7FF7F8060F48
+//   .text : 00007FF7F661D796 0F 28 74 24 40                          movaps  xmm6, [rsp + 58h + var_18]
+//   .text : 00007FF7F661D79B 48 83 C4 58                             add     rsp, 58h
+//   .text : 00007FF7F661D79F C3                                      retn
+//   .text : 00007FF7F661D7A0; -------------------------------------------------------------------------- -
+//   .text:00007FF7F661D7A0
+//   .text : 00007FF7F661D7A0                         loc_7FF7F661D7A0 : ; CODE XREF : GetWarmth + 13↑j
+//   .text : 00007FF7F661D7A0 48 8D 05 E9 0B A4 01                    lea     rax, off_7FF7F805E390
+//   .text:00007FF7F661D7A7 C7 44 24 68 00 00 00 00                 mov[rsp + 58h + arg_8], 0
+//   .text : 00007FF7F661D7AF 48 89 44 24 70                          mov[rsp + 58h + arg_10], rax
+//   .text : 00007FF7F661D7B4 48 8D 54 24 20                          lea     rdx, [rsp + 58h + var_38]
+//   .text : 00007FF7F661D7B9 48 8D 44 24 60                          lea     rax, [rsp + 58h + arg_0]
+//   .text : 00007FF7F661D7BE 48 81 C1 D8 01 00 00                    add     rcx, 1D8h
+//   .text : 00007FF7F661D7C5 48 89 44 24 20                          mov[rsp + 58h + var_38], rax
+//   .text : 00007FF7F661D7CA 48 8D 44 24 68                          lea     rax, [rsp + 58h + arg_8]
+//   .text : 00007FF7F661D7CF 48 89 44 24 28                          mov[rsp + 58h + var_30], rax
+//   .text : 00007FF7F661D7D4 48 8D 44 24 70                          lea     rax, [rsp + 58h + arg_10]
+//   .text : 00007FF7F661D7D9 48 89 44 24 30                          mov[rsp + 58h + var_28], rax
+//   .text : 00007FF7F661D7DE E8 8D 02 00 00                          call    sub_7FF7F661DA70
+//   .text : 00007FF7F661D7E3 8B 54 24 68                             mov     edx, [rsp + 58h + arg_8]
+//   .text : 00007FF7F661D7E7 85 D2                                   test    edx, edx
+//   .text : 00007FF7F661D7E9 74 44                                   jz      short loc_7FF7F661D82F
+//   .text : 00007FF7F661D7EB 48 8B 4C 24 70                          mov     rcx, [rsp + 58h + arg_10]
+//   .text : 00007FF7F661D7F0 F6 C2 01                                test    dl, 1
+//   .text : 00007FF7F661D7F3 74 08                                   jz      short loc_7FF7F661D7FD
+//   .text:00007FF7F661D7F5 48 8B 01                                mov     rax, [rcx]
+//   .text : 00007FF7F661D7F8 F3 0F 10 70 08                          movss   xmm6, dword ptr[rax + 8]
+//   .text:00007FF7F661D7FD
+//   .text : 00007FF7F661D7FD                         loc_7FF7F661D7FD : ; CODE XREF : GetWarmth + 83↑j
+//   .text : 00007FF7F661D7FD F6 C2 02                                test    dl, 2
+//   .text : 00007FF7F661D800 74 09                                   jz      short loc_7FF7F661D80B
+//   .text:00007FF7F661D802 48 8B 41 08                             mov     rax, [rcx + 8]
+//   .text:00007FF7F661D806 F3 0F 58 70 08                          addss   xmm6, dword ptr[rax + 8]
+//   .text:00007FF7F661D80B
+//   .text : 00007FF7F661D80B                         loc_7FF7F661D80B : ; CODE XREF : GetWarmth + 90↑j
+//   .text : 00007FF7F661D80B F6 C2 04                                test    dl, 4
+//   .text : 00007FF7F661D80E 74 09                                   jz      short loc_7FF7F661D819
+//   .text:00007FF7F661D810 48 8B 41 10                             mov     rax, [rcx + 10h]
+//   .text : 00007FF7F661D814 F3 0F 58 70 08                          addss   xmm6, dword ptr[rax + 8]
+//   .text:00007FF7F661D819
+//   .text : 00007FF7F661D819                         loc_7FF7F661D819 : ; CODE XREF : GetWarmth + 9E↑j
+//   .text : 00007FF7F661D819 F6 C2 08                                test    dl, 8
+//   .text:00007FF7F661D81C 74 09                                   jz      short loc_7FF7F661D827
+//   .text:00007FF7F661D81E 48 8B 41 18                             mov     rax, [rcx + 18h]
+//   .text : 00007FF7F661D822 F3 0F 58 70 08                          addss   xmm6, dword ptr[rax + 8]
+//   .text:00007FF7F661D827
+//   .text : 00007FF7F661D827                         loc_7FF7F661D827 : ; CODE XREF : GetWarmth + AC↑j
+//   .text : 00007FF7F661D827 F3 0F 59 35 01 37 A4 01                 mulss   xmm6, cs : dword_7FF7F8060F30
+//   .text : 00007FF7F661D82F
+//   .text : 00007FF7F661D82F                         loc_7FF7F661D82F : ; CODE XREF : GetWarmth + 18↑j
+//   .text : 00007FF7F661D82F; GetWarmth + 79↑j
+//   .text:00007FF7F661D82F 0F 28 C6                                movaps  xmm0, xmm6
+//   .text : 00007FF7F661D832 0F 28 74 24 40                          movaps  xmm6, [rsp + 58h + var_18]
+//   .text : 00007FF7F661D837 48 83 C4 58                             add     rsp, 58h
+//   .text : 00007FF7F661D83B C3                                      retn
+//   .text : 00007FF7F661D83B                         GetWarmth       endp
+//   .text : 00007FF7F661D83B
+//   .text : 00007FF7F661D83B; -------------------------------------------------------------------------- -
 
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
@@ -32,7 +172,7 @@ RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DAF60);
 //Unpacked
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 AD B1 A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8 -->1.5.39
-//CFF Explorer .text 8465024889442438C744244000000000488B014533C0488D542438FF5008C743
+//CFF Explorer .text 8B65024889442438C744244000000000488B014533C0488D542438FF5008C743
 RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00893180);
 
 // Base Address = 7FF690BE0000
@@ -666,7 +806,7 @@ double CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
       objDesc.extendDataList->Insert(armorData->equipData.pExtraData);
    }
 
-   double fRating = GetWarmthRating(objDesc.type);
+   double fRating = GetArmorWarmthRating_Native(objDesc.type);
 
    // Delete the allocated dummy list
    delete objDesc.extendDataList;
@@ -682,7 +822,7 @@ double CAHZScaleform::GetArmorWarmthRating(TESObjectREFR* targetRef)
    if (!targetRef || !targetRef->baseForm)
       return 0.0;
 
-   if (targetRef->baseForm->GetFormType() != kFormType_Armor)
+   if (targetRef->baseForm->GetFormType() != kFormType_Armor || !IsSurvivalMode())
    {
       return 0.0;
    }
@@ -762,7 +902,7 @@ double CAHZScaleform::GetTotalWarmthRating(void)
       return 0.0;
    }
 
-   return GetActorWarmthRating(pPC, 0.0);
+   return GetActorWarmthRating_Native(pPC, 0.0);
 }
 
 double CAHZScaleform::mRound(double r)
@@ -2233,9 +2373,6 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
          totalWarmthRating = GetTotalWarmthRating();
          warmthDifference = GetWarmthRatingDiff(pTargetReference);
          warmthRating = GetArmorWarmthRating(pTargetReference);
-
-
-         _MESSAGE("Total Warmth %g, Warmth Difference %g, Warmth %g", totalWarmthRating, warmthDifference, warmthRating);
       }
 
    }
