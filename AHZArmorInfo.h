@@ -6,12 +6,14 @@ class AHZArmorData
 public:
 	EquipData equipData;
 	TESObjectARMO *armor;
+	TESObjectLIGH *torch;
 
 	AHZArmorData(void)
 	{
 		equipData.pForm = NULL;
 		equipData.pExtraData = NULL;
 		armor = NULL;
+		torch = NULL;
 	}
 
 	AHZArmorData(TESObjectREFR *thisObject)
@@ -21,12 +23,14 @@ public:
 			equipData.pForm = thisObject->baseForm;
 			equipData.pExtraData = &thisObject->extraData;
 			armor = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectARMO);
+			torch = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectLIGH);
 		}
 		else
 		{
 			equipData.pForm = NULL;
 			equipData.pExtraData = NULL;
 			armor = NULL;
+			torch = NULL;
 		}
 	}
 

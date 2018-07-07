@@ -48,7 +48,14 @@ AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(UInt32 slotMask)
 			data.equipData = pContainerChanges->FindEquipped(matcher);
 			if (data.equipData.pForm)
 			{
-				data.armor = DYNAMIC_CAST(data.equipData.pForm, TESForm, TESObjectARMO);
+            if (data.equipData.pForm->GetFormType() == kFormType_Armor)
+            {
+               data.armor = DYNAMIC_CAST(data.equipData.pForm, TESForm, TESObjectARMO);
+            }
+            if (data.equipData.pForm->GetFormType() == kFormType_Light)
+            {
+               data.torch = DYNAMIC_CAST(data.equipData.pForm, TESForm, TESObjectLIGH);
+            }
 			}
 		}
 	}
