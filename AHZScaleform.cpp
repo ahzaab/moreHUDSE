@@ -1843,7 +1843,7 @@ string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * st
    //<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
 
    // Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
-   std::regex rgx(R"(^(<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="\$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(?:<\/FONT><FONT FACE="\$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(<\/FONT>([\w\s]+|)<\/P><\/TEXTFORMAT>)$)");
+   std::regex rgx(R"(^(<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(?:<\/FONT><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(<\/FONT>([\w\s]+|)<\/P><\/TEXTFORMAT>)$)");
    std::smatch match;
    string s = stringFromHUD;
    const string cs = const_cast<string &>(s);
@@ -2417,6 +2417,10 @@ void CAHZScaleform::BuildIngredientObject(IngredientItem* ingredient, GFxFunctio
    }
 
    string strings[4];
+
+   // Not all ingredients have 4 effects
+   UInt32 effectsCount = ingredient->effectItemList.count;
+
    for (int i = 0; i < 4; i++)
    {
       strings[i].clear();
@@ -2429,17 +2433,25 @@ void CAHZScaleform::BuildIngredientObject(IngredientItem* ingredient, GFxFunctio
             TESFullName* pFullName = DYNAMIC_CAST(pEI->mgef, TESForm, TESFullName);
             if (pFullName)
             {
-               strings[i].append(pFullName->name.data);
+               strings[i].append(pFullName->name.data); 
             }
          }
       }
    }
    GFxValue obj2;
    args->movie->CreateObject(&obj2);
-   RegisterString(&obj2, args->movie, "effect1", strings[0].c_str());
-   RegisterString(&obj2, args->movie, "effect2", strings[1].c_str());
-   RegisterString(&obj2, args->movie, "effect3", strings[2].c_str());
-   RegisterString(&obj2, args->movie, "effect4", strings[3].c_str());
+
+   if (effectsCount >= 1)
+      RegisterString(&obj2, args->movie, "effect1", strings[0].c_str());
+
+   if (effectsCount >= 2)
+      RegisterString(&obj2, args->movie, "effect2", strings[1].c_str());
+
+   if (effectsCount >= 3)
+      RegisterString(&obj2, args->movie, "effect3", strings[2].c_str());
+
+   if (effectsCount >= 4)
+      RegisterString(&obj2, args->movie, "effect4", strings[3].c_str());
    args->args[0].SetMember("ingredientObj", &obj2);
 };
 
