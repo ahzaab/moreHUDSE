@@ -57,6 +57,7 @@ public:
    static double GetTotalWarmthRating(void);
    static double GetArmorWarmthRating(TESObjectREFR* targetRef);
 
+
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
       const std::string& replace);
