@@ -47,7 +47,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30501)
+#define PLUGIN_VERSION  (30502)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -343,7 +343,7 @@ extern "C"
 
          return false;
       }
-      else if (skse->runtimeVersion != RUNTIME_VERSION_1_5_39)
+      else if (skse->runtimeVersion != (MAKE_EXE_VERSION(1, 5, 50)))
       {
          _ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 
