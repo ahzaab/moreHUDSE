@@ -1,5 +1,7 @@
 ﻿#include <wchar.h>
 #include <stdlib.h>
+#include <sstream>
+#include <iostream>
 #include <list>
 #include <algorithm>
 #include "skse64/GameReferences.h"
@@ -20,7 +22,7 @@
 
 //Unpacked
 //HxD Raw FF C0 83 F8 07 77 0A F3 0F 10 8A 70 01 00 00 EB 54 4C 8D 0D 80 B3 A7 01 C7 44 24 20 00 00 00 00
-RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD850);
+RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD7E0);
 
 //text:00007FF7F661D850; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //   .text:00007FF7F661D850
@@ -79,7 +81,7 @@ RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD850);
 
 //Unpacked 
 //Hxd Raw F0 44 0F 28 44 24 30 0F 28 C6 0F 28 74 24 50 48 83 C4 60 5F C3 0F 1F 00 7D E2 3B 00 7D E2 3B 00
-RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD770);
+RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD700);
 
 //text:00007FF7F661D770
 //   .text : 00007FF7F661D770; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -167,13 +169,14 @@ RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD770);
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
 //CFF Explorer .text 030300008891FC0303008891FE030300488DB9A0020300488BCFE821A191FF40
-RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DAF60);
+RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DACA0);
 
 //Unpacked
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 AD B1 A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8 -->1.5.39
+//HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 FD B3 A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8 -->1.5.50
 //CFF Explorer .text 8B65024889442438C744244000000000488B014533C0488D542438FF5008C743
-RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00893180);
+RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00892EC0);
 
 // Base Address = 7FF690BE0000
 //text:00007FF691471320; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -516,9 +519,10 @@ RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00893180);
 //HxD Raw 1C 91 00 00 00 48 8B 0D 2C 7F 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.16
 //HxD Raw 1C 91 00 00 00 48 8B 0D FC 7E 6B 02 E8 4F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.23
 //HxD Raw 1C 91 00 00 00 48 8B 0D FC 85 6B 02 E8 9F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.39
+//HxD Raw 1C 91 00 00 00 48 8B 0D BC 88 6B 02 E8 3F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.50
 //CFF Explorer .text F6C701742740F6C7047513488B0D4E507C02488B01488BD3FF506090EB0EBA38 --> 1.5.16
 //CFF Explorer .text F6C701742740F6C7047513488B0D1E507C02488B01488BD3FF506090EB0EBA38 --> 1.5.23
-RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x008935A0);
+RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x008932E0);
 
 // Base Address = 7FF690BE0000
 //.text:00007FF691471740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -1829,75 +1833,168 @@ string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
 
 string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated)
 {
-   string desc;
+	string desc;
 
-   if (!theObject)
-      return desc;
+	if (!theObject)
+		return desc;
 
-   if (!theObject->baseForm)
-      return desc;
+	if (!theObject->baseForm)
+		return desc;
 
-   if (!stringFromHUD)
-      return desc;
+	if (!stringFromHUD)
+		return desc;
 
-   //<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
+	//<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
 
-   // Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
-   std::regex rgx(R"(^(<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(?:<\/FONT><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(<\/FONT>([\w\s]+|)<\/P><\/TEXTFORMAT>)$)");
-   std::smatch match;
-   string s = stringFromHUD;
-   const string cs = const_cast<string &>(s);
+	// Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
+	std::regex rgx(R"(\s+([0-9]*\.?[0-9]+))");
+	std::smatch match;
+	string s = stringFromHUD;
+	const string cs = const_cast<string &>(s);
+	vector<string> parts;
 
-   if (regex_search(cs.begin(), cs.end(), match, rgx))
-   {
-      if (match.size() < 7)
-      {
-         return desc;
-      }
+	while (regex_search(s, match, rgx))
+	{
+		if (!match.size())
+		{
+			return desc;
+		}
 
-      // The fixed positions of the matches (containing groups)
-      string weight = match[3];
-      string value = match[5];
-      char *end;
+		parts.push_back(match[0]);
 
-      float weightValue = strtof(weight.c_str(), &end);
-      float valueValue = strtof(value.c_str(), &end);
+		s = match.suffix();
+	}
 
-      // Don't show a neg or 0 ratio, its pointless
-      if (weightValue <= 0.0 || valueValue <= 0.0)
-      {
-         return desc;
-      }
+	if (parts.size() < 2)
+	{
+		return desc;
+	}
 
-      float vW = valueValue / weightValue;
+	// The fixed positions of the matches (containing groups)
+	string weight = parts[parts.size() - 2];
+	string value = parts[parts.size() - 1];
+	char *end;
 
-      // Add the VW label
-      desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-      desc.append(vmTranslated);
-      desc.append(" <\\FONT>");
+	float weightValue = strtof(weight.c_str(), &end);
+	float valueValue = strtof(value.c_str(), &end);
 
-      char floatHold[64];
-      size_t size = 64;
+	// Don't show a neg or 0 ratio, its pointless
+	if (weightValue <= 0.0 || valueValue <= 0.0)
+	{
+		return desc;
+	}
 
-      //Rounding trick
-      sprintf_s(floatHold, size, "%.2f", vW);
-      vW = strtof(floatHold, &end);
+	float vW = valueValue / weightValue;
 
-      if (vW < 1.0)
-      {
-         sprintf_s(floatHold, size, "%.1g", vW);
-      }
-      else
-      {
-         sprintf_s(floatHold, size, "%.0f", vW);
-      }
+	// Add the VW label
+	desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+	desc.append(vmTranslated);
+	desc.append(" <\\FONT>");
 
-      desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
-      desc.append(floatHold);
-      desc.append("<\\FONT>");
-   }
+	char floatHold[64];
+	size_t size = 64;
 
-   return desc;
+	//Rounding trick
+	sprintf_s(floatHold, size, "%.2f", vW);
+	vW = strtof(floatHold, &end);
+
+	if (vW < 1.0)
+	{
+		sprintf_s(floatHold, size, "%.1g", vW);
+	}
+	else
+	{
+		sprintf_s(floatHold, size, "%.0f", vW);
+	}
+
+	desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+	desc.append(floatHold);
+	desc.append("<\\FONT>");
+
+	return desc;
+
+
+	//string desc;
+
+	//if (!theObject)
+	//	return desc;
+
+	//if (!theObject->baseForm)
+	//	return desc;
+
+	//if (!stringFromHUD)
+	//	return desc;
+
+	//char *end;
+	//float weightValue = 0.0;
+	//float valueValue = 0.0;
+	//std::istringstream iss(stringFromHUD);
+	//std::string throwaway;
+
+	//vector<string> parts;
+	//int i = 0;
+	//// Get the weight and value from the HUD text since there is no decoded way (reliably) to get the value for all forms and references
+	//do 
+	//{
+	//	parts.push_back("");
+	//} while (iss >> parts[i++]); // stream the different fields.  THe weight and height are the last
+	//
+	//if (parts.size() < 4)
+	//{
+	//	return desc;
+	//}
+
+	//// Remove the last empty string if one exists
+	//if (parts[parts.size() - 1] == "")
+	//{
+	//	parts.pop_back();
+	//}
+
+	//// check the size again
+	//if (parts.size() < 4)
+	//{
+	//	return desc;
+	//}
+
+	//// The last value should be the "Value"
+	//// The third from last should be the weight
+	//weightValue = atof(parts[parts.size() - 3].c_str());
+	//valueValue = atof(parts[parts.size() - 1].c_str());
+
+	//// Don't show a neg or 0 ratio, its pointless
+	//if ((mRound(weightValue * 100) / 100) <= 0.0 || (mRound(valueValue * 100) / 100) <= 0.0)
+	//{
+	//	return desc;
+	//}
+
+	//float vW = valueValue / weightValue;
+
+	//// Add the VW label
+	//desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+	//desc.append(vmTranslated);
+	//desc.append(" <\\FONT>");
+
+	//char floatHold[64];
+	//size_t size = 64;
+
+	////Rounding trick
+	//sprintf_s(floatHold, size, "%.2f", vW);
+	//vW = strtof(floatHold, &end);
+
+	//if (vW < 1.0)
+	//{
+	//	sprintf_s(floatHold, size, "%.1g", vW);
+	//}
+	//else
+	//{
+	//	sprintf_s(floatHold, size, "%.0f", vW);
+	//}
+
+	//desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+	//desc.append(floatHold);
+	//desc.append("<\\FONT>");
+ //  
+	//return desc;
 };
 
 string CAHZScaleform::GetBookSkill(TESObjectREFR *theObject)
