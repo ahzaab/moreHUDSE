@@ -1,5 +1,7 @@
 ﻿#include <wchar.h>
 #include <stdlib.h>
+#include <sstream>
+#include <iostream>
 #include <list>
 #include <algorithm>
 #include "skse64/GameReferences.h"
@@ -1831,75 +1833,168 @@ string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
 
 string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated)
 {
-   string desc;
+	string desc;
 
-   if (!theObject)
-      return desc;
+	if (!theObject)
+		return desc;
 
-   if (!theObject->baseForm)
-      return desc;
+	if (!theObject->baseForm)
+		return desc;
 
-   if (!stringFromHUD)
-      return desc;
+	if (!stringFromHUD)
+		return desc;
 
-   //<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
+	//<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">WEIGHT </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">0.5</FONT><FONT FACE="$EverywhereMediumFont" SIZE="15" COLOR="#999999" KERNING="0">      VALUE </FONT><FONT FACE="$EverywhereBoldFont" SIZE="24" COLOR="#FFFFFF" KERNING="0">21</FONT></P></TEXTFORMAT>
 
-   // Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
-   std::regex rgx(R"(^(<TEXTFORMAT INDENT="0" LEFTMARGIN="0" RIGHTMARGIN="0" LEADING="2"><P ALIGN="CENTER"><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(?:<\/FONT><FONT FACE="\$EverywhereMediumFont" SIZE="\d.+" COLOR="#999999" KERNING="0">)([\W\w\s]+)(?:<\/FONT><FONT FACE="\$EverywhereBoldFont" SIZE="\d.+" COLOR="#FFFFFF" KERNING="0">)((?:[0-9]+\.[0-9]*)|(?:[0-9]*\.[0-9]+)|(?:[0-9]+))(<\/FONT>([\w\s]+|)<\/P><\/TEXTFORMAT>)$)");
-   std::smatch match;
-   string s = stringFromHUD;
-   const string cs = const_cast<string &>(s);
+	// Using regex from the HUD string to extract the value and weight values.  The SKSE version are either broken or unreliable
+	std::regex rgx(R"(\s+([0-9]*\.?[0-9]+))");
+	std::smatch match;
+	string s = stringFromHUD;
+	const string cs = const_cast<string &>(s);
+	vector<string> parts;
 
-   if (regex_search(cs.begin(), cs.end(), match, rgx))
-   {
-      if (match.size() < 7)
-      {
-         return desc;
-      }
+	while (regex_search(s, match, rgx))
+	{
+		if (!match.size())
+		{
+			return desc;
+		}
 
-      // The fixed positions of the matches (containing groups)
-      string weight = match[3];
-      string value = match[5];
-      char *end;
+		parts.push_back(match[0]);
 
-      float weightValue = strtof(weight.c_str(), &end);
-      float valueValue = strtof(value.c_str(), &end);
+		s = match.suffix();
+	}
 
-      // Don't show a neg or 0 ratio, its pointless
-      if (weightValue <= 0.0 || valueValue <= 0.0)
-      {
-         return desc;
-      }
+	if (parts.size() < 2)
+	{
+		return desc;
+	}
 
-      float vW = valueValue / weightValue;
+	// The fixed positions of the matches (containing groups)
+	string weight = parts[parts.size() - 2];
+	string value = parts[parts.size() - 1];
+	char *end;
 
-      // Add the VW label
-      desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-      desc.append(vmTranslated);
-      desc.append(" <\\FONT>");
+	float weightValue = strtof(weight.c_str(), &end);
+	float valueValue = strtof(value.c_str(), &end);
 
-      char floatHold[64];
-      size_t size = 64;
+	// Don't show a neg or 0 ratio, its pointless
+	if (weightValue <= 0.0 || valueValue <= 0.0)
+	{
+		return desc;
+	}
 
-      //Rounding trick
-      sprintf_s(floatHold, size, "%.2f", vW);
-      vW = strtof(floatHold, &end);
+	float vW = valueValue / weightValue;
 
-      if (vW < 1.0)
-      {
-         sprintf_s(floatHold, size, "%.1g", vW);
-      }
-      else
-      {
-         sprintf_s(floatHold, size, "%.0f", vW);
-      }
+	// Add the VW label
+	desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+	desc.append(vmTranslated);
+	desc.append(" <\\FONT>");
 
-      desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
-      desc.append(floatHold);
-      desc.append("<\\FONT>");
-   }
+	char floatHold[64];
+	size_t size = 64;
 
-   return desc;
+	//Rounding trick
+	sprintf_s(floatHold, size, "%.2f", vW);
+	vW = strtof(floatHold, &end);
+
+	if (vW < 1.0)
+	{
+		sprintf_s(floatHold, size, "%.1g", vW);
+	}
+	else
+	{
+		sprintf_s(floatHold, size, "%.0f", vW);
+	}
+
+	desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+	desc.append(floatHold);
+	desc.append("<\\FONT>");
+
+	return desc;
+
+
+	//string desc;
+
+	//if (!theObject)
+	//	return desc;
+
+	//if (!theObject->baseForm)
+	//	return desc;
+
+	//if (!stringFromHUD)
+	//	return desc;
+
+	//char *end;
+	//float weightValue = 0.0;
+	//float valueValue = 0.0;
+	//std::istringstream iss(stringFromHUD);
+	//std::string throwaway;
+
+	//vector<string> parts;
+	//int i = 0;
+	//// Get the weight and value from the HUD text since there is no decoded way (reliably) to get the value for all forms and references
+	//do 
+	//{
+	//	parts.push_back("");
+	//} while (iss >> parts[i++]); // stream the different fields.  THe weight and height are the last
+	//
+	//if (parts.size() < 4)
+	//{
+	//	return desc;
+	//}
+
+	//// Remove the last empty string if one exists
+	//if (parts[parts.size() - 1] == "")
+	//{
+	//	parts.pop_back();
+	//}
+
+	//// check the size again
+	//if (parts.size() < 4)
+	//{
+	//	return desc;
+	//}
+
+	//// The last value should be the "Value"
+	//// The third from last should be the weight
+	//weightValue = atof(parts[parts.size() - 3].c_str());
+	//valueValue = atof(parts[parts.size() - 1].c_str());
+
+	//// Don't show a neg or 0 ratio, its pointless
+	//if ((mRound(weightValue * 100) / 100) <= 0.0 || (mRound(valueValue * 100) / 100) <= 0.0)
+	//{
+	//	return desc;
+	//}
+
+	//float vW = valueValue / weightValue;
+
+	//// Add the VW label
+	//desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+	//desc.append(vmTranslated);
+	//desc.append(" <\\FONT>");
+
+	//char floatHold[64];
+	//size_t size = 64;
+
+	////Rounding trick
+	//sprintf_s(floatHold, size, "%.2f", vW);
+	//vW = strtof(floatHold, &end);
+
+	//if (vW < 1.0)
+	//{
+	//	sprintf_s(floatHold, size, "%.1g", vW);
+	//}
+	//else
+	//{
+	//	sprintf_s(floatHold, size, "%.0f", vW);
+	//}
+
+	//desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+	//desc.append(floatHold);
+	//desc.append("<\\FONT>");
+ //  
+	//return desc;
 };
 
 string CAHZScaleform::GetBookSkill(TESObjectREFR *theObject)
