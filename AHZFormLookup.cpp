@@ -255,7 +255,7 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
          UInt32 baseForm = (baseFormID & 0x00FFFFFF) | baseModIndex;
          UInt32 targetForm = (targetFormID & 0x00FFFFFF) | targetModIndex;
          // Load into map if the entry does not already exist
-         if (m_LUT.find(`) == m_LUT.end())
+         if (m_LUT.find(baseForm) == m_LUT.end())
          {
             m_LUT[baseForm] = targetForm;
             _VMESSAGE("ACTI BASE ID:%08X, ACTI Targ ID:%08X", baseForm, targetForm);

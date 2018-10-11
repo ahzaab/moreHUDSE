@@ -1,5 +1,6 @@
 scriptname AHZConfigMenu extends SKI_ConfigBase
 
+import FISSfactory
 
 GlobalVariable Property AHZBottomWidgetXPercent  Auto  
 GlobalVariable Property AHZBottomWidgetYPercent  Auto  
@@ -168,7 +169,7 @@ endEvent
 
 event OnConfigOpen()
 	_uninstallMod = false;
-	;/
+	
 	ValidatePapyrusUtil = PapyrusUtil.getVersion()>31
 	if ValidatePapyrusUtil
 		saConfigs = JSONUtil.JsonInFolder("..\\moreHUD\\")
@@ -180,7 +181,7 @@ event OnConfigOpen()
 			endIf
 		endWhile
 	endIf
-	/;
+	
 endEvent
 
 event OnConfigClose()
@@ -792,10 +793,10 @@ event OnOptionHighlight(int a_option)
 	endif	
 
 endEvent
-;/
+
 function FISS_SAVE()
 
-	fissinterface fiss = fissfactory.getFISS()
+	fissinterface fiss = FISSfactory.getFISS()
 	if !fiss
 		debug.MessageBox("$wHUD_FissMiss")
 		return 
@@ -825,6 +826,7 @@ function FISS_SAVE()
 	fiss.saveInt("AHZEnemyLevelMin", AHZEnemyLevelMin.GetValueInt())
 	fiss.saveInt("AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
 	fiss.saveInt("AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt())
+	fiss.saveInt("AHZDisplayDelay", AHZDisplayDelay.GetValueInt())
 	fiss.saveFloat("AHZBottomWidgetXPercent", AHZBottomWidgetXPercent.GetValue())
 	fiss.saveFloat("AHZBottomWidgetYPercent", AHZBottomWidgetYPercent.GetValue())
 	fiss.saveFloat("AHZSideWidgetXPercent", AHZSideWidgetXPercent.GetValue())
@@ -875,6 +877,7 @@ function FISS_LOAD()
 		AHZEnemyLevelMin.SetValueInt(fiss.loadInt("AHZEnemyLevelMin"))
 		AHZShowEnemyLevel.SetValueInt(fiss.loadInt("AHZShowEnemyLevel"))
 		AHZShowEnchantmentKnown.SetValueInt(fiss.loadInt("AHZShowEnchantmentKnown"))
+		AHZDisplayDelay.SetValueInt(fiss.loadInt("AHZDisplayDelay"))
 	endIf
 	String loadResult = fiss.endLoad()
 	if loadResult != " "
@@ -964,6 +967,8 @@ state SaveCurrentConfigBN
 			JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue())	
+			JSONUtil.SetPathIntValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValueInt())
+			
 		JSONUtil.save(file)
 		SetTextOptionValueST("$mHUD_Done")
 	endEvent
@@ -1006,6 +1011,7 @@ state LoadSelectedConfigBN
 			AHZShowBookSkill.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowBookSkill", AHZShowBookSkill.GetValueInt()))
 			AHZShowVW.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowVW", AHZShowVW.GetValueInt()))
 			AHZShowEnchantmentKnown.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt()))	
+			AHZDisplayDelay.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValueInt()))		
 			AHZShowBottomWidget.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowBottomWidget", AHZShowBottomWidget.GetValueInt()))			
 			AHZBottomWidgetRightAligned.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZBottomWidgetRightAligned", AHZBottomWidgetRightAligned.GetValueInt()))
 			AHZShowTargetWeight.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowTargetWeight", AHZShowTargetWeight.GetValueInt()))			
@@ -1026,13 +1032,14 @@ state LoadSelectedConfigBN
 			AHZInventoryWidgetScale.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZInventoryWidgetScale", AHZInventoryWidgetScale.GetValue()))		
 			AHZShowEnemyLevel.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt()))
 			AHZEnemyLevelMax.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue()))
-			AHZEnemyLevelMin.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue()))	
+			AHZEnemyLevelMin.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue()))
+				
 	endEvent
 	
 	event OnHighlightST()
 		SetInfoText("$mHUD_LoadInfoPU")
 	endEvent
-endState /;
+endState 
 
 ; Private Functions ------------------------------------------------------------------------------------------
 Function ToggleGlobalInt(GlobalVariable var)
