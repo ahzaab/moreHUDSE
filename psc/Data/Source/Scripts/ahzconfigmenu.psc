@@ -79,8 +79,10 @@ int selectedConfig = 0
 ; 8 - Added Scaling
 ; 9 - Added A page for the enemy level
 ; 10 - Updated the widget style names
+; 12 - Misspelling
+; 13 - Added seconds translation
 int function GetVersion()
-	return 11
+	return 13
 endFunction
 
 
@@ -219,7 +221,7 @@ event OnPageReset(string a_page)
 		_activationModeOID_M 	= AddMenuOption("$mHUD_ActivationMode", ActivationModes[AHZActivationMode.GetValueInt()])
 		_activationKeyMapOID_K 	= AddKeyMapOption("$mHUD_ActivationHotKey",AHZHotKey.GetValueInt(),  OPTION_FLAG_WITH_UNMAP);
 		_toggle12OID_B			= AddToggleOption("$mHUD_HotKeyToggles", AHZHotkeyToggles.GetValueInt())
-		_sliderDisplayDelay_OID_S = AddSliderOption("$mHUD_DisplayDelay", AHZDisplayDelay.GetValue(), "{0}ms")
+		_sliderDisplayDelay_OID_S = AddSliderOption("$mHUD_DisplayDelay", AHZDisplayDelay.GetValue(), "{2} S")
 		AddEmptyOption()
 
 		AddHeaderOption("$mHUD_WidgetExtras")		
@@ -485,8 +487,8 @@ event OnOptionSliderOpen(int a_option)
 	if (a_option == _sliderDisplayDelay_OID_S)
 		SetSliderDialogStartValue(AHZDisplayDelay.GetValue())
 		SetSliderDialogDefaultValue(0)
-		SetSliderDialogRange(0, 5000)
-		SetSliderDialogInterval(50)
+		SetSliderDialogRange(0, 2.00)
+		SetSliderDialogInterval(0.01)
 	endif	
 
 endEvent
@@ -551,7 +553,7 @@ event OnOptionSliderAccept(int a_option, float a_value)
 
 	if (a_option == _sliderDisplayDelay_OID_S)
 		AHZDisplayDelay.SetValue(a_value)
-		SetSliderOptionValue(a_option, a_value, "{0}")
+		SetSliderOptionValue(a_option, a_value, "{2} S")
 	endif	
 
 endEvent
@@ -798,7 +800,7 @@ function FISS_SAVE()
 
 	fissinterface fiss = FISSfactory.getFISS()
 	if !fiss
-		debug.MessageBox("$wHUD_FissMiss")
+		debug.MessageBox("$mHUD_FissMiss")
 		return 
 	endIf
 	fiss.beginSave("MoreHUD.xml", "MoreHUD")
@@ -826,7 +828,7 @@ function FISS_SAVE()
 	fiss.saveInt("AHZEnemyLevelMin", AHZEnemyLevelMin.GetValueInt())
 	fiss.saveInt("AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
 	fiss.saveInt("AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt())
-	fiss.saveInt("AHZDisplayDelay", AHZDisplayDelay.GetValueInt())
+	fiss.saveFloat("AHZDisplayDelay", AHZDisplayDelay.GetValue())
 	fiss.saveFloat("AHZBottomWidgetXPercent", AHZBottomWidgetXPercent.GetValue())
 	fiss.saveFloat("AHZBottomWidgetYPercent", AHZBottomWidgetYPercent.GetValue())
 	fiss.saveFloat("AHZSideWidgetXPercent", AHZSideWidgetXPercent.GetValue())
@@ -843,7 +845,7 @@ function FISS_LOAD()
 
 	fissinterface fiss = fissfactory.getFISS()
 	if !fiss
-		debug.MessageBox("$wHUD_FissMiss")
+		debug.MessageBox("$mHUD_FissMiss")
 		return 
 	endIf
 	fiss.beginLoad("MoreHUD.xml")
@@ -877,7 +879,7 @@ function FISS_LOAD()
 		AHZEnemyLevelMin.SetValueInt(fiss.loadInt("AHZEnemyLevelMin"))
 		AHZShowEnemyLevel.SetValueInt(fiss.loadInt("AHZShowEnemyLevel"))
 		AHZShowEnchantmentKnown.SetValueInt(fiss.loadInt("AHZShowEnchantmentKnown"))
-		AHZDisplayDelay.SetValueInt(fiss.loadInt("AHZDisplayDelay"))
+		AHZDisplayDelay.SetValue(fiss.loadFloat("AHZDisplayDelay"))
 	endIf
 	String loadResult = fiss.endLoad()
 	if loadResult != " "
@@ -967,7 +969,7 @@ state SaveCurrentConfigBN
 			JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue())	
-			JSONUtil.SetPathIntValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValueInt())
+			JSONUtil.SetPathFloatValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValue())
 			
 		JSONUtil.save(file)
 		SetTextOptionValueST("$mHUD_Done")
@@ -1011,7 +1013,7 @@ state LoadSelectedConfigBN
 			AHZShowBookSkill.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowBookSkill", AHZShowBookSkill.GetValueInt()))
 			AHZShowVW.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowVW", AHZShowVW.GetValueInt()))
 			AHZShowEnchantmentKnown.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt()))	
-			AHZDisplayDelay.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValueInt()))		
+			AHZDisplayDelay.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValue()))		
 			AHZShowBottomWidget.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowBottomWidget", AHZShowBottomWidget.GetValueInt()))			
 			AHZBottomWidgetRightAligned.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZBottomWidgetRightAligned", AHZBottomWidgetRightAligned.GetValueInt()))
 			AHZShowTargetWeight.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowTargetWeight", AHZShowTargetWeight.GetValueInt()))			

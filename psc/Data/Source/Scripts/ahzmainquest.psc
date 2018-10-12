@@ -147,7 +147,7 @@ function UpdateSettings(bool disable)
         intargs_200[16] = AHZEnemyLevelMax.GetValueInt()
 	    intargs_200[17] = AHZEnemyLevelMin.GetValueInt()   
         intargs_200[18] = AHZShowEnchantmentKnown.GetValueInt()   
-        intargs_200[19] = AHZDisplayDelay.GetValueInt()      
+        intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)     
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()
