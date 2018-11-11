@@ -1,4 +1,4 @@
-#include "skse64/GameReferences.h"
+﻿#include "skse64/GameReferences.h"
 #include "skse64/GameFormComponents.h"
 #include "skse64/GameRTTI.h"
 #include "skse64/GameForms.h"
@@ -8,12 +8,31 @@
 #include "AHZScaleFormHook.h"
 #include "skse64/Hooks_Gameplay.h"
 
-//typedef  bool (__fastcall *GET_IS_IN_COMBAT)(PlayerCharacter *theActor);
-//static GET_IS_IN_COMBAT pGetIsInCombat = (GET_IS_IN_COMBAT)0x0074E5F0;
-
-//typedef  UInt32 (__fastcall *GET_GOLD_AMOUNT)(PlayerCharacter *theActor, int a);
-//static GET_GOLD_AMOUNT pGetGoldAmount = (GET_GOLD_AMOUNT)0x1D6A90; // 0x1F49C0; //(GET_GOLD_AMOUNT)0x006A8190;
-
+typedef  UInt32(*GET_GOLD_AMOUNT)(Actor* a1);
+RelocAddr<GET_GOLD_AMOUNT>GetGoldAmount_Native(0x005E74E0);
+//.text:00007FF6D6A774E0
+//.text : 00007FF6D6A774E0; ============== = S U B R O U T I N E ====================================== =
+//.text:00007FF6D6A774E0
+//.text : 00007FF6D6A774E0
+//.text : 00007FF6D6A774E0; int __fastcall GetGoldAmount_Native(Actor *a1)
+//.text:00007FF6D6A774E0                         GetGoldAmount_Native proc near; CODE XREF : sub_7FF6D67706E0 + 42↑p
+//.text : 00007FF6D6A774E0; sub_7FF6D6AEDBB0 + 2AF↓p ...
+//.text:00007FF6D6A774E0 48 83 EC 28                             sub     rsp, 28h
+//.text : 00007FF6D6A774E4 48 83 C1 70                             add     rcx, 70h; a1
+//.text:00007FF6D6A774E8 E8 23 CB B2 FF                          call    sub_7FF6D65A4010
+//.text : 00007FF6D6A774ED 48 85 C0                                test    rax, rax
+//.text : 00007FF6D6A774F0 74 0C                                   jz      short loc_7FF6D6A774FE
+//.text : 00007FF6D6A774F2 48 8B C8                                mov     rcx, rax
+//.text : 00007FF6D6A774F5 48 83 C4 28                             add     rsp, 28h
+//.text : 00007FF6D6A774F9 E9 A2 05 C0 FF                          jmp     sub_7FF6D6677AA0
+//.text : 00007FF6D6A774FE; -------------------------------------------------------------------------- -
+//.text:00007FF6D6A774FE
+//.text : 00007FF6D6A774FE                         loc_7FF6D6A774FE : ; CODE XREF : GetGoldAmount_Native + 10↑j
+//.text : 00007FF6D6A774FE 48 83 C4 28                             add     rsp, 28h
+//.text : 00007FF6D6A77502 C3                                      retn
+//.text : 00007FF6D6A77502                         GetGoldAmount_Native endp
+//.text : 00007FF6D6A77502
+//.text : 00007FF6D6A77502; -------------------------------------------------------------------------- -
 
 class ContainerFindItemByID
 {
@@ -97,7 +116,12 @@ UInt32 CAHZPlayerInfo::GetItemAmount(UInt32 formID)
 
 UInt32 CAHZPlayerInfo::GetGoldAmount(void)
 {
-	return CAHZPlayerInfo::GetItemAmount(0xF);
+   PlayerCharacter* pPC = (*g_thePlayer);
+   if (pPC)
+   {
+      return GetGoldAmount_Native(pPC);//CAHZPlayerInfo::GetItemAmount(0xF);
+   }
+   return 0;
 }
 
 

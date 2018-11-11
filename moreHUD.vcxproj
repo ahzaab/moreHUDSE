@@ -338,6 +338,8 @@
     <ClCompile Include="AHZFormLookup.cpp" />
     <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
+    <ClCompile Include="AHZExternalFormTable.cpp" />
+    <ClCompile Include="AHZVanillaFormTable.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +355,8 @@
     <ClInclude Include="AHZFormLookup.h" />
     <ClInclude Include="AHZUtilities.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
+    <ClInclude Include="AHZExternalFormTable.h" />
+    <ClInclude Include="AHZVanillaFormTable.h" />
     <ClInclude Include="resource2.h" />
   </ItemGroup>
   <ItemGroup>
