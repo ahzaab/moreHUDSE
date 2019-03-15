@@ -49,7 +49,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30600)
+#define PLUGIN_VERSION  (30602)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -170,6 +170,7 @@ public:
    virtual void	Invoke(Args * args)
    {
       CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
+
    }
 };
 
@@ -281,7 +282,7 @@ extern "C"
 
          return false;
       }
-      else if (skse->runtimeVersion != (MAKE_EXE_VERSION(1, 5, 53)))
+      else if (skse->runtimeVersion != (MAKE_EXE_VERSION(1, 5, 73)))
       {
          _ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 

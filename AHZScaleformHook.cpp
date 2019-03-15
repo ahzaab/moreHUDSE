@@ -68,7 +68,7 @@ EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * ev
 //HxD Raw 49 8B CA E8 E8 6F 64 00 48 8D 4D F0 E8 AF 6D 65 00 48 8D 4D 30 E8 A6 6D 65 00 66 44 89 65 70 4C -->1.5.39
 //CFF Explorer .text  53 20 48 8B 4B 10 E8 B5 67 64 00 84 C0 0F 84 F4 00 00 00 8B 43 18 24 8F 3C 08 0F 94 C0 88 44 24
 //ida 48 8B C4 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 18 FF FF FF 48 81 EC B0 01 00 00 48 C7 45 A8
-uintptr_t Enemy_Update_Hook_Base = 0x00882710;
+uintptr_t Enemy_Update_Hook_Base = 0x00882520;
 //.text:00007FF62B5220A0
 //.text : 00007FF62B5220A0; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //.text:00007FF62B5220A0
@@ -543,9 +543,9 @@ uintptr_t Enemy_Update_Hook_Base = 0x00882710;
 //.text : 00007FF62B522639; -------------------------------------------------------------------------- -
 
 RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
-void EnemyHealth_Update_Hook(UInt32 * refHandle, TESObjectREFR ** refrOut)
+void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrOut)
 {
-   TESObjectREFR * reference = (*refrOut);
+   TESObjectREFR * reference = *refrOut;
    if (!reference)
    {
       return;

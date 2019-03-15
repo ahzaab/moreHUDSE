@@ -225,12 +225,21 @@ void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 
 void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID)
 {
+   DataHandler * dataHandler = DataHandler::GetSingleton();
+   const ModInfo * baseModInfo = dataHandler->LookupModByName(baseFormModName.c_str());
+   if (!baseModInfo || !baseModInfo->IsActive())
+      return;
+
+   const ModInfo * targetModInfo = dataHandler->LookupModByName(targetFormModName.c_str());
+   if (!targetModInfo || !targetModInfo->IsActive())
+      return;
+
    // If not exists
    if (m_modIndexLUT.find(baseFormModName) == m_modIndexLUT.end())
    {
-      DataHandler * dataHandler = DataHandler::GetSingleton();
-      BSFixedString b(baseFormModName.c_str());
-      UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
+      UInt32 modIndex = baseModInfo->GetPartialIndex();
+
+      //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
       _VMESSAGE("ACTI Base Mod:%s, idx:%08X", baseFormModName.c_str(), modIndex);
       m_modIndexLUT[baseFormModName] = modIndex;
    }
@@ -238,9 +247,9 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
    // If not exists
    if (m_modIndexLUT.find(targetFormModName) == m_modIndexLUT.end())
    {
-      DataHandler * dataHandler = DataHandler::GetSingleton();
-      BSFixedString b(targetFormModName.c_str());
-      UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
+      UInt32 modIndex = targetModInfo->GetPartialIndex();
+
+      //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
       _VMESSAGE("ACTI Targ Mod:%s, idx:%08X", targetFormModName.c_str(), modIndex);
       m_modIndexLUT[targetFormModName] = modIndex;
    }
@@ -248,18 +257,15 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
    // If exists
    if (m_modIndexLUT.find(baseFormModName) != m_modIndexLUT.end() && m_modIndexLUT.find(targetFormModName) != m_modIndexLUT.end())
    {
-      UInt32 baseModIndex = m_modIndexLUT[baseFormModName];
-      UInt32 targetModIndex = m_modIndexLUT[targetFormModName];
-      if (baseModIndex != 0xFF000000 && baseModIndex != 0xFF000000)
+      //UInt32 baseModIndex = m_modIndexLUT[baseFormModName];
+      //UInt32 targetModIndex = m_modIndexLUT[targetFormModName];
+      UInt32 baseForm = baseModInfo->GetFormID(baseFormID); //(baseFormID & 0x00FFFFFF) | baseModIndex;
+      UInt32 targetForm = targetModInfo->GetFormID(targetFormID); //(targetFormID & 0x00FFFFFF) | targetModIndex;
+      // Load into map if the entry does not already exist
+      if (m_LUT.find(baseForm) == m_LUT.end())
       {
-         UInt32 baseForm = (baseFormID & 0x00FFFFFF) | baseModIndex;
-         UInt32 targetForm = (targetFormID & 0x00FFFFFF) | targetModIndex;
-         // Load into map if the entry does not already exist
-         if (m_LUT.find(baseForm) == m_LUT.end())
-         {
-            m_LUT[baseForm] = targetForm;
-            _VMESSAGE("ACTI BASE ID:%08X, ACTI Targ ID:%08X", baseForm, targetForm);
-         }
+         m_LUT[baseForm] = targetForm;
+         _VMESSAGE("ACTI BASE ID:%08X, ACTI Targ ID:%08X", baseForm, targetForm);
       }
    }
 }
