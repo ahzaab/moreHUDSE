@@ -22,7 +22,7 @@
 
 //Unpacked
 //HxD Raw FF C0 83 F8 07 77 0A F3 0F 10 8A 70 01 00 00 EB 54 4C 8D 0D 80 B3 A7 01 C7 44 24 20 00 00 00 00
-RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD7E0);
+RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD5F0);
 
 //text:00007FF7F661D850; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //   .text:00007FF7F661D850
@@ -81,7 +81,7 @@ RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD7E0);
 
 //Unpacked 
 //Hxd Raw F0 44 0F 28 44 24 30 0F 28 C6 0F 28 74 24 50 48 83 C4 60 5F C3 0F 1F 00 7D E2 3B 00 7D E2 3B 00
-RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD700);
+RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD510);
 
 //text:00007FF7F661D770
 //   .text : 00007FF7F661D770; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -169,14 +169,31 @@ RelocAddr<GET_ARMOR_WARMTH_RATING>GetArmorWarmthRating_Native(0x003BD700);
 //Unpacked
 //HxD Raw 03 00 4C 89 B7 D0 03 03 00 44 89 B7 D8 03 03 00 4C 89 B7 E8 03 03 00 4C 89 B7 F0 03 03 00 83 CB
 //CFF Explorer .text 030300008891FC0303008891FE030300488DB9A0020300488BCFE821A191FF40
-RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DACA0);
+RelocAddr<_IsSurvivalMode> IsSurvivalMode(0x008DAAB0);
+//.text:00000001408DAAB0                                                 IsSurvivalMode  proc near; CODE XREF : sub_1401A1730:loc_1401A17ACp
+//.text:00000001408DAAB0; sub_1401A1730 + 9Ep ...
+//.text:00000001408DAAB0 48 83 EC 28                                                     sub     rsp, 28h
+//.text:00000001408DAAB4 E8 57 C7 81 FF                                                  call    sub_1400F7210
+//.text:00000001408DAAB9 80 B8 C2 0C 00 00 00                                            cmp     byte ptr[rax + 0CC2h], 0
+//.text:00000001408DAAC0 74 2B                                                           jz      short loc_1408DAAED
+//.text:00000001408DAAC2 48 8B 88 30 0A 00 00                                            mov     rcx, [rax + 0A30h]
+//.text:00000001408DAAC9 48 85 C9                                                        test    rcx, rcx
+//.text:00000001408DAACC 74 1F                                                           jz      short loc_1408DAAED
+//.text:00000001408DAACE F3 0F 10 05 12 88 C4 00                                         movss   xmm0, cs:dword_1415232E8
+//.text : 00000001408DAAD6 0F 2E 41 34                                                     ucomiss xmm0, dword ptr[rcx + 34h]
+//.text:00000001408DAADA 75 0A                                                           jnz     short loc_1408DAAE6
+//.text:00000001408DAADC B8 01 00 00 00                                                  mov     eax, 1
+//.text:00000001408DAAE1 48 83 C4 28                                                     add     rsp, 28h
+//.text:00000001408DAAE5 C3                                                              retn
+//.text:00000001408DAAE6; -------------------------------------------------------------------------- -
+
 
 //Unpacked
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 4D BA A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 AD B1 A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8 -->1.5.39
 //HxD Raw 8D 49 1E 48 89 44 24 20 F3 0F 11 44 24 40 E8 FD B3 A9 FF 48 8B 47 10 48 8B 48 10 8B 41 68 C1 E8 -->1.5.50
 //CFF Explorer .text 8B65024889442438C744244000000000488B014533C0488D542438FF5008C743
-RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00892EC0);
+RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00892CD0);
 
 // Base Address = 7FF690BE0000
 //text:00007FF691471320; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -522,7 +539,52 @@ RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2(0x00892EC0);
 //HxD Raw 1C 91 00 00 00 48 8B 0D BC 88 6B 02 E8 3F 15 38 00 84 C0 75 06 83 4B 1C 04 EB 1C 48 8B 4B 10 48 -->1.5.50
 //CFF Explorer .text F6C701742740F6C7047513488B0D4E507C02488B01488BD3FF506090EB0EBA38 --> 1.5.16
 //CFF Explorer .text F6C701742740F6C7047513488B0D1E507C02488B01488BD3FF506090EB0EBA38 --> 1.5.23
-RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x008932E0);
+RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode(0x008930F0);
+//.text:00000001408930F0; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
+//.text:00000001408930F0
+//.text:00000001408930F0
+//.text:00000001408930F0                                                 ProcessSurvivalMode proc near; CODE XREF : sub_140890E70 + 96Bp
+//.text:00000001408930F0; sub_140890E70 + D2Fp ...
+//.text:00000001408930F0
+//.text:00000001408930F0                                                 var_18 = qword ptr - 18h
+//.text:00000001408930F0                                                 var_10 = qword ptr - 10h
+//.text:00000001408930F0                                                 arg_0 = qword ptr  8
+//.text:00000001408930F0                                                 arg_8 = qword ptr  10h
+//.text:00000001408930F0                                                 arg_10 = qword ptr  18h
+//.text:00000001408930F0
+//.text:00000001408930F0 41 56                                                           push    r14
+//.text:00000001408930F2 48 83 EC 30                                                     sub     rsp, 30h
+//.text:00000001408930F6 48 8B 01                                                        mov     rax, [rcx]
+//.text:00000001408930F9 4C 8B F1                                                        mov     r14, rcx
+//.text:00000001408930FC 48 85 C0                                                        test    rax, rax
+//.text:00000001408930FF 48 8D 0D AA C1 C8 00                                            lea     rcx, Str1
+//.text:0000000140893106 BA 5B 00 00 00                                                  mov     edx, 5Bh; Val
+//.text:000000014089310B 48 0F 45 C8                                                     cmovnz  rcx, rax; Str
+//.text:000000014089310F FF 15 6B 67 C7 00                                               call    cs : __imp_strchr
+//.text : 0000000140893115 48 85 C0                                                        test    rax, rax
+//.text:0000000140893118 0F 84 E1 01 00 00                                               jz      loc_1408932FF
+//.text:000000014089311E 41 0F B7 46 08                                                  movzx   eax, word ptr[r14 + 8]
+//.text:0000000140893123 B9 FF FF 00 00                                                  mov     ecx, 0FFFFh
+//.text:0000000140893128
+//.text:0000000140893128                                                 loc_140893128 : ; DATA XREF : .rdata : 0000000141BD35FCo
+//.text:0000000140893128;.rdata:0000000141BD3610o ...
+//.text:0000000140893128 48 89 5C 24 40                                                  mov[rsp + 38h + arg_0], rbx
+//.text:000000014089312D 48 89 6C 24 48                                                  mov[rsp + 38h + arg_8], rbp
+//.text:0000000140893132 48 89 7C 24 28                                                  mov[rsp + 38h + var_10], rdi
+//.text:0000000140893137 4C 89 7C 24 20                                                  mov[rsp + 38h + var_18], r15
+//.text:000000014089313C 66 3B C1                                                        cmp     ax, cx
+//.text:000000014089313F 75 1A                                                           jnz     short loc_14089315B
+//.text:0000000140893141 49 8B 0E                                                        mov     rcx, [r14]
+//.text:0000000140893144 48 83 C8 FF or rax, 0FFFFFFFFFFFFFFFFh
+//.text:0000000140893148 0F 1F 84 00 00 00 00 00                                         nop     dword ptr[rax + rax + 00000000h]
+//.text:0000000140893150
+//.text:0000000140893150                                                 loc_140893150 : ; CODE XREF : ProcessSurvivalMode + 67j
+//.text:0000000140893150 48 FF C0                                                        inc     rax
+//.text:0000000140893153 80 3C 01 00                                                     cmp     byte ptr[rcx + rax], 0
+//.text:0000000140893157 75 F7                                                           jnz     short loc_140893150
+//.text:0000000140893159 EB 03                                                           jmp     short loc_14089315E
+//.text:000000014089315B; -------------------------------------------------------------------------- -
+
 
 // Base Address = 7FF690BE0000
 //.text:00007FF691471740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
