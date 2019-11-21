@@ -36,6 +36,8 @@
 #include <locale.h>
 #include "AHZConsole.h"
 #include "AHZUtilities.h"
+#include "AHZVanillaFormTable.h"
+#include "AHZExternalFormTable.h"
 #include "xbyak/xbyak.h"
 
 using namespace std;
@@ -47,7 +49,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30504)
+#define PLUGIN_VERSION  (30600)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -229,6 +231,11 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
    if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_DataLoaded)
    {
+		// First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
+      CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
+      CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
+
+      // Second load any addional forms added externally
       _MESSAGE("Processing .mhud Files...");
 
       // Read all .mhuf files and load in the lookup tables
@@ -239,83 +246,14 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
       if (!mHudFiles.size())
       {
-         _MESSAGE("No .mHud file detected");
+         _MESSAGE("INFO: No .mHud files detected, skipping.");
       }
-
-      // Foreach mhud file, load in the lookup table entries
-      vector<string>::iterator p;
-      for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
-         _MESSAGE("Loading %s", (*p).c_str());
-         gLog.Indent();
-         string fullPath = skyrimDataPath + *p;
-
-         /*************************************************************************************************/
-         #pragma region Loading Lookup tables
-
-         // Get the number of entries
-         int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
-         _MESSAGE("Loading %d Lookup Entries", iNumOfEntries);
-         cout << iNumOfEntries << endl;
-
-         // Get each entry and load into the lookup table
-         for (int i = 0; i < iNumOfEntries; i++)
-         {
-            char value[32] = "";
-            char returnValue[1024] = "";
-            sprintf_s(value, (size_t)32, "%d", i + 1);
-            string entrName("oEntry");
-            entrName.append(value);
-            GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
-            if (strlen(returnValue))
-            {
-               AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(string(returnValue));
-
-               if (!lutObject.IsEmpty())
-               {
-                  CAHZFormLookup::Instance().AddFormID(lutObject.BaseMod, lutObject.BaseFormID, lutObject.TargetMod, lutObject.TargetFormID);
-               }
-               else
-               {
-                  _MESSAGE("Could not entry Entry: %s", returnValue);
-               }
-            }
-         }
-         #pragma endregion
-         /*************************************************************************************************/
-
-         /*************************************************************************************************/
-         #pragma region Loading Scripts Variables
-
-         // Get the number of entries
-         iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
-         _MESSAGE("Loading %d Script Variable(s)", iNumOfEntries);
-         cout << iNumOfEntries << endl;
-
-         // Get each entry and load into the lookup table
-         for (int i = 0; i < iNumOfEntries; i++)
-         {
-            char value[32] = "";
-            char returnValue[1024] = "";
-            sprintf_s(value, (size_t)32, "%d", i + 1);
-            string entrName("sVariable");
-            entrName.append(value);
-            GetPrivateProfileString("ScriptVariables", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
-
-            if (strlen(returnValue))
-            {
-               CAHZFormLookup::Instance().AddScriptVarable(string(returnValue));
-            }
-            else
-            {
-               _MESSAGE("Could not load script variable: %s", returnValue);
-            }
-         }
-         #pragma endregion
-         /*************************************************************************************************/
-      }
-
-      if (mHudFiles.size())
-      {
+      else
+      {  
+         // Load the external ACTI Forms and VM Script Variables 
+         CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
+         CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
+         
          _MESSAGE("%d .mHud file(s) processed", mHudFiles.size());
       }
    }
@@ -343,7 +281,7 @@ extern "C"
 
          return false;
       }
-      else if (skse->runtimeVersion != (MAKE_EXE_VERSION(1, 5, 50)))
+      else if (skse->runtimeVersion != (MAKE_EXE_VERSION(1, 5, 53)))
       {
          _ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 

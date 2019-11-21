@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050320;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050350;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
@@ -164,7 +164,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050320;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;RUNTIME_VERSION=0x01050350;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -338,6 +338,8 @@
     <ClCompile Include="AHZFormLookup.cpp" />
     <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="AHZWeaponInfo.cpp" />
+    <ClCompile Include="AHZExternalFormTable.cpp" />
+    <ClCompile Include="AHZVanillaFormTable.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +355,8 @@
     <ClInclude Include="AHZFormLookup.h" />
     <ClInclude Include="AHZUtilities.h" />
     <ClInclude Include="AHZWeaponInfo.h" />
+    <ClInclude Include="AHZExternalFormTable.h" />
+    <ClInclude Include="AHZVanillaFormTable.h" />
     <ClInclude Include="resource2.h" />
   </ItemGroup>
   <ItemGroup>
