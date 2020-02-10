@@ -42,6 +42,9 @@
 
 using namespace std;
 
+// Is Actor Sentient = 606850
+// Get Soul Level = 3C1740
+
 IDebugLog	gLog;
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
