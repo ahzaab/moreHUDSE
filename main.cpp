@@ -262,6 +262,7 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 	   }
 
 	   _MESSAGE("Third party .mHud file processing completed.");
+   }
 }
 
 extern "C"
