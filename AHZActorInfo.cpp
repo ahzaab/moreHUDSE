@@ -44,7 +44,7 @@ RelocAddr<GET_ACTOR_IS_SENTIENT>pGetActorIsSentient(0x00606850);
 //.text:0000000140606886; -------------------------------------------------------------------------- -
 
 
-typedef  UInt32 (__cdecl *GET_ACTOR_SOUL_TYPE)(UInt32 level, UInt8 isSetient);
+typedef  UInt32 (__fastcall *GET_ACTOR_SOUL_TYPE)(UInt32 level, UInt8 isSetient);
 RelocAddr<GET_ACTOR_SOUL_TYPE>pGetActorSoulType(0x003C1740);
 //.text:00000001403C1740; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //.text:00000001403C1740
