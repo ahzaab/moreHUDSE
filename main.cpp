@@ -52,7 +52,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30604)
+#define PLUGIN_VERSION  (30605)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -196,10 +196,10 @@ public:
       // If the target is not valid or it can't be picked up by the player
       if (!pTargetReference)
       {
-         args->result->SetBool(false);
+         args->result->SetNumber(0);
          return;
       }
-      args->result->SetBool(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
+      args->result->SetNumber(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
    }
 };
 
@@ -235,32 +235,33 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
    if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_DataLoaded)
    {
-		// First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
-      CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
-      CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
+	   // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
+	   CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
+	   CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
 
-      // Second load any addional forms added externally
-      _MESSAGE("Processing .mhud Files...");
+	   // Second load any addional forms added externally
+	   _MESSAGE("Processing any third party .mhud files that may exist...");
 
-      // Read all .mhuf files and load in the lookup tables
-      string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+	   // Read all .mhuf files and load in the lookup tables
+	   string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
 
-      // Get all .mhud files from the skyrim data folder
-      vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+	   // Get all .mhud files from the skyrim data folder
+	   vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
 
-      if (!mHudFiles.size())
-      {
-         _MESSAGE("INFO: No .mHud files detected, skipping.");
-      }
-      else
-      {  
-         // Load the external ACTI Forms and VM Script Variables 
-         CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
-         CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
-         
-         _MESSAGE("%d .mHud file(s) processed", mHudFiles.size());
-      }
-   }
+	   if (!mHudFiles.size())
+	   {
+		   _MESSAGE("No third party .mHud files where detected.");
+	   }
+	   else
+	   {
+		   // Load the external ACTI Forms and VM Script Variables 
+		   CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
+		   CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
+
+		   _MESSAGE("%d third party .mHud file(s) processed", mHudFiles.size());
+	   }
+
+	   _MESSAGE("Third party .mHud file processing completed.");
 }
 
 extern "C"
