@@ -824,10 +824,13 @@ UInt32 CAHZScaleform::GetIsKnownEnchantment(TESObjectREFR *targetRef)
 	PlayerCharacter* pPC = (*g_thePlayer);
 	TESForm *baseForm;
 	if (pPC && targetRef && (baseForm = targetRef->baseForm) &&
-		(baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo))
+		(baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo || baseForm->GetFormType() == kFormType_Projectile))
 	{
 		EnchantmentItem * enchantment = NULL;
 		TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
+		if (baseForm->GetFormType() == kFormType_Projectile)
+			enchantable = DYNAMIC_CAST(AHZGetForm(targetRef), TESForm, TESEnchantableForm);
+		
 		bool wasExtra = false;
 		if (enchantable) { // Check the item for a base enchantment
 			enchantment = enchantable->enchantment;
@@ -1769,19 +1772,22 @@ AlchemyItem* CAHZScaleform::GetAlchemyItem(TESForm *thisObject)
    return NULL;
 }
 
-bool CAHZScaleform::CanPickUp(UInt32 formType)
+bool CAHZScaleform::CanPickUp(TESForm* form)
 {
-   return (formType == kFormType_Weapon ||
-      formType == kFormType_Armor ||
-      formType == kFormType_SoulGem ||
-      formType == kFormType_Potion ||
-      formType == kFormType_Misc ||
-      formType == kFormType_Ingredient ||
-      formType == kFormType_Book ||
-      formType == kFormType_Ammo ||
-      formType == kFormType_ScrollItem ||
-      formType == kFormType_Outfit ||
-      formType == kFormType_Key);
+	UINT32 formType = form->GetFormType();
+	bool canCarry =  (formType == kFormType_Weapon ||
+		formType == kFormType_Armor ||
+		formType == kFormType_SoulGem ||
+		formType == kFormType_Potion ||
+		formType == kFormType_Misc ||
+		formType == kFormType_Ingredient ||
+		formType == kFormType_Book ||
+		formType == kFormType_Ammo ||
+		formType == kFormType_ScrollItem ||
+		formType == kFormType_Outfit ||
+		formType == kFormType_Key ||
+		formType == kFormType_Projectile);  // Projectiles with the "Can Pick Up" flag set to false will not even register in the crossshairs
+	return canCarry;
 }
 
 string CAHZScaleform::GetTargetName(TESForm *thisObject)
@@ -2301,10 +2307,16 @@ string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
          }
       }
    }
-   else if (theObject->baseForm->GetFormType() == kFormType_Ammo)
+   else if (theObject->baseForm->GetFormType() == kFormType_Ammo ||
+			theObject->baseForm->GetFormType() == kFormType_Projectile)
    {
-      TESAmmo *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
-
+	   TESAmmo *item = NULL;
+	   
+	   if (theObject->baseForm->GetFormType() == kFormType_Projectile)
+		   item = DYNAMIC_CAST(AHZGetForm(theObject), TESForm, TESAmmo);
+	   else
+		   item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
+	   
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
@@ -2569,7 +2581,8 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    args->movie->CreateObject(&obj);
 
    if (pTargetReference->baseForm->GetFormType() == kFormType_Weapon ||
-      pTargetReference->baseForm->GetFormType() == kFormType_Ammo)
+      pTargetReference->baseForm->GetFormType() == kFormType_Ammo ||
+	   pTargetReference->baseForm->GetFormType() == kFormType_Projectile)
    {
       TESForm *form = NULL;
       TESAmmo *ammo = NULL;
@@ -2767,11 +2780,11 @@ void CAHZScaleform::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionH
    // If the target is not valid or it can't be picked up by the player
    if ((canCarry = (GetIngredient(targetForm) != NULL)) ||
       (canCarry = (GetAlchemyItem(targetForm) != NULL)) ||
-      (canCarry = CanPickUp(pTargetReference->baseForm->GetFormType()) ||
+      (canCarry = CanPickUp(pTargetReference->baseForm) ||
       (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)) ||
          ((spellItem = GetSpellItem(targetForm)) != NULL))
    {
-      if (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm && !CanPickUp(targetForm->formType))
+      if (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm && !CanPickUp(targetForm))
       {
          canCarry = false;
       }
