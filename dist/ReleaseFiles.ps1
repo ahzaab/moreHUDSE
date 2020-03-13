@@ -14,14 +14,20 @@ $releaseDir = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\Release"
 $versionDir = "$releaseDir\$Version"
 $tempDir = "$versionDir\.tmp"
 $destDataDir = "$versionDir\Data"
+$destSksePlugin = "$destDataDir\SKSE\Plugins\AHZmoreHUDPlugin.dll"
+$sourceSksePlugin = "$sourceDataDir\SKSE\Plugins\AHZmoreHUDPlugin.dll"
 
-$requiredDataDirs = @("Interface","Scripts","Source\Scripts" , "Interface\exported", "Interface\translations")
+$requiredDataDirs = @("Interface","Scripts","Source\Scripts" , "Interface\exported", "Interface\translations", "SKSE\Plugins")
 
 $requiredDataDirs | ForEach-Object{
     if (!$(Test-Path "$destDataDir\$_"))
     {
         New-Item -ItemType Directory "$destDataDir\$_"
     }
+}
+
+if ($destSksePlugin -and $sourceSksePlugin){
+    Copy-Item $sourceSksePlugin $destSksePlugin
 }
 
 $items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex
@@ -37,7 +43,7 @@ $filesToCopy | ForEach-Object {
 }
 
 # Get te list of files to include in the bsa (Do not include the esp)
-$bsaFileList = $filesToCopy | Where-object {$(Get-Item $_).Extension -ne '.esp'} | ForEach-Object { $_.Replace($sourceDataDir,"") } | ForEach-Object { $_.TrimStart("\") }
+$bsaFileList = $filesToCopy | Where-object {$(Get-Item $_).Extension -ne '.esp' -and $(Get-Item $_).Extension -ne '.dll'} | ForEach-Object { $_.Replace($sourceDataDir,"") } | ForEach-Object { $_.TrimStart("\") }
 
 #Get the esp file name and create the name of the bsa file to match the esp file
 $pluginFile = $filesToCopy | Where-object {$(Get-Item $_).Extension -eq '.esp'} | Select-Object -First 1
@@ -67,6 +73,18 @@ Pop-Location
 Copy-Item "$tempDir\$bsaFileName" $versionDir
 Copy-Item "$destDataDir\$pluginFile" $versionDir
 
+# Give time for files to not be in use
+Start-Sleep -Milliseconds 20
+
+#Prepair for 7z archive
+Remove-Item $tempDir\* -Force -Recurse
+New-Item -ItemType Directory "$tempDir\Data"
+New-Item -ItemType Directory "$tempDir\Data\SKSE\Plugins"
+Copy-Item "$versionDir\$bsaFileName" "$tempDir\Data"
+Copy-Item "$versionDir\$pluginFile" "$tempDir\Data"
+Copy-Item $destSksePlugin "$tempDir\Data\SKSE\Plugins"
+
+& "C:\Program Files\7-Zip\7z" a "$versionDir\$($pluginFile.Replace(".esp", ".7z"))" "$tempDir\Data" -mx5 -t7z
 
 }
 finally
