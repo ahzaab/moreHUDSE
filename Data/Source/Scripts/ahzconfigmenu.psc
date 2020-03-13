@@ -7,6 +7,7 @@ GlobalVariable Property AHZBottomWidgetYPercent  Auto
 GlobalVariable Property AHZSideWidgetXPercent  Auto  
 GlobalVariable Property AHZSideWidgetYPercent  Auto  
 GlobalVariable Property AHZShowBottomWidget  Auto  
+GlobalVariable Property AHZShowBottomWidgetAlways  Auto  
 GlobalVariable Property AHZShowIngredientWidget  Auto
 GlobalVariable Property AHZShowEffectsWidget  Auto
 GlobalVariable Property AHZShowInventoryCount  Auto  
@@ -28,7 +29,8 @@ GlobalVariable Property AHZShowVW  Auto
 GlobalVariable Property AHZBottomWidgetScale  Auto
 GlobalVariable Property AHZInventoryWidgetScale  Auto 
 GlobalVariable Property AHZSideWidgetScale  Auto  
-GlobalVariable Property AHZShowEnemyLevel  Auto  
+GlobalVariable Property AHZShowEnemyLevel  Auto 
+GlobalVariable Property AHZShowEnemySoulLevel  Auto   
 GlobalVariable Property AHZEnemyLevelMax  Auto  
 GlobalVariable Property AHZEnemyLevelMin  Auto  
 GlobalVariable Property AHZShowEnchantmentKnown  Auto  
@@ -81,6 +83,7 @@ int selectedConfig = 0
 ; 10 - Updated the widget style names
 ; 12 - Misspelling
 ; 13 - Added seconds translation
+; 14 - Added Show Player Data Widget Always option
 int function GetVersion()
 	return 13
 endFunction
@@ -96,6 +99,7 @@ endFunction
 
 ; General Settings --------------------
 int			_toggle1OID_B				; Show Player Data Widget
+int			_toggle17OID_B				; Show Player Data Widget Always
 int			_toggle2OID_B				; Show Target Data Widget (Ingredients)
 int			_toggle3OID_B				; Show Target Data Widget (Effects)
 int			_toggle4OID_B				; Uninstall
@@ -134,6 +138,7 @@ int         _inventoryAlignmentOID_M
 int			_toggle14OID_B				; Show Enemy Level
 int			_sliderEnemyLevelMax_OID_S
 int			_sliderEnemyLevelMin_OID_S
+int			_toggle16OID_B				; Show Enemy Soul Level
 
 ;Private variables
 bool 		_uninstallMod			= false
@@ -239,6 +244,7 @@ event OnPageReset(string a_page)
 	elseif (a_page == "$mHUD_PlayersDataPage")
 		AddHeaderOption("$mHUD_PlayersDataWidget")
 		_toggle1OID_B			= AddToggleOption("$mHUD_Visible", AHZShowBottomWidget.GetValueInt())
+		_toggle17OID_B			= AddToggleOption("$mHUD_VisibleAlways", AHZShowBottomWidgetAlways.GetValueInt())
 		_bottomAlignmentOID_M 	= AddMenuOption("$mHUD_Alignment", AlignmentStyles[AHZBottomWidgetRightAligned.GetValueInt()])
 		AddEmptyOption()
 		_toggle11OID_B			= AddToggleOption("$mHUD_DisplayTargetWeight", AHZShowTargetWeight.GetValueInt())
@@ -285,10 +291,11 @@ event OnPageReset(string a_page)
 		_sliderInventoryScale_OID_S = AddSliderOption("$mHUD_Scale", AHZInventoryWidgetScale.GetValue(), "{2}%")		
 	elseif (a_page == "$mHUD_EnemysLevelPage")
 		AddHeaderOption("$mHUD_GeneralEnemyLevel")
-		_toggle14OID_B			= AddToggleOption("$mHUD_ShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
+		_toggle14OID_B = AddToggleOption("$mHUD_ShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
+		_toggle16OID_B = AddToggleOption("$mHUD_ShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt())	
 		AddHeaderOption("$mHUD_ColorScale")
 		_sliderEnemyLevelMin_OID_S = AddSliderOption("$mHUD_LevelBelowPlayer", AHZEnemyLevelMin.GetValue(), "{0}")
-		_sliderEnemyLevelMax_OID_S = AddSliderOption("$mHUD_LevelAbovePlayer", AHZEnemyLevelMax.GetValue(), "{0}")	
+		_sliderEnemyLevelMax_OID_S = AddSliderOption("$mHUD_LevelAbovePlayer", AHZEnemyLevelMax.GetValue(), "{0}")
 	elseIf a_page == "$mHUD_PresetPage"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		SetCursorPosition(0)
@@ -353,6 +360,12 @@ event OnOptionSelect(int a_option)
 		SetToggleOptionValue(_toggle14OID_B, AHZShowEnemyLevel.GetValueInt())
 	endif
 
+	; Toggle Enemy Soul Level
+	if (a_option == _toggle16OID_B)
+		ToggleGlobalInt(AHZShowEnemySoulLevel)
+		SetToggleOptionValue(_toggle16OID_B, AHZShowEnemySoulLevel.GetValueInt())
+	endif
+
 	; Toggle Target+Players Weight
 	if (a_option == _toggle11OID_B)
 		ToggleGlobalInt(AHZShowTargetWeight)
@@ -369,7 +382,19 @@ event OnOptionSelect(int a_option)
 	if (a_option == _toggle1OID_B)
 		ToggleGlobalInt(AHZShowBottomWidget)
 		SetToggleOptionValue(_toggle1OID_B, AHZShowBottomWidget.GetValueInt())
+		
+		if (AHZShowBottomWidget.GetValueInt() == 0)
+			SetOptionFlags(_toggle17OID_B, OPTION_FLAG_DISABLED)
+		else
+			SetOptionFlags(_toggle17OID_B, OPTION_FLAG_NONE)
+		endif
 	endif
+	
+	; Toggle bottom widget always
+	if (a_option == _toggle17OID_B)
+		ToggleGlobalInt(AHZShowBottomWidgetAlways)
+		SetToggleOptionValue(_toggle17OID_B, AHZShowBottomWidgetAlways.GetValueInt())
+	endif	
 	
 	; Toggle Inventory Count
 	if (a_option == _toggle5OID_B)
@@ -694,6 +719,10 @@ event OnOptionHighlight(int a_option)
 		SetInfoText("$mHUD_ShowsEnemyslevel")
 	endif
 
+	if (a_option == _toggle16OID_B)
+		SetInfoText("$mHUD_ShowsEnemysSoullevel")
+	endif
+
 	if (a_option == _toggle15OID_B)
 		SetInfoText("$mHUD_ShowsIconDisenchanted")
 	endif
@@ -709,6 +738,10 @@ event OnOptionHighlight(int a_option)
 	if (a_option == _toggle1OID_B)
 		SetInfoText("$mHUD_ShowsBottomBar")
 	endif		
+	
+	if (a_option == _toggle17OID_B)
+		SetInfoText("$mHUD_ShowsBottomBarAlways")
+	endif	
 	
 	if (a_option == _toggle2OID_B)
 		SetInfoText("$mHUD_ShowsIngredientEffects")
@@ -827,6 +860,7 @@ function FISS_SAVE()
 	fiss.saveInt("AHZEnemyLevelMax", AHZEnemyLevelMax.GetValueInt())
 	fiss.saveInt("AHZEnemyLevelMin", AHZEnemyLevelMin.GetValueInt())
 	fiss.saveInt("AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
+	fiss.saveInt("AHZShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt())
 	fiss.saveInt("AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt())
 	fiss.saveFloat("AHZDisplayDelay", AHZDisplayDelay.GetValue())
 	fiss.saveFloat("AHZBottomWidgetXPercent", AHZBottomWidgetXPercent.GetValue())
@@ -878,6 +912,7 @@ function FISS_LOAD()
 		AHZEnemyLevelMax.SetValueInt(fiss.loadInt("AHZEnemyLevelMax"))
 		AHZEnemyLevelMin.SetValueInt(fiss.loadInt("AHZEnemyLevelMin"))
 		AHZShowEnemyLevel.SetValueInt(fiss.loadInt("AHZShowEnemyLevel"))
+		AHZShowEnemySoulLevel.SetValueInt(fiss.loadInt("AHZShowEnemySoulLevel"))
 		AHZShowEnchantmentKnown.SetValueInt(fiss.loadInt("AHZShowEnchantmentKnown"))
 		AHZDisplayDelay.SetValue(fiss.loadFloat("AHZDisplayDelay"))
 	endIf
@@ -967,6 +1002,7 @@ state SaveCurrentConfigBN
 			JSONUtil.SetPathFloatValue(file, ".!AHZInventoryWidgetYPercent", AHZInventoryWidgetYPercent.GetValue())
 			JSONUtil.SetPathFloatValue(file, ".!AHZInventoryWidgetScale", AHZInventoryWidgetScale.GetValue())		
 			JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
+			JSONUtil.SetPathIntValue(file, ".!AHZShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue())
 			JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue())	
 			JSONUtil.SetPathFloatValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValue())
@@ -1033,6 +1069,7 @@ state LoadSelectedConfigBN
 			AHZInventoryWidgetYPercent.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZInventoryWidgetYPercent", AHZInventoryWidgetYPercent.GetValue()))
 			AHZInventoryWidgetScale.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZInventoryWidgetScale", AHZInventoryWidgetScale.GetValue()))		
 			AHZShowEnemyLevel.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt()))
+			AHZShowEnemyLevel.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt()))
 			AHZEnemyLevelMax.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue()))
 			AHZEnemyLevelMin.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue()))
 				

@@ -5,6 +5,7 @@ GlobalVariable Property AHZBottomWidgetYPercent  Auto
 GlobalVariable Property AHZSideWidgetXPercent  Auto  
 GlobalVariable Property AHZSideWidgetYPercent  Auto  
 GlobalVariable Property AHZShowBottomWidget  Auto  
+GlobalVariable Property AHZShowBottomWidgetAlways  Auto  
 GlobalVariable Property AHZShowIngredientWidget  Auto
 GlobalVariable Property AHZShowEffectsWidget  Auto
 GlobalVariable Property AHZShowInventoryCount  Auto  
@@ -27,6 +28,7 @@ GlobalVariable Property AHZBottomWidgetScale  Auto
 GlobalVariable Property AHZInventoryWidgetScale  Auto 
 GlobalVariable Property AHZSideWidgetScale  Auto 
 GlobalVariable Property AHZShowEnemyLevel  Auto  
+GlobalVariable Property AHZShowEnemySoulLevel  Auto   
 GlobalVariable Property AHZEnemyLevelPercent  Auto  
 GlobalVariable Property AHZEnemyLevelMax  Auto  
 GlobalVariable Property AHZEnemyLevelMin  Auto  
@@ -100,7 +102,7 @@ function RefreshWidgets()
 EndFunction
 
 function UpdateSettings(bool disable)
-    int[] intargs_200 = new int[20]
+    int[] intargs_200 = new int[22]
     float[] argsF = new float[2]
     float argF = 100.0
 
@@ -126,7 +128,9 @@ function UpdateSettings(bool disable)
         intargs_200[16] = 0        
 	    intargs_200[17] = 0   
         intargs_200[18] = 0
-        intargs_200[19] = 0 
+        intargs_200[19] = 0
+        intargs_200[20] = 0 
+	intargs_200[21] = 0 
     else
         intargs_200[0] = AHZShowIngredientWidget.GetValueInt()
         intargs_200[1] = AHZShowEffectsWidget.GetValueInt()
@@ -147,7 +151,9 @@ function UpdateSettings(bool disable)
         intargs_200[16] = AHZEnemyLevelMax.GetValueInt()
 	    intargs_200[17] = AHZEnemyLevelMin.GetValueInt()   
         intargs_200[18] = AHZShowEnchantmentKnown.GetValueInt()   
-        intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)     
+        intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)
+        intargs_200[20] = AHZShowEnemySoulLevel.GetValueInt()
+	intargs_200[21] = AHZShowBottomWidgetAlways.GetValueInt()         
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()
