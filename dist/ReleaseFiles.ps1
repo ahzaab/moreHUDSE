@@ -84,7 +84,10 @@ Copy-Item "$versionDir\$bsaFileName" "$tempDir\Data"
 Copy-Item "$versionDir\$pluginFile" "$tempDir\Data"
 Copy-Item $destSksePlugin "$tempDir\Data\SKSE\Plugins"
 
-& "C:\Program Files\7-Zip\7z" a "$versionDir\$($pluginFile.Replace(".esp", ".7z"))" "$tempDir\Data" -mx5 -t7z
+$fileVersionNane = $Version.Replace('.', '_')
+$zipFileName = $pluginFile.Replace('.esp', "$fileVersionNane.7z")
+
+Start-Process "C:\Program Files\7-Zip\7z" -ArgumentList "a `"$versionDir\$zipFileName`" `"$tempDir\Data`" -mx5 -t7z" -wait -NoNewWindow -PassThru
 
 }
 finally

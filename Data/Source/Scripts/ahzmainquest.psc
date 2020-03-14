@@ -43,7 +43,7 @@ int Property iToggleOn Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 3 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 6 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 4 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 5 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -74,9 +74,6 @@ Function Maintenance()
     elseIf skseRelease < I_MIN_SKSE_RELEASE_IDX
        	Debug.MessageBox("moreHUD: The SKSE revision is out of date.  Please install the latest SKSE")
         isSKSEInstalled = false
-    ;elseIf (SKSE.GetScriptVersionRelease() != skseRelease)
-   ;     Debug.MessageBox("moreHUD: The SKSE scripts are out of date.  Please make sure the latest scripts are installed. \n(Script Revision: " + SKSE.GetScriptVersionRelease() + ", SKSE Revision: " + skseRelease + ")")
-   ;     isSKSEInstalled = false
     else
 		isSKSEInstalled = true
     endIf
@@ -130,7 +127,7 @@ function UpdateSettings(bool disable)
         intargs_200[18] = 0
         intargs_200[19] = 0
         intargs_200[20] = 0 
-	intargs_200[21] = 0 
+	    intargs_200[21] = 0 
     else
         intargs_200[0] = AHZShowIngredientWidget.GetValueInt()
         intargs_200[1] = AHZShowEffectsWidget.GetValueInt()
@@ -153,7 +150,7 @@ function UpdateSettings(bool disable)
         intargs_200[18] = AHZShowEnchantmentKnown.GetValueInt()   
         intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)
         intargs_200[20] = AHZShowEnemySoulLevel.GetValueInt()
-	intargs_200[21] = AHZShowBottomWidgetAlways.GetValueInt()         
+	    intargs_200[21] = AHZShowBottomWidgetAlways.GetValueInt()         
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()
