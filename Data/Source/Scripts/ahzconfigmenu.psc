@@ -720,7 +720,7 @@ event OnOptionHighlight(int a_option)
     endif
 
     if (a_option == _toggle16OID_B)
-        SetInfoText("$mHUD_ShowsEnemysSoullevel")
+        SetInfoText("$mHUD_ShowsEnemysSoulLevel")
     endif
 
     if (a_option == _toggle15OID_B)

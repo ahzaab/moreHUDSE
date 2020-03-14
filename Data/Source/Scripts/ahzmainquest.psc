@@ -29,7 +29,6 @@ GlobalVariable Property AHZInventoryWidgetScale  Auto
 GlobalVariable Property AHZSideWidgetScale  Auto 
 GlobalVariable Property AHZShowEnemyLevel  Auto  
 GlobalVariable Property AHZShowEnemySoulLevel  Auto   
-GlobalVariable Property AHZEnemyLevelPercent  Auto  
 GlobalVariable Property AHZEnemyLevelMax  Auto  
 GlobalVariable Property AHZEnemyLevelMin  Auto  
 GlobalVariable Property AHZShowEnchantmentKnown  Auto
