@@ -457,6 +457,7 @@
     <ClCompile Include="AHZLUTObject.cpp" />
     <ClCompile Include="AHZVanillaFormTable.cpp" />
     <ClCompile Include="AHZExternalFormTable.cpp" />
+    <ClCompile Include="AHZActorInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -480,6 +481,7 @@
     <ClInclude Include="AHZLUTObject.h" />
     <ClInclude Include="AHZVanillaFormTable.h" />
     <ClInclude Include="AHZExternalFormTable.h" />
+    <ClInclude Include="AHZActorInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

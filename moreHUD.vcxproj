@@ -329,6 +329,7 @@
     <ClCompile Include="..\skse64_common\Relocation.cpp" />
     <ClCompile Include="..\skse64_common\SafeWrite.cpp" />
     <ClCompile Include="..\skse64_common\Utilities.cpp" />
+    <ClCompile Include="AHZActorInfo.cpp" />
     <ClCompile Include="AHZArmorInfo.cpp" />
     <ClCompile Include="AHZConsole.cpp" />
     <ClCompile Include="AHZLUTObject.cpp" />
@@ -346,6 +347,7 @@
     <ClInclude Include="..\skse64\GameAPI.h" />
     <ClInclude Include="..\skse64\ScaleformAPI.h" />
     <ClInclude Include="..\skse64\ScaleformCallbacks.h" />
+    <ClInclude Include="AHZActorInfo.h" />
     <ClInclude Include="AHZArmorInfo.h" />
     <ClInclude Include="AHZConsole.h" />
     <ClInclude Include="AHZLUTObject.h" />
