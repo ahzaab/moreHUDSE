@@ -20,6 +20,8 @@
 #include "AHZFormLookup.h"
 #include "AHZUtilities.h"
 
+static std::map<UInt8, string> m_soulMap;
+
 //Unpacked
 //HxD Raw FF C0 83 F8 07 77 0A F3 0F 10 8A 70 01 00 00 EB 54 4C 8D 0D 80 B3 A7 01 C7 44 24 20 00 00 00 00
 RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native(0x003BD5F0);
@@ -782,50 +784,99 @@ float CAHZScaleform::GetBaseDamage(TESAmmo* pthisAmmo)
    return pthisAmmo->settings.damage;
 }
 
-bool CAHZScaleform::GetIsKnownEnchantment(TESObjectREFR *targetRef)
+string CAHZScaleform::GetSoulLevelName(UInt8 soulLevel)
 {
-   PlayerCharacter* pPC = (*g_thePlayer);
-   TESForm *baseForm;
-   if (pPC && targetRef && (baseForm = targetRef->baseForm) && 
-      (baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo)) 
-   {
-      EnchantmentItem * enchantment = NULL;
-      TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
-      bool wasExtra = false;
-      if (enchantable) { // Check the item for a base enchantment
-         enchantment = enchantable->enchantment;
-      }
-      if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(targetRef->extraData.GetByType(kExtraData_Enchantment)))
-      {
-         wasExtra = true;
-         enchantment = extraEnchant->enchant;
-      }
-
-      if (enchantment)
-      {
-         if ((enchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
-            return true;
-         }
-
-         if (enchantment->data.baseEnchantment)
-         {
-            if ((enchantment->data.baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
-               return true;
-            }
-         }
-      }
-
-      // Its safe to assume that if it not a base enchanted item, that it was enchanted by the player and therefore, they
-      // know the enchantment
-      if (wasExtra)
-      {
-         return true;
-      }
-
-   }
-   return false;
+	if (m_soulMap.empty()) //Cache it,  No need to hit the game setting every time
+	{
+		SettingCollectionMap	* settings = *g_gameSettingCollection;
+		m_soulMap[1] = string(settings->Get("sSoulLevelNamePetty")->data.s);
+		m_soulMap[2] = string(settings->Get("sSoulLevelNameLesser")->data.s);
+		m_soulMap[3] = string(settings->Get("sSoulLevelNameCommon")->data.s);
+		m_soulMap[4] = string(settings->Get("sSoulLevelNameGreater")->data.s);
+		m_soulMap[5] = string(settings->Get("sSoulLevelNameGrand")->data.s);
+	}
+	if (m_soulMap.find(soulLevel) == m_soulMap.end())
+	{
+		return string("");
+	}
+	return m_soulMap[soulLevel];
 }
 
+bool MagicDisallowEnchanting(BGSKeywordForm *pKeywords)
+{
+	if (pKeywords)
+	{
+		for (UInt32 k = 0; k < pKeywords->numKeywords; k++) {
+			if (pKeywords->keywords[k]) {
+				string keyWordName = string(pKeywords->keywords[k]->keyword.Get());
+				if (keyWordName == "MagicDisallowEnchanting")
+				{
+					return true;  // Is enchanted, but cannot be enchanted by player
+				}
+			}
+		}
+	}
+	return false;
+}
+
+UInt32 CAHZScaleform::GetIsKnownEnchantment(TESObjectREFR *targetRef)
+{
+	PlayerCharacter* pPC = (*g_thePlayer);
+	TESForm *baseForm;
+	if (pPC && targetRef && (baseForm = targetRef->baseForm) &&
+		(baseForm->GetFormType() == kFormType_Weapon || baseForm->GetFormType() == kFormType_Armor || baseForm->GetFormType() == kFormType_Ammo || baseForm->GetFormType() == kFormType_Projectile))
+	{
+		EnchantmentItem * enchantment = NULL;
+		TESEnchantableForm * enchantable = DYNAMIC_CAST(baseForm, TESForm, TESEnchantableForm);
+		if (baseForm->GetFormType() == kFormType_Projectile)
+			enchantable = DYNAMIC_CAST(AHZGetForm(targetRef), TESForm, TESEnchantableForm);
+		
+		bool wasExtra = false;
+		if (enchantable) { // Check the item for a base enchantment
+			enchantment = enchantable->enchantment;
+		}
+		if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(targetRef->extraData.GetByType(kExtraData_Enchantment)))
+		{
+			wasExtra = true;
+			enchantment = extraEnchant->enchant;
+		}
+
+		if (enchantment)
+		{
+			if ((enchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
+				return MagicDisallowEnchanting(DYNAMIC_CAST(enchantment, EnchantmentItem, BGSKeywordForm)) ? 2 : 1;
+			}
+			else if (MagicDisallowEnchanting(DYNAMIC_CAST(enchantment, EnchantmentItem, BGSKeywordForm)))
+			{
+				return 2;
+			}
+
+			EnchantmentItem * baseEnchantment = (EnchantmentItem *)(enchantment->data.baseEnchantment);
+			if (baseEnchantment)
+			{
+				if ((baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
+					return MagicDisallowEnchanting(DYNAMIC_CAST(baseEnchantment, EnchantmentItem, BGSKeywordForm)) ? 2 : 1;
+				}
+				else if (MagicDisallowEnchanting(DYNAMIC_CAST(baseEnchantment, EnchantmentItem, BGSKeywordForm)))
+				{
+					return 2;
+				}
+			}
+		}
+
+		// Its safe to assume that if it not a base enchanted item, that it was enchanted by the player and therefore, they
+		// know the enchantment
+		if (wasExtra)
+		{
+			return 1;
+		}
+		else if (enchantable) {
+			return MagicDisallowEnchanting(DYNAMIC_CAST(enchantable, TESEnchantableForm, BGSKeywordForm)) ? 2 : 0;
+		}
+
+	}
+	return 0;
+}
 double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
 {
    if (!weaponData)
@@ -1721,19 +1772,22 @@ AlchemyItem* CAHZScaleform::GetAlchemyItem(TESForm *thisObject)
    return NULL;
 }
 
-bool CAHZScaleform::CanPickUp(UInt32 formType)
+bool CAHZScaleform::CanPickUp(TESForm* form)
 {
-   return (formType == kFormType_Weapon ||
-      formType == kFormType_Armor ||
-      formType == kFormType_SoulGem ||
-      formType == kFormType_Potion ||
-      formType == kFormType_Misc ||
-      formType == kFormType_Ingredient ||
-      formType == kFormType_Book ||
-      formType == kFormType_Ammo ||
-      formType == kFormType_ScrollItem ||
-      formType == kFormType_Outfit ||
-      formType == kFormType_Key);
+	UINT32 formType = form->GetFormType();
+	bool canCarry =  (formType == kFormType_Weapon ||
+		formType == kFormType_Armor ||
+		formType == kFormType_SoulGem ||
+		formType == kFormType_Potion ||
+		formType == kFormType_Misc ||
+		formType == kFormType_Ingredient ||
+		formType == kFormType_Book ||
+		formType == kFormType_Ammo ||
+		formType == kFormType_ScrollItem ||
+		formType == kFormType_Outfit ||
+		formType == kFormType_Key ||
+		formType == kFormType_Projectile);  // Projectiles with the "Can Pick Up" flag set to false will not even register in the crossshairs
+	return canCarry;
 }
 
 string CAHZScaleform::GetTargetName(TESForm *thisObject)
@@ -1772,19 +1826,13 @@ string CAHZScaleform::GetTargetName(TESForm *thisObject)
       TESSoulGem *gem = DYNAMIC_CAST(reference->baseForm, TESForm, TESSoulGem);
       if (gem)
       {
-         char * soulName = NULL;
+         string soulName("");
          SettingCollectionMap	* settings = *g_gameSettingCollection;
-         switch (gem->soulSize)
-         {
-         case 1: soulName = settings->Get("sSoulLevelNamePetty")->data.s; break;
-         case 2: soulName = settings->Get("sSoulLevelNameLesser")->data.s; break;
-         case 3: soulName = settings->Get("sSoulLevelNameCommon")->data.s; break;
-         case 4: soulName = settings->Get("sSoulLevelNameGreater")->data.s; break;
-         case 5: soulName = settings->Get("sSoulLevelNameGrand")->data.s; break;
-         default: break;
-         }
 
-         if (soulName)
+		 soulName = GetSoulLevelName(gem->soulSize);
+
+
+         if (soulName.length())
          {
             name.append(" (");
             name.append(soulName);
@@ -1818,27 +1866,42 @@ bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 static UInt32 lasttargetRef;
 void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 {
-   PlayerCharacter* pPC = (*g_thePlayer);
-   UInt16 npcLevel = 0;
-   UInt16 playerLevel = 0;
+	PlayerCharacter* pPC = (*g_thePlayer);
+	CAHZActorData actorData;
+	actorData.Level = 0;
+	actorData.IsSentient = 0;
+	UInt16 playerLevel = 0;
+	UInt32 soulType = 0;
 
-   if (pPC)
-   {
-      npcLevel = GetCurrentEnemyLevel();
-      if (npcLevel >= 1)
-      {
-         playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
-      }
-   }
+	if (pPC)
+	{
+		actorData = GetCurrentEnemyData();
+		if (actorData.Level)
+		{
+			playerLevel = CALL_MEMBER_FN(pPC, GetLevel)();
+			if (!actorData.IsSentient) {  // If sentient, then don't bother all sentients have grand soul gem levels
+				soulType = CAHZActorInfo::GetSoulType(actorData.Level, actorData.IsSentient);
+			}
+		}
+	}
 
-   GFxValue obj;
-   args->movie->CreateObject(&obj);
-   RegisterNumber(&obj, "EnemyLevel", npcLevel);
-   RegisterNumber(&obj, "PlayerLevel", playerLevel);
-   if (args->args[0].HasMember("outObj"))
-   {
-      args->args[0].SetMember("outObj", &obj);
-   }
+	GFxValue obj;
+	args->movie->CreateObject(&obj);
+	if (actorData.Level)
+	{
+		RegisterNumber(&obj, "EnemyLevel", actorData.Level);
+		RegisterNumber(&obj, "PlayerLevel", playerLevel);
+		string soulName = GetSoulLevelName((UInt8)soulType);
+		if (soulType && soulName.length())
+		{
+			RegisterString(&obj, args->movie, "Soul", soulName.c_str());
+		}
+	}
+
+	if (args->args[0].HasMember("outObj"))
+	{
+		args->args[0].SetMember("outObj", &obj);
+	}
 }
 
 string CAHZScaleform::GetArmorWeightClass(TESObjectREFR *theObject)
@@ -2244,10 +2307,16 @@ string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
          }
       }
    }
-   else if (theObject->baseForm->GetFormType() == kFormType_Ammo)
+   else if (theObject->baseForm->GetFormType() == kFormType_Ammo ||
+			theObject->baseForm->GetFormType() == kFormType_Projectile)
    {
-      TESAmmo *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
-
+	   TESAmmo *item = NULL;
+	   
+	   if (theObject->baseForm->GetFormType() == kFormType_Projectile)
+		   item = DYNAMIC_CAST(AHZGetForm(theObject), TESForm, TESAmmo);
+	   else
+		   item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
+	   
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
@@ -2512,7 +2581,8 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    args->movie->CreateObject(&obj);
 
    if (pTargetReference->baseForm->GetFormType() == kFormType_Weapon ||
-      pTargetReference->baseForm->GetFormType() == kFormType_Ammo)
+      pTargetReference->baseForm->GetFormType() == kFormType_Ammo ||
+	   pTargetReference->baseForm->GetFormType() == kFormType_Projectile)
    {
       TESForm *form = NULL;
       TESAmmo *ammo = NULL;
@@ -2710,11 +2780,11 @@ void CAHZScaleform::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionH
    // If the target is not valid or it can't be picked up by the player
    if ((canCarry = (GetIngredient(targetForm) != NULL)) ||
       (canCarry = (GetAlchemyItem(targetForm) != NULL)) ||
-      (canCarry = CanPickUp(pTargetReference->baseForm->GetFormType()) ||
+      (canCarry = CanPickUp(pTargetReference->baseForm) ||
       (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)) ||
          ((spellItem = GetSpellItem(targetForm)) != NULL))
    {
-      if (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm && !CanPickUp(targetForm->formType))
+      if (pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm && !CanPickUp(targetForm))
       {
          canCarry = false;
       }

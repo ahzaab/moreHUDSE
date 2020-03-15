@@ -22,6 +22,7 @@
 #include <algorithm>
 #include "skse64/PapyrusObjectReference.h"
 #include "AHZWeaponInfo.h"
+#include "AHZFormLookup.h"
 
 class ContainerAmmoVistor
 {
@@ -74,7 +75,8 @@ AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(TESObjectREFR * thisObject)
 		return weaponData;
 
 	if (thisObject->baseForm->GetFormType() != kFormType_Weapon &&
-		thisObject->baseForm->GetFormType() != kFormType_Ammo)
+		thisObject->baseForm->GetFormType() != kFormType_Ammo &&
+		thisObject->baseForm->GetFormType() != kFormType_Projectile)
 	{
 		return weaponData;
 	}
@@ -86,6 +88,16 @@ AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(TESObjectREFR * thisObject)
 		weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESObjectWEAP);
 	else if (thisObject->baseForm->GetFormType() == kFormType_Ammo)
 		weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESAmmo);
+	else if (thisObject->baseForm->GetFormType() == kFormType_Projectile)
+	{
+		ArrowProjectile *asArrowProjectile = DYNAMIC_CAST(thisObject, TESObjectREFR, ArrowProjectile);
+		weaponData.ammo = DYNAMIC_CAST(AHZGetForm(thisObject), TESForm, TESAmmo);
+		if (asArrowProjectile) {
+			weaponData.equipData.pForm = weaponData.ammo;
+			weaponData.equipData.pExtraData = &asArrowProjectile->extraData;
+		}
+	}
+
 	return weaponData;
 }
 

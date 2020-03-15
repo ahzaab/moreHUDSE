@@ -5,6 +5,7 @@ GlobalVariable Property AHZBottomWidgetYPercent  Auto
 GlobalVariable Property AHZSideWidgetXPercent  Auto  
 GlobalVariable Property AHZSideWidgetYPercent  Auto  
 GlobalVariable Property AHZShowBottomWidget  Auto  
+GlobalVariable Property AHZShowBottomWidgetAlways  Auto  
 GlobalVariable Property AHZShowIngredientWidget  Auto
 GlobalVariable Property AHZShowEffectsWidget  Auto
 GlobalVariable Property AHZShowInventoryCount  Auto  
@@ -27,7 +28,7 @@ GlobalVariable Property AHZBottomWidgetScale  Auto
 GlobalVariable Property AHZInventoryWidgetScale  Auto 
 GlobalVariable Property AHZSideWidgetScale  Auto 
 GlobalVariable Property AHZShowEnemyLevel  Auto  
-GlobalVariable Property AHZEnemyLevelPercent  Auto  
+GlobalVariable Property AHZShowEnemySoulLevel  Auto   
 GlobalVariable Property AHZEnemyLevelMax  Auto  
 GlobalVariable Property AHZEnemyLevelMin  Auto  
 GlobalVariable Property AHZShowEnchantmentKnown  Auto
@@ -41,7 +42,7 @@ int Property iToggleOn Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 3 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 6 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 4 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 5 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -72,9 +73,6 @@ Function Maintenance()
     elseIf skseRelease < I_MIN_SKSE_RELEASE_IDX
        	Debug.MessageBox("moreHUD: The SKSE revision is out of date.  Please install the latest SKSE")
         isSKSEInstalled = false
-    ;elseIf (SKSE.GetScriptVersionRelease() != skseRelease)
-   ;     Debug.MessageBox("moreHUD: The SKSE scripts are out of date.  Please make sure the latest scripts are installed. \n(Script Revision: " + SKSE.GetScriptVersionRelease() + ", SKSE Revision: " + skseRelease + ")")
-   ;     isSKSEInstalled = false
     else
 		isSKSEInstalled = true
     endIf
@@ -100,7 +98,7 @@ function RefreshWidgets()
 EndFunction
 
 function UpdateSettings(bool disable)
-    int[] intargs_200 = new int[20]
+    int[] intargs_200 = new int[22]
     float[] argsF = new float[2]
     float argF = 100.0
 
@@ -126,7 +124,9 @@ function UpdateSettings(bool disable)
         intargs_200[16] = 0        
 	    intargs_200[17] = 0   
         intargs_200[18] = 0
-        intargs_200[19] = 0 
+        intargs_200[19] = 0
+        intargs_200[20] = 0 
+	    intargs_200[21] = 0 
     else
         intargs_200[0] = AHZShowIngredientWidget.GetValueInt()
         intargs_200[1] = AHZShowEffectsWidget.GetValueInt()
@@ -147,7 +147,9 @@ function UpdateSettings(bool disable)
         intargs_200[16] = AHZEnemyLevelMax.GetValueInt()
 	    intargs_200[17] = AHZEnemyLevelMin.GetValueInt()   
         intargs_200[18] = AHZShowEnchantmentKnown.GetValueInt()   
-        intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)     
+        intargs_200[19] = ((AHZDisplayDelay.GetValue() * 1000.0) as Int)
+        intargs_200[20] = AHZShowEnemySoulLevel.GetValueInt()
+	    intargs_200[21] = AHZShowBottomWidgetAlways.GetValueInt()         
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()

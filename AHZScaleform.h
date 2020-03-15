@@ -53,7 +53,7 @@ public:
    static void ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args);
    static bool GetIsBookAndWasRead(TESObjectREFR *theObject);
    static void ProcessEnemyInformation(GFxFunctionHandler::Args *args);
-   static bool GetIsKnownEnchantment(TESObjectREFR *targetRef);
+   static UInt32 GetIsKnownEnchantment(TESObjectREFR *targetRef);
    static double GetTotalWarmthRating(void);
    static double GetArmorWarmthRating(TESObjectREFR* targetRef);
 
@@ -99,7 +99,8 @@ private:
    static AlchemyItem* GetAlchemyItem(TESForm *initialTarget);
    static AlchemyItem * GetAlchemyItemFromLeveledList(TESForm *thisObject);
    static SpellItem* GetSpellItem(TESForm *initialTarget);
+   static string GetSoulLevelName(UInt8 soulLevel);
 
    // const char * GetTargetName(TESObjectREFR *thisObject);
-   static bool CanPickUp(UInt32 formType);
+   static bool CanPickUp(TESForm * form);
 };
