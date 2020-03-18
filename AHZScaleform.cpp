@@ -1864,6 +1864,30 @@ bool CAHZScaleform::GetIsBookAndWasRead(TESObjectREFR *theObject)
 }
 
 static UInt32 lasttargetRef;
+
+static bool DoubleCompare(double a, double b)
+{
+	double delta = fabs(a - b);
+	if (delta <  std::numeric_limits<double>::epsilon() &&
+		delta > -std::numeric_limits<double>::epsilon()) {
+		return true;
+	}
+	return false;
+}
+
+static double GetPct(double current, double max)
+{
+	double percent = -1; 
+
+	if (!DoubleCompare(max, 0.0))
+	{
+		percent = floor((current / max) * 100.0);
+		return fmin(100, fmax(percent, -1));  // negative indicates that the actor value is not used
+	}
+
+	return percent;
+}
+
 void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 {
 	PlayerCharacter* pPC = (*g_thePlayer);
@@ -1885,22 +1909,37 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 		}
 	}
 
-	GFxValue obj;
-	args->movie->CreateObject(&obj);
+	GFxValue enemyObj;
+	GFxValue playerObj;
+	args->movie->CreateObject(&enemyObj);
+	args->movie->CreateObject(&playerObj);
 	if (actorData.Level)
 	{
-		RegisterNumber(&obj, "EnemyLevel", actorData.Level);
-		RegisterNumber(&obj, "PlayerLevel", playerLevel);
+		RegisterNumber(&enemyObj, "level", actorData.Level);
+		RegisterNumber(&playerObj, "level", playerLevel);
 		string soulName = GetSoulLevelName((UInt8)soulType);
 		if (soulType && soulName.length())
 		{
-			RegisterString(&obj, args->movie, "Soul", soulName.c_str());
+			RegisterString(&enemyObj, args->movie, "soul", soulName.c_str());
 		}
+		RegisterNumber(&enemyObj, "maxHealth", actorData.maxHealth);
+		RegisterNumber(&enemyObj, "health", actorData.health);
+		RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
+		RegisterNumber(&enemyObj, "maxMagicka", actorData.maxMagicka);
+		RegisterNumber(&enemyObj, "magicka", actorData.magicka);
+		RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
+		RegisterNumber(&enemyObj, "maxStamina", actorData.maxStamina);
+		RegisterNumber(&enemyObj, "stamina", actorData.stamina);
+		RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
 	}
 
-	if (args->args[0].HasMember("outObj"))
+	if (args->args[0].HasMember("player"))
 	{
-		args->args[0].SetMember("outObj", &obj);
+		args->args[0].SetMember("player", &playerObj);
+	}
+	if (args->args[0].HasMember("enemy"))
+	{
+		args->args[0].SetMember("enemy", &enemyObj);
 	}
 }
 

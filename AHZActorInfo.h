@@ -2,9 +2,41 @@
 
 #include "skse64/GameReferences.h"
 
-struct CAHZActorData{
+class CAHZActorData{
+public:
+
 	UInt32 IsSentient;
 	UInt16 Level;
+	float maxHealth;
+	float health;
+	float maxMagicka;
+	float magicka;
+	float maxStamina;
+	float stamina;
+	
+	CAHZActorData()
+	{
+		maxHealth =0;
+		health = 0;
+		maxMagicka = 0;
+		magicka = 0;
+		maxStamina = 0;
+		stamina = 0;
+		IsSentient = 0;
+		Level = 0;
+	};
+
+	CAHZActorData(const CAHZActorData & data)
+	{
+		maxHealth = data.maxHealth;
+		health = data.health;
+		maxMagicka = data.maxMagicka;
+		magicka = data.magicka;
+		maxStamina = data.maxStamina;
+		stamina = data.stamina;
+		IsSentient = data.IsSentient;
+		Level = data.Level;
+	};
 };
 
 class CAHZActorInfo
