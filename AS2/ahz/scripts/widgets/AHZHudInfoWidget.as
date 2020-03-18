@@ -25,6 +25,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public var EnemyStamina_mc:MovieClip;
 	public var EnemyMagickaMeter: Meter;
 	public var EnemyStaminaMeter: Meter;	
+	public var HealthStats_mc: MovieClip;
+	public var MagickaStats_mc: MovieClip;
+	public var StaminaStats_mc: MovieClip;
 	
 	// Public vars
 	public var ToggleState:Number;
@@ -59,6 +62,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var showTargetWarmth:Boolean;
 	private var showEnemyMagickaMeter:Boolean;
 	private var showEnemyStaminaMeter:Boolean;
+	private var showEnemyStaminaStats:Boolean;
+	private var showEnemyMagickaStats:Boolean;
+	private var showEnemyHealthStats:Boolean;
 	
 	var PLAYER_CARD_WIDTH:Number = 651.0;
 		
@@ -171,9 +177,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		displayActive = false;
 		showEnemySoulLevel = false;
 		
-		showEnemyMagickaMeter = true;
-		showEnemyStaminaMeter = true;
 		
+		showEnemyMagickaMeter = true;
+		showEnemyStaminaMeter = true;	
+		showEnemyHealthStats = true;
+		showEnemyStaminaStats = true;
+		showEnemyMagickaStats = true;
+
 	}
 
 	function UpdateEnemyMeters(magickaPct:Number, staminaPct:Number):Void{
@@ -223,6 +233,50 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	}
 
+	function UpdateEnemyStats(enemy:Object):Void{
+		
+		if (!enemy){
+			MagickaStats_mc._alpha = 0;
+			StaminaStats_mc._alpha = 0;
+			return;
+		}
+		
+		MagickaStats_mc._alpha = (showEnemyMagickaStats) ? EnemyMagicka_mc._alpha : 0;
+		StaminaStats_mc._alpha = (showEnemyStaminaStats) ? EnemyStamina_mc._alpha : 0;
+		MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
+		StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();
+		MagickaStats_mc._x = EnemyMagicka_mc._x;
+		MagickaStats_mc._y = EnemyMagicka_mc._y;
+		StaminaStats_mc._x = EnemyStamina_mc._x;
+		StaminaStats_mc._y = EnemyStamina_mc._y;
+	}
+
+	function UpdateEnemyHealthStats(enemy:Object):Void{
+		
+		if (!enemy){
+			HealthStats_mc._alpha = 0;
+			return;
+		}
+		
+		if (showEnemyHealthStats)
+		{
+			if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+			{
+				HealthStats_mc._alpha = 0;
+			}
+			else
+			{
+				HealthStats_mc._alpha = 100;
+			}
+		}
+		else
+		{
+			HealthStats_mc._alpha = 0;
+		}
+		
+		HealthStats_mc.Stats.text = enemy.health.toString() + "/" + enemy.maxHealth.toString();
+	}
+
 	function InitEnemySoulTextField():Void{
 		
 		EnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
@@ -240,6 +294,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemyStaminaMeter.SetPercent(0);		
 		EnemyMagicka_mc._alpha = 0;
 		EnemyStamina_mc._alpha = 0;
+		HealthStats_mc._alpha = 0;
+		MagickaStats_mc._alpha = 0;
+		StaminaStats_mc._alpha = 0;
 		
 		var enemy_mc = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance;
 		EnemySoul = enemy_mc.createTextField("EnemySoul", 
@@ -256,30 +313,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemySoul.filters = filterArray;
 		EnemySoul._alpha = 0;	
 		
-		//_root.HUDMovieBaseInstance.EnemyHealth_mc.duplicateMovieClip(EnemyMagicka_mc, "dupEnemyMagicka_mc", _root.HUDMovieBaseInstance.EnemyHealth_mc, _root.HUDMovieBaseInstance.EnemyHealth_mc.getNextHighestDepth());
-				
-		//EnemyMagicka_mc._x = (Stage.visibleRect.width - _root.HUDMovieBaseInstance.EnemyHealth_mc._width) - (_root.HUDMovieBaseInstance.EnemyHealth_mc._x);
-		//EnemyMagicka_mc._y = (Stage.visibleRect.height - _root.HUDMovieBaseInstance.EnemyHealth_mc._height) - (_root.HUDMovieBaseInstance.EnemyHealth_mc._x);
-
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
 		
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Stage.visibleRect.width: " + Stage.visibleRect.width);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Stage.visibleRect.height: " + Stage.visibleRect.height);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Stage.visibleRect.x: " + Stage.visibleRect.x);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Stage.visibleRect.y: " + Stage.visibleRect.y);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._width: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._width);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._height: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._height);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._x: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._x);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._y: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._y);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._width: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._width);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._height: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._height);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y);			
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);	
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._xscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._xscale);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._yscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._yscale);	
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._parent._xscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._parent._xscale);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._parent._yscale: " + _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._parent._yscale);	
+		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x);
+		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y);
+		
 	}
 
 	function ShowElements(aMode:String,abShow:Boolean):Void
@@ -565,10 +604,28 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				staminaPct = outData.enemy.staminaPct;
 			}	
 			UpdateEnemyMeters(magickaPct, staminaPct);		
+			UpdateEnemyStats(outData.enemy);
+			UpdateEnemyHealthStats(outData.enemy);
 		}
 		else
 		{
 			UpdateEnemyMeters(-1, -1);
+			UpdateEnemyStats(null);
+			
+			if (showEnemyHealthStats)
+			{
+				if (!dataRead)
+				{
+					_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);
+					dataRead = true;
+				}
+				UpdateEnemyHealthStats(outData.enemy);
+			}
+			else
+			{
+				UpdateEnemyHealthStats(null);
+			}
+			
 		}
 		
 	
@@ -1001,7 +1058,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 								   showknownEnchantmentValue:Number,
 								   widgetDisplayDelayMSValue:Number,
 								   showEnemySoulLevelValue:Number,
-								   viewBottomInfoAlwaysValue:Number):Void 
+								   viewBottomInfoAlwaysValue:Number,
+								   showEnemyMagickaMeterValue:Number,
+								   showEnemyStaminaMeterValue:Number,
+								   showEnemyHealthStatsValue:Number,
+								   showEnemyStaminaStatsValue:Number,
+								   showEnemyMagickaStatsValue:Number):Void 
 	{				
 		viewSideInfo = (sideView>=1);
 		viewBottomInfo = (bottomView>=1);
@@ -1025,6 +1087,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		widgetDisplayDelayMS = widgetDisplayDelayMSValue;
 		showEnemySoulLevel = (showEnemySoulLevelValue>=1);
 		viewBottomInfoAlways = (viewBottomInfoAlwaysValue>=1);
+		showEnemyMagickaMeter = (showEnemyMagickaMeterValue>=1);
+		showEnemyStaminaMeter = (showEnemyStaminaMeterValue>=1);
+		showEnemyHealthStats = (showEnemyHealthStatsValue>=1);
+		showEnemyStaminaStats = (showEnemyStaminaStatsValue>=1);
+		showEnemyMagickaStats = (showEnemyMagickaStatsValue>=1);
+		
 		RefreshWidgets();
 	}
 

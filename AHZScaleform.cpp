@@ -1879,9 +1879,14 @@ static double GetPct(double current, double max)
 {
 	double percent = -1; 
 
+	if (max < 0)
+	{
+		return percent;
+	}
+
 	if (!DoubleCompare(max, 0.0))
 	{
-		percent = floor((current / max) * 100.0);
+		percent = ceil((current / max) * 100.0);
 		return fmin(100, fmax(percent, -1));  // negative indicates that the actor value is not used
 	}
 
@@ -1922,14 +1927,14 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 		{
 			RegisterString(&enemyObj, args->movie, "soul", soulName.c_str());
 		}
-		RegisterNumber(&enemyObj, "maxHealth", actorData.maxHealth);
-		RegisterNumber(&enemyObj, "health", actorData.health);
+		RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
+		RegisterNumber(&enemyObj, "health", ceil(actorData.health));
 		RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
-		RegisterNumber(&enemyObj, "maxMagicka", actorData.maxMagicka);
-		RegisterNumber(&enemyObj, "magicka", actorData.magicka);
+		RegisterNumber(&enemyObj, "maxMagicka", ceil(actorData.maxMagicka));
+		RegisterNumber(&enemyObj, "magicka", ceil(actorData.magicka));
 		RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
-		RegisterNumber(&enemyObj, "maxStamina", actorData.maxStamina);
-		RegisterNumber(&enemyObj, "stamina", actorData.stamina);
+		RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
+		RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
 		RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
 	}
 
