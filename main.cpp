@@ -59,7 +59,7 @@ CAHZDebugConsole theDebugConsole;
 
 /**** scaleform functions ****/
 
-class SKSEScaleform_InstallHooks : public GFxFunctionHandler
+class SKSEScaleform_InstallHooks : public GFxFunctionHandler 
 {
 public:
    virtual void	Invoke(Args * args)

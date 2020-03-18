@@ -83,10 +83,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var ENEMY_METER_HEIGHT:Number = 11.5;
 	
 	// Rects
-	private var maxXY:Object;
-	private var minXY:Object;
+	private var stageRect:Object;
 
-	
 	// Statics
 	private static var hooksInstalled:Boolean = false;
 
@@ -98,15 +96,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				
 		savedCrossHairData = {outObj:Object,validTarget:Boolean};
 		// Get the rec of the parent
-		maxXY = {x:Stage.visibleRect.x,y:Stage.visibleRect.y};
-		minXY = {x:Stage.visibleRect.x + Stage.visibleRect.width,y:Stage.visibleRect.y + Stage.visibleRect.height};
-		this._parent.globalToLocal(maxXY);
-		this._parent.globalToLocal(minXY);
-		txtMeasureInstance._alpha = 0;
+		stageRect = {x:Stage.visibleRect.x,y:Stage.visibleRect.y};
 		
+		txtMeasureInstance._alpha = 0;
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("This:");
 		// Anchor this widget to the top left corner
-		this._y = maxXY.y;
-		this._x = maxXY.x;
+		this._y = stageRect.y;
+		this._x = stageRect.x;
 
 		// Start with the widgets hidden
 		hideInventoryWidget();
@@ -285,8 +281,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);		
 			
 		orginalBracketLocationY = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
-		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + ENEMY_METER_HEIGHT;
-		EnemyMagicka_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x);
+		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + ENEMY_METER_HEIGHT - stageRect.y;
+		EnemyMagicka_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
 		EnemyStamina_mc._x = EnemyMagicka_mc._x;	
 		EnemyMagickaMeter = new Meter(EnemyMagicka_mc);
 		EnemyStaminaMeter = new Meter(EnemyStamina_mc);
@@ -316,8 +312,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
 		
-		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x);
-		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y);
+		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
+		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y;
 		
 	}
 
