@@ -542,15 +542,18 @@ uintptr_t Enemy_Update_Hook_Base = 0x00882520;
 //.text : 00007FF62B522639                         EnemyHealth__Update endp
 //.text : 00007FF62B522639
 //.text : 00007FF62B522639; -------------------------------------------------------------------------- -
-
+static UInt64 lastRefHandle = 0;
 RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
 void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrOut)
 {
+
    TESObjectREFR * reference = *refrOut;
    if (!reference)
    {
       return;
    }
+
+   bool targetChanged = (lastRefHandle != (UInt64)refHandle);
    UInt16 npcLevel = 0;
    UInt32 isSentient = 0;
    float maxHealth = 0;
@@ -559,6 +562,7 @@ void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrO
    float magicka = 0;
    float maxStamina = 0;
    float stamina = 0;
+   lastRefHandle = (UInt64)refHandle;
 
    if (reference)
    {
@@ -585,6 +589,7 @@ void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrO
 
    
    CAHZActorData data;
+   data.targetChanged = targetChanged;
    data.Level = npcLevel;
    data.IsSentient = isSentient;
    data.maxHealth = maxHealth;

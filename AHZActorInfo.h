@@ -13,6 +13,7 @@ public:
 	float magicka;
 	float maxStamina;
 	float stamina;
+	bool targetChanged;
 	
 	CAHZActorData()
 	{
@@ -24,6 +25,7 @@ public:
 		stamina = 0;
 		IsSentient = 0;
 		Level = 0;
+		targetChanged = false;
 	};
 
 	CAHZActorData(const CAHZActorData & data)
@@ -36,6 +38,7 @@ public:
 		stamina = data.stamina;
 		IsSentient = data.IsSentient;
 		Level = data.Level;
+		targetChanged = data.targetChanged;
 	};
 };
 

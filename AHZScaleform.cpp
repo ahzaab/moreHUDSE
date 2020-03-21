@@ -1936,6 +1936,7 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 		RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
 		RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
 		RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
+		RegisterBoolean(&enemyObj, "targetChanged", actorData.targetChanged);
 	}
 
 	if (args->args[0].HasMember("player"))
