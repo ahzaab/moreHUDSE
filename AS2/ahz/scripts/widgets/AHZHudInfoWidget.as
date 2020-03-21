@@ -6,6 +6,7 @@ import flash.geom.Transform;
 import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.filters.DropShadowFilter;
+import Components.Meter;
 
 class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 {
@@ -20,6 +21,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public var BottomRolloverText:TextField;
 	public var TopRolloverText:TextField;
 	public var EnemySoul:TextField;
+	public var EnemyMagicka_mc:MovieClip;
+	public var EnemyStamina_mc:MovieClip;
+	public var EnemyMagickaMeter: Meter;
+	public var EnemyStaminaMeter: Meter;	
+	public var HealthStats_mc: MovieClip;
+	public var MagickaStats_mc: MovieClip;
+	public var StaminaStats_mc: MovieClip;
+	public var AHZBracketInstance: MovieClip;
 	
 	// Public vars
 	public var ToggleState:Number;
@@ -52,6 +61,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var displayActive:Boolean;
 	private var showEnemySoulLevel:Boolean;
 	private var showTargetWarmth:Boolean;
+	private var showEnemyMagickaMeter:Boolean;
+	private var showEnemyStaminaMeter:Boolean;
+	private var showEnemyStaminaStats:Boolean;
+	private var showEnemyMagickaStats:Boolean;
+	private var showEnemyHealthStats:Boolean;
+	
 	var PLAYER_CARD_WIDTH:Number = 651.0;
 		
 	// private variables
@@ -65,12 +80,15 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var _mcLoader:MovieClipLoader;
 	private var alphaTimer:Number;
 	private var widgetDelayTimer:Number;
+	private var orginalBracketLocationY:Number;
+	private var ENEMY_METER_HEIGHT:Number = 11.5;
+	private var firstMagickaMeterUpdate:Boolean = true;
+	private var firstStaminaMeterUpdate:Boolean = true;
+	private var alphaChanged:Boolean = true;
 	
 	// Rects
-	private var maxXY:Object;
-	private var minXY:Object;
+	private var stageRect:Object;
 
-	
 	// Statics
 	private static var hooksInstalled:Boolean = false;
 
@@ -79,17 +97,16 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function AHZHudInfoWidget()
 	{
 		super();
+				
 		savedCrossHairData = {outObj:Object,validTarget:Boolean};
 		// Get the rec of the parent
-		maxXY = {x:Stage.visibleRect.x,y:Stage.visibleRect.y};
-		minXY = {x:Stage.visibleRect.x + Stage.visibleRect.width,y:Stage.visibleRect.y + Stage.visibleRect.height};
-		this._parent.globalToLocal(maxXY);
-		this._parent.globalToLocal(minXY);
-		txtMeasureInstance._alpha = 0;
+		stageRect = {x:Stage.visibleRect.x,y:Stage.visibleRect.y};
 		
+		txtMeasureInstance._alpha = 0;
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("This:");
 		// Anchor this widget to the top left corner
-		this._y = maxXY.y;
-		this._x = maxXY.x;
+		this._y = stageRect.y;
+		this._x = stageRect.x;
 
 		// Start with the widgets hidden
 		hideInventoryWidget();
@@ -159,23 +176,190 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		widgetDisplayDelayMS = 0;
 		displayActive = false;
 		showEnemySoulLevel = false;
+		showEnemyMagickaMeter = false;
+		showEnemyStaminaMeter = false;	
+		showEnemyHealthStats = false;
+		showEnemyStaminaStats = false;
+		showEnemyMagickaStats = false;
+	}
+
+	function UpdateEnemyMeters(magickaPct:Number, staminaPct:Number, updateRequired:Boolean):Void{
+		
+		if (magickaPct < 0 && staminaPct < 0)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			EnemyStaminaMeter.SetPercent(0);
+			EnemyMagicka_mc._alpha = 0;
+			EnemyStamina_mc._alpha = 0;
+			AHZBracketInstance._y = orginalBracketLocationY;
+		}	
+		else if (magickaPct < 0)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			EnemyMagicka_mc._alpha = 0;
+			if (updateRequired || firstStaminaMeterUpdate)
+			{
+				EnemyStaminaMeter.SetPercent(staminaPct);
+				firstStaminaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyStaminaMeter.SetTargetPercent(staminaPct);
+			}
+			EnemyStamina_mc._alpha = 100;
+			EnemyStamina_mc._y = EnemyMagicka_mc._y;
+			AHZBracketInstance._y = orginalBracketLocationY + ENEMY_METER_HEIGHT;
+		}
+		else if (staminaPct < 0)
+		{
+			if (updateRequired || firstMagickaMeterUpdate)
+			{
+				EnemyMagickaMeter.SetPercent(magickaPct);
+				firstMagickaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyMagickaMeter.SetTargetPercent(magickaPct);
+			}
+			EnemyMagicka_mc._alpha = 100;			
+			EnemyStaminaMeter.SetPercent(0);
+			EnemyStamina_mc._alpha = 0;
+			AHZBracketInstance._y = orginalBracketLocationY + ENEMY_METER_HEIGHT;
+		}
+		else
+		{
+			if (updateRequired || firstMagickaMeterUpdate || firstStaminaMeterUpdate)
+			{
+				EnemyMagickaMeter.SetPercent(magickaPct);
+				EnemyStaminaMeter.SetPercent(staminaPct);
+				firstStaminaMeterUpdate = false;
+				firstMagickaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyMagickaMeter.SetTargetPercent(magickaPct);
+				EnemyStaminaMeter.SetTargetPercent(staminaPct);
+			}
+			EnemyMagicka_mc._alpha = 100;	
+			EnemyStamina_mc._alpha = 100;
+			EnemyStamina_mc._y = EnemyMagicka_mc._y + ENEMY_METER_HEIGHT;
+			AHZBracketInstance._y = orginalBracketLocationY + (ENEMY_METER_HEIGHT * 2);
+		}
+		
+		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			EnemyStaminaMeter.SetPercent(0);			
+			EnemyMagicka_mc._alpha = 0;
+			EnemyStamina_mc._alpha = 0;
+		}
+
+	}
+
+	function UpdateEnemyStats(enemy:Object):Void{
+		
+		if (!enemy){
+			MagickaStats_mc._alpha = 0;
+			StaminaStats_mc._alpha = 0;
+			return;
+		}
+		
+		MagickaStats_mc._alpha = (showEnemyMagickaStats) ? EnemyMagicka_mc._alpha : 0;
+		StaminaStats_mc._alpha = (showEnemyStaminaStats) ? EnemyStamina_mc._alpha : 0;
+		MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
+		StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();
+		MagickaStats_mc._x = EnemyMagicka_mc._x;
+		MagickaStats_mc._y = EnemyMagicka_mc._y;
+		StaminaStats_mc._x = EnemyStamina_mc._x;
+		StaminaStats_mc._y = EnemyStamina_mc._y;
+	}
+
+	function UpdateEnemyHealthStats(enemy:Object):Void{
+		
+		if (!enemy){
+			HealthStats_mc._alpha = 0;
+			return;
+		}
+		
+		if (showEnemyHealthStats)
+		{
+			if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+			{
+				HealthStats_mc._alpha = 0;
+			}
+			else
+			{
+				HealthStats_mc._alpha = 100;
+			}
+		}
+		else
+		{
+			HealthStats_mc._alpha = 0;
+		}
+		
+		HealthStats_mc.Stats.text = enemy.health.toString() + "/" + enemy.maxHealth.toString();
 	}
 
 	function InitEnemySoulTextField():Void{
-		var enemy_mc = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance;
+		
+		EnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
+		EnemyMagicka_mc._yscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale );
+		EnemyStamina_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
+		EnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);		
+			
+		orginalBracketLocationY = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
+		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + ENEMY_METER_HEIGHT - stageRect.y;
+		EnemyMagicka_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
+		EnemyStamina_mc._x = EnemyMagicka_mc._x;	
+		EnemyMagickaMeter = new Meter(EnemyMagicka_mc);
+		EnemyStaminaMeter = new Meter(EnemyStamina_mc);
+		EnemyMagickaMeter.SetPercent(0);
+		EnemyStaminaMeter.SetPercent(0);		
+		EnemyMagicka_mc._alpha = 0;
+		EnemyStamina_mc._alpha = 0;
+		HealthStats_mc._alpha = 0;
+		MagickaStats_mc._alpha = 0;
+		StaminaStats_mc._alpha = 0;
+				
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
+		
+		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
+		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y;
+		
+		
+		var mc:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
+		AHZBracketInstance = mc.duplicateMovieClip("AHZBracketInstance", this.getNextHighestDepth());
+		AHZBracketInstance.gotoAndStop(100);
+		AHZBracketInstance.RolloverNameInstance.textAutoSize="shrink";	
+		
+		AHZBracketInstance._y = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
+		AHZBracketInstance._x = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._x;
+		
+		// Juat move it out of view.  I want the alpha logic to stay in place
+		_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y = -999999;
+		
+		orginalBracketLocationY = AHZBracketInstance._y;
+		
+		
+		var enemy_mc = AHZBracketInstance;
 		EnemySoul = enemy_mc.createTextField("EnemySoul", 
 							enemy_mc.getNextHighestDepth(), 
 							 enemy_mc.RolloverNameInstance._x, 
-							 enemy_mc.RolloverNameInstance._height - 22, 
+							 enemy_mc.RolloverNameInstance._height - 28, 
 							 enemy_mc.RolloverNameInstance._width, 
 							 enemy_mc.RolloverNameInstance._height);
-		EnemySoul.setNewTextFormat(enemy_mc.RolloverNameInstance.getTextFormat());
+		var format = enemy_mc.RolloverNameInstance.getTextFormat();
+		format.size = 15;
+		EnemySoul.setNewTextFormat(format);
 		
 		var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
 		var filterArray:Array = new Array();
   		filterArray.push(filter);
 		EnemySoul.filters = filterArray;
-		EnemySoul._alpha = 0;	
+		EnemySoul._alpha = 0;			
+		EnemySoul.textAutoSize="shrink";		
+		
 	}
 
 	function ShowElements(aMode:String,abShow:Boolean):Void
@@ -367,59 +551,47 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}	
 	}
 	
-	function UpdateEnemyLevelValues()
-	{
-		var outData:Object = {outObj:Object};
-		_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);			
-		if (outData && outData.outObj)
-		{				
-			savedEnemyLevelNumber = outData.outObj.EnemyLevel;
-			savedPlayerLevelNumber = outData.outObj.PlayerLevel;	
-			
-			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Update: " + savedEnemyLevelNumber.toString() + ", " + savedPlayerLevelNumber.toString());
-		}	
-	}
-
 	function interpolate(pBegin:Number, pEnd:Number, pMax:Number, pStep:Number):Number {
 		return pBegin + Math.floor((pEnd - pBegin) * pStep / pMax);
 	}
+	
+	function adjustBracketWidth():Void 
+	{
+		var widthValue:Number = 0.66;
+		widthValue = widthValue * AHZBracketInstance.RolloverNameInstance.textWidth;
+		widthValue = Math.floor(widthValue) + 5;
+		widthValue = Math.min(100, Math.max(0, widthValue));
+		
+		AHZBracketInstance.gotoAndStop(widthValue);
+	}
+
+	function updateDisplayText():Void
+	{
+		// Could use the extension method SetText, but just to be sure
+		if (_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html){
+			AHZBracketInstance.RolloverNameInstance.html = true;
+			AHZBracketInstance.RolloverNameInstance.htmlText = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.htmlText;
+		}
+		else{
+			AHZBracketInstance.RolloverNameInstance.html = false;
+			AHZBracketInstance.RolloverNameInstance.text = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
+		}
+		adjustBracketWidth();
+	}
+
 
 	function isEnemyLevelUpdateRequired():Boolean
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Checking if visible");
 		
 		// Check the enemy movie is even visible
-		if (_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha == 0 || !showEnemyLevel){
+		if (_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha == 0 ||
+			!_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text ||
+			!_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text.length){
 			return false;
 		}
 		
-
-		var enemyNameText = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Checking if (x) is in '" + enemyNameText + "'");
-		var startIndex:Number = enemyNameText.lastIndexOf("(");
-		var lastIndex:Number = enemyNameText.lastIndexOf(")");	
-	
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("SI: " + startIndex.toString());
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("EI: " + lastIndex.toString());
-	
-		// Look for (x) in the text  (This would be a lot easier if AS2 supported RegExp -_-)
-		if (startIndex < 0 || lastIndex < 0 || (lastIndex < startIndex) || ((lastIndex - startIndex) < 2))	
-		{
-			return true;
-		}
-	
-		// Check for A number in the parentheses
-		var levelString:String = enemyNameText.substring(startIndex + 1, lastIndex);
-		
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("D: " + (lastIndex - startIndex).toString());
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Level String: '" + levelString + "'");
-		
-		if (levelString == "" || parseInt(levelString) == NaN){
-			return true;
-		}
-	
-		return false;
-	
+		return true;
 	}
 
 	function measureStringWidth(str:String):Number {
@@ -430,14 +602,26 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	function SetCompassAngle(aPlayerAngle: Number, aCompassAngle: Number, abShowCompass: Boolean)
 	{			
-		var outData:Object = {outObj:Object};
-	
-		if (showEnemySoulLevel && _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		var outData:Object = {enemy:Object, player:Object};
+		var dataRead:Boolean = false;
+		var magickaPct:Number = -1;
+		var staminaPct:Number = -1;
+		var updateRequired:Boolean = false;
+		var levelText:String;
+		
+		// The enemy meter is not visible so leave
+		if (!AHZBracketInstance._alpha)
+		{
+			return;
+		}
+		
+		if (showEnemySoulLevel)
 		{
 			_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);
-			if (outData && outData.outObj && outData.outObj.Soul){
+			dataRead = true;
+			if (outData && outData.enemy && outData.enemy.soul){
 				EnemySoul._alpha = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance._alpha;
-				EnemySoul.text = outData.outObj.Soul;
+				EnemySoul.text = outData.enemy.soul;
 			}
 			else
 			{
@@ -447,41 +631,79 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		else
 		{
 			EnemySoul._alpha = 0;
-			// stting to null will flag the code further down to read the data again for the level
-			outData = null;
 		}
 	
-		// This function is hooked and gets fired every frame
-		if (isEnemyLevelUpdateRequired(outData))
-		{			
-			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("T");
-			var levelText:String;
-			// If the data was not aquired from reading the soul level then read it here
-			if (!outData)
+		if (showEnemyMagickaMeter || showEnemyStaminaMeter)
+		{
+			if (!dataRead)
 			{
-				outData = {outObj:Object};
-				_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);			
+				_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);
+				dataRead = true;
+			}
+	
+			if (outData && outData.enemy && showEnemyMagickaMeter){
+				magickaPct = outData.enemy.magickaPct;
+			}
+			if (outData && outData.enemy && showEnemyStaminaMeter){
+				staminaPct = outData.enemy.staminaPct;
+			}	
+			UpdateEnemyMeters(magickaPct, staminaPct, outData.enemy.targetChanged || alphaChanged);		
+			UpdateEnemyStats(outData.enemy);
+			UpdateEnemyHealthStats(outData.enemy);
+		}
+		else
+		{
+			UpdateEnemyMeters(-1, -1, true);
+			UpdateEnemyStats(null);
+			
+			if (showEnemyHealthStats)
+			{
+				if (!dataRead)
+				{
+					_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);
+					dataRead = true;
+				}
+				UpdateEnemyHealthStats(outData.enemy);
+			}
+			else
+			{
+				UpdateEnemyHealthStats(null);
+			}
+		}
+		
+		
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("T");
+		
+		if (showEnemyLevel)
+		{
+			// If the data was not aquired from reading the soul level then read it here
+			if (!dataRead)
+			{
+				_global.skse.plugins.AHZmoreHUDPlugin.GetEnemyInformation(outData, LevelTranslated.htmlText);		
+				dataRead = true;
 			}
 			
-			if (outData && outData.outObj)
+			if (outData && outData.enemy && outData.player)
 			{				
-				savedEnemyLevelNumber = outData.outObj.EnemyLevel;
-				savedPlayerLevelNumber = outData.outObj.PlayerLevel;
+				savedEnemyLevelNumber = outData.enemy.level;
+				savedPlayerLevelNumber = outData.player.level;
 				
 				if (savedPlayerLevelNumber == 0 && savedEnemyLevelNumber == 0)
 				{
+					updateDisplayText();
+					alphaChanged = false;
 					return;
 				}
 			}
 			else
 			{
+				updateDisplayText();
+				alphaChanged = false;
 				return;
 			}
 											
-			if (showEnemyLevelMax > 0 && showEnemyLevelMin > 0 )
+			if (showEnemyLevelMax && showEnemyLevelMin)
 			{	
-				var oldTextWidth:Number = measureStringWidth(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text);
-
 				// Get the delta of level from player
 				var deltaLevelFromPlayer = savedEnemyLevelNumber-savedPlayerLevelNumber;
 				var maxPercent:Number = showEnemyLevelMax;
@@ -521,35 +743,34 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 					fontColor = "FFFFFF";
 				}
 			
-				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = true;	
 				levelText = " (<font color=\'#" + fontColor + "\'>" + savedEnemyLevelNumber.toString() + "</font>)";
-				
+				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = true;
 				// Append the level
-				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.htmlText = 
+				AHZBracketInstance.RolloverNameInstance.html = true;
+				AHZBracketInstance.RolloverNameInstance.htmlText = 
 					appendHtmlToEnd(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.htmlText, levelText);
+				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = false;
+				adjustBracketWidth();					
 			}
 			// No coloring, turn off html
+			else if (savedEnemyLevelNumber)
+			{
+				AHZBracketInstance.RolloverNameInstance.html = false;
+				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = false;
+				AHZBracketInstance.RolloverNameInstance.text = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text + " (" + savedEnemyLevelNumber.toString() + ")";	
+				adjustBracketWidth();
+			}
 			else
 			{
-				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = false;
-				levelText = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;									
-				levelText = levelText + " (" + savedEnemyLevelNumber.toString() + ")";
-				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.html = false;
-				_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text = levelText;
+				updateDisplayText();
 			}
-			
-			// Calculate the new position for the brackets
-			var newTextWidth:Number = measureStringWidth(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text);
-			
-			var widthPercentChange = (newTextWidth - oldTextWidth) / oldTextWidth;
-			var adjustedBracketWidth = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._currentframe + 
-					(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._currentframe * widthPercentChange)
-			
-			adjustedBracketWidth = Math.min(100, Math.max(adjustedBracketWidth, 0));
-			var iMeterFrame: Number = Math.floor(adjustedBracketWidth);
-			
-			_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.gotoAndStop(iMeterFrame);						
 		}
+		else
+		{
+			updateDisplayText();
+		}
+		
+		alphaChanged = false;
 	}
 	
 	function ProcessTargetWarmth(isValidTarget:Boolean):Void
@@ -880,7 +1101,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 								   showknownEnchantmentValue:Number,
 								   widgetDisplayDelayMSValue:Number,
 								   showEnemySoulLevelValue:Number,
-								   viewBottomInfoAlwaysValue:Number):Void 
+								   viewBottomInfoAlwaysValue:Number,
+								   showEnemyMagickaMeterValue:Number,
+								   showEnemyStaminaMeterValue:Number,
+								   showEnemyHealthStatsValue:Number,
+								   showEnemyStaminaStatsValue:Number,
+								   showEnemyMagickaStatsValue:Number):Void 
 	{				
 		viewSideInfo = (sideView>=1);
 		viewBottomInfo = (bottomView>=1);
@@ -904,6 +1130,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		widgetDisplayDelayMS = widgetDisplayDelayMSValue;
 		showEnemySoulLevel = (showEnemySoulLevelValue>=1);
 		viewBottomInfoAlways = (viewBottomInfoAlwaysValue>=1);
+		showEnemyMagickaMeter = (showEnemyMagickaMeterValue>=1);
+		showEnemyStaminaMeter = (showEnemyStaminaMeterValue>=1);
+		showEnemyHealthStats = (showEnemyHealthStatsValue>=1);
+		showEnemyStaminaStats = (showEnemyStaminaStatsValue>=1);
+		showEnemyMagickaStats = (showEnemyMagickaStatsValue>=1);
+		
 		RefreshWidgets();
 	}
 
@@ -1140,6 +1372,29 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				appendImageToEnd(TopRolloverText, "eyeImage.png", 17, 17);				
 			}
 		}
+	}
+
+	function onEnterFrame(): Void
+	{
+		var previousAlpha = AHZBracketInstance._alpha;
+		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		{	
+			AHZBracketInstance._alpha = 0;
+		}
+		else if (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._alpha || _root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		{
+			AHZBracketInstance._alpha = 100;
+		}
+		
+		// Detect visibility change
+		if (previousAlpha != AHZBracketInstance._alpha)
+		{
+			alphaChanged = true;
+		}
+		
+		EnemyMagickaMeter.Update();
+		EnemyStaminaMeter.Update();
+	
 	}
 
 	public static function hookFunction(a_scope:Object, a_memberFn:String, a_hookScope:Object, a_hookFn:String):Boolean {

@@ -17,9 +17,25 @@ class AHZCrosshairRefEventHandler : public BSTEventSink <SKSECrosshairRefEvent>
 };
 
 
-class SafeEnemyLevelDataHolder: public SafeDataHolder<CAHZActorData>
+class SafeEnemyDataHolder: public SafeDataHolder<CAHZActorData>
 {
 public:
-   SafeEnemyLevelDataHolder() {};
-   ~SafeEnemyLevelDataHolder() {};
+   SafeEnemyDataHolder() {};
+   ~SafeEnemyDataHolder() {};
+
+   CAHZActorData GetData()
+   {
+	   CAHZActorData data;
+	   Lock();
+	   data = m_data;
+	   Release();
+	   return data;
+   };
+
+   void SetData(const CAHZActorData &data)
+   {
+	   Lock();
+	   m_data = data;
+	   Release();
+   };
 };

@@ -35,6 +35,11 @@ GlobalVariable Property AHZEnemyLevelMax  Auto
 GlobalVariable Property AHZEnemyLevelMin  Auto  
 GlobalVariable Property AHZShowEnchantmentKnown  Auto  
 GlobalVariable Property AHZDisplayDelay  Auto  
+GlobalVariable Property AHZShowEnemyMagickaMeter Auto
+GlobalVariable Property AHZShowEnemyStaminaMeter Auto
+GlobalVariable Property AHZShowEnemyMagickaStats Auto
+GlobalVariable Property AHZShowEnemyStaminaStats Auto
+GlobalVariable Property AHZShowEnemyHealthStats Auto
 
 Quest Property AHZMainQuestREF  Auto  
 
@@ -99,7 +104,6 @@ endFunction
 
 ; General Settings --------------------
 int         _toggle1OID_B               ; Show Player Data Widget
-int         _toggle17OID_B              ; Show Player Data Widget Always
 int         _toggle2OID_B               ; Show Target Data Widget (Ingredients)
 int         _toggle3OID_B               ; Show Target Data Widget (Effects)
 int         _toggle4OID_B               ; Uninstall
@@ -111,6 +115,14 @@ int         _toggle11OID_B              ; Show Target Weight with Player's Weigh
 int         _toggle12OID_B              ; Hotkey Toggles
 int         _toggle13OID_B              ; Show VW
 int         _toggle15OID_B              ; Show Known Enchantment
+int         _toggle17OID_B              ; Show Player Data Widget Always
+
+int         _toggle19OID_B              ; AHZShowEnemyMagickaMeter
+int         _toggle20OID_B              ; AHZShowEnemyStaminaMeter
+int         _toggle21OID_B              ; AHZShowEnemyMagickaStats
+int         _toggle22OID_B              ; AHZShowEnemyStaminaStats
+int         _toggle23OID_B              ; AHZShowEnemyHealthStats
+
 int         _activationModeOID_M        ; Activate Mode Drop Down
 int         _activationKeyMapOID_K      ; Activation Key Binding
 int         _sliderDisplayDelay_OID_S   ; Display Delay
@@ -296,6 +308,17 @@ event OnPageReset(string a_page)
         AddHeaderOption("$mHUD_ColorScale")
         _sliderEnemyLevelMin_OID_S = AddSliderOption("$mHUD_LevelBelowPlayer", AHZEnemyLevelMin.GetValue(), "{0}")
         _sliderEnemyLevelMax_OID_S = AddSliderOption("$mHUD_LevelAbovePlayer", AHZEnemyLevelMax.GetValue(), "{0}")
+
+        SetCursorPosition(1)
+        AddHeaderOption("$mHUD_EnemyMeters")   
+        _toggle19OID_B = AddToggleOption("$mHUD_AHZShowEnemyMagickaMeter", AHZShowEnemyMagickaMeter.GetValueInt())
+        _toggle20OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaMeter", AHZShowEnemyStaminaMeter.GetValueInt())
+        AddHeaderOption("$mHUD_EnemyStats")
+        _toggle23OID_B = AddToggleOption("$mHUD_AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt())
+        _toggle21OID_B = AddToggleOption("$mHUD_AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt())       
+        _toggle22OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())       
+
+
     elseIf a_page == "$mHUD_PresetPage"
         SetCursorFillMode(TOP_TO_BOTTOM)
         SetCursorPosition(0)
@@ -413,6 +436,48 @@ event OnOptionSelect(int a_option)
         ToggleGlobalInt(AHZShowEffectsWidget)
         SetToggleOptionValue(_toggle3OID_B, AHZShowEffectsWidget.GetValueInt())
     endif   
+
+    ; AHZShowEnemyMagickaMeter
+    if (a_option == _toggle19OID_B)
+        ToggleGlobalInt(AHZShowEnemyMagickaMeter)
+        SetToggleOptionValue(_toggle19OID_B, AHZShowEnemyMagickaMeter.GetValueInt())
+
+        if (AHZShowEnemyMagickaMeter.GetValueInt() == 0)
+            SetOptionFlags(_toggle21OID_B, OPTION_FLAG_DISABLED)
+        else
+            SetOptionFlags(_toggle21OID_B, OPTION_FLAG_NONE)
+        endif    
+    endif   
+
+    ; AHZShowEnemyStaminaMeter
+    if (a_option == _toggle20OID_B)
+        ToggleGlobalInt(AHZShowEnemyStaminaMeter)
+        SetToggleOptionValue(_toggle20OID_B, AHZShowEnemyStaminaMeter.GetValueInt())
+
+        if (AHZShowEnemyStaminaMeter.GetValueInt() == 0)
+            SetOptionFlags(_toggle22OID_B, OPTION_FLAG_DISABLED)
+        else
+            SetOptionFlags(_toggle22OID_B, OPTION_FLAG_NONE)
+        endif           
+    endif
+
+    ; AHZShowEnemyHealthStats
+    if (a_option == _toggle23OID_B)
+        ToggleGlobalInt(AHZShowEnemyHealthStats)
+        SetToggleOptionValue(_toggle23OID_B, AHZShowEnemyHealthStats.GetValueInt())
+    endif       
+
+    ; AHZShowEnemyMagickaStats
+    if (a_option == _toggle21OID_B)
+        ToggleGlobalInt(AHZShowEnemyMagickaStats)
+        SetToggleOptionValue(_toggle21OID_B, AHZShowEnemyMagickaStats.GetValueInt())
+    endif 
+
+    ; AHZShowEnemyStaminaStats
+    if (a_option == _toggle22OID_B)
+        ToggleGlobalInt(AHZShowEnemyStaminaStats)
+        SetToggleOptionValue(_toggle22OID_B, AHZShowEnemyStaminaStats.GetValueInt())
+    endif 
 
     ; Toggle uninstall
     if (a_option == _toggle4OID_B)
@@ -827,6 +892,26 @@ event OnOptionHighlight(int a_option)
         SetInfoText("$mHUD_DisplayDelayDescription")
     endif   
 
+    if (a_option == _toggle19OID_B)
+        SetInfoText("$mHUD_AHZShowEnemyMagickaMeterInfo")
+    endIf
+
+    if (a_option == _toggle20OID_B)
+        SetInfoText("$mHUD_AHZShowEnemyStaminaMeterInfo")
+    endIf
+
+    if (a_option == _toggle23OID_B)
+        SetInfoText("$mHUD_AHZShowEnemyHealthStatsInfo")
+    endif   
+
+    if (a_option == _toggle21OID_B)
+        SetInfoText("$mHUD_AHZShowEnemyMagickaStatsInfo")
+    endif   
+
+    if (a_option == _toggle22OID_B)
+        SetInfoText("$mHUD_AHZShowEnemyStaminaStatsInfo")
+    endif   
+
 endEvent
 
 function FISS_SAVE()
@@ -862,6 +947,11 @@ function FISS_SAVE()
     fiss.saveInt("AHZShowEnemyLevel", AHZShowEnemyLevel.GetValueInt())
     fiss.saveInt("AHZShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt())
     fiss.saveInt("AHZShowEnchantmentKnown", AHZShowEnchantmentKnown.GetValueInt())
+    fiss.saveInt("AHZShowEnemyMagickaMeter", AHZShowEnemyMagickaMeter.GetValueInt())
+    fiss.saveInt("AHZShowEnemyStaminaMeter", AHZShowEnemyStaminaMeter.GetValueInt())
+    fiss.saveInt("AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt())
+    fiss.saveInt("AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())
+    fiss.saveInt("AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt())
     fiss.saveFloat("AHZDisplayDelay", AHZDisplayDelay.GetValue())
     fiss.saveFloat("AHZBottomWidgetXPercent", AHZBottomWidgetXPercent.GetValue())
     fiss.saveFloat("AHZBottomWidgetYPercent", AHZBottomWidgetYPercent.GetValue())
@@ -915,6 +1005,11 @@ function FISS_LOAD()
         AHZShowEnemySoulLevel.SetValueInt(fiss.loadInt("AHZShowEnemySoulLevel"))
         AHZShowEnchantmentKnown.SetValueInt(fiss.loadInt("AHZShowEnchantmentKnown"))
         AHZDisplayDelay.SetValue(fiss.loadFloat("AHZDisplayDelay"))
+        AHZShowEnemyMagickaMeter.SetValueInt(fiss.loadInt("AHZShowEnemyMagickaMeter"))
+        AHZShowEnemyStaminaMeter.SetValueInt(fiss.loadInt("AHZShowEnemyStaminaMeter"))
+        AHZShowEnemyMagickaStats.SetValueInt(fiss.loadInt("AHZShowEnemyMagickaStats"))
+        AHZShowEnemyStaminaStats.SetValueInt(fiss.loadInt("AHZShowEnemyStaminaStats"))
+        AHZShowEnemyHealthStats.SetValueInt(fiss.loadInt("AHZShowEnemyHealthStats"))
     endIf
     String loadResult = fiss.endLoad()
     if loadResult != " "
@@ -1006,7 +1101,11 @@ state SaveCurrentConfigBN
             JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue())
             JSONUtil.SetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue()) 
             JSONUtil.SetPathFloatValue(file, ".!AHZDisplayDelay", AHZDisplayDelay.GetValue())
-            
+            JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyMagickaMeter", AHZShowEnemyMagickaMeter.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyStaminaMeter", AHZShowEnemyStaminaMeter.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt())
         JSONUtil.save(file)
         SetTextOptionValueST("$mHUD_Done")
     endEvent
@@ -1072,7 +1171,11 @@ state LoadSelectedConfigBN
             AHZShowEnemyLevel.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemySoulLevel", AHZShowEnemySoulLevel.GetValueInt()))
             AHZEnemyLevelMax.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMax", AHZEnemyLevelMax.GetValue()))
             AHZEnemyLevelMin.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZEnemyLevelMin", AHZEnemyLevelMin.GetValue()))
-                
+            AHZShowEnemyMagickaMeter.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyMagickaMeter", AHZShowEnemyMagickaMeter.GetValueInt()))
+            AHZShowEnemyStaminaMeter.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyStaminaMeter", AHZShowEnemyStaminaMeter.GetValueInt()))
+            AHZShowEnemyMagickaStats.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt()))
+            AHZShowEnemyStaminaStats.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt()))
+            AHZShowEnemyHealthStats.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt()))
     endEvent
     
     event OnHighlightST()
