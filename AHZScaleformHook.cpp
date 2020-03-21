@@ -8,6 +8,7 @@
 #include "skse64/xbyak/xbyak.h"
 #include "AHZScaleformHook.h"
 #include "skse64/GameMenus.h"
+#include "skse64/GameData.h"
 #include "skse64/PapyrusEvents.h"
 #include <string>
 #include "xbyak/xbyak.h"
@@ -15,7 +16,7 @@
 
 using namespace std;
 static bool ahzMenuLoaded = false;
-static SafeEnemyLevelDataHolder ahzTargetHandle;
+static SafeEnemyDataHolder ahzEnemyData;
 TESObjectREFR *g_ahzTargetReference;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
@@ -541,17 +542,28 @@ uintptr_t Enemy_Update_Hook_Base = 0x00882520;
 //.text : 00007FF62B522639                         EnemyHealth__Update endp
 //.text : 00007FF62B522639
 //.text : 00007FF62B522639; -------------------------------------------------------------------------- -
-
+static UInt64 lastRefHandle = 0;
 RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
 void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrOut)
 {
+
    TESObjectREFR * reference = *refrOut;
    if (!reference)
    {
       return;
    }
+
+   bool targetChanged = (lastRefHandle != (UInt64)refHandle);
    UInt16 npcLevel = 0;
    UInt32 isSentient = 0;
+   float maxHealth = 0;
+   float health = 0;
+   float maxMagicka = 0;
+   float magicka = 0;
+   float maxStamina = 0;
+   float stamina = 0;
+   lastRefHandle = (UInt64)refHandle;
+
    if (reference)
    {
 	   if (reference->baseForm->formType == kFormType_NPC ||
@@ -562,23 +574,36 @@ void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrO
 		   {
 			   npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
 			   isSentient = CAHZActorInfo::IsSentient(pNPC);
+			   UInt32 actorValue = LookupActorValueByName("health");
+			   maxHealth = pNPC->actorValueOwner.GetMaximum(actorValue);
+			   health = pNPC->actorValueOwner.GetCurrent(actorValue);
+			   actorValue = LookupActorValueByName("magicka");
+			   maxMagicka = pNPC->actorValueOwner.GetMaximum(actorValue);
+			   magicka = pNPC->actorValueOwner.GetCurrent(actorValue);
+			   actorValue = LookupActorValueByName("stamina");
+			   maxStamina = pNPC->actorValueOwner.GetMaximum(actorValue);
+			   stamina = pNPC->actorValueOwner.GetCurrent(actorValue);
 		   }
 	   }
    }
 
-   ahzTargetHandle.Lock();
-   ahzTargetHandle.m_data.Level = npcLevel;
-   ahzTargetHandle.m_data.IsSentient = isSentient;
-   ahzTargetHandle.Release();
+   
+   CAHZActorData data;
+   data.targetChanged = targetChanged;
+   data.Level = npcLevel;
+   data.IsSentient = isSentient;
+   data.maxHealth = maxHealth;
+   data.health = health;
+   data.maxMagicka = maxMagicka;
+   data.magicka = magicka;
+   data.maxStamina = maxStamina;
+   data.stamina = stamina;
+   ahzEnemyData.SetData(data);
 }
 //RelocPtr<SimpleLock>		globalMenuStackLock(0x1EE4A60);
 CAHZActorData GetCurrentEnemyData()
 {
-   CAHZActorData refr;
-   ahzTargetHandle.Lock();
-   refr = ahzTargetHandle.m_data;
-   ahzTargetHandle.Release();
-   return refr;
+   return ahzEnemyData.GetData();
 }
 
 void AHZInstallEnemyHealthUpdateHook()
