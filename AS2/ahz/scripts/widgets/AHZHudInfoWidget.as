@@ -82,9 +82,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var widgetDelayTimer:Number;
 	private var orginalBracketLocationY:Number;
 	private var ENEMY_METER_HEIGHT:Number = 11.5;
+	private var enemyMeterHeightScaled:Number;
 	private var firstMagickaMeterUpdate:Boolean = true;
 	private var firstStaminaMeterUpdate:Boolean = true;
 	private var alphaChanged:Boolean = true;
+	private var savedEnemyNames:String;
 	
 	// Rects
 	private var stageRect:Object;
@@ -208,7 +210,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			}
 			EnemyStamina_mc._alpha = 100;
 			EnemyStamina_mc._y = EnemyMagicka_mc._y;
-			AHZBracketInstance._y = orginalBracketLocationY + ENEMY_METER_HEIGHT;
+			AHZBracketInstance._y = (orginalBracketLocationY + ENEMY_METER_HEIGHT);
 		}
 		else if (staminaPct < 0)
 		{
@@ -224,7 +226,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			EnemyMagicka_mc._alpha = 100;			
 			EnemyStaminaMeter.SetPercent(0);
 			EnemyStamina_mc._alpha = 0;
-			AHZBracketInstance._y = orginalBracketLocationY + ENEMY_METER_HEIGHT;
+			AHZBracketInstance._y = (orginalBracketLocationY + ENEMY_METER_HEIGHT);
 		}
 		else
 		{
@@ -242,8 +244,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			}
 			EnemyMagicka_mc._alpha = 100;	
 			EnemyStamina_mc._alpha = 100;
-			EnemyStamina_mc._y = EnemyMagicka_mc._y + ENEMY_METER_HEIGHT;
-			AHZBracketInstance._y = orginalBracketLocationY + (ENEMY_METER_HEIGHT * 2);
+			EnemyStamina_mc._y = EnemyMagicka_mc._y + enemyMeterHeightScaled;
+			AHZBracketInstance._y = (orginalBracketLocationY + (ENEMY_METER_HEIGHT * 2));
 		}
 		
 		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
@@ -305,10 +307,20 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
 		EnemyMagicka_mc._yscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale );
 		EnemyStamina_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
-		EnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);		
-			
+		EnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);	
+		HealthStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
+		HealthStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);			
+		MagickaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
+		MagickaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);				
+		StaminaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
+		StaminaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);			
+		enemyMeterHeightScaled = ENEMY_METER_HEIGHT * (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale/100);
+
+		//ENEMY_METER_HEIGHT = ENEMY_METER_HEIGHT * (1 / (EnemyMagicka_mc._yscale / 100));
+		//ENEMY_BRACKET_SCALE = (1 / (EnemyMagicka_mc._yscale / 100));
+
 		orginalBracketLocationY = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
-		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + ENEMY_METER_HEIGHT - stageRect.y;
+		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + enemyMeterHeightScaled - stageRect.y;
 		EnemyMagicka_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
 		EnemyStamina_mc._x = EnemyMagicka_mc._x;	
 		EnemyMagickaMeter = new Meter(EnemyMagicka_mc);
@@ -319,14 +331,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemyStamina_mc._alpha = 0;
 		HealthStats_mc._alpha = 0;
 		MagickaStats_mc._alpha = 0;
-		StaminaStats_mc._alpha = 0;
+		StaminaStats_mc._alpha = 0;	
 				
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
 		
 		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
 		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y;
-		
 		
 		var mc:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
 		AHZBracketInstance = mc.duplicateMovieClip("AHZBracketInstance", this.getNextHighestDepth());
@@ -336,12 +347,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		AHZBracketInstance._y = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
 		AHZBracketInstance._x = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._x;
 		
+		AHZBracketInstance._xscale =  100;//(_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
+		AHZBracketInstance._yscale =  100;//(_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);		
+		
 		// Juat move it out of view.  I want the alpha logic to stay in place
+		_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._xscale = 0;
+		_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._yscale = 0;
 		_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y = -999999;
-		
-		orginalBracketLocationY = AHZBracketInstance._y;
-		
-		
+	
 		var enemy_mc = AHZBracketInstance;
 		EnemySoul = enemy_mc.createTextField("EnemySoul", 
 							enemy_mc.getNextHighestDepth(), 
@@ -692,6 +705,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				{
 					updateDisplayText();
 					alphaChanged = false;
+					savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 					return;
 				}
 			}
@@ -699,6 +713,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			{
 				updateDisplayText();
 				alphaChanged = false;
+				savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 				return;
 			}
 											
@@ -771,6 +786,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}
 		
 		alphaChanged = false;
+
+		savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 	}
 	
 	function ProcessTargetWarmth(isValidTarget:Boolean):Void
