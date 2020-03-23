@@ -1918,26 +1918,24 @@ void CAHZScaleform::ProcessEnemyInformation(GFxFunctionHandler::Args * args)
 	GFxValue playerObj;
 	args->movie->CreateObject(&enemyObj);
 	args->movie->CreateObject(&playerObj);
-	if (actorData.Level)
+
+	RegisterNumber(&enemyObj, "level", actorData.Level);
+	RegisterNumber(&playerObj, "level", playerLevel);
+	string soulName = GetSoulLevelName((UInt8)soulType);
+	if (soulType && soulName.length())
 	{
-		RegisterNumber(&enemyObj, "level", actorData.Level);
-		RegisterNumber(&playerObj, "level", playerLevel);
-		string soulName = GetSoulLevelName((UInt8)soulType);
-		if (soulType && soulName.length())
-		{
-			RegisterString(&enemyObj, args->movie, "soul", soulName.c_str());
-		}
-		RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
-		RegisterNumber(&enemyObj, "health", ceil(actorData.health));
-		RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
-		RegisterNumber(&enemyObj, "maxMagicka", ceil(actorData.maxMagicka));
-		RegisterNumber(&enemyObj, "magicka", ceil(actorData.magicka));
-		RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
-		RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
-		RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
-		RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
-		RegisterBoolean(&enemyObj, "targetChanged", actorData.targetChanged);
+		RegisterString(&enemyObj, args->movie, "soul", soulName.c_str());
 	}
+	RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
+	RegisterNumber(&enemyObj, "health", ceil(actorData.health));
+	RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
+	RegisterNumber(&enemyObj, "maxMagicka", ceil(actorData.maxMagicka));
+	RegisterNumber(&enemyObj, "magicka", ceil(actorData.magicka));
+	RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
+	RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
+	RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
+	RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
+	RegisterBoolean(&enemyObj, "targetChanged", actorData.targetChanged);
 
 	if (args->args[0].HasMember("player"))
 	{

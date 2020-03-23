@@ -86,7 +86,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var firstMagickaMeterUpdate:Boolean = true;
 	private var firstStaminaMeterUpdate:Boolean = true;
 	private var alphaChanged:Boolean = true;
-	private var savedEnemyNames:String;
 	
 	// Rects
 	private var stageRect:Object;
@@ -346,9 +345,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		
 		AHZBracketInstance._y = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
 		AHZBracketInstance._x = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._x;
-		
-		AHZBracketInstance._xscale =  100;//(_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
-		AHZBracketInstance._yscale =  100;//(_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);		
 		
 		// Juat move it out of view.  I want the alpha logic to stay in place
 		_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._xscale = 0;
@@ -701,11 +697,10 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				savedEnemyLevelNumber = outData.enemy.level;
 				savedPlayerLevelNumber = outData.player.level;
 				
-				if (savedPlayerLevelNumber == 0 && savedEnemyLevelNumber == 0)
+				if (!savedPlayerLevelNumber || !savedEnemyLevelNumber)  // Don't show level if the level is 0
 				{
 					updateDisplayText();
 					alphaChanged = false;
-					savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 					return;
 				}
 			}
@@ -713,7 +708,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			{
 				updateDisplayText();
 				alphaChanged = false;
-				savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 				return;
 			}
 											
@@ -786,8 +780,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}
 		
 		alphaChanged = false;
-
-		savedEnemyNames = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance.RolloverNameInstance.text;
 	}
 	
 	function ProcessTargetWarmth(isValidTarget:Boolean):Void
