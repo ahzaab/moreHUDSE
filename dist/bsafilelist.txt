@@ -6,8 +6,8 @@ Source\Scripts\ahzconfigmenu.psc
 Source\Scripts\ahzmainquest.psc
 Source\Scripts\ahzmaintenancealiasscript.psc
 Source\Scripts\ahzplayerloadgamealias.psc
-Interface\exported\ahzhudinfo.swf
-Interface\exported\ahzmorehudlogo.dds
+Interface\Exported\ahzhudinfo.swf
+Interface\Exported\ahzmorehudlogo.dds
 Interface\translations\ahzmorehud_czech.txt
 Interface\translations\ahzmorehud_english.txt
 Interface\translations\ahzmorehud_french.txt

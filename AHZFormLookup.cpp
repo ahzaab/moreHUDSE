@@ -192,11 +192,11 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 	{
 		return lutForm;
 	}
-	else if (targetReference->baseForm->formType == kFormType_Activator)
+	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Activator)
 	{
 		return GetAttachedForm(targetReference);
 	}
-	else if (targetReference->baseForm->formType == kFormType_Projectile)
+	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Projectile)
 	{
 		Projectile *pProjectile = (DYNAMIC_CAST(targetReference, TESObjectREFR, Projectile));
 
@@ -218,13 +218,16 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 
 TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
 {
-   if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
-   {
-      UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
-      TESForm * form = LookupFormByID(formID);
-      return form;
-   }
-   return NULL;
+	if (!targetRef->baseForm)
+		return NULL;
+
+	if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
+	{
+		UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
+		TESForm * form = LookupFormByID(formID);
+		return form;
+	}
+	return NULL;
 }
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
@@ -304,6 +307,11 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
       return NULL;
    }
 
+   if (!form->baseForm)
+   {
+	   return NULL;
+   }
+
    if (form->baseForm->formType != kFormType_Activator)
    {
       return NULL;
@@ -320,7 +328,7 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
             TESLevItem *lvli = DYNAMIC_CAST(attachedForm, TESForm, TESLevItem);
 
             // Get the first form and see if it is an ingredient
-            if (lvli->leveledList.length > 0)
+            if (lvli && lvli->leveledList.length > 0)
             {
                TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
                return itemform;
@@ -331,7 +339,7 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
             BGSListForm *lvli = DYNAMIC_CAST(attachedForm, TESForm, BGSListForm);
 
             // Get the first form and see if it is an ingredient
-            if (lvli->forms.count > 0)
+            if (lvli && lvli->forms.count > 0)
             {
                TESForm *itemform = (TESForm *)lvli->forms.entries[0];
                return itemform;
@@ -352,6 +360,10 @@ TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableNam
    if (form) {
       VMClassRegistry		* registry = (*g_skyrimVM)->GetClassRegistry();
       IObjectHandlePolicy	* policy = registry->GetHandlePolicy();
+
+	  if (!form->baseForm)
+		  return NULL;
+
       UInt64 handle = policy->Create(form->baseForm->formType, form);
       if (handle != policy->GetInvalidHandle())
       {
