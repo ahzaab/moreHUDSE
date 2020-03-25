@@ -489,4 +489,9 @@
   <ItemGroup>
     <ResourceCompile Include="AHZmoreHUDPlugin.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="AHZScaleFormAddressInfo.txt" />
+    <Text Include="AHZScaleformHookAddressInfo.txt" />
+    <Text Include="AHZPlayerInfoAddressInfo.txt" />
+  </ItemGroup>
 </Project>

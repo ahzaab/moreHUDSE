@@ -7,6 +7,7 @@ import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.filters.DropShadowFilter;
 import Components.Meter;
+import mx.managers.DepthManager;
 
 class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 {
@@ -86,6 +87,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var firstMagickaMeterUpdate:Boolean = true;
 	private var firstStaminaMeterUpdate:Boolean = true;
 	private var alphaChanged:Boolean = true;
+	private var swapped:Boolean = false;
 	
 	// Rects
 	private var stageRect:Object;
@@ -331,7 +333,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		HealthStats_mc._alpha = 0;
 		MagickaStats_mc._alpha = 0;
 		StaminaStats_mc._alpha = 0;	
-				
+		
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
 		
@@ -609,6 +611,21 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
     	return txtMeasureInstance.textWidth;
 	}
 
+    function GetRootMovies(targetMovie:MovieClip):Array
+    {
+        var arr:Array = new Array();
+        for (var i in targetMovie)
+        {
+			if (targetMovie[i] instanceof MovieClip)
+            {
+				var target:MovieClip = MovieClip(targetMovie[i]);
+				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog(i + ": " + target + ": " + target.getDepth());
+            }
+        }
+        return arr;
+    }
+
+
 	function SetCompassAngle(aPlayerAngle: Number, aCompassAngle: Number, abShowCompass: Boolean)
 	{			
 		var outData:Object = {enemy:Object, player:Object};
@@ -622,6 +639,21 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (!AHZBracketInstance._alpha)
 		{
 			return;
+		}
+		
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.FloatingContainer: " + _root.FloatingContainer);
+		
+		if (!swapped && _root.FloatingContainer){
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Before:");
+			//GetRootMovies(_root);
+
+			// I'm patching FloatingContriner because the swapDepth is moving HUDMovieBaseInstance above the as2 reserved depth which is the highest allowed
+			// as long as _root.FloatingContainer is below the z order of HUDMovieBaseInstance then we are good
+			_root.HUDMovieBaseInstance.setDepthTo(_root.FloatingContainer.getDepth() +1);
+			
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("After:");
+			//GetRootMovies(_root);
+			swapped = true;
 		}
 		
 		if (showEnemySoulLevel)

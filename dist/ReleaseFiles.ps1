@@ -1,10 +1,22 @@
 ﻿Param(
     [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
-    $Version
+    $Version,
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [int]$AsLightPlugin
 )
 
 try{
+
+if ($AsLightPlugin)
+{
+    $pluginExtesion = '.esl'  #The esl file must have already been compacted and flagged
+}
+else{
+    $pluginExtesion = '.esp'
+}
+
 $executingPath = split-path $SCRIPT:MyInvocation.MyCommand.Path -parent
 
 $sourceDir = "$($Env:Skyrim64Path)"
@@ -32,7 +44,7 @@ if ($destSksePlugin -and $sourceSksePlugin){
 
 $items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex
 $items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc
-$items += Get-ChildItem "$sourceDataDir" -Filter ahzmorehud.esp
+$items += Get-ChildItem "$sourceDataDir" -Filter "ahzmorehud$pluginExtesion"
 $items += Get-ChildItem "$sourceDataDir\Interface" -Include @('ahzhudinfo.swf', 'ahzmorehudlogo.dds', 'ahzmorehud_*.txt') -Recurse
 
 $filesToCopy = $items | Select-ObjecT -ExpandProperty FullName
@@ -43,12 +55,12 @@ $filesToCopy | ForEach-Object {
 }
 
 # Get te list of files to include in the bsa (Do not include the esp)
-$bsaFileList = $filesToCopy | Where-object {$(Get-Item $_).Extension -ne '.esp' -and $(Get-Item $_).Extension -ne '.dll'} | ForEach-Object { $_.Replace($sourceDataDir,"") } | ForEach-Object { $_.TrimStart("\") }
+$bsaFileList = $filesToCopy | Where-object {$(Get-Item $_).Extension -ne $pluginExtesion -and $(Get-Item $_).Extension -ne '.dll'} | ForEach-Object { $_.Replace($sourceDataDir,"") } | ForEach-Object { $_.TrimStart("\") }
 
 #Get the esp file name and create the name of the bsa file to match the esp file
-$pluginFile = $filesToCopy | Where-object {$(Get-Item $_).Extension -eq '.esp'} | Select-Object -First 1
+$pluginFile = $filesToCopy | Where-object {$(Get-Item $_).Extension -eq $pluginExtesion} | Select-Object -First 1
 $pluginFile = $pluginFile.Replace("$sourceDataDir\","");
-$bsaFileName = $pluginFile.Replace(".esp", ".bsa")
+$bsaFileName = $pluginFile.Replace($pluginExtesion, ".bsa")
 
 #Update the bsa file list
 Set-Content -Path "$executingPath\bsafilelist.txt" -Value $($bsaFileList -join "`r`n")
@@ -85,7 +97,7 @@ Copy-Item "$versionDir\$pluginFile" "$tempDir\Data"
 Copy-Item $destSksePlugin "$tempDir\Data\SKSE\Plugins"
 
 $fileVersionNane = $Version.Replace('.', '_')
-$zipFileName = $pluginFile.Replace('.esp', "$fileVersionNane.7z")
+$zipFileName = $pluginFile.Replace($pluginExtesion, "$fileVersionNane.7z")
 
 Start-Process "C:\Program Files\7-Zip\7z" -ArgumentList "a `"$versionDir\$zipFileName`" `"$tempDir\Data`" -mx5 -t7z" -wait -NoNewWindow -PassThru
 

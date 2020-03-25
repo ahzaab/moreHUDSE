@@ -372,6 +372,11 @@
   <ItemGroup>
     <ResourceCompile Include="AHZmoreHUDPlugin.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="AHZPlayerInfoAddressInfo.txt" />
+    <Text Include="AHZScaleFormAddressInfo.txt" />
+    <Text Include="AHZScaleformHookAddressInfo.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
