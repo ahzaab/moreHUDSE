@@ -1,5 +1,16 @@
 #pragma once
 
+// Alignemnt comes from https://github.com/Ryan-rsm-McKenzie/CommonLibSSE/blob/master/include/RE/Projectile.h
+// Credit goes to Ryan.  I only needed the one item 
+class AHZProjectile : public TESObjectREFR
+{
+public:
+    UInt8	unk98[0x147 - 0x98];	// 98
+    InventoryEntryData *extraData;	// 148
+    UInt8	unk150[0x1B7 - 0x150];	// 150
+    TESAmmo * sourceAmmo;			// 1B8
+};
+
 class MatchByForm : public FormMatcher
 {
 	TESForm * m_form;
@@ -38,6 +49,6 @@ public:
 	static AHZWeaponData GetLeftHandWeapon(void);
 	static AHZWeaponData GetRightHandWeapon(void);
 	static AHZWeaponData GetEquippedAmmo(void);
-	static UInt32 GetGoldAmount(void);
+    //static bool IsProjectileWithSource(TESObjectREFR * objectRef);
 };
 
