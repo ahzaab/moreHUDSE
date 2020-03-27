@@ -740,13 +740,13 @@ event OnOptionKeyMapChange(int a_option, int a_keyCode, string a_conflictControl
 
         bool continue = true
 
-        if (a_conflictControl != "" && a_keyCode != -1)
+        if (a_conflictControl != "" && a_keyCode != -1 && a_conflictName != ModName)
             string msg
 
             if (a_conflictName != "")
-                msg = "This key is already mapped to:\n'" + a_conflictControl + "'\n(" + a_conflictName + ")\n\nAre you sure you want to continue?"
+                msg = "$SKI_MSG2{" + a_conflictControl + " (" + a_conflictName + ")}"
             else
-                msg = "This key is already mapped to:\n'" + a_conflictControl + "'\n\nAre you sure you want to continue?"
+                msg = "$SKI_MSG2{" + a_conflictControl + "}"
             endIf
 
             continue = ShowMessage(msg, true, "$mHUD_Yes", "$mHUD_No")
@@ -918,7 +918,7 @@ function FISS_SAVE()
 
     fissinterface fiss = FISSfactory.getFISS()
     if !fiss
-        debug.MessageBox("$mHUD_FissMiss")
+        ShowMessage("$mHUD_FissMiss", false)
         return 
     endIf
     fiss.beginSave("MoreHUD.xml", "MoreHUD")
@@ -969,7 +969,7 @@ function FISS_LOAD()
 
     fissinterface fiss = fissfactory.getFISS()
     if !fiss
-        debug.MessageBox("$mHUD_FissMiss")
+        ShowMessage("$mHUD_FissMiss", false)
         return 
     endIf
     fiss.beginLoad("MoreHUD.xml")
@@ -1024,7 +1024,7 @@ state FISS_LOAD_PRESET
 
         if self.ShowMessage("$mHUD_LoadPreset", true, "$mHUD_Yes", "$mHUD_No")
             self.FISS_LOAD()
-            self.ShowMessage("$mHUD_Done", true, "$mHUD_Yes", "$mHUD_No")
+            self.ShowMessage("$mHUD_Done", false)
         endIf
     endFunction
 
@@ -1136,7 +1136,7 @@ state LoadSelectedConfigBN
     event OnSelectST()
         string file = "..\\moreHUD\\" + saConfigs[selectedConfig]
         if !JSONUtil.IsGood(file)
-            ShowMessage("$mHUD_PresetBadInfo \n" + JSONUtil.getErrors(file), false, "$mHUD_PresetBad")
+            ShowMessage("$mHUD_PresetBadInfo{" + JSONUtil.getErrors(file) + "}", false, "$mHUD_PresetBad")
             return
         endIf
         SetTextOptionValueST("$mHUD_PresetApply")
