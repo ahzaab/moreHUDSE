@@ -169,3 +169,19 @@ AHZWeaponData CAHZWeaponInfo::GetEquippedAmmo(void)
 	}
 	return weaponData;
 }
+
+//bool CAHZWeaponInfo::IsProjectileWithSource(TESObjectREFR * objectRef)
+//{
+//    if (!objectRef || !objectRef->baseForm || objectRef->baseForm->GetFormType() != kFormType_Projectile)
+//        return false;
+//
+//    Projectile *pProjectile = (DYNAMIC_CAST(objectRef, TESObjectREFR, Projectile));
+//
+//    if (pProjectile) {
+//        AHZProjectile *a = (AHZProjectile*)(pProjectile);
+//        if (a && a->sourceAmmo)
+//            return true;
+//    }
+//
+//    return false;
+//}
