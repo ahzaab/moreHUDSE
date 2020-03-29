@@ -493,5 +493,6 @@
     <Text Include="AHZScaleFormAddressInfo.txt" />
     <Text Include="AHZScaleformHookAddressInfo.txt" />
     <Text Include="AHZPlayerInfoAddressInfo.txt" />
+    <Text Include="AHZActorInfoAddressInfo.txt" />
   </ItemGroup>
 </Project>
