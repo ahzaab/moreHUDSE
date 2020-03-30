@@ -200,7 +200,7 @@ event OnConfigOpen()
             endIf
         endWhile
     endIf
-    
+
 endEvent
 
 event OnConfigClose()
@@ -256,7 +256,11 @@ event OnPageReset(string a_page)
     elseif (a_page == "$mHUD_PlayersDataPage")
         AddHeaderOption("$mHUD_PlayersDataWidget")
         _toggle1OID_B           = AddToggleOption("$mHUD_Visible", AHZShowBottomWidget.GetValueInt())
-        _toggle17OID_B          = AddToggleOption("$mHUD_VisibleAlways", AHZShowBottomWidgetAlways.GetValueInt())
+        if (AHZShowBottomWidget.GetValueInt() == 0)
+            _toggle17OID_B = AddToggleOption("$mHUD_VisibleAlways", AHZShowBottomWidgetAlways.GetValueInt(), OPTION_FLAG_DISABLED)
+        else
+            _toggle17OID_B = AddToggleOption("$mHUD_VisibleAlways", AHZShowBottomWidgetAlways.GetValueInt())
+        endif  
         _bottomAlignmentOID_M   = AddMenuOption("$mHUD_Alignment", AlignmentStyles[AHZBottomWidgetRightAligned.GetValueInt()])
         AddEmptyOption()
         _toggle11OID_B          = AddToggleOption("$mHUD_DisplayTargetWeight", AHZShowTargetWeight.GetValueInt())
@@ -315,9 +319,18 @@ event OnPageReset(string a_page)
         _toggle20OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaMeter", AHZShowEnemyStaminaMeter.GetValueInt())
         AddHeaderOption("$mHUD_EnemyStats")
         _toggle23OID_B = AddToggleOption("$mHUD_AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt())
-        _toggle21OID_B = AddToggleOption("$mHUD_AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt())       
-        _toggle22OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())       
+             
+        if (AHZShowEnemyMagickaMeter.GetValueInt() == 0)
+            _toggle21OID_B = AddToggleOption("$mHUD_AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt(), OPTION_FLAG_DISABLED)  
+        else
+            _toggle21OID_B = AddToggleOption("$mHUD_AHZShowEnemyMagickaStats", AHZShowEnemyMagickaStats.GetValueInt())  
+        endif  
 
+        if (AHZShowEnemyStaminaMeter.GetValueInt() == 0)
+            _toggle22OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt(), OPTION_FLAG_DISABLED)   
+        else
+            _toggle22OID_B = AddToggleOption("$mHUD_AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())  
+        endif  
 
     elseIf a_page == "$mHUD_PresetPage"
         SetCursorFillMode(TOP_TO_BOTTOM)
@@ -410,7 +423,7 @@ event OnOptionSelect(int a_option)
             SetOptionFlags(_toggle17OID_B, OPTION_FLAG_DISABLED)
         else
             SetOptionFlags(_toggle17OID_B, OPTION_FLAG_NONE)
-        endif
+        endif   
     endif
     
     ; Toggle bottom widget always
@@ -446,7 +459,7 @@ event OnOptionSelect(int a_option)
             SetOptionFlags(_toggle21OID_B, OPTION_FLAG_DISABLED)
         else
             SetOptionFlags(_toggle21OID_B, OPTION_FLAG_NONE)
-        endif    
+        endif   
     endif   
 
     ; AHZShowEnemyStaminaMeter
@@ -458,7 +471,7 @@ event OnOptionSelect(int a_option)
             SetOptionFlags(_toggle22OID_B, OPTION_FLAG_DISABLED)
         else
             SetOptionFlags(_toggle22OID_B, OPTION_FLAG_NONE)
-        endif           
+        endif         
     endif
 
     ; AHZShowEnemyHealthStats
@@ -894,23 +907,23 @@ event OnOptionHighlight(int a_option)
 
     if (a_option == _toggle19OID_B)
         SetInfoText("$mHUD_AHZShowEnemyMagickaMeterInfo")
-    endIf
+    endif  
 
     if (a_option == _toggle20OID_B)
         SetInfoText("$mHUD_AHZShowEnemyStaminaMeterInfo")
-    endIf
+    endif
 
     if (a_option == _toggle23OID_B)
         SetInfoText("$mHUD_AHZShowEnemyHealthStatsInfo")
-    endif   
+    endif
 
     if (a_option == _toggle21OID_B)
         SetInfoText("$mHUD_AHZShowEnemyMagickaStatsInfo")
-    endif   
+    endif
 
     if (a_option == _toggle22OID_B)
         SetInfoText("$mHUD_AHZShowEnemyStaminaStatsInfo")
-    endif   
+    endif
 
 endEvent
 
