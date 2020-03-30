@@ -52,7 +52,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30706)
+#define PLUGIN_VERSION  (30707)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;

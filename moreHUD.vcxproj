@@ -373,6 +373,7 @@
     <ResourceCompile Include="AHZmoreHUDPlugin.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="AHZActorInfoAddressInfo.txt" />
     <Text Include="AHZPlayerInfoAddressInfo.txt" />
     <Text Include="AHZScaleFormAddressInfo.txt" />
     <Text Include="AHZScaleformHookAddressInfo.txt" />
