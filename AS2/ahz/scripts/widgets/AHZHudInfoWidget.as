@@ -334,8 +334,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		MagickaStats_mc._alpha = 0;
 		StaminaStats_mc._alpha = 0;	
 		
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
 		
 		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
 		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y;
@@ -375,6 +375,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	function ShowElements(aMode:String,abShow:Boolean):Void
 	{
+		var newHUDMode:String = "All";
 		/*hudModes[0] = "All"
 		hudModes[1] = "StealthMode"
 		hudModes[2] = "Favor"
@@ -392,19 +393,27 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			}
 		}
 
-		var hudmode:String = _root.HUDMovieBaseInstance.HUDModes[_root.HUDMovieBaseInstance.HUDModes.length - 1];
+		if (abShow) {
+			newHUDMode = aMode;
+		} else {
+			if (_root.HUDMovieBaseInstance.HUDModes.length > 0) {
+				newHUDMode = String(_root.HUDMovieBaseInstance.HUDModes[_root.HUDMovieBaseInstance.HUDModes.length - 1]);
+			}
+		}
 		
-		if (hudmode == "All" ||
-			hudmode == "StealthMode" || 
-			hudmode == "Favor" || 
-			hudmode == "Swimming" || 
-			hudmode == "HorseMode" || 
-			hudmode == "WarHorseMode")
+		if (newHUDMode == "All" ||
+			newHUDMode == "StealthMode" || 
+			newHUDMode == "Favor" || 
+			newHUDMode == "Swimming" || 
+			newHUDMode == "HorseMode" || 
+			newHUDMode == "WarHorseMode")
 		{
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": visible");
 			this._visible = true;
 		}
 		else
 		{
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": hidden");
 			this._visible = false;
 		}
 
@@ -619,7 +628,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			if (targetMovie[i] instanceof MovieClip)
             {
 				var target:MovieClip = MovieClip(targetMovie[i]);
-				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog(i + ": " + target + ": " + target.getDepth());
+				//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog(i + ": " + target + ": " + target.getDepth());
             }
         }
         return arr;
@@ -1176,7 +1185,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		showEnemyHealthStats = (showEnemyHealthStatsValue>=1);
 		showEnemyStaminaStats = (showEnemyStaminaStatsValue>=1);
 		showEnemyMagickaStats = (showEnemyMagickaStatsValue>=1);
-		
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("updateSettings");
 		RefreshWidgets();
 	}
 
