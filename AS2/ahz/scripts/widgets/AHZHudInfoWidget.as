@@ -24,6 +24,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public var EnemySoul:TextField;
 	public var EnemyMagicka_mc:MovieClip;
 	public var EnemyStamina_mc:MovieClip;
+	public var LoadedEnemyMagicka_mc:MovieClip;
+	public var LoadedEnemyStamina_mc:MovieClip;	
 	public var EnemyMagickaMeter: Meter;
 	public var EnemyStaminaMeter: Meter;	
 	public var HealthStats_mc: MovieClip;
@@ -88,6 +90,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var firstStaminaMeterUpdate:Boolean = true;
 	private var alphaChanged:Boolean = true;
 	private var swapped:Boolean = false;
+	private var _config:Object;
+	private var staminaMeterBaseY:Number = 0;
+	private var baseX:Number = 0;
+	private var baseY:Number = 0;
+	private var metersToLoad:Array;
+	private var mcLoader:MovieClipLoader;
+	
 	
 	// Rects
 	private var stageRect:Object;
@@ -100,7 +109,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function AHZHudInfoWidget()
 	{
 		super();
-				
+		
+		mcLoader = new MovieClipLoader();
+		mcLoader.addListener(this);
+		metersToLoad = new Array();
+		
 		savedCrossHairData = {outObj:Object,validTarget:Boolean};
 		// Get the rec of the parent
 		stageRect = {x:Stage.visibleRect.x,y:Stage.visibleRect.y};
@@ -117,9 +130,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		hideBottomWidget();
 		hideInventoryWidget();
 
-		InitEnemySoulTextField();
-
-		//EnemySoul.border = true;
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("AHZConfigManager.loadConfig");
+		AHZConfigManager.loadConfig(this, "configLoaded", "configError");
 
 		if (_root.HUDMovieBaseInstance.RolloverInfoInstance)
 		{
@@ -140,17 +152,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			// SkyHUD
 			TopRolloverText = _root.HUDMovieBaseInstance.RolloverName_mc.RolloverNameInstance
 		}
-		
-		if (! hooksInstalled)
-		{
-			// Apply hooks to hook events
-			hookFunction(_root.HUDMovieBaseInstance,"SetCrosshairTarget",this,"SetCrosshairTarget");
-			hookFunction(_root.HUDMovieBaseInstance,"ShowElements",this,"ShowElements");
-			hookFunction(_root.HUDMovieBaseInstance,"SetCompassAngle",this,"SetCompassAngle");
-			_global.skse.plugins.AHZmoreHUDPlugin.InstallHooks();
-			hooksInstalled = true;
-		}
-			
+					
 		// Initialize variables
 		viewSideInfo = false;
 		viewEffectsInfo = false;
@@ -186,159 +188,196 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		showEnemyMagickaStats = false;
 	}
 
-	function UpdateEnemyMeters(magickaPct:Number, staminaPct:Number, updateRequired:Boolean):Void{
+	function configLoaded(event:Object):Void{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configLoaded: " + event);
+		_config = event.config;
+		prepareConfigs();
+		initializeClips();
+	}
+
+	function configError(event:Object):Void{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configError: " + event);
+		prepareConfigs();
+		initializeClips();
+	}
+
+	function prepareConfigs() :Void{
+		if (!_config)
+			_config = {};
 		
-		if (magickaPct < 0 && staminaPct < 0)
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET] = 0;
+		
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET] = 0;		
+		
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE] = 1.0;				
+		
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE] = 1.0;						
+
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA] = 100;	
+
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET] = 0;			
+
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET] = 0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE] = 1.0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE] = 1.0;	
+			
+		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA])
+			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA] = 100;				
+			
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET] = 0;
+		
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET] = 0;		
+		
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE] = 1.0;				
+		
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE] = 1.0;						
+
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA] = 100;	
+
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET] = 0;			
+
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET] = 0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE] = 1.0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE] = 1.0;	
+	
+		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA])
+			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA] = 100;	
+	
+		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET])
+			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET] = 0;			
+
+		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET])
+			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET] = 0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE])
+			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE] = 1.0;		
+
+		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE])
+			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE] = 1.0;	
+			
+		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA])
+			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA] = 100;			
+			
+		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+			_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] = true;
+			
+		if (!_config[AHZDefines.CFG_ENEMY_METER_HEIGHT])
+			_config[AHZDefines.CFG_ENEMY_METER_HEIGHT] = ENEMY_METER_HEIGHT;				
+	}
+	
+	function initializeClips():Void {	
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
+		if (_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 		{
-			EnemyMagickaMeter.SetPercent(0);
-			EnemyStaminaMeter.SetPercent(0);
-			EnemyMagicka_mc._alpha = 0;
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
+			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
+			LoadedEnemyStamina_mc = this.createEmptyMovieClip("LoadedEnemyStamina_mc", EnemyStamina_mc.getDepth());
+			mcLoader.loadClip(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH], LoadedEnemyStamina_mc);					
+			
+			// Make the built-in movieclip disapear, it is being replaced, pending any loading errors
 			EnemyStamina_mc._alpha = 0;
-			AHZBracketInstance._y = orginalBracketLocationY;
-		}	
-		else if (magickaPct < 0)
-		{
-			EnemyMagickaMeter.SetPercent(0);
-			EnemyMagicka_mc._alpha = 0;
-			if (updateRequired || firstStaminaMeterUpdate)
-			{
-				EnemyStaminaMeter.SetPercent(staminaPct);
-				firstStaminaMeterUpdate = false;
-			}
-			else
-			{
-				EnemyStaminaMeter.SetTargetPercent(staminaPct);
-			}
-			EnemyStamina_mc._alpha = 100;
-			EnemyStamina_mc._y = EnemyMagicka_mc._y;
-			AHZBracketInstance._y = (orginalBracketLocationY + ENEMY_METER_HEIGHT);
-		}
-		else if (staminaPct < 0)
-		{
-			if (updateRequired || firstMagickaMeterUpdate)
-			{
-				EnemyMagickaMeter.SetPercent(magickaPct);
-				firstMagickaMeterUpdate = false;
-			}
-			else
-			{
-				EnemyMagickaMeter.SetTargetPercent(magickaPct);
-			}
-			EnemyMagicka_mc._alpha = 100;			
-			EnemyStaminaMeter.SetPercent(0);
-			EnemyStamina_mc._alpha = 0;
-			AHZBracketInstance._y = (orginalBracketLocationY + ENEMY_METER_HEIGHT);
+			EnemyStamina_mc._xscale = 0;
+			EnemyStamina_mc._yscale = 0;
 		}
 		else
 		{
-			if (updateRequired || firstMagickaMeterUpdate || firstStaminaMeterUpdate)
-			{
-				EnemyMagickaMeter.SetPercent(magickaPct);
-				EnemyStaminaMeter.SetPercent(staminaPct);
-				firstStaminaMeterUpdate = false;
-				firstMagickaMeterUpdate = false;
-			}
-			else
-			{
-				EnemyMagickaMeter.SetTargetPercent(magickaPct);
-				EnemyStaminaMeter.SetTargetPercent(staminaPct);
-			}
-			EnemyMagicka_mc._alpha = 100;	
-			EnemyStamina_mc._alpha = 100;
-			EnemyStamina_mc._y = EnemyMagicka_mc._y + enemyMeterHeightScaled;
-			AHZBracketInstance._y = (orginalBracketLocationY + (ENEMY_METER_HEIGHT * 2));
+			LoadedEnemyStamina_mc = EnemyStamina_mc;
 		}
 		
-		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		if (_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 		{
-			EnemyMagickaMeter.SetPercent(0);
-			EnemyStaminaMeter.SetPercent(0);			
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
+			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
+			LoadedEnemyMagicka_mc = this.createEmptyMovieClip("LoadedEnemyMagicka_mc", EnemyMagicka_mc.getDepth());
+			mcLoader.loadClip(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH], LoadedEnemyMagicka_mc);		
+			
+			// Make the built-in movieclip disapear, it is being replaced, pending any loading errorss
 			EnemyMagicka_mc._alpha = 0;
-			EnemyStamina_mc._alpha = 0;
-		}
-
-	}
-
-	function UpdateEnemyStats(enemy:Object):Void{
-		
-		if (!enemy){
-			MagickaStats_mc._alpha = 0;
-			StaminaStats_mc._alpha = 0;
-			return;
-		}
-		
-		MagickaStats_mc._alpha = (showEnemyMagickaStats) ? EnemyMagicka_mc._alpha : 0;
-		StaminaStats_mc._alpha = (showEnemyStaminaStats) ? EnemyStamina_mc._alpha : 0;
-		MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
-		StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();
-		MagickaStats_mc._x = EnemyMagicka_mc._x;
-		MagickaStats_mc._y = EnemyMagicka_mc._y;
-		StaminaStats_mc._x = EnemyStamina_mc._x;
-		StaminaStats_mc._y = EnemyStamina_mc._y;
-	}
-
-	function UpdateEnemyHealthStats(enemy:Object):Void{
-		
-		if (!enemy){
-			HealthStats_mc._alpha = 0;
-			return;
-		}
-		
-		if (showEnemyHealthStats)
-		{
-			if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
-			{
-				HealthStats_mc._alpha = 0;
-			}
-			else
-			{
-				HealthStats_mc._alpha = 100;
-			}
+			EnemyMagicka_mc._xscale = 0;
+			EnemyMagicka_mc._yscale = 0;
 		}
 		else
 		{
-			HealthStats_mc._alpha = 0;
-		}
+			LoadedEnemyMagicka_mc = EnemyMagicka_mc;
+		}		
 		
-		HealthStats_mc.Stats.text = enemy.health.toString() + "/" + enemy.maxHealth.toString();
+		if (!metersToLoad.length)
+		{
+			clipsReady();
+		}
 	}
 
-	function InitEnemySoulTextField():Void{
+	function clipsReady()
+	{
+		if (!LoadedEnemyMagicka_mc)
+			LoadedEnemyMagicka_mc = EnemyMagicka_mc;			
+		if (!LoadedEnemyStamina_mc)
+			LoadedEnemyStamina_mc = EnemyStamina_mc;
+					
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading COMPLETED");
+		LoadedEnemyMagicka_mc._alpha = 0;
+		LoadedEnemyStamina_mc._alpha = 0;
+		LoadedEnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale ) * _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE];
+		LoadedEnemyMagicka_mc._yscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale ) * _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE];
+		LoadedEnemyStamina_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale ) * _config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE];
+		LoadedEnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale) * _config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE];
+		HealthStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale) * _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE];	
+		HealthStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale) * _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE];			
+		MagickaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale) * _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE];			
+		MagickaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale) * _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE];							
+		StaminaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale) * _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE];		
+		StaminaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale) * _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE];				
+		enemyMeterHeightScaled = _config[AHZDefines.CFG_ENEMY_METER_HEIGHT] * (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale/100);
+
+		// Not stacking so height does not matter
+		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		{
+			enemyMeterHeightScaled = 1.0;
+		}
 		
-		EnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
-		EnemyMagicka_mc._yscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale );
-		EnemyStamina_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale );
-		EnemyStamina_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);	
-		HealthStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
-		HealthStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);			
-		MagickaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
-		MagickaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);				
-		StaminaStats_mc._xscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale);		
-		StaminaStats_mc._yscale =  (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale);			
-		enemyMeterHeightScaled = ENEMY_METER_HEIGHT * (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale/100);
-
-		//ENEMY_METER_HEIGHT = ENEMY_METER_HEIGHT * (1 / (EnemyMagicka_mc._yscale / 100));
-		//ENEMY_BRACKET_SCALE = (1 / (EnemyMagicka_mc._yscale / 100));
-
 		orginalBracketLocationY = _root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._y;
-		EnemyMagicka_mc._y = _root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y + enemyMeterHeightScaled - stageRect.y;
-		EnemyMagicka_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
-		EnemyStamina_mc._x = EnemyMagicka_mc._x;	
-		EnemyMagickaMeter = new Meter(EnemyMagicka_mc);
-		EnemyStaminaMeter = new Meter(EnemyStamina_mc);
+		baseX = ((_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x);
+		baseY = ((_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y);
+		
+		LoadedEnemyMagicka_mc._y = baseY + enemyMeterHeightScaled + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET];
+		LoadedEnemyMagicka_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET];
+		LoadedEnemyStamina_mc._x = baseX  + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET];
+		staminaMeterBaseY = baseY + enemyMeterHeightScaled + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET];
+		
+		EnemyMagickaMeter = new Meter(LoadedEnemyMagicka_mc);
+		EnemyStaminaMeter = new Meter(LoadedEnemyStamina_mc);
 		EnemyMagickaMeter.SetPercent(0);
 		EnemyStaminaMeter.SetPercent(0);		
-		EnemyMagicka_mc._alpha = 0;
-		EnemyStamina_mc._alpha = 0;
+		LoadedEnemyMagicka_mc._alpha = 0;
+		LoadedEnemyStamina_mc._alpha = 0;
 		HealthStats_mc._alpha = 0;
 		MagickaStats_mc._alpha = 0;
 		StaminaStats_mc._alpha = 0;	
 		
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc: " + HealthStats_mc);
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("HealthStats_mc.Stats: " + HealthStats_mc.Stats);
-		
-		HealthStats_mc._x = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._x + _root.HUDMovieBaseInstance.EnemyHealth_mc._x) - stageRect.x;
-		HealthStats_mc._y = (_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._y + _root.HUDMovieBaseInstance.EnemyHealth_mc._y) - stageRect.y;
+		HealthStats_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET];
+		HealthStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET];
 		
 		var mc:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
 		AHZBracketInstance = mc.duplicateMovieClip("AHZBracketInstance", this.getNextHighestDepth());
@@ -370,7 +409,169 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		EnemySoul.filters = filterArray;
 		EnemySoul._alpha = 0;			
 		EnemySoul.textAutoSize="shrink";		
+
+		if (! hooksInstalled)
+		{
+			// Apply hooks to hook events
+			hookFunction(_root.HUDMovieBaseInstance,"SetCrosshairTarget",this,"SetCrosshairTarget");
+			hookFunction(_root.HUDMovieBaseInstance,"ShowElements",this,"ShowElements");
+			hookFunction(_root.HUDMovieBaseInstance,"SetCompassAngle",this,"SetCompassAngle");
+			_global.skse.plugins.AHZmoreHUDPlugin.InstallHooks();
+			hooksInstalled = true;
+		}		
+	}
+
+	function UpdateEnemyMeters(magickaPct:Number, staminaPct:Number, updateRequired:Boolean):Void{
 		
+		if (magickaPct < 0 && staminaPct < 0)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			EnemyStaminaMeter.SetPercent(0);
+			LoadedEnemyMagicka_mc._alpha = 0;
+			LoadedEnemyStamina_mc._alpha = 0;
+		}	
+		else if (magickaPct < 0)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			LoadedEnemyMagicka_mc._alpha = 0;
+			if (updateRequired || firstStaminaMeterUpdate)
+			{
+				EnemyStaminaMeter.SetPercent(staminaPct);
+				firstStaminaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyStaminaMeter.SetTargetPercent(staminaPct);
+			}
+			LoadedEnemyStamina_mc._alpha = _config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA];
+		}
+		else if (staminaPct < 0)
+		{
+			if (updateRequired || firstMagickaMeterUpdate)
+			{
+				EnemyMagickaMeter.SetPercent(magickaPct);
+				firstMagickaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyMagickaMeter.SetTargetPercent(magickaPct);
+			}
+			LoadedEnemyMagicka_mc._alpha = _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA];			
+			EnemyStaminaMeter.SetPercent(0);
+			LoadedEnemyStamina_mc._alpha = 0;
+		}
+		else
+		{
+			if (updateRequired || firstMagickaMeterUpdate || firstStaminaMeterUpdate)
+			{
+				EnemyMagickaMeter.SetPercent(magickaPct);
+				EnemyStaminaMeter.SetPercent(staminaPct);
+				firstStaminaMeterUpdate = false;
+				firstMagickaMeterUpdate = false;
+			}
+			else
+			{
+				EnemyMagickaMeter.SetTargetPercent(magickaPct);
+				EnemyStaminaMeter.SetTargetPercent(staminaPct);
+			}
+			LoadedEnemyMagicka_mc._alpha = _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA];	
+			LoadedEnemyStamina_mc._alpha = _config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA];
+		}		
+		
+		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		{
+			LoadedEnemyStamina_mc._y = staminaMeterBaseY;
+		}
+		else
+		{
+			if (magickaPct < 0 && staminaPct < 0)
+			{
+				AHZBracketInstance._y = orginalBracketLocationY;
+			}	
+			else if (magickaPct < 0)
+			{
+				LoadedEnemyStamina_mc._y = staminaMeterBaseY;
+				AHZBracketInstance._y = (orginalBracketLocationY + _config[AHZDefines.CFG_ENEMY_METER_HEIGHT]);
+			}
+			else if (staminaPct < 0)
+			{
+				AHZBracketInstance._y = (orginalBracketLocationY + _config[AHZDefines.CFG_ENEMY_METER_HEIGHT]);
+			}
+			else
+			{
+				LoadedEnemyStamina_mc._y = staminaMeterBaseY + enemyMeterHeightScaled;
+				AHZBracketInstance._y = (orginalBracketLocationY + (_config[AHZDefines.CFG_ENEMY_METER_HEIGHT] * 2));
+			}	
+		}
+		
+		
+		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		{
+			EnemyMagickaMeter.SetPercent(0);
+			EnemyStaminaMeter.SetPercent(0);			
+			LoadedEnemyMagicka_mc._alpha = 0;
+			LoadedEnemyStamina_mc._alpha = 0;
+		}
+
+	}
+
+	function UpdateEnemyStats(enemy:Object):Void{
+		
+		if (!enemy){
+			MagickaStats_mc._alpha = 0;
+			StaminaStats_mc._alpha = 0;
+			return;
+		}
+		
+		MagickaStats_mc._alpha = (showEnemyMagickaStats) ? _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA] : 0;
+		StaminaStats_mc._alpha = (showEnemyStaminaStats) ? _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA] : 0;
+		MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
+		StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();		
+		
+		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		{
+			MagickaStats_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET];
+			MagickaStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET];
+			StaminaStats_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET];
+			StaminaStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET];
+		}
+		else
+		{
+			MagickaStats_mc._alpha = (showEnemyMagickaStats) ? _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA] : 0;
+			StaminaStats_mc._alpha = (showEnemyStaminaStats) ? _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA] : 0;
+			MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
+			StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();
+			MagickaStats_mc._x = LoadedEnemyMagicka_mc._x + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET];
+			MagickaStats_mc._y = LoadedEnemyMagicka_mc._y + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET];
+			StaminaStats_mc._x = LoadedEnemyStamina_mc._x + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET];
+			StaminaStats_mc._y = LoadedEnemyStamina_mc._y + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET];
+		}
+	}
+
+	function UpdateEnemyHealthStats(enemy:Object):Void{
+		
+		if (!enemy){
+			HealthStats_mc._alpha = 0;
+			return;
+		}
+		
+		if (showEnemyHealthStats)
+		{
+			if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+			{
+				HealthStats_mc._alpha = 0;
+			}
+			else
+			{
+				HealthStats_mc._alpha = _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA];
+			}
+		}
+		else
+		{
+			HealthStats_mc._alpha = 0;
+		}
+		
+		HealthStats_mc.Stats.text = enemy.health.toString() + "/" + enemy.maxHealth.toString();
 	}
 
 	function ShowElements(aMode:String,abShow:Boolean):Void
@@ -1033,7 +1234,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 									 playerData.playerObj.maxEncumbranceNumber,
 									 playerData.playerObj.goldNumber,
 									 0.0,
-									 AHZInventoryDefines.kNone,
+									 AHZDefines.kNone,
 									 undefined,
 									 undefined,
 									 undefined);
@@ -1204,17 +1405,17 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (viewBottomInfo)
 		{
 			var tempType:Number;
-			if (formType == AHZInventoryDefines.kWeapon || formType == AHZInventoryDefines.kAmmo || formType == AHZInventoryDefines.kProjectile)
+			if (formType == AHZDefines.kWeapon || formType == AHZDefines.kAmmo || formType == AHZDefines.kProjectile)
 			{
-				tempType = AHZInventoryDefines.ICT_WEAPON;
+				tempType = AHZDefines.ICT_WEAPON;
 			}
-			else if (formType == AHZInventoryDefines.kArmor)
+			else if (formType == AHZDefines.kArmor)
 			{
-				tempType = AHZInventoryDefines.ICT_ARMOR;
+				tempType = AHZDefines.ICT_ARMOR;
 			}
 			else
 			{
-				tempType = AHZInventoryDefines.ICT_DEFAULT;
+				tempType = AHZDefines.ICT_DEFAULT;
 			}
 			
 			// Set to 0 to disable
@@ -1459,4 +1660,35 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		};
 		return true;
 	}
+	
+	private function removePendingClip(s_mc:MovieClip):Void{
+		var index = metersToLoad.indexOf(s_mc);
+		if (index >= 0){
+			metersToLoad.splice(index, 1);
+		}	
+	}
+	
+	public function onLoadInit(s_mc: MovieClip): Void
+	{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("onLoadInit: " + s_mc);
+
+		removePendingClip(s_mc);
+		if (!metersToLoad.length)
+		{
+			clipsReady();
+		}
+	}
+	
+	public function onLoadError(s_mc:MovieClip, a_errorCode: String): Void
+	{
+		// Even on error, we need to pull it from the pending clips.  If the
+		// clip could not load it will revert back to the built-in clip
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Error Loading: " + s_mc + " Error: " + a_errorCode);
+		
+		removePendingClip(s_mc);
+		if (!metersToLoad.length)
+		{
+			clipsReady();
+		}		
+	}	
 }

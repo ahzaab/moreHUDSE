@@ -15,7 +15,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 	{
 		super();
 		PlayerInfoCard_mc = this;
-		iLastItemType = AHZInventoryDefines.ICT_NONE;
+		iLastItemType = AHZDefines.ICT_NONE;
 	}
 
 	function PositionElements(aiLeftOffset: Number, aiRightOffset: Number): Void
@@ -46,7 +46,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 		}
 		if (PlayerInfoObj != undefined && aItemUpdateObj != undefined) {
 			switch(iItemType) {
-				case AHZInventoryDefines.ICT_ARMOR:
+				case AHZDefines.ICT_ARMOR:
 					PlayerInfoCard_mc.gotoAndStop("Armor");
 					var strArmor: String = Math.floor(PlayerInfoObj.armor).toString();
 					if (aItemUpdateObj.armorChange != undefined) {
@@ -80,7 +80,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 					this.PlayerInfoCard_mc.WarmthRatingValue.SetText(strWarmth,true);						
 					break;
 					
-				case AHZInventoryDefines.ICT_WEAPON:
+				case AHZDefines.ICT_WEAPON:
 					PlayerInfoCard_mc.gotoAndStop("Weapon");
 					var strDamage: String = Math.floor(PlayerInfoObj.damage).toString();
 					if (aItemUpdateObj.damageChange != undefined) {
@@ -95,7 +95,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 					PlayerInfoCard_mc.DamageValue.SetText(strDamage, true);
 					break;
 					
-				case AHZInventoryDefines.ICT_DEFAULT:
+				case AHZDefines.ICT_DEFAULT:
 				default:
 					PlayerInfoCard_mc.gotoAndStop("Default");
 			}
@@ -141,12 +141,12 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				PlayerInfoCard_mc.PlayerGoldValue._x = PlayerInfoCard_mc.PlayerGoldLabel._x + PlayerInfoCard_mc.PlayerGoldLabel.getLineMetrics(0).width + 3;
 				PlayerInfoCard_mc.CarryWeightLabel._x = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue.getLineMetrics(0).width + 8;
 				PlayerInfoCard_mc.CarryWeightValue._x = PlayerInfoCard_mc.CarryWeightLabel._x + PlayerInfoCard_mc.CarryWeightLabel.getLineMetrics(0).width + 3;
-				if (iItemType === AHZInventoryDefines.ICT_ARMOR) {
+				if (iItemType === AHZDefines.ICT_ARMOR) {
 					PlayerInfoCard_mc.ArmorRatingLabel._x = PlayerInfoCard_mc.CarryWeightValue._x + PlayerInfoCard_mc.CarryWeightValue.getLineMetrics(0).width + 8;
 					PlayerInfoCard_mc.ArmorRatingValue._x = PlayerInfoCard_mc.ArmorRatingLabel._x + PlayerInfoCard_mc.ArmorRatingLabel.getLineMetrics(0).width + 3;
 					PlayerInfoCard_mc.WarmthRatingLabel._x = PlayerInfoCard_mc.ArmorRatingValue._x + PlayerInfoCard_mc.ArmorRatingValue.getLineMetrics(0).width + 8;
 					PlayerInfoCard_mc.WarmthRatingValue._x = PlayerInfoCard_mc.WarmthRatingLabel._x + PlayerInfoCard_mc.WarmthRatingLabel.getLineMetrics(0).width + 3;    	
-				} else if (iItemType === AHZInventoryDefines.ICT_WEAPON) {
+				} else if (iItemType === AHZDefines.ICT_WEAPON) {
 					PlayerInfoCard_mc.DamageLabel._x = PlayerInfoCard_mc.CarryWeightValue._x + PlayerInfoCard_mc.CarryWeightValue.getLineMetrics(0).width + 8;
 					PlayerInfoCard_mc.DamageValue._x = PlayerInfoCard_mc.DamageLabel._x + PlayerInfoCard_mc.DamageLabel.getLineMetrics(0).width + 3;			
 				}
@@ -169,12 +169,12 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				PlayerInfoCard_mc.PlayerGoldLabel._x = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue.getLineMetrics(0).x - PlayerInfoCard_mc.PlayerGoldLabel._width;
 				PlayerInfoCard_mc.CarryWeightValue._x = PlayerInfoCard_mc.PlayerGoldLabel._x + PlayerInfoCard_mc.PlayerGoldLabel.getLineMetrics(0).x - PlayerInfoCard_mc.CarryWeightValue._width - 5;
 				PlayerInfoCard_mc.CarryWeightLabel._x = PlayerInfoCard_mc.CarryWeightValue._x + PlayerInfoCard_mc.CarryWeightValue.getLineMetrics(0).x - PlayerInfoCard_mc.CarryWeightLabel._width;
-				if (iItemType === AHZInventoryDefines.ICT_ARMOR) {
+				if (iItemType === AHZDefines.ICT_ARMOR) {
 					PlayerInfoCard_mc.ArmorRatingValue._x = PlayerInfoCard_mc.CarryWeightLabel._x + PlayerInfoCard_mc.CarryWeightLabel.getLineMetrics(0).x - PlayerInfoCard_mc.ArmorRatingValue._width - 5;
 					PlayerInfoCard_mc.ArmorRatingLabel._x = PlayerInfoCard_mc.ArmorRatingValue._x + PlayerInfoCard_mc.ArmorRatingValue.getLineMetrics(0).x - PlayerInfoCard_mc.ArmorRatingLabel._width;
 					PlayerInfoCard_mc.WarmthRatingValue._x = PlayerInfoCard_mc.ArmorRatingLabel._x + PlayerInfoCard_mc.ArmorRatingLabel.getLineMetrics(0).x - PlayerInfoCard_mc.WarmthRatingValue._width - 5;
                     PlayerInfoCard_mc.WarmthRatingLabel._x = PlayerInfoCard_mc.WarmthRatingValue._x + PlayerInfoCard_mc.WarmthRatingValue.getLineMetrics(0).x - PlayerInfoCard_mc.WarmthRatingLabel._width;
-				} else if (iItemType === AHZInventoryDefines.ICT_WEAPON) {
+				} else if (iItemType === AHZDefines.ICT_WEAPON) {
 					PlayerInfoCard_mc.DamageValue._x = PlayerInfoCard_mc.CarryWeightLabel._x + PlayerInfoCard_mc.CarryWeightLabel.getLineMetrics(0).x - PlayerInfoCard_mc.DamageValue._width - 5;
 					PlayerInfoCard_mc.DamageLabel._x = PlayerInfoCard_mc.DamageValue._x + PlayerInfoCard_mc.DamageValue.getLineMetrics(0).x - PlayerInfoCard_mc.DamageLabel._width;
 				}		
@@ -199,18 +199,18 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				PlayerInfoCard_mc.PlayerGoldLabel._x = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue.getLineMetrics(0).x - PlayerInfoCard_mc.PlayerGoldLabel._width;
 				PlayerInfoCard_mc.CarryWeightValue._x = PlayerInfoCard_mc.PlayerGoldLabel._x + PlayerInfoCard_mc.PlayerGoldLabel.getLineMetrics(0).x - PlayerInfoCard_mc.CarryWeightValue._width - 5;
 				PlayerInfoCard_mc.CarryWeightLabel._x = PlayerInfoCard_mc.CarryWeightValue._x + PlayerInfoCard_mc.CarryWeightValue.getLineMetrics(0).x - PlayerInfoCard_mc.CarryWeightLabel._width;
-				if (iItemType === AHZInventoryDefines.ICT_ARMOR) {
+				if (iItemType === AHZDefines.ICT_ARMOR) {
 					PlayerInfoCard_mc.ArmorRatingValue._x = PlayerInfoCard_mc.CarryWeightLabel._x + PlayerInfoCard_mc.CarryWeightLabel.getLineMetrics(0).x - PlayerInfoCard_mc.ArmorRatingValue._width - 5;
 					PlayerInfoCard_mc.ArmorRatingLabel._x = PlayerInfoCard_mc.ArmorRatingValue._x + PlayerInfoCard_mc.ArmorRatingValue.getLineMetrics(0).x - PlayerInfoCard_mc.ArmorRatingLabel._width;
 					PlayerInfoCard_mc.WarmthRatingValue._x = PlayerInfoCard_mc.ArmorRatingLabel._x + PlayerInfoCard_mc.ArmorRatingLabel.getLineMetrics(0).x - PlayerInfoCard_mc.WarmthRatingValue._width - 5;
                     PlayerInfoCard_mc.WarmthRatingLabel._x = PlayerInfoCard_mc.WarmthRatingValue._x + PlayerInfoCard_mc.WarmthRatingValue.getLineMetrics(0).x - PlayerInfoCard_mc.WarmthRatingLabel._width;
-				} else if (iItemType === AHZInventoryDefines.ICT_WEAPON) {
+				} else if (iItemType === AHZDefines.ICT_WEAPON) {
 					PlayerInfoCard_mc.DamageValue._x = PlayerInfoCard_mc.CarryWeightLabel._x + PlayerInfoCard_mc.CarryWeightLabel.getLineMetrics(0).x - PlayerInfoCard_mc.DamageValue._width - 5;
 					PlayerInfoCard_mc.DamageLabel._x = PlayerInfoCard_mc.DamageValue._x + PlayerInfoCard_mc.DamageValue.getLineMetrics(0).x - PlayerInfoCard_mc.DamageLabel._width;
 				}
 				
 				var deltaVal:Number = 0.0;
-				if (iItemType === AHZInventoryDefines.ICT_ARMOR) 
+				if (iItemType === AHZDefines.ICT_ARMOR) 
 				{
 					if (PlayerInfoCard_mc.WarmthRatingLabel._visible)
 					{
@@ -227,7 +227,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 					PlayerInfoCard_mc.ArmorRatingLabel._x -= deltaVal;
 					PlayerInfoCard_mc.ArmorRatingValue._x -= deltaVal;					
 				} 
-				else if (iItemType === AHZInventoryDefines.ICT_WEAPON) 
+				else if (iItemType === AHZDefines.ICT_WEAPON) 
 				{
 					deltaVal = ((PLAYER_CARD_WIDTH - PlayerInfoCard_mc.DamageLabel._x) / 2.0) + PlayerInfoCard_mc.DamageLabel._x;
 					deltaVal -= (PLAYER_CARD_WIDTH / 2.0);
