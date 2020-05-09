@@ -40,6 +40,7 @@ GlobalVariable Property AHZShowEnemyStaminaMeter Auto
 GlobalVariable Property AHZShowEnemyMagickaStats Auto
 GlobalVariable Property AHZShowEnemyStaminaStats Auto
 GlobalVariable Property AHZShowEnemyHealthStats Auto
+GlobalVariable Property AHZShowInventoryCountWithZero Auto
 
 Quest Property AHZMainQuestREF  Auto  
 
@@ -108,6 +109,7 @@ int         _toggle2OID_B               ; Show Target Data Widget (Ingredients)
 int         _toggle3OID_B               ; Show Target Data Widget (Effects)
 int         _toggle4OID_B               ; Uninstall
 int         _toggle5OID_B               ; Show Target Inventory
+int         _toggle6OID_B               ; Show Target Inventory Even When Zero
 int         _toggle8OID_B               ; Show Books Read
 int         _toggle9OID_B               ; Show Armor Weight Class
 int         _toggle10OID_B              ; Show Book Skill
@@ -293,6 +295,13 @@ event OnPageReset(string a_page)
     elseif ((a_page == "$mHUD_TargetsInventory") || (a_page == "$mHUD_TargetsCountPage"))
         AddHeaderOption("$mHUD_TargetsCountWidget")
         _toggle5OID_B           = AddToggleOption("$mHUD_Visible", AHZShowInventoryCount.GetValueInt())
+
+        if (AHZShowInventoryCount.GetValueInt() == 0)
+            _toggle6OID_B = AddToggleOption("$mHUD_TargetsCountVisibleWhenZero", AHZShowInventoryCountWithZero.GetValueInt(), OPTION_FLAG_DISABLED)
+        else
+            _toggle6OID_B = AddToggleOption("$mHUD_TargetsCountVisibleWhenZero", AHZShowInventoryCountWithZero.GetValueInt())
+        endif
+
         _inventoryAlignmentOID_M = AddMenuOption("$mHUD_Alignment", AlignmentStyles[AHZInventoryWidgetRightAligned.GetValueInt()])
 
         AddEmptyOption()
@@ -436,6 +445,19 @@ event OnOptionSelect(int a_option)
     if (a_option == _toggle5OID_B)
         ToggleGlobalInt(AHZShowInventoryCount)
         SetToggleOptionValue(_toggle5OID_B, AHZShowInventoryCount.GetValueInt())
+
+        if (AHZShowInventoryCount.GetValueInt() == 0)
+            SetOptionFlags(_toggle6OID_B, OPTION_FLAG_DISABLED)
+        else
+            SetOptionFlags(_toggle6OID_B, OPTION_FLAG_NONE)
+        endif  
+
+    endif
+
+    ; Toggle Inventory Count even when zero
+    if (a_option == _toggle6OID_B)
+        ToggleGlobalInt(AHZShowInventoryCountWithZero)
+        SetToggleOptionValue(_toggle6OID_B, AHZShowInventoryCountWithZero.GetValueInt())
     endif
 
     ; Toggle side widget for ingredient effects
@@ -831,6 +853,10 @@ event OnOptionHighlight(int a_option)
 
     if (a_option == _toggle5OID_B)
         SetInfoText("$mHUD_ShowsCurrentNumber")
+    endif   
+
+    if (a_option == _toggle6OID_B)
+        SetInfoText("$mHUD_ShowsInventoryCountEventWhenZero")
     endif   
 
     if (a_option == _sliderBottomX_OID_S)

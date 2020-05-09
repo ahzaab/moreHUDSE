@@ -250,7 +250,7 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
 	   if (!mHudFiles.size())
 	   {
-		   _MESSAGE("No third party .mHud files where detected.");
+           _MESSAGE("No third party .mHud files where detected.");
 	   }
 	   else
 	   {

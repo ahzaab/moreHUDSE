@@ -43,6 +43,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var viewBottomInfo:Boolean;
 	private var viewBottomInfoAlways:Boolean;
 	private var viewInventoryCount:Boolean;
+	private var viewInventoryCountWithZero:Boolean;
 	private var bottomAligned:Number;
 	private var inventoryAligned:Number;
 	private var ingredientWidgetStyle:Number;// 1, 2, 3
@@ -159,6 +160,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		viewBottomInfo = false;
 		viewBottomInfoAlways = false;
 		viewInventoryCount = false;
+		viewInventoryCountWithZero = false;
 		bottomAligned = 1;
 		inventoryAligned = 0;
 		ingredientWidgetStyle = 0;
@@ -546,6 +548,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			StaminaStats_mc._x = LoadedEnemyStamina_mc._x + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET];
 			StaminaStats_mc._y = LoadedEnemyStamina_mc._y + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET];
 		}
+		
+		
+		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		{			
+			MagickaStats_mc._alpha = 0;
+			StaminaStats_mc._alpha = 0;
+		}	
 	}
 
 	function UpdateEnemyHealthStats(enemy:Object):Void{
@@ -1357,11 +1366,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 								   showEnemyStaminaMeterValue:Number,
 								   showEnemyHealthStatsValue:Number,
 								   showEnemyStaminaStatsValue:Number,
-								   showEnemyMagickaStatsValue:Number):Void 
+								   showEnemyMagickaStatsValue:Number,
+								   viewInventoryCountWithZeroValue:Number):Void 
 	{				
 		viewSideInfo = (sideView>=1);
 		viewBottomInfo = (bottomView>=1);
-		viewInventoryCount = (inventoryCount>=1);
+		viewInventoryCount = (inventoryCount>=1); 
+		viewInventoryCountWithZero = (viewInventoryCountWithZeroValue>=1);
 		bottomAligned = bottomAlignedValue;
 		inventoryAligned = inventoryAlignedValue;
 		viewEffectsInfo = (effectsView>=1);
@@ -1482,7 +1493,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	public function showInventoryWidget(inventoryName:String,inventoryCount:Number)
 	{
-		if (viewInventoryCount && inventoryCount > 0)
+		if (viewInventoryCount && (inventoryCount > 0 || viewInventoryCountWithZero))
 		{
 			Inventory_mc.InventoryCount.SetText(inventoryCount.toString());
 			Inventory_mc.InventoryName.SetText(inventoryName);

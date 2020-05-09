@@ -29,6 +29,14 @@ if ($(Test-Path "$sourcePath\Interface\moreHUD"))
     Copy-Item "$sourcePath\Interface\moreHUD\*.*" -Destination "$destinationDataPath\Interface\moreHUD"
 }
 
+if ($(Test-Path "$sourcePath\Interface\moreHUD"))
+{
+    if (!$(Test-Path "$destinationDataPath\Interface\moreHUD"))
+    {
+        New-Item -ItemType Directory "$destinationDataPath\Interface\moreHUD"
+    }
+    Copy-Item "$sourcePath\Interface\moreHUD\*.*" -Destination "$destinationDataPath\Interface\moreHUD"
+}
 
 Copy-Item "$sourcePath\Scripts\ahz*.pex" -Destination "$destinationDataPath\Scripts"
 Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Exclude AhzMoreHudIE.psc -Destination "$destinationDataPath\Source\Scripts"

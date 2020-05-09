@@ -1,5 +1,5 @@
 
-; If any parameters are left blank the buil-in default values are used including the default clips
+; If any parameters are left blank the built-in default values are used including the default clips
 
 [EnemyMeter]
 ; Will stack the meters and numbers in this order Health, Magicka, Stamina
@@ -9,7 +9,7 @@ fHeight = 11.5
 
 [EnemyMagickaMeter]
 fXOffset=0
-fYOffset=100
+fYOffset=0
 fXScale=1.0
 fYScale=1.0
 fAlpha=100
@@ -22,11 +22,11 @@ fNumbersAlpha=100
 
 [EnemyStaminaMeter]
 fXOffset=0
-fYOffset=300
+fYOffset=0
 fXScale=1.0
 fYScale=1.0
 fAlpha=100
-sSWFPath=
+sSWFPath='moreHUD/enemyStaminaMeter.swf'
 fNumbersXOffset=0
 fNumbersYOffset=0
 fNumbersXScale=1.0
