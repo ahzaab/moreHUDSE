@@ -6,10 +6,11 @@ class AHZConfigManager
   /* CONSTANTS */
   
 	private static var CONFIG_PATH = "moreHUD/config.txt";
-
+	private static var EXPORTED_PATH = "exported/moreHUD/config.txt";
 	private static var eventObject: Object;
-
 	private static var configObject: Object;
+	private static var exportedTried:Boolean = false;
+	
 		
   /* INITIALIATZION */
   
@@ -36,12 +37,23 @@ class AHZConfigManager
 		
 	private static function onLoadConfig(success:Boolean):Void {
 		if (success){
+			configObject["useExported"] = exportedTried;
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded successfully");
 			eventObject.dispatchEvent({type: "configLoad", config: configObject});
 		}
 		else{
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded with error");
-			eventObject.dispatchEvent({type: "configError", config: undefined});
+			if (!exportedTried){
+				exportedTried = true;
+				var lv = new LoadVars();
+				lv.onData = parseConfigData;
+				lv.onLoad = onLoadConfig;
+				lv.load(EXPORTED_PATH);
+			}
+			else
+			{
+				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded with error");
+				eventObject.dispatchEvent({type: "configError", config: undefined});
+			}
 		}	
 	}
 		

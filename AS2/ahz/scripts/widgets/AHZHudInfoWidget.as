@@ -72,6 +72,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var showEnemyHealthStats:Boolean;
 	
 	var PLAYER_CARD_WIDTH:Number = 651.0;
+	var EXPORTED_PREFIX:String = "exported/"	
 		
 	// private variables
 	private var savedRolloverInfoText:String;
@@ -293,6 +294,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
 		if (_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 		{
+			if (_config.useExported && _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH].toLowerCase().indexOf(EXPORTED_PREFIX)<0)
+			{
+				_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH] = EXPORTED_PREFIX + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH];
+			}	
+			
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 			LoadedEnemyStamina_mc = this.createEmptyMovieClip("LoadedEnemyStamina_mc", EnemyStamina_mc.getDepth());
@@ -310,6 +316,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		
 		if (_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 		{
+			if (_config.useExported && _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH].toLowerCase().indexOf(EXPORTED_PREFIX)<0)
+			{
+				_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH] = EXPORTED_PREFIX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH];
+			}	
+			
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 			LoadedEnemyMagicka_mc = this.createEmptyMovieClip("LoadedEnemyMagicka_mc", EnemyMagicka_mc.getDepth());
