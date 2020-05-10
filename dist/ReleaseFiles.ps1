@@ -43,7 +43,7 @@ if ($destSksePlugin -and $sourceSksePlugin){
 }
 
 $items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex
-$items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc
+$items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc | Where-Object {$_.Name -ne 'AhzMoreHudIE.psc'}
 $items += Get-ChildItem "$sourceDataDir" -Filter "ahzmorehud$pluginExtesion"
 $items += Get-ChildItem "$sourceDataDir\Interface" -Include @('ahzhudinfo.swf', 'ahzmorehudlogo.dds', 'ahzmorehud_*.txt') -Recurse
 
