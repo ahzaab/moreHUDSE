@@ -9,6 +9,7 @@ GlobalVariable Property AHZShowBottomWidgetAlways  Auto
 GlobalVariable Property AHZShowIngredientWidget  Auto
 GlobalVariable Property AHZShowEffectsWidget  Auto
 GlobalVariable Property AHZShowInventoryCount  Auto  
+GlobalVariable Property AHZShowInventoryCountWithZero  Auto  
 GlobalVariable Property AHZInventoryWidgetYPercent  Auto  
 GlobalVariable Property AHZInventoryWidgetXPercent  Auto  
 GlobalVariable Property AHZBottomWidgetRightAligned  Auto  
@@ -47,7 +48,7 @@ int Property iToggleOn Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 3 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 7 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 7 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 9 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -103,7 +104,7 @@ function RefreshWidgets()
 EndFunction
 
 function UpdateSettings(bool disable)
-    int[] intargs_200 = new int[27]
+    int[] intargs_200 = new int[28]
     float[] argsF = new float[2]
     float argF = 100.0
 
@@ -136,7 +137,8 @@ function UpdateSettings(bool disable)
         intargs_200[23] = 0
         intargs_200[24] = 0
         intargs_200[25] = 0 
-	    intargs_200[26] = 0          
+	    intargs_200[26] = 0 
+        intargs_200[27] = 0             
     else
         intargs_200[0] = AHZShowIngredientWidget.GetValueInt()
         intargs_200[1] = AHZShowEffectsWidget.GetValueInt()
@@ -164,7 +166,8 @@ function UpdateSettings(bool disable)
         intargs_200[23] = AHZShowEnemyStaminaMeter.GetValueInt()  
         intargs_200[24] = AHZShowEnemyHealthStats.GetValueInt()  
         intargs_200[25] = AHZShowEnemyStaminaStats.GetValueInt()  
-	    intargs_200[26] = AHZShowEnemyMagickaStats.GetValueInt()                    
+	    intargs_200[26] = AHZShowEnemyMagickaStats.GetValueInt()  
+        intargs_200[27] = AHZShowInventoryCountWithZero.GetValueInt()                    
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()

@@ -19,12 +19,21 @@ if (!$(Test-Path "$destinationDataPath\Interface\translations"))
     New-Item -ItemType Directory "$destinationDataPath\Interface\translations"
 }
 
+if ($(Test-Path "$sourcePath\Interface\exported\moreHUD"))
+{
+    if (!$(Test-Path "$destinationDataPath\Interface\exported\moreHUD"))
+    {
+        New-Item -ItemType Directory "$destinationDataPath\Interface\exported\moreHUD"
+    }
+    Copy-Item "$sourcePath\Interface\exported\moreHUD\*.*" -Destination "$destinationDataPath\Interface\exported\moreHUD"
+}
+
 Copy-Item "$sourcePath\Scripts\ahz*.pex" -Destination "$destinationDataPath\Scripts"
-Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Destination "$destinationDataPath\Source\Scripts"
+Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Exclude AhzMoreHudIE.psc -Destination "$destinationDataPath\Source\Scripts"
 Copy-Item "$sourcePath\ahzmorehud.esp" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\ahzmorehud.esl" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\Interface\ahzhudinfo.swf" -Destination "$destinationDataPath\Interface"
-Copy-Item "$sourcePath\Interface\exported\ahzhudinfo.swf" -Destination "$destinationDataPath\Interface\exported"
+Copy-Item "$sourcePath\Interface\ahzhudinfo.swf" -Destination "$destinationDataPath\Interface\exported"
 Copy-Item "$sourcePath\Interface\exported\ahzmorehudlogo.dds" -Destination "$destinationDataPath\Interface\exported"
 
 Copy-Item "$sourcePath\Interface\translations\ahz*.txt" -Destination "$destinationDataPath\Interface\translations"
