@@ -33,7 +33,9 @@
 			
 	static var CFG_ENEMY_METER_USE_STACKING: String = 'busestacking:enemymeter';
 	static var CFG_ENEMY_METER_HEIGHT: String = 'fheight:enemymeter';
-			
+	
+	static var CFG_ICONS_PATH:String = 'sswfpath:icons';
+	
 	/* Player Info Costants */
 	static var ICT_NONE: Number = 0;
 	static var ICT_ARMOR: Number = 1;

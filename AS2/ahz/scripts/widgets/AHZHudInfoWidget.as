@@ -105,6 +105,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	// Statics
 	private static var hooksInstalled:Boolean = false;
+	static var IconContainer:AHZIconContainer = new AHZIconContainer();
 
 	/* INITIALIZATION */
 	
@@ -293,16 +294,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	function initializeClips():Void {	
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
 		if (_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
-		{
-			if (_config.useExported && _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH].toLowerCase().indexOf(EXPORTED_PREFIX)<0)
-			{
-				_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH] = EXPORTED_PREFIX + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH];
-			}	
-			
+		{			
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 			LoadedEnemyStamina_mc = this.createEmptyMovieClip("LoadedEnemyStamina_mc", EnemyStamina_mc.getDepth());
-			mcLoader.loadClip(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH], LoadedEnemyStamina_mc);					
+			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]), LoadedEnemyStamina_mc);					
 			
 			// Make the built-in movieclip disapear, it is being replaced, pending any loading errors
 			EnemyStamina_mc._alpha = 0;
@@ -316,15 +312,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		
 		if (_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 		{
-			if (_config.useExported && _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH].toLowerCase().indexOf(EXPORTED_PREFIX)<0)
-			{
-				_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH] = EXPORTED_PREFIX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH];
-			}	
 			
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 			LoadedEnemyMagicka_mc = this.createEmptyMovieClip("LoadedEnemyMagicka_mc", EnemyMagicka_mc.getDepth());
-			mcLoader.loadClip(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH], LoadedEnemyMagicka_mc);		
+			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]), LoadedEnemyMagicka_mc);		
 			
 			// Make the built-in movieclip disapear, it is being replaced, pending any loading errorss
 			EnemyMagicka_mc._alpha = 0;
@@ -335,11 +327,40 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			LoadedEnemyMagicka_mc = EnemyMagicka_mc;
 		}		
-		
+				
 		if (!metersToLoad.length)
 		{
-			clipsReady();
+			loadIcons();
 		}
+	}
+
+	public function iconsLoaded(event:Object):Void
+	{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
+		IconContainer.Reset();
+		clipsReady();
+	}
+
+	public function iconsLoadedError(event:Object):Void
+	{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
+		IconContainer.Reset();
+		clipsReady();
+	}
+
+	public function loadIcons(): Void
+	{
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading icons");
+		if (_config[AHZDefines.CFG_ICONS_PATH])
+		{
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
+			IconContainer.Load(TopRolloverText, AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), this, "iconsLoaded", "iconsLoadedError");
+		}
+		else
+		{
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Could not load: " + _config[AHZDefines.CFG_ICONS_PATH]);
+			clipsReady();
+		}							  
 	}
 
 	function clipsReady()
@@ -348,7 +369,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			LoadedEnemyMagicka_mc = EnemyMagicka_mc;			
 		if (!LoadedEnemyStamina_mc)
 			LoadedEnemyStamina_mc = EnemyStamina_mc;
-					
+										
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading COMPLETED");
 		LoadedEnemyMagicka_mc._alpha = 0;
 		LoadedEnemyStamina_mc._alpha = 0;
@@ -431,6 +452,47 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			hookFunction(_root.HUDMovieBaseInstance,"SetCompassAngle",this,"SetCompassAngle");
 			_global.skse.plugins.AHZmoreHUDPlugin.InstallHooks();
 			hooksInstalled = true;
+		}		
+	}
+	
+	function ProcessThirdPartyIcons()
+	{
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmDisp"))
+		{
+			IconContainer.appendImage("dbmDisp");
+		}
+	
+		var informList = _global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmNew");
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("informList: " + informList);
+		if (informList)
+		{
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Append dbmNew");
+			IconContainer.appendImage("dbmNew");
+		}
+		
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmFound"))
+		{
+			IconContainer.appendImage("dbmFound");
+		}		
+		
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQ.png"))
+		{
+			IconContainer.appendImage("iEquipQ.png");
+		}		
+		
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQB.png"))
+		{
+			IconContainer.appendImage("iEquipQB.png");
+		}
+		
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQL.png"))
+		{
+			IconContainer.appendImage("iEquipQL.png");
+		}	
+		
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQR.png"))
+		{
+			IconContainer.appendImage("iEquipQR.png");
 		}		
 	}
 
@@ -645,6 +707,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		clearInterval(alphaTimer);
 		if (TopRolloverText._alpha < 50)
 		{
+			IconContainer._alpha = 0;
 			hideSideWidget();	
 			hideInventoryWidget();
 			//Book_mc._alpha = 0;
@@ -662,7 +725,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			var outData:Object = {outObj:Object};
 			var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
-			var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);	
+			var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
+			IconContainer._alpha = TopRolloverText._alpha;
 			ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 			ProcessTargetAndInventoryWidget(validTarget && hudIsVisible);
 		}	
@@ -679,6 +743,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var outData:Object = {outObj:Object};
 		var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
 		var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
+		IconContainer._alpha = TopRolloverText._alpha;
 		ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 		ProcessTargetAndInventoryWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 	}
@@ -700,28 +765,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
         return firstText + appendedHtml + secondText;
 	}
 
-	function appendImageToEnd(textField:TextField, imageName:String, width:Number, height:Number)
-	{
-		if (textField.text.indexOf("[" + imageName + "]") < 0)
-		{
-			var b1 = BitmapData.loadBitmap(imageName); 
-			if (b1)
-			{
-				var a = new Array; 
-				a[0] = { subString:"[" + imageName + "]", image:b1, width:width, height:height, id:"id" + imageName };  //baseLineY:0, 
-				textField.setImageSubstitutions(a);
-				textField.htmlText = 
-				appendHtmlToEnd(textField.htmlText, " " + "[" + imageName + "]");
-			}
-		}
-	}
-
 	// Hooks the main huds function
 	function SetCrosshairTarget(abActivate:Boolean,aName:String,abShowButton:Boolean,abTextOnly:Boolean,abFavorMode:Boolean,abShowCrosshair:Boolean,aWeight:Number,aCost:Number,aFieldValue:Number,aFieldText):Void
 	{			
 		var validTarget:Boolean = false;
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
+		IconContainer.Reset();
 		
 		// Always reset the delay timer to reset when the cross hair changes
 		if (widgetDelayTimer)
@@ -776,6 +826,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		ProcessBookSkill(validTarget);
 		ProcessWeightClass(validTarget);
 		ProcessReadBook(validTarget);
+		ProcessThirdPartyIcons();
 	}
 	
 	function delayedDisplay():Void
@@ -1094,12 +1145,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				
 				// Player knows the enchantment
 				if (knownEnchantment == 1){
-					appendImageToEnd(TopRolloverText, "ahzknown.png", 17, 17);
+					IconContainer._alpha = TopRolloverText._alpha;
+					IconContainer.appendImage("ahzKnown");
 				}
 				
 				// The item is enchanted, but the player cannot learn the enchantment
 				if (knownEnchantment == 2){
-					appendImageToEnd(TopRolloverText, "ahzEnch.png", 17, 17);
+					IconContainer.appendImage("ahzEnch")
 				}	
 			}
 		}
@@ -1642,7 +1694,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			if (bookRead && TopRolloverText._alpha>0 && TopRolloverText.htmlText!="")
 			{
 				TopRolloverText.html=true;
-				appendImageToEnd(TopRolloverText, "eyeImage.png", 17, 17);				
+				IconContainer.appendImage("ahzEye");
 			}
 		}
 	}
@@ -1697,7 +1749,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		removePendingClip(s_mc);
 		if (!metersToLoad.length)
 		{
-			clipsReady();
+			
+			loadIcons();
 		}
 	}
 	
@@ -1710,7 +1763,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		removePendingClip(s_mc);
 		if (!metersToLoad.length)
 		{
-			clipsReady();
+			loadIcons();
 		}		
 	}	
 }

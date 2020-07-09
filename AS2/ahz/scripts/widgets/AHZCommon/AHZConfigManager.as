@@ -7,6 +7,7 @@ class AHZConfigManager
   
 	private static var CONFIG_PATH = "moreHUD/config.txt";
 	private static var EXPORTED_PATH = "exported/moreHUD/config.txt";
+	private static var EXPORTED_PREFIX = "exported/";
 	private static var eventObject: Object;
 	private static var configObject: Object;
 	private static var exportedTried:Boolean = false;
@@ -33,6 +34,21 @@ class AHZConfigManager
 		lv.onLoad = onLoadConfig;
 		lv.load(CONFIG_PATH);
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig end");
+	}
+		
+	public static function ResolvePath(path:String):String{
+		if (!path){
+			return undefined;
+		}
+		
+		if (configObject.useExported && path.toLowerCase().indexOf(EXPORTED_PREFIX)<0)
+		{
+			return EXPORTED_PREFIX + path;
+		}	
+		else
+		{
+			return path;
+		}
 	}
 		
 	private static function onLoadConfig(success:Boolean):Void {

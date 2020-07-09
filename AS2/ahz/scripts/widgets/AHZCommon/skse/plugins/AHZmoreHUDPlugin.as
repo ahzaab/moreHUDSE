@@ -15,4 +15,6 @@ intrinsic class skse.plugins.AHZmoreHUDPlugin
 	static function IsAKnownEnchantedItem():Number;
 	static function GetTargetWarmthRating():Number;
 	static function AHZLog(data:String):String;
+	static function IsTargetInFormList(iconName:String):Boolean;
+	static function IsTargetInIconList(iconName:String):Boolean;
 }

@@ -39,3 +39,6 @@ fNumbersYOffset=0
 fNumbersXScale=1.0
 fNumbersYScale=1.0
 fNumbersAlpha=100
+
+[Icons]
+sSWFPath='moreHUD/baseIcons.swf'
