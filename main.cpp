@@ -256,7 +256,7 @@ public:
 			}
 
 			const char * name = NULL;
-			TESFullName* pFullName = DYNAMIC_CAST(pTargetReference, TESForm, TESFullName);
+			TESFullName* pFullName = DYNAMIC_CAST(pTargetReference->baseForm, TESForm, TESFullName);
 			if (pFullName)
 				name = pFullName->name.data;
 
