@@ -29,7 +29,7 @@ $destDataDir = "$versionDir\Data"
 $destSksePlugin = "$destDataDir\SKSE\Plugins\AHZmoreHUDPlugin.dll"
 $sourceSksePlugin = "$sourceDataDir\SKSE\Plugins\AHZmoreHUDPlugin.dll"
 
-$requiredDataDirs = @("Interface","Scripts","Source\Scripts" , "Interface\exported", "Interface\translations", "SKSE\Plugins")
+$requiredDataDirs = @("Interface","Scripts","Source\Scripts" , "Interface\exported", "Interface\translations", "SKSE\Plugins", "Interface\exported\moreHUD" )
 
 $requiredDataDirs | ForEach-Object{
     if (!$(Test-Path "$destDataDir\$_"))
@@ -42,8 +42,9 @@ if ($destSksePlugin -and $sourceSksePlugin){
     Copy-Item $sourceSksePlugin $destSksePlugin
 }
 
-$items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex
+$items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex | Where-Object {$_.Name -ne 'AhzMoreHudIE.pex'}
 $items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc | Where-Object {$_.Name -ne 'AhzMoreHudIE.psc'}
+$items += @(Get-ChildItem "$sourceDataDir\Interface\exported\moreHUD")
 $items += Get-ChildItem "$sourceDataDir" -Filter "ahzmorehud$pluginExtesion"
 $items += Get-ChildItem "$sourceDataDir\Interface" -Include @('ahzhudinfo.swf', 'ahzmorehudlogo.dds', 'ahzmorehud_*.txt') -Recurse
 

@@ -1,11 +1,17 @@
 Scripts\ahzconfigmenu.pex
 Scripts\ahzmainquest.pex
 Scripts\ahzmaintenancealiasscript.pex
+Scripts\AhzMoreHud.pex
 Scripts\ahzplayerloadgamealias.pex
 Source\Scripts\ahzconfigmenu.psc
 Source\Scripts\ahzmainquest.psc
 Source\Scripts\ahzmaintenancealiasscript.psc
+Source\Scripts\AhzMoreHud.psc
 Source\Scripts\ahzplayerloadgamealias.psc
+Interface\exported\moreHUD\baseIcons.swf
+Interface\exported\moreHUD\config.txt
+Interface\exported\moreHUD\enemyMagickaMeter.swf
+Interface\exported\moreHUD\enemyStaminaMeter.swf
 Interface\exported\AHZHudInfo.swf
 Interface\exported\ahzmorehudlogo.dds
 Interface\translations\ahzmorehud_czech.txt

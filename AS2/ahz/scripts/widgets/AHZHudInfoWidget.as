@@ -133,7 +133,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		hideBottomWidget();
 		hideInventoryWidget();
 
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("AHZConfigManager.loadConfig");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("AHZConfigManager.loadConfig");
 		AHZConfigManager.loadConfig(this, "configLoaded", "configError");
 
 		if (_root.HUDMovieBaseInstance.RolloverInfoInstance)
@@ -193,14 +193,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	}
 
 	function configLoaded(event:Object):Void{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configLoaded: " + event);
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configLoaded: " + event);
 		_config = event.config;
 		prepareConfigs();
 		initializeClips();
 	}
 
 	function configError(event:Object):Void{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configError: " + event);
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configError: " + event);
 		prepareConfigs();
 		initializeClips();
 	}
@@ -292,10 +292,10 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	}
 	
 	function initializeClips():Void {	
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
 		if (_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 		{			
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 			LoadedEnemyStamina_mc = this.createEmptyMovieClip("LoadedEnemyStamina_mc", EnemyStamina_mc.getDepth());
 			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]), LoadedEnemyStamina_mc);					
@@ -313,7 +313,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 		{
 			
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
 			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 			LoadedEnemyMagicka_mc = this.createEmptyMovieClip("LoadedEnemyMagicka_mc", EnemyMagicka_mc.getDepth());
 			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]), LoadedEnemyMagicka_mc);		
@@ -336,29 +336,29 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	public function iconsLoaded(event:Object):Void
 	{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
 		IconContainer.Reset();
 		clipsReady();
 	}
 
 	public function iconsLoadedError(event:Object):Void
 	{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
 		IconContainer.Reset();
 		clipsReady();
 	}
 
 	public function loadIcons(): Void
 	{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading icons");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading icons");
 		if (_config[AHZDefines.CFG_ICONS_PATH])
 		{
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
 			IconContainer.Load(TopRolloverText, AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), this, "iconsLoaded", "iconsLoadedError");
 		}
 		else
 		{
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Could not load: " + _config[AHZDefines.CFG_ICONS_PATH]);
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Could not load: " + _config[AHZDefines.CFG_ICONS_PATH]);
 			clipsReady();
 		}							  
 	}
@@ -370,7 +370,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (!LoadedEnemyStamina_mc)
 			LoadedEnemyStamina_mc = EnemyStamina_mc;
 										
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading COMPLETED");
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading COMPLETED");
 		LoadedEnemyMagicka_mc._alpha = 0;
 		LoadedEnemyStamina_mc._alpha = 0;
 		LoadedEnemyMagicka_mc._xscale = (_root.HUDMovieBaseInstance.EnemyHealth_mc._xscale ) * _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE];
@@ -462,11 +462,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			IconContainer.appendImage("dbmDisp");
 		}
 	
-		var informList = _global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmNew");
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("informList: " + informList);
-		if (informList)
+		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmNew"))
 		{
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Append dbmNew");
 			IconContainer.appendImage("dbmNew");
 		}
 		
@@ -772,6 +769,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
 		IconContainer.Reset();
+		IconContainer._alpha = TopRolloverText._alpha;
 		
 		// Always reset the delay timer to reset when the cross hair changes
 		if (widgetDelayTimer)
@@ -1744,7 +1742,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	
 	public function onLoadInit(s_mc: MovieClip): Void
 	{
-		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("onLoadInit: " + s_mc);
+		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("onLoadInit: " + s_mc);
 
 		removePendingClip(s_mc);
 		if (!metersToLoad.length)

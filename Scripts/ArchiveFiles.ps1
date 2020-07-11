@@ -30,7 +30,7 @@ if ($(Test-Path "$sourcePath\Interface\exported\moreHUD"))
 
 Copy-Item "$sourcePath\Source\Scripts\ahzMoreHud.psc" -Destination "$destinationDataPath\Source\Scripts"
 Copy-Item "$sourcePath\Scripts\ahzMoreHud.pex" -Destination "$destinationDataPath\Scripts"
-Copy-Item "$sourcePath\Scripts\ahz*.pex" -Destination "$destinationDataPath\Scripts"
+Copy-Item "$sourcePath\Scripts\ahz*.pex" -Exclude AhzMoreHudIE.pex -Destination "$destinationDataPath\Scripts"
 Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Exclude AhzMoreHudIE.psc -Destination "$destinationDataPath\Source\Scripts"
 Copy-Item "$sourcePath\ahzmorehud.esp" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\ahzmorehud.esl" -Destination "$destinationDataPath"
