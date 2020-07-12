@@ -455,8 +455,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}		
 	}
 	
-	function ProcessThirdPartyIcons()
+	function ProcessThirdPartyIcons(validTarget:Boolean)
 	{
+		if (!validTarget)
+		{
+			return;
+		}
+		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmDisp"))
 		{
 			IconContainer.appendImage("dbmDisp");
@@ -690,11 +695,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": visible");
 			this._visible = true;
+			IconContainer.Show();
 		}
 		else
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": hidden");
 			this._visible = false;
+			IconContainer.Hide();
 		}
 
 	}
@@ -824,7 +831,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		ProcessBookSkill(validTarget);
 		ProcessWeightClass(validTarget);
 		ProcessReadBook(validTarget);
-		ProcessThirdPartyIcons();
+		ProcessThirdPartyIcons(validTarget);
 	}
 	
 	function delayedDisplay():Void

@@ -42,8 +42,8 @@ if ($destSksePlugin -and $sourceSksePlugin){
     Copy-Item $sourceSksePlugin $destSksePlugin
 }
 
-$items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex | Where-Object {$_.Name -ne 'AhzMoreHudIE.pex'}
-$items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc | Where-Object {$_.Name -ne 'AhzMoreHudIE.psc'}
+$items = Get-ChildItem "$sourceDataDir\Scripts" -Filter ahz*.pex | Where-Object {$_.Name -ne 'AhzMoreHudIE.pex' -and $_.Name -notmatch 'ahz.*?test.*?\.pex'}
+$items += Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter ahz*.psc | Where-Object {$_.Name -ne 'AhzMoreHudIE.psc' -and $_.Name -notmatch 'ahz.*?test.*?\.psc'}
 $items += @(Get-ChildItem "$sourceDataDir\Interface\exported\moreHUD")
 $items += Get-ChildItem "$sourceDataDir" -Filter "ahzmorehud$pluginExtesion"
 $items += Get-ChildItem "$sourceDataDir\Interface" -Include @('ahzhudinfo.swf', 'ahzmorehudlogo.dds', 'ahzmorehud_*.txt') -Recurse
