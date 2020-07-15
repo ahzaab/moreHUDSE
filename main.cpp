@@ -174,8 +174,7 @@ class SKSEScaleform_GetIsValidTarget : public GFxFunctionHandler
 public:
    virtual void	Invoke(Args * args)
    {
-      CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
-
+	   CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
    }
 };
 
