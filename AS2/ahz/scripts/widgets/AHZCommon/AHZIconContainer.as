@@ -178,11 +178,7 @@ class AHZIconContainer
 	}
 	
 	public function set _alpha(alphaValue:Number):Void{
-		if (!loadedIconNames)
-		{
-			return;
-		}	
-		for (var i = 0; i <= loadedIconNames.length; i++)
+		for (var i = 0; i < MAX_CONCURRENT_ICONS; i++)
 		{
 			loadedIcons[i]._alpha = alphaValue;
 		}			
