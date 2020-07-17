@@ -6,10 +6,11 @@ class AHZIconContainer
 {
   /* CONSTANTS */
   	private static var MAX_CONCURRENT_ICONS:Number = 16;
-	private static var ICON_WIDTH:Number = 20;
-	private static var ICON_HEIGHT:Number = 20;
-	private static var ICON_XOFFSET:Number = 0;
-	private static var ICON_YOFFSET:Number = 3;
+	//private static var ICON_WIDTH:Number = 20;
+	//private static var ICON_HEIGHT:Number = 20;
+	private static var MIN_ICON_SIZE:Number = 16;
+	private static var ICON_XOFFSET:Number = -5;
+	private static var ICON_YOFFSET:Number = -5;
 
 	/* Static */
 	private static var eventObject: Object;
@@ -26,18 +27,36 @@ class AHZIconContainer
   	private var _tf:TextField;
   	private var _lastX:Number;
 	private var _textFormat:TextFormat;
+	private var _iconSize:Number;
+	private var _iconScale:Number;
 	
   	public function AHZIconContainer()
 	{	
 	}
 
 	
-	public function Load(textField:TextField, s_filePath:String, a_scope: Object, a_loadedCallBack: String, a_errorCallBack: String):Void
+	public function Load(textField:TextField, 
+						 s_filePath:String, 
+						 a_scope: Object, 
+						 a_loadedCallBack: String, 
+						 a_errorCallBack: String,
+						 a_size:Number,
+						 a_scale:Number):Void
 	{		
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("~ LOAD ~ '" + s_filePath + "'" , false);
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ LOAD ~ '" + s_filePath + "'" );
 		if (managerSetup){
 			return;
+		}
+		_iconSize = a_size;
+		if (_iconSize < MIN_ICON_SIZE)
+		{
+			_iconSize = MIN_ICON_SIZE;
+		}
+		_iconScale = a_scale;
+		if (!_iconScale)
+		{
+			_iconScale = 1.0;
 		}
 		loadedClips = new Array();
 		loadedIcons = new Array();
@@ -91,7 +110,7 @@ class AHZIconContainer
 		{
 			if (loadedIcons.length || !GetImageSub(a_imageName))   // Already exists
 			{
-				_imageSubs.push({ subString:"[" + a_imageName + "]", image:loadedImage, width:ICON_WIDTH, height:ICON_WIDTH, id:"id" + a_imageName });
+				_imageSubs.push({ subString:"[" + a_imageName + "]", image:loadedImage, width:(_iconSize * _iconScale), height:20, id:"id" + a_imageName });
 			}	
 		}
 				
@@ -116,10 +135,10 @@ class AHZIconContainer
 				loadedIcons[loadedIconNames.length].gotoAndStop(a_imageName);
 				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("GOTO: " + a_imageName);
 				loadedIcons[loadedIconNames.length]._quality = "BEST";
-				loadedIcons[loadedIconNames.length]._height = ICON_HEIGHT;
-				loadedIcons[loadedIconNames.length]._width = ICON_WIDTH;
+				loadedIcons[loadedIconNames.length]._height = (_iconSize * _iconScale);
+				loadedIcons[loadedIconNames.length]._width = (_iconSize * _iconScale);
 				loadedIcons[loadedIconNames.length]._x = (currentLineMetrics.x + currentLineMetrics.width) + ICON_XOFFSET + _tf._x ;
-				loadedIcons[loadedIconNames.length]._y = (_tf._y + _tf._height) - currentLineMetrics.height + ICON_YOFFSET;
+				loadedIcons[loadedIconNames.length]._y = (_tf._y + _tf._height) - (_iconSize * _iconScale) + ICON_YOFFSET;
 				loadedIcons._alpha = _tf._alpha;
 				
 				// preposition the previously added icons
@@ -140,8 +159,14 @@ class AHZIconContainer
 		this._alpha = 0;
 	}
 	
-	public function Reset():Void
+	public function Reset(a_size:Number):Void
 	{
+		_iconSize = a_size;
+		if (_iconSize < MIN_ICON_SIZE)
+		{
+			_iconSize = MIN_ICON_SIZE;
+		}		
+		
 		// re-ackquire the text field forms
 		_textFormat = _tf.getTextFormat();
 		
@@ -206,7 +231,7 @@ class AHZIconContainer
 			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("old loadedIcons["+i+"]._x: " + loadedIcons[i]._x, false);
 			loadedIcons[i]._x = loadedIcons[i]._x - (xDelta);
 			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("new loadedIcons["+i+"]._x: " + loadedIcons[i]._x, false);
-			loadedIcons[i]._y = (_tf._y + _tf._height) - newLineMetrics.height + ICON_YOFFSET;
+			loadedIcons[i]._y = (_tf._y + _tf._height) - (_iconSize * _iconScale) + ICON_YOFFSET;
 		}		
 		_lastX = (newLineMetrics.x + _tf._x);
 	}

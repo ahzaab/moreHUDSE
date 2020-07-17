@@ -39,6 +39,7 @@ GlobalVariable Property AHZShowEnemyStaminaMeter Auto
 GlobalVariable Property AHZShowEnemyMagickaStats Auto
 GlobalVariable Property AHZShowEnemyStaminaStats Auto
 GlobalVariable Property AHZShowEnemyHealthStats Auto
+GlobalVariable Property AHZIconSize Auto
 
 ; Keeps track of the revision
 int Property iVersion Auto
@@ -50,6 +51,7 @@ int Property I_THIS_VERSION_MAJOR = 3 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 7 autoReadOnly
 int Property I_THIS_VERSION_BUILD = 9 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
+float Property DEFAULT_ICON_SIZE = 20 autoReadOnly
 
 ; SKSE oldest supported release index
 int I_MIN_SKSE_RELEASE_IDX = 53
@@ -138,7 +140,7 @@ function UpdateSettings(bool disable)
         intargs_200[24] = 0
         intargs_200[25] = 0 
 	    intargs_200[26] = 0 
-        intargs_200[27] = 0             
+        intargs_200[27] = 0        
     else
         intargs_200[0] = AHZShowIngredientWidget.GetValueInt()
         intargs_200[1] = AHZShowEffectsWidget.GetValueInt()
@@ -167,7 +169,7 @@ function UpdateSettings(bool disable)
         intargs_200[24] = AHZShowEnemyHealthStats.GetValueInt()  
         intargs_200[25] = AHZShowEnemyStaminaStats.GetValueInt()  
 	    intargs_200[26] = AHZShowEnemyMagickaStats.GetValueInt()  
-        intargs_200[27] = AHZShowInventoryCountWithZero.GetValueInt()                    
+        intargs_200[27] = AHZShowInventoryCountWithZero.GetValueInt()                       
     endif
 
     argsF[0] = AHZBottomWidgetXPercent.GetValue()
@@ -193,6 +195,9 @@ function UpdateSettings(bool disable)
 
     ; Show the widgets with the passed parameters
     UI.InvokeIntA("HUD Menu", WidgetRoot + ".updateSettings", intargs_200)
+
+    argF = AHZIconSize.GetValue()
+    UI.InvokeFloat("HUD Menu", WidgetRoot + ".setIconSize", argF)
 
     ; Register for key press event for toggling
     if (AHZHotKey.GetValueInt() == -1)

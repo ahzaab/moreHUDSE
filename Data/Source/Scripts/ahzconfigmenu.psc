@@ -41,6 +41,7 @@ GlobalVariable Property AHZShowEnemyMagickaStats Auto
 GlobalVariable Property AHZShowEnemyStaminaStats Auto
 GlobalVariable Property AHZShowEnemyHealthStats Auto
 GlobalVariable Property AHZShowInventoryCountWithZero Auto
+GlobalVariable Property AHZIconSize Auto
 
 Quest Property AHZMainQuestREF  Auto  
 
@@ -90,8 +91,9 @@ int selectedConfig = 0
 ; 12 - Misspelling
 ; 13 - Added seconds translation
 ; 14 - Added Show Player Data Widget Always option
+; 14 - Added Icon Size
 int function GetVersion()
-    return 13
+    return 15
 endFunction
 
 
@@ -128,6 +130,7 @@ int         _toggle23OID_B              ; AHZShowEnemyHealthStats
 int         _activationModeOID_M        ; Activate Mode Drop Down
 int         _activationKeyMapOID_K      ; Activation Key Binding
 int         _sliderDisplayDelay_OID_S   ; Display Delay
+int         _sliderIconSize_OID_S       ; Icon Size
 
 ; Side Widget Settings ------------------
 int         _sliderSideX_OID_S
@@ -249,6 +252,8 @@ event OnPageReset(string a_page)
         _toggle10OID_B          = AddToggleOption("$mHUD_ShowBookSkill", AHZShowBookSkill.GetValueInt())
         _toggle13OID_B          = AddToggleOption("$mHUD_ShowValueToWeightRatio", AHZShowVW.GetValueInt())
         _toggle15OID_B          = AddToggleOption("$mHUD_ShowKnownEnchantment", AHZShowEnchantmentKnown.GetValueInt())
+        _sliderIconSize_OID_S   = AddSliderOption("$mHUD_IconSize", AHZIconSize.GetValue(), "{0}")
+
         AddEmptyOption()
 
         SetCursorPosition(1)
@@ -616,6 +621,13 @@ event OnOptionSliderOpen(int a_option)
         SetSliderDialogInterval(0.01)
     endif   
 
+    if (a_option == _sliderIconSize_OID_S)
+        SetSliderDialogStartValue(AHZIconSize.GetValue())
+        SetSliderDialogDefaultValue(20)
+        SetSliderDialogRange(16, 64)
+        SetSliderDialogInterval(1)
+    endif  
+
 endEvent
 
 ; @implements SKI_ConfigBase
@@ -680,6 +692,11 @@ event OnOptionSliderAccept(int a_option, float a_value)
         AHZDisplayDelay.SetValue(a_value)
         SetSliderOptionValue(a_option, a_value, "{2} S")
     endif   
+
+    if (a_option == _sliderIconSize_OID_S)
+        AHZIconSize.SetValue(a_value)
+        SetSliderOptionValue(a_option, a_value, "{0}")
+    endif  
 
 endEvent
 
@@ -930,6 +947,10 @@ event OnOptionHighlight(int a_option)
     if (a_option == _sliderDisplayDelay_OID_S)
         SetInfoText("$mHUD_DisplayDelayDescription")
     endif   
+
+    if (a_option == _sliderIconSize_OID_S)
+        SetInfoText("$mHUD_IconSizeDescription")
+    endif 
 
     if (a_option == _toggle19OID_B)
         SetInfoText("$mHUD_AHZShowEnemyMagickaMeterInfo")

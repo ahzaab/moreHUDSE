@@ -70,9 +70,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var showEnemyStaminaStats:Boolean;
 	private var showEnemyMagickaStats:Boolean;
 	private var showEnemyHealthStats:Boolean;
+	private var iconSize:Number;
 	
 	var PLAYER_CARD_WIDTH:Number = 651.0;
 	var EXPORTED_PREFIX:String = "exported/"	
+	var DEFAULT_ICON_SIZE:Number=20;	
 		
 	// private variables
 	private var savedRolloverInfoText:String;
@@ -288,7 +290,10 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] = true;
 			
 		if (!_config[AHZDefines.CFG_ENEMY_METER_HEIGHT])
-			_config[AHZDefines.CFG_ENEMY_METER_HEIGHT] = ENEMY_METER_HEIGHT;				
+			_config[AHZDefines.CFG_ENEMY_METER_HEIGHT] = ENEMY_METER_HEIGHT;	
+			
+		if (!_config[AHZDefines.CFG_ICONS_SCALE])
+			_config[AHZDefines.CFG_ICONS_SCALE] = 1.0;			
 	}
 	
 	function initializeClips():Void {	
@@ -337,14 +342,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function iconsLoaded(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
-		IconContainer.Reset();
+		IconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
 	public function iconsLoadedError(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
-		IconContainer.Reset();
+		IconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
@@ -354,7 +359,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (_config[AHZDefines.CFG_ICONS_PATH])
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
-			IconContainer.Load(TopRolloverText, AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), this, "iconsLoaded", "iconsLoadedError");
+			IconContainer.Load(TopRolloverText, AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), this, "iconsLoaded", "iconsLoadedError", DEFAULT_ICON_SIZE, _config[AHZDefines.CFG_ICONS_SCALE]);
 		}
 		else
 		{
@@ -775,7 +780,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var validTarget:Boolean = false;
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
-		IconContainer.Reset();
+		IconContainer.Reset(iconSize);
 		IconContainer._alpha = TopRolloverText._alpha;
 		
 		// Always reset the delay timer to reset when the cross hair changes
@@ -1355,6 +1360,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	}
 
 	// @Papyrus
+	public function setIconSize(a_size:Number):Void
+	{
+		iconSize = a_size;
+	}
+	
 	public function setBottomWidgetScale(percent:Number):Void
 	{
 		AHZBottomBar_mc._yscale  = (percent / 1.0);
