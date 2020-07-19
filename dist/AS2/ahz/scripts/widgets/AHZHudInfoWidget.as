@@ -359,7 +359,16 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (_config[AHZDefines.CFG_ICONS_PATH])
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
-			IconContainer.Load(TopRolloverText, AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), this, "iconsLoaded", "iconsLoadedError", DEFAULT_ICON_SIZE, _config[AHZDefines.CFG_ICONS_SCALE]);
+			IconContainer.Load(
+						TopRolloverText, 
+						AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), 
+						this, 
+						"iconsLoaded", 
+						"iconsLoadedError", 
+						DEFAULT_ICON_SIZE, 
+						_config[AHZDefines.CFG_ICONS_SCALE],
+						_config[AHZDefines.CFG_ICONS_SPACING],
+						_config[AHZDefines.CFG_ICONS_YOFFSET]);
 		}
 		else
 		{
@@ -466,7 +475,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			return;
 		}
-		IconContainer.appendImage("ahzKnown");
+		//IconContainer.appendImage("ahzKnown");
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmDisp"))
 		{
 			IconContainer.appendImage("dbmDisp");

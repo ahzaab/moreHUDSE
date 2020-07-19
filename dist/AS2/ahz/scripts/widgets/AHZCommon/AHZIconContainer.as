@@ -6,11 +6,8 @@ class AHZIconContainer
 {
   /* CONSTANTS */
   	private static var MAX_CONCURRENT_ICONS:Number = 16;
-	//private static var ICON_WIDTH:Number = 20;
-	//private static var ICON_HEIGHT:Number = 20;
 	private static var MIN_ICON_SIZE:Number = 16;
-	private static var ICON_XOFFSET:Number = 5;
-	private static var TEXT_FIELD_METRIC_BOTTOM:Number = 0;
+	private static var ICON_YOFFSET:Number = 1;
 
 	/* Static */
 	private static var eventObject: Object;
@@ -29,6 +26,8 @@ class AHZIconContainer
 	private var _textFormat:TextFormat;
 	private var _iconSize:Number;
 	private var _iconScale:Number;
+	private var _iconSpacing:Number;
+	private var _iconYOffset:Number;
 	
   	public function AHZIconContainer()
 	{	
@@ -41,7 +40,9 @@ class AHZIconContainer
 						 a_loadedCallBack: String, 
 						 a_errorCallBack: String,
 						 a_size:Number,
-						 a_scale:Number):Void
+						 a_scale:Number,
+						 a_spacing:Number,
+						 a_yOffset:Number):Void
 	{		
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("~ LOAD ~ '" + s_filePath + "'" , false);
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ LOAD ~ '" + s_filePath + "'" );
@@ -58,6 +59,19 @@ class AHZIconContainer
 		{
 			_iconScale = 1.0;
 		}
+		
+		_iconSpacing = a_spacing;
+		if (!_iconSpacing)
+		{
+			_iconSpacing = 0;
+		}
+		
+		_iconYOffset = a_yOffset;
+		if (_iconYOffset == undefined || _iconYOffset == null)
+		{
+			_iconYOffset = ICON_YOFFSET;
+		}
+		
 		loadedClips = new Array();
 		loadedIcons = new Array();
 		loadedIconNames = new Array();
@@ -79,17 +93,6 @@ class AHZIconContainer
 			iconLoader.addListener(this);
 			iconLoader.loadClip(s_filePath, clip);
 		}
-	}
-
-	private function getTextFieldCenter():Number
-	{
-		var bottom:Number = (_tf._y + _tf._height);
-		var lineMetrics = _tf.getLineMetrics(1);
-		var unknownSpaceBetweenBottomAndMetricsBottom = TEXT_FIELD_METRIC_BOTTOM;
-		
-		var textCenter: Number = bottom - (lineMetrics.height / 2);
-		
-		return textCenter - unknownSpaceBetweenBottomAndMetricsBottom;
 	}
 
 	public function appendImage(a_imageName:String):Void
@@ -126,19 +129,19 @@ class AHZIconContainer
 		}
 				
 		if (_imageSubs.length)
-		{			
-			// get the line metrics before addeding the next image
-			var currentLineMetrics = _tf.getLineMetrics(1);
+		{					
 			if (_tf.html) 
 			{
-				_tf.appendHtml(getDefaultHtml("[" + a_imageName + "]"));
+				_tf.appendHtml(getDefaultHtml(getSpaces() + "[" + a_imageName + "]"));
 			}
 			else
 			{
-				_tf.text += "[" + a_imageName + "]";
+				_tf.text += getSpaces() + "[" + a_imageName + "]";
 			}			
 			
 			_tf.setImageSubstitutions(_imageSubs);
+			
+			var metricsAfterSpaces = _tf.getLineMetrics(1);	
 			
 			if (loadedIcons.length){	
 				
@@ -148,10 +151,9 @@ class AHZIconContainer
 				loadedIcons[loadedIconNames.length]._quality = "BEST";
 				loadedIcons[loadedIconNames.length]._height = (_iconSize * _iconScale);
 				loadedIcons[loadedIconNames.length]._width = (_iconSize * _iconScale);
-				loadedIcons[loadedIconNames.length]._x = _tf._x + ((currentLineMetrics.x + (currentLineMetrics.width - (_iconSize * _iconScale))) + ((_iconSize * _iconScale) / 2)); 	
-				loadedIcons[loadedIconNames.length]._x += ICON_XOFFSET;
+				loadedIcons[loadedIconNames.length]._x = _tf._x + (metricsAfterSpaces.x + metricsAfterSpaces.width) - (_iconSize * _iconScale); 	
 				loadedIcons[loadedIconNames.length]._y = getTextFieldCenter() - ((_iconSize * _iconScale) / 2);
-				
+				loadedIcons[loadedIconNames.length]._y += _iconYOffset;
 				
 				loadedIcons._alpha = _tf._alpha;
 				
@@ -244,6 +246,7 @@ class AHZIconContainer
 		{
 			loadedIcons[i]._x = loadedIcons[i]._x - (xDelta);
 			loadedIcons[i]._y = getTextFieldCenter() - ((_iconSize * _iconScale) / 2);
+			loadedIcons[i]._y += _iconYOffset;
 		}		
 		_lastX = (newLineMetrics.x);
 	}
@@ -288,5 +291,29 @@ class AHZIconContainer
 		return returnValue;
 	}
 	
+	private function getTextFieldCenter():Number
+	{
+		var bottom:Number = (_tf._y + _tf._height);
+		var lineMetrics = _tf.getLineMetrics(1);
+		var textCenter: Number = bottom - (lineMetrics.height / 2);
+		return textCenter;
+	}
 	
+	private function getSpaces():String
+	{
+		var spaces:String = "";
+		var oneSpace:String = " ";
+		
+		if (_tf.html)
+		{
+			oneSpace = "&nbsp;";
+		}
+		
+		for (var i:Number=0; i < _iconSpacing; i++)
+		{
+			spaces += oneSpace;
+		}
+		
+		return spaces;
+	}	
 }
