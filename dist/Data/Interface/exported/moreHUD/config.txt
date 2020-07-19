@@ -42,3 +42,4 @@ fNumbersAlpha=100
 
 [Icons]
 sSWFPath='moreHUD/baseIcons.swf'
+fScale=1.0

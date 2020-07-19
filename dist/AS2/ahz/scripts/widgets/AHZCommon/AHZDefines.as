@@ -35,7 +35,7 @@
 	static var CFG_ENEMY_METER_HEIGHT: String = 'fheight:enemymeter';
 	
 	static var CFG_ICONS_PATH:String = 'sswfpath:icons';
-	static var CFG_ICONS_SCALE:String = 'scale:icons';
+	static var CFG_ICONS_SCALE:String = 'fscale:icons';
 	
 	/* Player Info Costants */
 	static var ICT_NONE: Number = 0;
