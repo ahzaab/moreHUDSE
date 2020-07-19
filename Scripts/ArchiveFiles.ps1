@@ -1,6 +1,16 @@
 ﻿$sourcePath = "$($Env:Skyrim64Path)\Data"
-$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\Data"
-$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\AS2"
+$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\dist\Data"
+$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\dist\AS2"
+
+if (!$(Test-Path "$destinationDataPath"))
+{
+    New-Item -ItemType Directory "$destinationDataPath"
+}
+
+if (!$(Test-Path "$destinationAS2Path"))
+{
+    New-Item -ItemType Directory "$destinationAS2Path"
+}
 
 if (!$(Test-Path "$destinationDataPath\Interface"))
 {
