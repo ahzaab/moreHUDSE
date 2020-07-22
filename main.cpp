@@ -38,7 +38,9 @@
 #include "AHZUtilities.h"
 #include "AHZVanillaFormTable.h"
 #include "AHZExternalFormTable.h"
+#include "AHZPapyrusmoreHUD.h"
 #include "xbyak/xbyak.h"
+#include "skse64/HashUtil.h"
 
 using namespace std;
 
@@ -50,9 +52,9 @@ PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
 SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
+SKSEPapyrusInterface * g_sksePapyrus = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (30709)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -172,8 +174,7 @@ class SKSEScaleform_GetIsValidTarget : public GFxFunctionHandler
 public:
    virtual void	Invoke(Args * args)
    {
-      CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
-
+	   CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
    }
 };
 
@@ -203,6 +204,85 @@ public:
    }
 };
 
+class SKSEScaleform_IsTargetInFormList : public GFxFunctionHandler
+{
+public:
+	virtual void	Invoke(Args * args)
+	{
+		if (args &&
+			args->args &&
+			args->numArgs > 0 &&
+			args->args[0].GetType() == GFxValue::kType_String)
+		{
+
+			TESObjectREFR * pTargetReference = CAHZPlayerInfo::GetTargetRef();
+			// If the target is not valid then say false
+			if (!pTargetReference)
+			{
+				args->result->SetBool(false);
+				return;
+			}
+
+			auto keyName = string(args->args[0].GetString());
+
+			args->result->SetBool(papyrusMoreHud::HasForm(keyName, pTargetReference->baseForm->formID));
+			return;
+		}
+
+		args->result->SetBool(false);
+		return;
+	}
+};
+
+class SKSEScaleform_IsTargetInIconList : public GFxFunctionHandler
+{
+public:
+	virtual void	Invoke(Args * args)
+	{
+		if (args && 
+			args->args && 
+			args->numArgs > 0 && 
+			args->args[0].GetType() == GFxValue::kType_String)
+		{
+			auto iconName = string(args->args[0].GetString());
+
+			TESObjectREFR * pTargetReference = CAHZPlayerInfo::GetTargetRef();
+			// If the target is not valid then say false
+			if (!pTargetReference)
+			{
+				args->result->SetBool(false);
+				return;
+			}
+
+			const char * name = NULL;
+			TESFullName* pFullName = DYNAMIC_CAST(pTargetReference->baseForm, TESForm, TESFullName);
+			if (pFullName)
+				name = pFullName->name.data;
+
+			// Can't get the same for the crc
+			if (!name)
+			{
+				args->result->SetBool(false);
+				return;
+			}
+
+			auto hash = (SInt32)HashUtil::CRC32(name, pTargetReference->baseForm->formID & 0x00FFFFFF);
+
+			auto resultIconName = string(papyrusMoreHud::GetIconName(hash));
+
+			if (!resultIconName.length())
+			{
+				args->result->SetBool(false);
+				return;
+			}
+
+			args->result->SetBool(resultIconName == iconName);
+			return;
+		}
+		args->result->SetBool(false);
+	}
+};
+
 bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 {
    RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
@@ -218,6 +298,9 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
    RegisterFunction <SKSEScaleform_GetTargetWarmthRating>(root, view, "GetTargetWarmthRating");
    RegisterFunction <SKSEScaleform_GetEnemyInformation>(root, view, "GetEnemyInformation");
    RegisterFunction <SKSEScaleform_IsAKnownEnchantedItem>(root, view, "IsAKnownEnchantedItem");
+   RegisterFunction <SKSEScaleform_IsTargetInFormList>(root, view, "IsTargetInFormList");
+   RegisterFunction <SKSEScaleform_IsTargetInIconList>(root, view, "IsTargetInIconList");
+
    
 
    RegisterFunction <SKSEScaleform_AHZLog>(root, view, "AHZLog");
@@ -324,6 +407,13 @@ extern "C"
          return false;
       }
 
+	  g_sksePapyrus = (SKSEPapyrusInterface *)skse->QueryInterface(kInterface_Papyrus);
+	  if (!g_skseMessaging)
+	  {
+		  _ERROR("couldn't get Papyrus interface");
+		  return false;
+	  }
+
       // supported runtime version
       return true;
    }
@@ -357,6 +447,9 @@ extern "C"
          _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
          return false;
       }
+
+	  // Register Papyrus functions
+	  g_sksePapyrus->Register(papyrusMoreHud::RegisterFuncs);
 
       AHZInstallEnemyHealthUpdateHook();
 
