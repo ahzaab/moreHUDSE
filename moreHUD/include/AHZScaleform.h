@@ -70,7 +70,7 @@ private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
       const std::string& replace);
 
-   static void RegisterString(RE::GFxValue* dst, RE::GFxMovieView* view, const char* name, const char* str);
+   static void RegisterString(RE::GFxValue* dst, const char* name, const char* str);
    static void RegisterNumber(RE::GFxValue* dst, const char* name, double value);
    static void RegisterBoolean(RE::GFxValue* dst, const char* name, bool value);
    static void SetResultString(RE::GFxFunctionHandler::Params& args, const char* str);

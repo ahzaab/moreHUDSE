@@ -13,5 +13,13 @@
 using namespace std::literals;
 namespace logger = SKSE::log;
 
+template <typename T1, typename T2>
+inline T2* dyna_cast(T1* base)
+{
+    auto asForm = static_cast<T1*>(base);
+    auto ret = (asForm)->As<targetType>();
+    return ret;
+}
+#define DYNAMIC_CAST(base, srcType, targetType) (dyna_cast<srcType, targetType>(base))
 
-#define DYNAMIC_CAST(base, srcType, targetType)((base)->As<targetType>())
+

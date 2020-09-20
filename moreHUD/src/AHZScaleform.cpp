@@ -21,6 +21,7 @@
 #include "AHZScaleformHook.h"
 #include "AHZFormLookup.h"
 #include "AHZUtilities.h"
+#include "ActorValueList.h"
 
 static std::map<uint8_t, string> m_soulMap;
 
@@ -1132,7 +1133,7 @@ RE::AlchemyItem* CAHZScaleform::GetAlchemyItem(RE::TESForm *thisObject)
                     return nullptr;
                 } else if (itemform->formType == RE::FormType::AlchemyItem)
                 {
-                    auto alchmyItem = DYNAMIC_CAST(itemform, TESForm, RE::AlchemyItem);
+                    auto alchmyItem = DYNAMIC_CAST(itemform, RE::TESForm, RE::AlchemyItem);
                     return alchmyItem;
                 }
             } else if (form->formType == RE::FormType::FormList)
@@ -1188,12 +1189,12 @@ RE::AlchemyItem* CAHZScaleform::GetAlchemyItem(RE::TESForm *thisObject)
                     return nullptr;
                 } else if (itemform->formType == RE::FormType::AlchemyItem)
                 {
-                    auto alchmyItem = DYNAMIC_CAST(itemform, TESForm, RE::AlchemyItem);
+                    auto alchmyItem = DYNAMIC_CAST(itemform, RE::TESForm, RE::AlchemyItem);
                     return alchmyItem;
                 }
             } else if (form->formType == RE::FormType::FormList)
             {
-                auto lvli = DYNAMIC_CAST(form, TESForm, RE::BGSListForm);
+                auto lvli = DYNAMIC_CAST(form, RE::TESForm, RE::BGSListForm);
 
                 if (!lvli) {
                     return nullptr;
@@ -1377,7 +1378,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params & arg
 	string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
 	if (soulType && soulName.length())
 	{
-		RegisterString(&enemyObj, args.movie, "soul", soulName.c_str());
+		RegisterString(&enemyObj, "soul", soulName.c_str());
 	}
 	RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
 	RegisterNumber(&enemyObj, "health", ceil(actorData.health));
@@ -1410,59 +1411,50 @@ string CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR *theObject)
    if (!theObject->GetBaseObject())
 	   return desc;
 
-   if (theObject->GetBaseObject()->GetFormType() != kFormType_Armor)
+   if (theObject->GetBaseObject()->GetFormType() != RE::FormType::Armor)
       return desc;
 
-   TESObjectARMO *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectARMO);
+   auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESObjectARMO);
    if (!item)
       return desc;
 
-   ActorValueList * avList = ActorValueList::GetSingleton();
-   if (avList && item->bipedObject.data.weightClass <= 1)
+   auto avList = SKSE::ActorValueList::GetSingleton();
+   if (item->IsLightArmor() || item->IsHeavyArmor())
    {
       // Utilize the AV value to get the localized name for "Light Armor"
-      if (item->bipedObject.data.weightClass == 0)
+      if (item->IsLightArmor())
       {
-         ActorValueInfo * info = avList->GetActorValue(12);
+         auto info = avList->GetActorValue(RE::ActorValue::kLightArmor);
          if (info)
          {
-            TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
-            if (fname && fname->name.data)
-            {
-               desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-               desc.append(fname->name.data);
-               desc.append("<\\FONT>");
-            }
+            desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+            desc.append(info->GetFullName());
+            desc.append("<\\FONT>");
          }
       }
 
       // Utilize the AV value to get the localized name for "Heavy Armor"
-      else if (item->bipedObject.data.weightClass == 1)
+      else if (item->IsHeavyArmor())
       {
-         ActorValueInfo * info = avList->GetActorValue(11);
-         if (info)
-         {
-            TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
-            if (fname && fname->name.data)
-            {
-               desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
-               desc.append(fname->name.data);
-               desc.append("<\\FONT>");
-            }
-         }
+          auto info = avList->GetActorValue(RE::ActorValue::kHeavyArmor);
+          if (info) {
+              desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+              desc.append(info->GetFullName());
+              desc.append("<\\FONT>");
+          }
       }
    }
    return desc;
 };
 
-string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated)
+string CAHZScaleform::GetValueToWeight(RE::TESObjectREFR *theObject, const char * stringFromHUD, const char * vmTranslated)
 {
 	string desc;
 
 	if (!theObject)
 		return desc;
 
-	if (!theObject->baseForm)
+	if (!theObject->GetBaseObject())
 		return desc;
 
 	if (!stringFromHUD)
@@ -1538,12 +1530,12 @@ string CAHZScaleform::GetValueToWeight(TESObjectREFR *theObject, const char * st
 	return desc;
 };
 
-string CAHZScaleform::GetBookSkill(TESObjectREFR *theObject)
+string CAHZScaleform::GetBookSkill(RE::TESObjectREFR *theObject)
 {
    string desc;
-   if (theObject->baseForm->GetFormType() == kFormType_Book)
+   if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Book)
    {
-      TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+       auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESObjectBOOK);
 
       if (!item)
          return desc;
@@ -2047,110 +2039,136 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    args->args[0].SetMember("targetObj", &obj);
 };
 
-void CAHZScaleform::BuildIngredientObject(IngredientItem* ingredient, GFxFunctionHandler::Args *args)
+bool CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index)
 {
-   if (!args)
-   {
-      return;
-   }
+    bool isKnown = false;
+
+    enum  // type - these are flags
+    {
+        kType_NoEffect = 0,
+        kType_FirstEffect = 1 << 0,
+        kType_SecondEffect = 1 << 1,
+        kType_ThirdEffect = 1 << 2,
+        kType_FourthEffect = 1 << 3
+    };
+
+
+        return false;
+    switch (index) {
+    case 0:
+        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_FirstEffect) == kType_FirstEffect);
+        break;
+    case 1:
+        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_SecondEffect) == kType_SecondEffect);
+        break;
+    case 2:
+        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_ThirdEffect) == kType_ThirdEffect);
+        break;
+    case 3:
+        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_FourthEffect) == kType_FourthEffect);
+        break;
+    default:
+        break;
+    }
+    return isKnown;
+}
+
+void CAHZScaleform::BuildIngredientObject(RE::IngredientItem* ingredient, RE::GFxFunctionHandler::Params &args)
+{
+
 
    // If no ingredient, then we are done here
    if (!ingredient)
    {
-      args->args[0].DeleteMember("ingredientObj");
+      args.args[0].DeleteMember("ingredientObj");
       return;
    }
 
    string strings[4];
 
    // Not all ingredients have 4 effects
-   UInt32 effectsCount = ingredient->effectItemList.count;
+   uint32_t effectsCount = ingredient->effects.size();
 
    for (int i = 0; i < 4; i++)
    {
       strings[i].clear();
       if (GetIsNthEffectKnown(ingredient, i))
       {
-         MagicItem::EffectItem* pEI = NULL;
-         ingredient->effectItemList.GetNthItem(i, pEI);
+         //MagicItem::EffectItem* pEI = NULL;
+         auto pEI = ingredient->effects[i];
          if (pEI)
          {
-            TESFullName* pFullName = DYNAMIC_CAST(pEI->mgef, TESForm, TESFullName);
+            auto pFullName = DYNAMIC_CAST(pEI->baseEffect, RE::TESForm, RE::TESFullName);
             if (pFullName)
             {
-               strings[i].append(pFullName->name.data); 
+               strings[i].append(pFullName->GetFullName()); 
             }
          }
       }
    }
-   GFxValue obj2;
-   args->movie->CreateObject(&obj2);
+   RE::GFxValue obj2;
+   args.movie->CreateObject(&obj2);
 
    if (effectsCount >= 1)
-      RegisterString(&obj2, args->movie, "effect1", strings[0].c_str());
+      RegisterString(&obj2, "effect1", strings[0].c_str());
 
    if (effectsCount >= 2)
-      RegisterString(&obj2, args->movie, "effect2", strings[1].c_str());
+      RegisterString(&obj2, "effect2", strings[1].c_str());
 
    if (effectsCount >= 3)
-      RegisterString(&obj2, args->movie, "effect3", strings[2].c_str());
+      RegisterString(&obj2, "effect3", strings[2].c_str());
 
    if (effectsCount >= 4)
-      RegisterString(&obj2, args->movie, "effect4", strings[3].c_str());
-   args->args[0].SetMember("ingredientObj", &obj2);
+      RegisterString(&obj2, "effect4", strings[3].c_str());
+   args.args[0].SetMember("ingredientObj", &obj2);
 };
 
-void CAHZScaleform::BuildInventoryObject(TESForm* form, GFxFunctionHandler::Args *args)
+void CAHZScaleform::BuildInventoryObject(RE::TESForm* form, RE::GFxFunctionHandler::Params &args)
 {
-    if (!args)
-    {
-        return;
-    }
-
     // Used to store the name
     string name;
 
     // Used to store the count of the item
-    UInt32 itemCount;
+    uint32_t itemCount;
 
-    TESObjectREFR * reference = AHZGetReference(form);
+    auto reference = AHZGetReference(form);
 
     if (reference)
     {
         // Get the number of this in the inventory
-        itemCount = CAHZPlayerInfo::GetItemAmount(reference->baseForm->formID);
+        itemCount = CAHZPlayerInfo::GetItemAmount(reference->GetBaseObject()->formID);
         name = CAHZScaleform::GetTargetName(reference);
     }
     else if (form)
     {
         // Get the number of this in the inventory
         itemCount = CAHZPlayerInfo::GetItemAmount(form->formID);
-        TESFullName* pFullName = DYNAMIC_CAST(form, TESForm, TESFullName);
+        auto pFullName = DYNAMIC_CAST(form, RE::TESForm, RE::TESFullName);
         if (pFullName)
         {
-            name.append(pFullName->name.data);
+            name.append(pFullName->GetFullName());
         }
     }
 
     // If the name contains a string
     if (name.length())
     {
-        GFxValue obj;
-        args->movie->CreateObject(&obj);
+        RE::GFxValue obj;
+        args.movie->CreateObject(&obj);
 
-        RegisterString(&obj, args->movie, "inventoryName", name.c_str());
+        RegisterString(&obj, "inventoryName", name.c_str());
         RegisterNumber(&obj, "inventoryCount", itemCount);
 
         // Add the object to the scaleform function
-        args->args[0].SetMember("inventoryObj", &obj);
+        args.args[0].SetMember("inventoryObj", &obj);
     }
     else
     {
-        args->args[0].DeleteMember("inventoryObj");
+        args.args[0].DeleteMember("inventoryObj");
     }
 }
 
-void CAHZScaleform::RegisterString(RE::GFxValue * dst, RE::GFxMovieView * view, const char * name, const char * str)
+void CAHZScaleform::RegisterString(RE::GFxValue * dst, const char * name, const char * str)
 {
     RE::GFxValue fxValue;
     fxValue.SetString(str);
@@ -2178,7 +2196,7 @@ void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxF
     if (!pTargetReference)
     {
         // return false, indicating that the target object is not valid for acquiring data
-        args.result->SetBool(false);
+        args.retVal->SetBoolean(false);
         args.args[0].DeleteMember("dataObj");
         return;
     }
@@ -2189,7 +2207,7 @@ void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxF
     auto targetForm = AHZGetForm(pTargetReference);
     RE::SpellItem spellItem = nullptr;
 
-    if (pTargetReference->baseForm && pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)
+    if (pTargetReference->GetBaseObject() && pTargetReference->GetBaseObject()->GetFormType() == kFormType_Activator && targetForm)
     {
         isActivator = true;
     }
