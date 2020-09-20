@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Patches.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Papyrus.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Events.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LevelUpMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scaleform.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatsMenuEx.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BirthSignMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\UIComponent.cpp">
+      <Filter>src\CLIK\GFx\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\Object.cpp">
+      <Filter>src\CLIK</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\MovieClip.cpp">
+      <Filter>src\CLIK</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\CoreList.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\ScrollingList.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\Button.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\TextField.cpp">
+      <Filter>src\CLIK</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\Array.cpp">
+      <Filter>src\CLIK</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\DropdownMenu.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\Slider.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpellmakingMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLIK\TextInput.cpp">
+      <Filter>src\CLIK\GFx\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MeterMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PCH.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TweenMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatsMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Inventory.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZConsole.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\version.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Patches.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Papyrus.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Events.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LevelUpMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scaleform.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StatsMenuEx.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BirthSignMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\UIComponent.h">
+      <Filter>include\CLIK\GFx\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\Object.h">
+      <Filter>include\CLIK</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\MovieClip.h">
+      <Filter>include\CLIK</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\CoreList.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\ScrollingList.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\Array.h">
+      <Filter>include\CLIK</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\Button.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\TextField.h">
+      <Filter>include\CLIK</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\DropdownMenu.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\Slider.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SpellmakingMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLIK\TextInput.h">
+      <Filter>include\CLIK\GFx\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MeterMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="include\PCH.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StatsMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TweenMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HudMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Inventory.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZConsole.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Offsets.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="exports.def" />
+    <None Include=".clang-format" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{5b4753d0-a12a-45de-a25f-3da9c119def2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{238172b9-863c-48b4-aabe-a4f4950d1181}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Scaleform">
+      <UniqueIdentifier>{3fe3a4c3-2fc2-47ba-80f2-a105d3e5e7a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scaleform">
+      <UniqueIdentifier>{af1484ec-a485-4a67-bdbc-f84aa954d608}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CLIK">
+      <UniqueIdentifier>{3e1e1279-e228-4e3b-b24b-4d897426728f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\CLIK">
+      <UniqueIdentifier>{c4f63cd0-e1e7-447f-955f-204452335695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CLIK\GFx">
+      <UniqueIdentifier>{ddc91199-1592-455a-b56a-7dee6b23e624}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\CLIK\GFx">
+      <UniqueIdentifier>{ceca774a-63b6-4410-859f-0c6c037db510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CLIK\GFx\Core">
+      <UniqueIdentifier>{e65c6429-aca0-4b0a-a13f-4589772204bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\CLIK\GFx\Core">
+      <UniqueIdentifier>{271a28b9-6fe0-411b-b066-099211d69e8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CLIK\GFx\Controls">
+      <UniqueIdentifier>{064122a0-dde9-4135-ada4-fc62fcaf048d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\CLIK\GFx\Controls">
+      <UniqueIdentifier>{e52b88c7-6992-49c8-80a3-e5983969fa03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

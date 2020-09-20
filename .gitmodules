@@ -1,0 +1,4 @@
+[submodule "CommonLibSSE"]
+	path = CommonLibSSE
+	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
+	branch = master
