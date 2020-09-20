@@ -17,8 +17,7 @@ public:
       // Foreach mhud file, load in the lookup table entries
       vector<string>::iterator p;
       for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
-         _MESSAGE("Loading ACTI Forms from '%s'", (*p).c_str());
-         gLog.Indent();
+         logger::info("Loading ACTI Forms from '{}'", (*p).c_str());
          string fullPath = skyrimDataPath + *p;
 
          // Get the number of entries
@@ -37,7 +36,8 @@ public:
             GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
             if (strlen(returnValue))
             {
-               AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(string(returnValue));
+                std::string  returnVal = returnValue;
+                AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(returnVal);
 
                if (!lutObject.IsEmpty())
                {
@@ -49,8 +49,6 @@ public:
                }
             }
          }
-
-         gLog.Outdent();
       }
    };
 
@@ -60,8 +58,7 @@ public:
 
       vector<string>::iterator p;
       for (p = mHudFiles.begin(); p != mHudFiles.end(); p++) {
-         _MESSAGE("Loading Script Variables from '%s'", (*p).c_str());
-         gLog.Indent();
+         logger::info("Loading Script Variables from '{}'", (*p).c_str());
          string fullPath = skyrimDataPath + *p;
          // Get the number of entries
          int iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
@@ -87,7 +84,6 @@ public:
                _MESSAGE("Could not load script variable: %s", returnValue);
             }
          }
-         gLog.Outdent();
       }
    };
 

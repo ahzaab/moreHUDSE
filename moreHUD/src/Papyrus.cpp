@@ -1,36 +1,19 @@
 #include "PCH.h"
 #include "Papyrus.h"
-#include <SpellmakingMenu.h>
-#include <HudMenu.h>
+#include "AHZPapyrusMoreHud.h"
 
-namespace Skywind
+namespace moreHUD
 {
 	bool Papyrus::Register()
 	{
 		auto papyrus = SKSE::GetPapyrusInterface();
-		if (!papyrus->Register(Scaleform::SpellmakingMenu::RegisterFuncs)) {
+		if (!papyrus->Register(PapyrusMoreHud::RegisterFunctions)) {
 			return false;
 		} else {
-			logger::info("registered papyrus SpellmakingMenu funcs");
-		}
-
-		if (!papyrus->Register(Scaleform::HudMenu::RegisterFuncs)) {
-			return false;
-		} else {
-			logger::info("registered papyrus hudmenu funcs");
+			logger::info("registered papyrus PapyrusMoreHud funcs");
 		}
 
 		return true;
 	}
 }
 
-OnBirthSignAcceptHandler* OnBirthSignAcceptHandler::GetSingleton()
-{
-	static OnBirthSignAcceptHandler singleton;
-	return &singleton;
-}
-
-
-OnBirthSignAcceptHandler::OnBirthSignAcceptHandler() :
-	Base(EVN_NAME)
-{}

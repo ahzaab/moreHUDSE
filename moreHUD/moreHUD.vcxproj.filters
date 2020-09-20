@@ -13,16 +13,7 @@
     <ClCompile Include="src\Events.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\LevelUpMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
     <ClCompile Include="src\Scaleform.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StatsMenuEx.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BirthSignMenu.cpp">
       <Filter>src\Scaleform</Filter>
     </ClCompile>
     <ClCompile Include="src\CLIK\UIComponent.cpp">
@@ -55,32 +46,59 @@
     <ClCompile Include="src\CLIK\Slider.cpp">
       <Filter>src\CLIK\GFx\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpellmakingMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
     <ClCompile Include="src\CLIK\TextInput.cpp">
       <Filter>src\CLIK\GFx\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MeterMenu.cpp">
-      <Filter>src\Scaleform</Filter>
     </ClCompile>
     <ClCompile Include="src\PCH.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TweenMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StatsMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\HudMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Inventory.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
     <ClCompile Include="src\AHZConsole.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZActorInfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZArmorInfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZExternalFormTable.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZFormLookup.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZLUTObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZPapyrusMoreHud.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZPlayerInfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZScaleform.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZScaleformHook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZUtilities.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZVanillaFormTable.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AHZWeaponInfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HUDObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\moreHUDMenu.cpp">
+      <Filter>src\Scaleform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorValueList.cpp">
+      <Filter>src\SKSE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,16 +114,7 @@
     <ClInclude Include="include\Events.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\LevelUpMenu.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
     <ClInclude Include="include\Scaleform.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StatsMenuEx.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BirthSignMenu.h">
       <Filter>include\Scaleform</Filter>
     </ClInclude>
     <ClInclude Include="include\CLIK\UIComponent.h">
@@ -138,36 +147,66 @@
     <ClInclude Include="include\CLIK\Slider.h">
       <Filter>include\CLIK\GFx\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\SpellmakingMenu.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
     <ClInclude Include="include\CLIK\TextInput.h">
       <Filter>include\CLIK\GFx\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MeterMenu.h">
-      <Filter>include\Scaleform</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="include\PCH.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StatsMenu.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TweenMenu.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HudMenu.h">
-      <Filter>include\Scaleform</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Inventory.h">
-      <Filter>include\Scaleform</Filter>
     </ClInclude>
     <ClInclude Include="include\AHZConsole.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Offsets.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZActorInfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZArmorInfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZExternalFormTable.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZFormLookup.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZLUTObject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZPapyrusMoreHud.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZPlayerInfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZScaleform.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZScaleformHook.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZUtilities.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZVanillaFormTable.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZWeaponInfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HUDObject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource2.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\moreHUDMenu.h">
+      <Filter>include\Scaleform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ActorValueList.h">
+      <Filter>include\SKSE</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +252,12 @@
     </Filter>
     <Filter Include="src\CLIK\GFx\Controls">
       <UniqueIdentifier>{e52b88c7-6992-49c8-80a3-e5983969fa03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SKSE">
+      <UniqueIdentifier>{63dab4b5-9ca4-4582-9fc4-ebff8cdacde1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\SKSE">
+      <UniqueIdentifier>{f527845d-08f5-46d3-b82e-3512d896f592}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

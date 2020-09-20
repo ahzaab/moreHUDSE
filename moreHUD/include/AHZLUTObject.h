@@ -6,9 +6,9 @@ class AHZLUTObject {
 
 public:
    string BaseMod;
-   UInt32 BaseFormID;
+   uint32_t BaseFormID;
    string TargetMod;
-   UInt32 TargetFormID;
+   uint32_t TargetFormID;
 
    bool IsEmpty()
    {

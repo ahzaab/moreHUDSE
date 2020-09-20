@@ -157,15 +157,27 @@
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActorValueList.cpp" />
+    <ClCompile Include="src\AHZActorInfo.cpp" />
+    <ClCompile Include="src\AHZArmorInfo.cpp" />
     <ClCompile Include="src\AHZConsole.cpp" />
-    <ClCompile Include="src\Inventory.cpp" />
-    <ClCompile Include="src\HudMenu.cpp" />
+    <ClCompile Include="src\AHZExternalFormTable.cpp" />
+    <ClCompile Include="src\AHZFormLookup.cpp" />
+    <ClCompile Include="src\AHZLUTObject.cpp" />
+    <ClCompile Include="src\AHZPapyrusMoreHud.cpp" />
+    <ClCompile Include="src\AHZPlayerInfo.cpp" />
+    <ClCompile Include="src\AHZScaleform.cpp" />
+    <ClCompile Include="src\AHZScaleformHook.cpp" />
+    <ClCompile Include="src\AHZUtilities.cpp" />
+    <ClCompile Include="src\AHZVanillaFormTable.cpp" />
+    <ClCompile Include="src\AHZWeaponInfo.cpp" />
+    <ClCompile Include="src\HUDObject.cpp" />
+    <ClCompile Include="src\moreHUDMenu.cpp" />
     <ClCompile Include="src\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\BirthSignMenu.cpp" />
     <ClCompile Include="src\CLIK\Array.cpp" />
     <ClCompile Include="src\CLIK\Button.cpp" />
     <ClCompile Include="src\CLIK\CoreList.cpp" />
@@ -178,20 +190,26 @@
     <ClCompile Include="src\CLIK\TextInput.cpp" />
     <ClCompile Include="src\CLIK\UIComponent.cpp" />
     <ClCompile Include="src\Events.cpp" />
-    <ClCompile Include="src\LevelUpMenu.cpp" />
-    <ClCompile Include="src\MeterMenu.cpp" />
     <ClCompile Include="src\Papyrus.cpp" />
     <ClCompile Include="src\Patches.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Scaleform.cpp" />
-    <ClCompile Include="src\SpellmakingMenu.cpp" />
-    <ClCompile Include="src\StatsMenu.cpp" />
-    <ClCompile Include="src\StatsMenuEx.cpp" />
-    <ClCompile Include="src\TweenMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ActorValueList.h" />
+    <ClInclude Include="include\AHZActorInfo.h" />
+    <ClInclude Include="include\AHZArmorInfo.h" />
     <ClInclude Include="include\AHZConsole.h" />
-    <ClInclude Include="include\BirthSignMenu.h" />
+    <ClInclude Include="include\AHZExternalFormTable.h" />
+    <ClInclude Include="include\AHZFormLookup.h" />
+    <ClInclude Include="include\AHZLUTObject.h" />
+    <ClInclude Include="include\AHZPapyrusMoreHud.h" />
+    <ClInclude Include="include\AHZPlayerInfo.h" />
+    <ClInclude Include="include\AHZScaleform.h" />
+    <ClInclude Include="include\AHZScaleformHook.h" />
+    <ClInclude Include="include\AHZUtilities.h" />
+    <ClInclude Include="include\AHZVanillaFormTable.h" />
+    <ClInclude Include="include\AHZWeaponInfo.h" />
     <ClInclude Include="include\CLIK\Array.h" />
     <ClInclude Include="include\CLIK\Button.h" />
     <ClInclude Include="include\CLIK\CoreList.h" />
@@ -204,20 +222,15 @@
     <ClInclude Include="include\CLIK\TextInput.h" />
     <ClInclude Include="include\CLIK\UIComponent.h" />
     <ClInclude Include="include\Events.h" />
-    <ClInclude Include="include\HudMenu.h" />
-    <ClInclude Include="include\LevelUpMenu.h" />
-    <ClInclude Include="include\MeterMenu.h" />
+    <ClInclude Include="include\moreHUDMenu.h" />
+    <ClInclude Include="include\HUDObject.h" />
     <ClInclude Include="include\Offsets.h" />
     <ClInclude Include="include\Papyrus.h" />
     <ClInclude Include="include\Patches.h" />
+    <ClInclude Include="include\resource2.h" />
     <ClInclude Include="include\Scaleform.h" />
-    <ClInclude Include="include\SpellmakingMenu.h" />
-    <ClInclude Include="include\StatsMenu.h" />
-    <ClInclude Include="include\StatsMenuEx.h" />
-    <ClInclude Include="include\TweenMenu.h" />
     <ClInclude Include="include\version.h" />
     <ClInclude Include="include\PCH.h" />
-    <ClInclude Include="include\Inventory.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

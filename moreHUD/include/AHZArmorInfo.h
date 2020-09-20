@@ -1,36 +1,42 @@
 #pragma once
 
+struct FoundEquipData
+{
+    RE::TESForm*       pForm;
+    RE::ExtraDataList* pExtraData;
+};
+
 
 class AHZArmorData
 {
 public:
-	EquipData equipData;
-	TESObjectARMO *armor;
-	TESObjectLIGH *torch;
+    FoundEquipData equipData;
+	RE::TESObjectARMO *armor;
+	RE::TESObjectLIGH *torch;
 
 	AHZArmorData(void)
 	{
-		equipData.pForm = NULL;
-		equipData.pExtraData = NULL;
-		armor = NULL;
-		torch = NULL;
+		equipData.pForm = nullptr;
+        equipData.pExtraData = nullptr;
+        armor = nullptr;
+        torch = nullptr;
 	}
 
-	AHZArmorData(TESObjectREFR *thisObject)
+	AHZArmorData(RE::TESObjectREFR *thisObject)
 	{
-		if (thisObject && thisObject->baseForm)
+		if (thisObject && thisObject->GetBaseObject())
 		{
-			equipData.pForm = thisObject->baseForm;
-			equipData.pExtraData = &thisObject->extraData;
-			armor = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectARMO);
-			torch = DYNAMIC_CAST(thisObject->baseForm, TESForm, TESObjectLIGH);
+			equipData.pForm = thisObject->GetBaseObject();
+			equipData.pExtraData = &thisObject->extraList;
+            armor = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectARMO);
+            torch = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectLIGH);
 		}
 		else
 		{
-			equipData.pForm = NULL;
-			equipData.pExtraData = NULL;
-			armor = NULL;
-			torch = NULL;
+            equipData.pForm = nullptr;
+            equipData.pExtraData = nullptr;
+            armor = nullptr;
+            torch = nullptr;
 		}
 	}
 
@@ -42,6 +48,6 @@ class CAHZArmorInfo
 public:
 	CAHZArmorInfo(void);
 	~CAHZArmorInfo(void);
-	static AHZArmorData GetArmorFromSlotMask(UInt32 slotMask);
+	static AHZArmorData GetArmorFromSlotMask(uint32_t slotMask);
 };
 

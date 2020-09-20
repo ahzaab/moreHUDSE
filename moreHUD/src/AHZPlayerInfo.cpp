@@ -1,12 +1,7 @@
-﻿#include "skse64/GameReferences.h"
-#include "skse64/GameFormComponents.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameForms.h"
-#include "skse64/GameAPI.h"
-#include "skse64/GameExtraData.h"
+﻿#include "PCH.h"
 #include "AHZPlayerInfo.h"
 #include "AHZScaleFormHook.h"
-#include "skse64/Hooks_Gameplay.h"
+
 
 typedef  UInt32(*GET_GOLD_AMOUNT)(Actor* a1);
 RelocAddr<GET_GOLD_AMOUNT>GetGoldAmount_Native(0x005E72F0);

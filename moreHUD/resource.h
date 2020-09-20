@@ -3,7 +3,7 @@
 // Used by version.rc
 //
 #define SWND_VERSION_BETA               0
-#define SWND_VERSION_MAJOR              1
+#define MHUD_VERSION_MAJOR              1
 #define SWND_VERSION_MINOR              1
 #define SWND_VERSION_PATCH              1
 #define VS_VERSION_INFO                 1

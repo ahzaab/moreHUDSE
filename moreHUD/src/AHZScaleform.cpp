@@ -6,15 +6,6 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
-#include "skse64/GameReferences.h"
-#include "skse64/GameObjects.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameSettings.h"
-#include "skse64/GameExtraData.h"
-#include "skse64/ScaleformCallbacks.h"
-#include "skse64/ScaleformMovie.h"
-#include "skse64/GameMenus.h"
-#include "skse64/skse64_common/Utilities.h"
 #include "AHZArmorInfo.h"
 #include "AHZWeaponInfo.h"
 #include "AHZScaleform.h"
@@ -1541,44 +1532,40 @@ string CAHZScaleform::GetBookSkill(RE::TESObjectREFR *theObject)
          return desc;
 
       // If this is a spell book, then it is not a skill book
-      if ((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell)
+      if ((item->data.flags & RE::OBJ_BOOK::Flag::kTeachesSpell) == RE::OBJ_BOOK::Flag::kTeachesSpell)
          return desc;
 
-      if (((item->data.flags & TESObjectBOOK::Data::kType_Skill) == TESObjectBOOK::Data::kType_Skill) &&
-         item->data.teaches.skill)
+      if (((item->data.flags & RE::OBJ_BOOK::Flag::kAdvancesActorValue) == RE::OBJ_BOOK::Flag::kAdvancesActorValue) &&
+          item->data.teaches.actorValueToAdvance != RE::ActorValue::kNone)
       {
-         ActorValueList * avList = ActorValueList::GetSingleton();
+         auto avList = SKSE::ActorValueList::GetSingleton();
          if (avList)
          {
-            ActorValueInfo * info = avList->GetActorValue(item->data.teaches.skill);
-            if (info)
-            {
-               TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
-               if (fname && fname->name.data)
-               {
-                  desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">       ");
-                  desc.append(fname->name.data);
-                  desc.append("<\\FONT>");
-               }
-            }
+            auto info = avList->GetActorValue(item->data.teaches.actorValueToAdvance);
+             if (info) {
+                 desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">       ");
+                 desc.append(info->GetFullName());
+                 desc.append("<\\FONT>");
+             }
          }
       }
    }
    return desc;
 }
 
-void CAHZScaleform::AppendDescription(TESDescription *desObj, TESForm *parent, std::string& description)
+void CAHZScaleform::AppendDescription(RE::TESDescription *desObj, RE::TESForm *parent, std::string& description)
 {
-   BSString bsDescription;
+   RE::BSString bsDescription;
    string tempString = "";
 
-   if (parent->GetFormType() == kFormType_Book)
+   if (parent->GetFormType() == RE::FormType::Book)
    {
-      CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 0x4D414E43);
-      if (&bsDescription)
+     // CALL_MEMBER_FN(desObj, Get)(&bsDescription, parent, 0x4D414E43);
+      desObj->GetDescription(bsDescription, parent, 0x4D414E43);
+      if (!bsDescription.empty())
       {
          tempString.clear();
-         tempString.append(bsDescription.Get());
+         tempString.append(bsDescription.data());
          if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
          {
             string formatted = "";
@@ -1589,14 +1576,15 @@ void CAHZScaleform::AppendDescription(TESDescription *desObj, TESForm *parent, s
    }
    else
    {
-      BSString bsDescription2;
-      TESDescription * desc = DYNAMIC_CAST(parent, TESForm, TESDescription);
+      RE::BSString bsDescription2;
+      auto desc = DYNAMIC_CAST(parent, RE::TESForm, RE::TESDescription);
       if (desc)
       {
-         CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0x43534544);
+         //CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0x43534544);
+          desc->GetDescription(bsDescription2, parent, 0x43534544);
          tempString.clear();
-         if (&bsDescription2)
-            tempString.append(bsDescription2.Get());
+         if (!bsDescription2.empty())
+            tempString.append(bsDescription2.data());
          if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
          {
             string formatted = "";
@@ -1605,10 +1593,11 @@ void CAHZScaleform::AppendDescription(TESDescription *desObj, TESForm *parent, s
          }
          else
          {
-            CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0);
+            //CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0);
+            desc->GetDescription(bsDescription2, parent, 0);
             tempString.clear();
             if (&bsDescription2)
-               tempString.append(bsDescription2.Get());
+               tempString.append(bsDescription2.data());
             if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
             {
                string formatted = "";
@@ -1620,29 +1609,31 @@ void CAHZScaleform::AppendDescription(TESDescription *desObj, TESForm *parent, s
    }
 }
 
-string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
+string CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR *theObject)
 {
-   BSString description;
+   RE::BSString description;
    string effectDescription;
    string  desc;
    string effectsString;
-   MagicItem * magicItem = NULL;
+   RE::MagicItem * magicItem = nullptr;
 
    if (!theObject)
       return desc;
 
-   tArray<MagicItem::EffectItem*> *effectList = NULL;
-   SettingCollectionMap *settings = *g_gameSettingCollection;
+   //tArray<MagicItem::EffectItem*> *effectList = NULL;
+   //SettingCollectionMap *settings = *g_gameSettingCollection;
 
-   if (theObject->baseForm->GetFormType() == kFormType_Potion)
+   auto settings = RE::GameSettingCollection::GetSingleton();
+
+   if (theObject->GetBaseObject()->GetFormType() == RE::FormType::AlchemyItem)
    {
-      AlchemyItem *item = DYNAMIC_CAST(theObject->baseForm, TESForm, AlchemyItem);
+      auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::AlchemyItem);
 
-      if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+      if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(theObject->extraList.GetByType(RE::ExtraDataType::kEnchantment))) // Enchanted
       {
-         if (extraEnchant->enchant)
+         if (extraEnchant->enchantment)
          {
-            GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+            GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
             desc.append(effectDescription);
          }
       }
@@ -1652,106 +1643,102 @@ string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
          GetMagicItemDescription(item, effectDescription);
          desc.append(effectDescription);
       }
-   }
-   else if (theObject->baseForm->GetFormType() == kFormType_Weapon)
+   } else if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Weapon)
    {
-      TESObjectWEAP *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectWEAP);
+       auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESObjectWEAP);
 
       // If there was no effects, then display athe description if available
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-         AppendDescription(&item->description, item, desc);
+         AppendDescription(item, item, desc);
       }
 
       if (item && !desc.length())
       {
          //Get enchantment description
-         if (item && item->enchantable.enchantment)
+         if (item && item->formEnchanting)
          {
-            GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+            GetMagicItemDescription(item->formEnchanting, effectDescription);
             desc.append(effectDescription);
          }
 
          // Items modified by the player
-         else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+         else if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(theObject->extraList.GetByType(RE::ExtraDataType::kEnchantment))) // Enchanted
          {
-            if (extraEnchant->enchant)
+            if (extraEnchant->enchantment)
             {
-               GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+                 GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
                desc.append(effectDescription);
             }
          }
       }
-   }
-   else if (theObject->baseForm->GetFormType() == kFormType_Armor)
+   } else if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Armor)
    {
-      TESObjectARMO *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectARMO);
+      auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESObjectARMO);
 
       // If there was no effects, then display athe description if available
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-         AppendDescription(&item->description, item, desc);
+         AppendDescription(item, item, desc);
       }
 
       if (item && !desc.length())
       {
          //Get enchantment description
-         if (item && item->enchantable.enchantment)
+         if (item && item->formEnchanting)
          {
-            GetMagicItemDescription(item->enchantable.enchantment, effectDescription);
+             GetMagicItemDescription(item->formEnchanting, effectDescription);
             desc.append(effectDescription);
          }
 
          // Items modified by the player
-         else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+         else if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(theObject->extraList.GetByType(RE::ExtraDataType::kEnchantment))) // Enchanted
          {
-            if (extraEnchant->enchant)
+            if (extraEnchant->enchantment)
             {
-               GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+                 GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
                desc.append(effectDescription);
             }
          }
       }
-   }
-   else if (theObject->baseForm->GetFormType() == kFormType_Ammo ||
-			theObject->baseForm->GetFormType() == kFormType_Projectile)
+   } else if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Ammo ||
+              theObject->GetBaseObject()->GetFormType() == RE::FormType::Projectile)
    {
-	   TESAmmo *item = NULL;
+	   RE::TESAmmo *item = nullptr;
 	   
-	   if (theObject->baseForm->GetFormType() == kFormType_Projectile)
-		   item = DYNAMIC_CAST(AHZGetForm(theObject), TESForm, TESAmmo);
+	   if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Projectile)
+		   item = DYNAMIC_CAST(AHZGetForm(theObject), RE::TESForm, RE::TESAmmo);
 	   else
-		   item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESAmmo);
+           item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESAmmo);
 	   
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-         AppendDescription(&item->description, item, desc);
+         AppendDescription(item, item, desc);
       }
 
-      if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(theObject->extraData.GetByType(kExtraData_Enchantment))) // Enchanted
+      if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(theObject->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
       {
-         if (extraEnchant->enchant)
+         if (extraEnchant->enchantment)
          {
-            GetMagicItemDescription(extraEnchant->enchant, effectDescription);
+            GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
             desc.append(effectDescription);
          }
       }
-   }
-   else if (theObject->baseForm->GetFormType() == kFormType_Book)
+   } else if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Book)
    {
-      TESObjectBOOK *item = DYNAMIC_CAST(theObject->baseForm, TESForm, TESObjectBOOK);
+      auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::TESObjectBOOK);
 
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-         AppendDescription(&item->description2, item, desc);
+          AppendDescription(&item->itemCardDescription, item, desc);
       }
 
       if (item &&
-         ((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell) && !desc.length())
+          ((item->data.flags & RE::OBJ_BOOK::Flag::kTeachesSpell) == RE::OBJ_BOOK::Flag::kTeachesSpell) && !desc.length())
       {
          if (item->data.teaches.spell)
          {
@@ -1759,14 +1746,13 @@ string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
             desc.append(effectDescription);
          }
       }
-   }
-   else if (theObject->baseForm->GetFormType() == kFormType_ScrollItem)
+   } else if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Scroll)
    {
-      ScrollItem *item = DYNAMIC_CAST(theObject->baseForm, TESForm, ScrollItem);
+      auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::ScrollItem);
       if (item)
       {
          // Get the description if any (Mostly Dawnguard and Dragonborn stuff uses the descriptions)
-         AppendDescription(&item->description, item, desc);
+         AppendDescription(item, item, desc);
 
          if (!desc.length())
          {
@@ -1778,41 +1764,37 @@ string CAHZScaleform::GetEffectsDescription(TESObjectREFR *theObject)
    return desc;
 };
 
-void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessTargetEffects(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
 {
-   TESObjectREFR * pTargetReference = targetObject;
-   AlchemyItem *alchemyItem = NULL;
-   SpellItem *spellItem = NULL;
-   IngredientItem *ingredientItem = NULL;
+   RE::TESObjectREFR * pTargetReference = targetObject;
+   RE::AlchemyItem *alchemyItem = nullptr;
+   RE::SpellItem *spellItem = nullptr;
+   RE::IngredientItem *ingredientItem = nullptr;
    string name;
 
-   if (!args)
-   {
-      return;
-   }
 
-   bool calculateInvenotry = args->args[1].GetBool();
+   bool calculateInvenotry = args.args[1].GetBool();
 
    if (!calculateInvenotry)
    {
-      args->args[0].DeleteMember("inventoryObj");
+      args.args[0].DeleteMember("inventoryObj");
    }
 
    // No valid reference
    if (!pTargetReference)
    {
-      args->args[0].DeleteMember("effectsObj");
-      args->args[0].DeleteMember("ingredientObj");
-      args->args[0].DeleteMember("inventoryObj");
+      args.args[0].DeleteMember("effectsObj");
+      args.args[0].DeleteMember("ingredientObj");
+      args.args[0].DeleteMember("inventoryObj");
       return;
    }
 
-   TESForm *targetForm = AHZGetForm(pTargetReference);
+   auto targetForm = AHZGetForm(pTargetReference);
 
    // See if its an ingredient.  Note they are formated differently with known effects;
-   if ((ingredientItem = GetIngredient(targetForm)) != NULL)
+   if ((ingredientItem = GetIngredient(targetForm)) != nullptr)
    {
-      args->args[0].DeleteMember("effectsObj");
+      args.args[0].DeleteMember("effectsObj");
       BuildIngredientObject(ingredientItem, args);
 
       if (calculateInvenotry)
@@ -1824,7 +1806,7 @@ void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctio
    }
 
    // See if its harvestable food
-   else if ((alchemyItem = GetAlchemyItem(targetForm)) != NULL)
+   else if ((alchemyItem = GetAlchemyItem(targetForm)) != nullptr)
    {
       string effectDescription;
       GetMagicItemDescription(alchemyItem, effectDescription);
@@ -1839,7 +1821,7 @@ void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctio
    // Spell items like blessings
    else if ((spellItem = GetSpellItem(targetForm)) != NULL)
    {
-      AppendDescription(&(spellItem->description), spellItem, name);
+      AppendDescription(spellItem, spellItem, name);
 
       if (!name.length())
       {
@@ -1867,30 +1849,25 @@ void CAHZScaleform::ProcessTargetEffects(TESObjectREFR* targetObject, GFxFunctio
    // If the name contains a string
    if (name.length())
    {
-      GFxValue obj;
-      args->movie->CreateObject(&obj);
+      RE::GFxValue obj;
+      args.movie->CreateObject(&obj);
 
       name = CAHZUtilities::trim(name);
 
-      RegisterString(&obj, args->movie, "effectsDescription",  name.c_str());
+      RegisterString(&obj, "effectsDescription",  name.c_str());
 
       // Add the object to the scaleform function
-      args->args[0].SetMember("effectsObj", &obj);
+      args.args[0].SetMember("effectsObj", &obj);
    }
    else
    {
-      args->args[0].DeleteMember("effectsObj");
+      args.args[0].DeleteMember("effectsObj");
    }
 };
 
-void CAHZScaleform::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessArmorClass(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
 {
-   if (!args)
-   {
-      return;
-   }
-
-   TESObjectREFR * pTargetReference = targetObject;
+   RE::TESObjectREFR * pTargetReference = targetObject;
    static string weightClass;
 
    // If the target is not valid or it can't be picked up by the player
@@ -1906,14 +1883,9 @@ void CAHZScaleform::ProcessArmorClass(TESObjectREFR* targetObject, GFxFunctionHa
    SetResultString(args, weightClass.c_str());
 };
 
-void CAHZScaleform::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessValueToWeight(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
 {
-   if (!args)
-   {
-      return;
-   }
-
-   TESObjectREFR * pTargetReference = targetObject;
+   RE::TESObjectREFR * pTargetReference = targetObject;
    static string valueToWeight;
 
    // If the target is not valid or it can't be picked up by the player
@@ -1924,14 +1896,14 @@ void CAHZScaleform::ProcessValueToWeight(TESObjectREFR* targetObject, GFxFunctio
    }
 
    valueToWeight.clear();
-   valueToWeight.append(GetValueToWeight(pTargetReference, args->args[0].GetString(), args->args[1].GetString()).c_str());
+   valueToWeight.append(GetValueToWeight(pTargetReference, args.args[0].GetString(), args.args[1].GetString()).c_str());
 
    SetResultString(args, valueToWeight.c_str());
 };
 
-void CAHZScaleform::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessBookSkill(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
 {
-   TESObjectREFR * pTargetReference = targetObject;
+   RE::TESObjectREFR * pTargetReference = targetObject;
    static string bookSkill;
 
    // If the target is not valid or it can't be picked up by the player
@@ -1948,9 +1920,9 @@ void CAHZScaleform::ProcessBookSkill(TESObjectREFR* targetObject, GFxFunctionHan
       bookSkill.c_str());
 };
 
-void CAHZScaleform::SetResultString(GFxFunctionHandler::Args *args, const char * str)
+void CAHZScaleform::SetResultString(RE::GFxFunctionHandler::Params &args, const char * str)
 {
-   args->result->SetString(str);
+   args.retVal->SetString(str);
 };
 
 void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -1964,9 +1936,9 @@ void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string
    }
 };
 
-void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunctionHandler::Args *args)
+void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
 {
-   TESObjectREFR * pTargetReference = targetObject;
+   RE::TESObjectREFR * pTargetReference = targetObject;
    float totalArmorOrWeapon = 0.0;
    float difference = 0.0;
    float totalWarmthRating = 0.0;
@@ -1974,32 +1946,28 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    bool isSurvivalMode = false;
    float warmthRating = 0.0;
 
-   if (!args)
-   {
-      return;
-   }
-
    if (!targetObject)
    {
-      args->args[0].DeleteMember("targetObj");
+      args.args[0].DeleteMember("targetObj");
       return;
    }
 
-   GFxValue obj;
-   args->movie->CreateObject(&obj);
+   RE::GFxValue obj;
+   args.movie->CreateObject(&obj);
 
-   if (pTargetReference->baseForm->GetFormType() == kFormType_Weapon ||
-      pTargetReference->baseForm->GetFormType() == kFormType_Ammo ||
-	   pTargetReference->baseForm->GetFormType() == kFormType_Projectile)
+   auto baseForm = pTargetReference->GetBaseObject();
+
+   if (baseForm->GetFormType() == RE::FormType::Weapon ||
+       baseForm->GetFormType() == RE::FormType::Ammo ||
+       baseForm->GetFormType() == RE::FormType::Projectile)
    {
-      TESForm *form = NULL;
-      TESAmmo *ammo = NULL;
+      RE::TESForm *form = nullptr;
+      RE::TESAmmo *ammo = nullptr;
 
       // If ammo is NULL, it is OK
       totalArmorOrWeapon = GetTotalActualWeaponDamage();
       difference = GetWeaponDamageDiff(pTargetReference);
-   }
-   else if (pTargetReference->baseForm->GetFormType() == kFormType_Armor)
+   } else if (baseForm->GetFormType() == RE::FormType::Armor)
    {
       totalArmorOrWeapon = GetTotalActualArmorRating();
       difference = GetArmorRatingDiff(pTargetReference);
@@ -2022,21 +1990,22 @@ void CAHZScaleform::ProcessTargetObject(TESObjectREFR* targetObject, GFxFunction
    RegisterNumber(&obj, "warmthDifference", warmthDifference);
    RegisterBoolean(&obj, "isSurvivalMode", isSurvivalMode);
 
-   float weight = CALL_MEMBER_FN(pTargetReference, GetWeight)();
-   if (pTargetReference->extraData.HasType(kExtraData_Count))
+   //float weight = CALL_MEMBER_FN(pTargetReference, GetWeight)();
+   float weight = pTargetReference->GetWeight();
+   if (pTargetReference->extraList.HasType(RE::ExtraDataType::kCount))
    {
-      ExtraCount* xCount = static_cast<ExtraCount*>(pTargetReference->extraData.GetByType(kExtraData_Count));
+      auto xCount = static_cast<RE::ExtraCount*>(pTargetReference->extraList.GetByType(RE::ExtraDataType::kCount));
       if (xCount)
       {
-         weight = weight * (float)(SInt16)(xCount->count & 0x7FFF);
+         weight = weight * static_cast<float_t>((static_cast<int16_t>(xCount->count & 0x7FFF)));
       }
    }
 
    RegisterNumber(&obj, "objWeight", weight);
 
    // Used by the scaleform script to know if this is a weapon, armor, or something else
-   RegisterNumber(&obj, "formType", pTargetReference->baseForm->GetFormType());
-   args->args[0].SetMember("targetObj", &obj);
+   RegisterNumber(&obj, "formType", static_cast<uint32_t>(baseForm->GetFormType()));
+   args.args[0].SetMember("targetObj", &obj);
 };
 
 bool CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index)
@@ -2205,19 +2174,19 @@ void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxF
     bool isActivator = false;
 
     auto targetForm = AHZGetForm(pTargetReference);
-    RE::SpellItem spellItem = nullptr;
+    RE::SpellItem* spellItem = nullptr;
 
-    if (pTargetReference->GetBaseObject() && pTargetReference->GetBaseObject()->GetFormType() == kFormType_Activator && targetForm)
+    if (pTargetReference->GetBaseObject() && pTargetReference->GetBaseObject()->GetFormType() == RE::FormType::Activator && targetForm)
     {
         isActivator = true;
     }
 
     // If the target is not valid or it can't be picked up by the player
-    if ((canCarry = (GetIngredient(targetForm) != NULL)) ||
-        (canCarry = (GetAlchemyItem(targetForm) != NULL)) ||
-        (canCarry = CanPickUp(pTargetReference->baseForm) ||
+    if ((canCarry = (GetIngredient(targetForm) != nullptr)) ||
+        (canCarry = (GetAlchemyItem(targetForm) != nullptr)) ||
+        (canCarry = CanPickUp(pTargetReference->GetBaseObject()) ||
         (isActivator)) ||
-            ((spellItem = GetSpellItem(targetForm)) != NULL))
+        ((spellItem = GetSpellItem(targetForm)) != nullptr))
     {
         if (isActivator && !CanPickUp(targetForm))
         {
@@ -2229,60 +2198,55 @@ void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxF
             canCarry = false;
         }
 
-        GFxValue obj;
-        args->movie->CreateObject(&obj);
+        RE::GFxValue obj;
+        args.movie->CreateObject(&obj);
 
         RegisterBoolean(&obj, "canCarry", canCarry);
 
         // Add the object to the scaleform function
-        args->args[0].SetMember("outObj", &obj);
+        args.args[0].SetMember("outObj", &obj);
 
         // return false, indicating that the target object is not valid for acquiring data
-        args->result->SetBool(true);
+        args.retVal->SetBoolean(true);
     }
     else
     {
         // Add the object to the scaleform function
-        args->args[0].DeleteMember("outObj");
+        args.args[0].DeleteMember("outObj");
 
         // The object is valid
-        args->result->SetBool(false);
+        args.retVal->SetBoolean(false);
     }
 }
 
-void CAHZScaleform::ProcessPlayerData( *args)
+void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
 {
-    if (!args)
-    {
-        return;
-    }
 
-    RE:: obj;
-    args->movie->CreateObject(&obj);
+    RE::GFxValue obj;
+    args.movie->CreateObject(&obj);
 
-    UInt32 actorValue = LookupActorValueByName("InventoryWeight");
-    float encumbranceNumber = ((*g_thePlayer)->actorValueOwner.GetCurrent(actorValue));
-    actorValue = LookupActorValueByName("CarryWeight");
-    float maxEncumbranceNumber = ((*g_thePlayer)->actorValueOwner.GetCurrent(actorValue));
+    auto  player = RE::PlayerCharacter::GetSingleton();
+    auto  encumbranceNumber = player->GetActorValue(RE::ActorValue::kInventoryWeight);
+    auto  maxEncumbranceNumber = player->GetActorValue(RE::ActorValue::kCarryWeight);
 
     // Enter the data into the Scaleform function
     RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);
     RegisterNumber(&obj, "maxEncumbranceNumber", maxEncumbranceNumber);
     RegisterNumber(&obj, "goldNumber", CAHZPlayerInfo::GetGoldAmount());
-    args->args[0].SetMember("playerObj", &obj);
+    args.args[0].SetMember("playerObj", &obj);
 }
 
-void CAHZScaleform::GetMagicItemDescription(MagicItem * item, std::string& description)
+void CAHZScaleform::GetMagicItemDescription(RE::MagicItem * item, std::string& description)
 {
     string outerString = "";
     description.clear();
 
-    BSString temp;
+    RE::BSString temp;
 
-    GetMagicItemDescription2(NULL, item, &temp);
+    GetMagicItemDescription2(nullptr, item, &temp);
     char *temp2 = ProcessSurvivalMode(&temp);
 
-    description.append(temp.Get());
+    description.append(temp.data());
 }
 
 void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& formatted)

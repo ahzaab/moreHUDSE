@@ -95,6 +95,7 @@ private:
    static double GetTotalActualWeaponDamage(void);
    static void   BuildIngredientObject(RE::IngredientItem* ingredient, RE::GFxFunctionHandler::Params& args);
    static void   BuildInventoryObject(RE::TESForm* form, RE::GFxFunctionHandler::Params& arg);
+   static bool GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index);
 
    static bool            IsTwoHanded(RE::TESObjectWEAP* thisWeapon);
    static bool            IsOneHanded(RE::TESObjectWEAP* thisWeapon);

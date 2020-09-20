@@ -1,22 +1,16 @@
-﻿#include "AHZActorInfo.h"
+﻿#include "PCH.h"
+#include "AHZActorInfo.h"
 
-// Is Actor Sentient = 606850
-// Get Soul Level = 3C1740
-
-
-typedef  UInt32 (__fastcall *GET_ACTOR_IS_SENTIENT)(Actor *theActor);
-RelocAddr<GET_ACTOR_IS_SENTIENT>pGetActorIsSentient(0x00606850);
-
-typedef  UInt32 (__fastcall *GET_ACTOR_SOUL_TYPE)(UInt32 level, UInt8 isSetient);
-RelocAddr<GET_ACTOR_SOUL_TYPE>pGetActorSoulType(0x003C1740);
-
-UInt32 CAHZActorInfo::IsSentient(Actor *actor)
+uint32_t CAHZActorInfo::IsSentient(RE::Actor *actor)
 {
-	return pGetActorIsSentient(actor);
+    using func_t = decltype(&CAHZActorInfo::IsSentient);
+    REL::Relocation<func_t> func{ REL::ID(36889) };
+    func(actor);
 }
 
-UInt32 CAHZActorInfo::GetSoulType(UInt16 actorLevel, UInt8 isActorSentient)
+uint32_t CAHZActorInfo::GetSoulType(uint16_t actorLevel, uint8_t isActorSentient)
 {
-	UInt32 type = pGetActorSoulType(actorLevel, isActorSentient);
-	return type;
+    using func_t = decltype(&CAHZActorInfo::GetSoulType);
+    REL::Relocation<func_t> func{ REL::ID(25933) };
+    func(actorLevel, isActorSentient);
 }

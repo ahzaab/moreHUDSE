@@ -118,7 +118,7 @@ extern "C"
             logger::info("registered listener"sv);
 
 
-            if (!Papyrus::Register()) {
+            if (!moreHUD::Papyrus::Register()) {
                 logger::critical("Could not register papyrus functions"sv);
                 return false;
             }
@@ -130,9 +130,9 @@ extern "C"
             Scaleform::RegisterCallbacks();
 
             logger::info("Installing Looks"sv);
-            Scaleform::StatsMenuHook::InstallHooks();
-            auto scaleform = SKSE::GetScaleformInterface();
-            scaleform->Register(Scaleform::Inventory::RegisterForInventory);
+            
+            //auto scaleform = SKSE::GetScaleformInterface();
+            //scaleform->Register(Scaleform::Inventory::RegisterForInventory);
 
             logger::info("moreHUD loaded"sv);
 

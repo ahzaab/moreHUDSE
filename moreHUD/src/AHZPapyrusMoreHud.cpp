@@ -1,45 +1,20 @@
+#include "PCH.h"
 #include "AHZPapyrusMoreHud.h"
-#include "skse64/PluginManager.h"
-
-#include "skse64_common/skse_version.h"
-#include "common/ICriticalSection.h"
 #include <mutex>
 
-namespace papyrusMoreHud {
 
-	class FormVisitor: public BGSListForm::Visitor
-	{
-	public:
-
-		FormVisitor::FormVisitor(TESForm* form) :m_form(form) {}
-
-		virtual bool Accept(TESForm* form)
-		{
-			if (!m_form || !form)
-				return false;
-
-			auto found = ((m_form->formID) == (form->formID));
-
-			return found;
-		}
-
-	private:
-		TESForm* m_form;
-
-	};
-
-	typedef std::map<UInt32, BSFixedString> AhzIconItemCache;
-	typedef std::map<std::string, BGSListForm*> AhzIconFormListCache;
+	typedef std::map<uint32_t, RE::BSFixedString> AhzIconItemCache;
+	typedef std::map<std::string, RE::BGSListForm*> AhzIconFormListCache;
 	static AhzIconItemCache s_ahzRegisteredIcons;
 	static AhzIconFormListCache s_ahzRegisteredIconFormLists;
 	static std::recursive_mutex mtx;
 
-	UInt32 GetVersion(StaticFunctionTag* base)
+	uint32_t PapyrusMoreHud::GetVersion(RE::StaticFunctionTag* base)
 	{
-		return PLUGIN_VERSION;
+        return 0;  //PLUGIN_VERSION;
 	}
 
-	void RegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName, BGSListForm* list)
+	void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
 	{
 		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -52,7 +27,8 @@ namespace papyrusMoreHud {
 			s_ahzRegisteredIconFormLists.insert(AhzIconFormListCache::value_type(iconName.c_str(), list));
 		}
 	}
-	void UnRegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName)
+
+	void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName)
 	{
 		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -63,7 +39,7 @@ namespace papyrusMoreHud {
 		}
 	}
 
-	bool IsIconFormListRegistered_Internal(std::string iconName)
+	bool PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName)
 	{
 		//_MESSAGE("IsIconItemRegistered %d", itemID);
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -80,12 +56,12 @@ namespace papyrusMoreHud {
 		return (it != s_ahzRegisteredIconFormLists.end());
 	}
 
-	bool IsIconFormListRegistered(StaticFunctionTag* base, BSFixedString iconName)
+	bool PapyrusMoreHud::IsIconFormListRegistered(RE::StaticFunctionTag* base, RE::BSFixedString iconName)
 	{
 		return IsIconFormListRegistered_Internal(iconName.c_str());
 	}
 
-	bool HasForm(std::string iconName, UInt32 formId)
+	bool PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId)
 	{
 		std::lock_guard <recursive_mutex> lock(mtx);
 		if (IsIconFormListRegistered_Internal(iconName))
@@ -95,18 +71,17 @@ namespace papyrusMoreHud {
 			if (!formId)
 				return false;
 
-			auto formFromId = LookupFormByID(formId);
+			auto formFromId = RE::TESForm::LookupByID(formId);
 
 			if (!formFromId)
 				return false;
 
-			FormVisitor visitor(formFromId);
-			return formList->Visit(visitor);
+			return formList->HasForm(formFromId);
 		}	
 		return false;
 	}
 
-	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32 itemID)
+	bool PapyrusMoreHud::IsIconItemRegistered(RE::StaticFunctionTag* base, uint32_t itemID)
 	{
 		//_MESSAGE("IsIconItemRegistered %d", itemID);
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -122,7 +97,7 @@ namespace papyrusMoreHud {
 
 
 
-	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName)
+	void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName)
 	{
 		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -132,7 +107,7 @@ namespace papyrusMoreHud {
 		}
 	}
 
-	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID)
+	void PapyrusMoreHud::RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID)
 	{
 		//_MESSAGE("RemoveIconItem %d", itemID);
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -142,31 +117,31 @@ namespace papyrusMoreHud {
 		}
 	}
 
-	void AddIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs, VMArray<BSFixedString> iconNames)
+	void PapyrusMoreHud::AddIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs, std::vector<RE::BSFixedString> iconNames)
 	{
 		std::lock_guard <recursive_mutex> lock(mtx);
-		if (itemIDs.Length() != iconNames.Length())
+		if (itemIDs.size() != iconNames.size())
 		{
 			return;
 		}
 
-		for (UInt32 i = 0; i < itemIDs.Length(); i++)
+		for (uint32_t i = 0; i < itemIDs.size(); i++)
 		{
-			UInt32 itemID;
-			BSFixedString iconName;
-			itemIDs.Get(&itemID, i);
-			iconNames.Get(&iconName, i);
+            uint32_t      itemID;
+			RE::BSFixedString iconName;
+            itemID = itemIDs[i];
+            iconName = iconNames[i];
 			AddIconItem(base, itemID, iconName);
 		}
 	}
 
-	void RemoveIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs)
+	void PapyrusMoreHud::RemoveIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs)
 	{
 		std::lock_guard <recursive_mutex> lock(mtx);
-		for (UInt32 i = 0; i < itemIDs.Length(); i++)
+        for (uint32_t i = 0; i < itemIDs.size(); i++)
 		{
-			UInt32 itemID;
-			itemIDs.Get(&itemID, i);
+            uint32_t itemID;
+            itemID = itemIDs[i];
 			if (itemID)
 			{
 				RemoveIconItem(base, itemID);
@@ -174,7 +149,7 @@ namespace papyrusMoreHud {
 		}
 	}
 
-	string GetIconName(UInt32 itemID)
+	string PapyrusMoreHud::GetIconName(uint32_t itemID)
 	{
 		string iconName("");
 		std::lock_guard <recursive_mutex> lock(mtx);
@@ -186,51 +161,17 @@ namespace papyrusMoreHud {
 
 		return iconName;
 	}
-}
-
-#include "skse64/PapyrusVM.h"
-#include "skse64/PapyrusNativeFunctions.h"
-
-bool papyrusMoreHud::RegisterFuncs(VMClassRegistry* registry)
-{
-	registry->RegisterFunction(
-		new NativeFunction0<StaticFunctionTag, UInt32>("GetVersion", "AhzMoreHud", papyrusMoreHud::GetVersion, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, bool, UInt32>("IsIconItemRegistered", "AhzMoreHud", papyrusMoreHud::IsIconItemRegistered, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, UInt32, BSFixedString>("AddIconItem", "AhzMoreHud", papyrusMoreHud::AddIconItem, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, UInt32>("RemoveIconItem", "AhzMoreHud", papyrusMoreHud::RemoveIconItem, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, VMArray<UInt32>, VMArray<BSFixedString>>("AddIconItems", "AhzMoreHud", papyrusMoreHud::AddIconItems, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, VMArray<UInt32>>("RemoveIconItems", "AhzMoreHud", papyrusMoreHud::RemoveIconItems, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, BSFixedString, BGSListForm*>("RegisterIconFormList", "AhzMoreHud", papyrusMoreHud::RegisterIconFormList, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, BSFixedString>("UnRegisterIconFormList", "AhzMoreHud", papyrusMoreHud::UnRegisterIconFormList, registry));
-
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, bool, BSFixedString>("IsIconFormListRegistered", "AhzMoreHud", papyrusMoreHud::IsIconFormListRegistered, registry));
 
 
-	registry->SetFunctionFlags("AhzMoreHud", "GetVersion", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "IsIconItemRegistered", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "AddIconItem", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "RemoveIconItem", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "AddIconItems", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "RemoveIconItems", VMClassRegistry::kFunctionFlag_NoWait);
-
-	registry->SetFunctionFlags("AhzMoreHud", "RegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "UnRegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHud", "IsIconFormListRegistered", VMClassRegistry::kFunctionFlag_NoWait);
-
-	return true;
-}
+void PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm)
+    {
+        a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion);
+        a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);
+        a_vm->RegisterFunction("AddIconItem", "AhzMoreHud", AddIconItem);
+        a_vm->RegisterFunction("RemoveIconItem", "AhzMoreHud", RemoveIconItem);
+        a_vm->RegisterFunction("AddIconItems", "AhzMoreHud", AddIconItems);
+        a_vm->RegisterFunction("RemoveIconItems", "AhzMoreHud", RemoveIconItems);
+        a_vm->RegisterFunction("RegisterIconFormList", "AhzMoreHud", RegisterIconFormList);
+        a_vm->RegisterFunction("UnRegisterIconFormList", "AhzMoreHud", UnRegisterIconFormList);
+        a_vm->RegisterFunction("IsIconFormListRegistered", "AhzMoreHud", IsIconFormListRegistered);
+    }

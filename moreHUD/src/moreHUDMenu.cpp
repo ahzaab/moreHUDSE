@@ -1,6 +1,6 @@
 #include "PCH.h"
 
-#include "HudMenu.h"
+#include "moreHUDMenu.h"
 
 #include <cmath>
 #include <cstdint>
@@ -8,6 +8,10 @@
 
 namespace Scaleform
 {
+
+
+
+
 	void HudMenu::SendNotification(RE::StaticFunctionTag*, RE::BSFixedString a_message, int32_t a_Level, float a_startPercent, float a_endPercent)
 	{
 		auto task = SKSE::GetTaskInterface();

@@ -1,12 +1,10 @@
 #pragma once
 
-#include "skse64/GameReferences.h"
-
 class CAHZActorData{
 public:
 
-	UInt32 IsSentient;
-	UInt16 Level;
+	uint32_t IsSentient;
+	uint16_t Level;
 	float maxHealth;
 	float health;
 	float maxMagicka;
@@ -48,7 +46,7 @@ public:
 	CAHZActorInfo(void);
 	~CAHZActorInfo(void);
 
-	static UInt32 IsSentient(Actor *actor);
-	static UInt32 GetSoulType(UInt16 actorLevel, UInt8 isActorSentient);
+	static uint32_t IsSentient(RE::Actor* actor);
+    static uint32_t GetSoulType(uint16_t actorLevel, uint8_t isActorSentient);
 };
 

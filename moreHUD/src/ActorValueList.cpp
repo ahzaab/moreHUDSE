@@ -12,5 +12,8 @@ namespace SKSE
         return func();
     }
 
-
+    RE::ActorValueInfo* ActorValueList::GetActorValue(RE::ActorValue id)
+    {
+        return (id < RE::ActorValue::kTotal) ? actorValues[id] : nullptr;
+    }
 }

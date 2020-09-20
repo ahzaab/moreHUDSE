@@ -1,31 +1,6 @@
-#include "skse64/GameReferences.h"
-#include "skse64/GameFormComponents.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameForms.h"
-#include "skse64/GameAPI.h"
-#include "skse64/GameExtraData.h"
+#include "PCH.h"
 #include "AHZArmorInfo.h"
 
-class MatchBySlot : public FormMatcher
-{
-	UInt32 m_mask;
-public:
-	MatchBySlot(UInt32 slot) : 
-	  m_mask(slot) 
-	{
-		
-	}
-
-	bool Matches(TESForm* pForm) const {
-		if (pForm) {
-			BGSBipedObjectForm* pBip = DYNAMIC_CAST(pForm, TESForm, BGSBipedObjectForm);
-			if (pBip) {
-				return (pBip->data.parts & m_mask) != 0;
-			}
-		}
-		return false;
-	}
-};
 
 CAHZArmorInfo::CAHZArmorInfo(void)
 {
@@ -35,30 +10,47 @@ CAHZArmorInfo::~CAHZArmorInfo(void)
 {
 }
 
-AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(UInt32 slotMask)
+AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(uint32_t slotMask)
 {
 	AHZArmorData data;
-	PlayerCharacter* pPC = (*g_thePlayer);
-	if (pPC)
-	{
-		MatchBySlot matcher((UInt32)slotMask);	
-		ExtraContainerChanges* pContainerChanges = static_cast<ExtraContainerChanges*>(pPC->extraData.GetByType(kExtraData_ContainerChanges));
-		if (pContainerChanges) 
-		{
-			data.equipData = pContainerChanges->FindEquipped(matcher);
-			if (data.equipData.pForm)
-			{
-            if (data.equipData.pForm->GetFormType() == kFormType_Armor)
-            {
-               data.armor = DYNAMIC_CAST(data.equipData.pForm, TESForm, TESObjectARMO);
-            }
-            if (data.equipData.pForm->GetFormType() == kFormType_Light)
-            {
-               data.torch = DYNAMIC_CAST(data.equipData.pForm, TESForm, TESObjectLIGH);
-            }
+    auto         pPC = RE::PlayerCharacter::GetSingleton();
+    auto         inventoryChanges = pPC->GetInventoryChanges();
+    auto         armor = inventoryChanges->GetArmorInSlot(slotMask);
+
+	if (armor) {
+        auto list = inventoryChanges->entryList;
+        //auto it = list->begin();
+
+		for (auto it = list->begin(); it != list->end(); ++it) {
+			auto entry = *it;
+			if (entry->object->GetFormID() == armor->formID) {
+				for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
+                    auto extraData = *entryListIT;
+					if (extraData &&
+						(extraData->HasType(RE::ExtraDataType::kWorn) || extraData->HasType(RE::ExtraDataType::kWornLeft)))
+					{
+                        data.equipData.pForm = entry->object;
+                        data.equipData.pExtraData = extraData;
+
+						if (data.equipData.pForm) {
+                            if (data.equipData.pForm->GetFormType() == RE::FormType::Armor) {
+                                data.armor = DYNAMIC_CAST(data.equipData.pForm, RE::TESForm, RE::TESObjectARMO);
+                            }
+                            if (data.equipData.pForm->GetFormType() == RE::FormType::Light) {
+                                data.torch = DYNAMIC_CAST(data.equipData.pForm, RE::TESForm, RE::TESObjectLIGH);
+                            }
+                        }
+
+						return data;
+					}
+				}
 			}
+
 		}
+		
+		return data;
 	}
-	return data;
+
+
 }
 
