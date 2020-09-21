@@ -11,6 +11,8 @@ class PapyrusMoreHud
 {
 public:
     static void RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+    static bool HasForm(std::string iconName, uint32_t formId);
+    static string GetIconName(uint32_t itemID);
 
 private:
     static uint32_t GetVersion(RE::StaticFunctionTag* base);
@@ -23,6 +25,6 @@ private:
     static void     UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
     static bool     IsIconFormListRegistered(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
     static bool     IsIconFormListRegistered_Internal(std::string iconName);
-    static string   GetIconName(uint32_t itemID);
-    static bool     HasForm(std::string iconName, uint32_t formId);
+    
+    
 };

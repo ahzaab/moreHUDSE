@@ -309,28 +309,28 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
    for (p = m_scriptVMVariables.begin(); p != m_scriptVMVariables.end(); p++) {
 
       //_MESSAGE("GetAttachedForm");
-      TESForm* attachedForm = NULL;
+     RE::TESForm* attachedForm = NULL;
       if ((attachedForm = GetAttachedForm(form, *p)) != NULL)
       {
          if (attachedForm->formType == kFormType_LeveledItem)
          {
-            TESLevItem *lvli = DYNAMIC_CAST(attachedForm, TESForm, TESLevItem);
+            TESLevItem *lvli = DYNAMIC_CAST(attachedForm,RE::TESForm, TESLevItem);
 
             // Get the first form and see if it is an ingredient
             if (lvli && lvli->leveledList.length > 0)
             {
-               TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
+              RE::TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
                return itemform;
             }
          }
          else if (attachedForm->formType == kFormType_List)
          {
-            BGSListForm *lvli = DYNAMIC_CAST(attachedForm, TESForm, BGSListForm);
+            BGSListForm *lvli = DYNAMIC_CAST(attachedForm,RE::TESForm, BGSListForm);
 
             // Get the first form and see if it is an ingredient
             if (lvli && lvli->forms.count > 0)
             {
-               TESForm *itemform = (TESForm *)lvli->forms.entries[0];
+              RE::TESForm *itemform = (TESForm *)lvli->forms.entries[0];
                return itemform;
             }
          }
@@ -364,7 +364,7 @@ TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableNam
          {
             if (retValue->IsIdentifier())
             {
-               TESForm * retForm;
+              RE::TESForm * retForm;
                UnpackValue<TESForm>(&retForm, retValue);
                return retForm;
             }

@@ -45,7 +45,7 @@ public:
 					{
 						ammoData.equipData.pForm = pEntryData->type;
 						ammoData.equipData.pExtraData = extraList;
-						ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.pForm, TESForm, TESAmmo);
+						ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.pForm,RE::TESForm, TESAmmo);
 						if (ammoData.ammo)
 						{
 							return false;
@@ -85,13 +85,13 @@ AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(TESObjectREFR * thisObject)
 	weaponData.equipData.pExtraData = &thisObject->extraData;
 
 	if (thisObject->baseForm->GetFormType() == kFormType_Weapon)
-		weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESObjectWEAP);
+		weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm, TESObjectWEAP);
 	else if (thisObject->baseForm->GetFormType() == kFormType_Ammo)
-		weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESAmmo);
+		weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm, TESAmmo);
 	else if (thisObject->baseForm->GetFormType() == kFormType_Projectile)
 	{
 		ArrowProjectile *asArrowProjectile = DYNAMIC_CAST(thisObject, TESObjectREFR, ArrowProjectile);
-		weaponData.ammo = DYNAMIC_CAST(AHZGetForm(thisObject), TESForm, TESAmmo);
+		weaponData.ammo = DYNAMIC_CAST(AHZGetForm(thisObject),RE::TESForm, TESAmmo);
 		if (asArrowProjectile) {
 			weaponData.equipData.pForm = weaponData.ammo;
 			weaponData.equipData.pExtraData = &asArrowProjectile->extraData;
@@ -116,7 +116,7 @@ AHZWeaponData CAHZWeaponInfo::GetLeftHandWeapon(void)
 				return weaponData;
 			weaponData.equipData = containerChanges->FindEquipped(matcher, true, true);
 			if (weaponData.equipData.pForm)
-				weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESObjectWEAP);
+				weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm, TESObjectWEAP);
 			return weaponData;
 		}
 	}
@@ -138,7 +138,7 @@ AHZWeaponData CAHZWeaponInfo::GetRightHandWeapon(void)
 				return weaponData;
 			weaponData.equipData = containerChanges->FindEquipped(matcher, true, false);
 			if (weaponData.equipData.pForm)
-				weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm, TESForm, TESObjectWEAP);
+				weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm, TESObjectWEAP);
 			return weaponData;
 		}
 	}

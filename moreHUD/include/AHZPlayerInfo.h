@@ -7,8 +7,8 @@ public:
 	~CAHZPlayerInfo(void);
 
 	static RE::TESObjectREFR * GetTargetRef();
-	static UInt32 GetItemAmount(UInt32 formID);
-	static UInt32 GetGoldAmount(void);
+	static uint32_t GetItemAmount(uint32_t formID);
+	static uint32_t GetGoldAmount(void);
 	static bool GetIsInCombat(void);
 };
 

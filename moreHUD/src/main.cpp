@@ -8,22 +8,17 @@
 #include "version.h"
 
 // TODO
-#include "BirthSignMenu.h"
-#include "MeterMenu.h"
-#include "SpellmakingMenu.h"
-#include "StatsMenu.h"
-#include "StatsMenuEx.h"
 #include "AHZConsole.h"
+#include "Events.h"
 
 // TODO
 
 #include "RE/Skyrim.h"
 #include "SKSE/API.h"
 #include <Papyrus.h>
-#include <Inventory.h>
 
 
-using namespace Skywind;
+using namespace moreHUD;
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
@@ -35,8 +30,9 @@ namespace
         switch (a_msg->type) {
         case SKSE::MessagingInterface::kDataLoaded:
         {
+            logger::info("Registering Events"sv);
             Events::Install();
-            Scaleform::RegisterCreators();
+
         } break;
         }
     }

@@ -171,6 +171,7 @@
     <ClCompile Include="src\AHZUtilities.cpp" />
     <ClCompile Include="src\AHZVanillaFormTable.cpp" />
     <ClCompile Include="src\AHZWeaponInfo.cpp" />
+    <ClCompile Include="src\HashUtil.cpp" />
     <ClCompile Include="src\HUDObject.cpp" />
     <ClCompile Include="src\moreHUDMenu.cpp" />
     <ClCompile Include="src\PCH.cpp">
@@ -222,6 +223,7 @@
     <ClInclude Include="include\CLIK\TextInput.h" />
     <ClInclude Include="include\CLIK\UIComponent.h" />
     <ClInclude Include="include\Events.h" />
+    <ClInclude Include="include\HashUtil.h" />
     <ClInclude Include="include\moreHUDMenu.h" />
     <ClInclude Include="include\HUDObject.h" />
     <ClInclude Include="include\Offsets.h" />

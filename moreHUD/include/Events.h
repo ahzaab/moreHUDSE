@@ -1,42 +1,68 @@
 #pragma once
 
-#include "RE/Skyrim.h"
-
+#include "SKSE\API.h"
 
 namespace Events
 {
-	class HitHandler : public RE::BSTEventSink<RE::TESHitEvent>
-	{
-	public:
-		using EventResult = RE::BSEventNotifyControl;
+    class CrosshairRefManager :
+        public RE::BSTEventSink<SKSE::CrosshairRefEvent>
+    {
+    public:
+        static inline CrosshairRefManager* GetSingleton()
+        {
+            static CrosshairRefManager singleton;
+            return std::addressof(singleton);
+        }
+        static inline void Register()
+        {
+            auto crosshair = SKSE::GetCrosshairRefEventSource();
+            if (crosshair) {
+                crosshair->AddEventSink(GetSingleton());
+                logger::info("Registered {}"sv, typeid(SKSE::CrosshairRefEvent).name());
+            }
+        }
+
+        inline RE::TESObjectREFR* GetCrosshairReference()
+        {
+            _cachedRef.get();
+        }
+
+    protected:
+        using EventResult = RE::BSEventNotifyControl;
+
+        inline EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*) override
+        {
+            auto crosshairRef =
+                a_event && a_event->crosshairRef ?
+                    a_event->crosshairRef->CreateRefHandle() :
+                    RE::ObjectRefHandle();
+            if (_cachedRef == crosshairRef) {
+                return EventResult::kContinue;
+            }
+
+            _cachedRef = crosshairRef;
+
+            return EventResult::kContinue;
+        }
 
 
-		static HitHandler* GetSingleton();
-		static void		   Sink();
+    private:
+        CrosshairRefManager() = default;
+        CrosshairRefManager(const CrosshairRefManager&) = delete;
+        CrosshairRefManager(CrosshairRefManager&&) = delete;
 
-		virtual EventResult ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override;
+        ~CrosshairRefManager() = default;
 
-	private:
-		HitHandler() = default;
-		HitHandler(const HitHandler&) = delete;
-		HitHandler(HitHandler&&) = delete;
-		virtual ~HitHandler() = default;
+        CrosshairRefManager& operator=(const CrosshairRefManager&) = delete;
+        CrosshairRefManager& operator=(CrosshairRefManager&&) = delete;
 
-		HitHandler& operator=(const HitHandler&) = delete;
-		HitHandler& operator=(HitHandler&&) = delete;
-	};
+        RE::ObjectRefHandle _cachedRef;
+    };
 
+    inline void Install()
+    {
+        CrosshairRefManager::Register();
+        logger::info("registered crosshair event"sv);
+    }
 
-	class MenuAndInputHander : public RE::BSTEventSink<RE::MenuOpenCloseEvent>, public RE::BSTEventSink<RE::InputEvent*>
-	{
-	public:
-		static MenuAndInputHander*		 GetSingleton();
-		static void						 Sink();
-		virtual RE::BSEventNotifyControl ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
-		virtual RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::InputEvent*>* a_eventSource) override;
-
-	private:
-	};
-
-	void Install();
 }

@@ -159,7 +159,7 @@ uint32_t CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR *targetRef)
 		}
 		else if (enchantable) {
             // TODO: Opps Bet this doen't work.  
-            // It probably always returned nullptr prior to the port.  It use to use the old DYNAMIC_CAST but the TESEnchantanbleForm does derive from TESForm
+            // It probably always returned nullptr prior to the port.  It use to use the old DYNAMIC_CAST but the TESEnchantanbleForm does derive fromRE::TESForm
             // Just sticking this in for now.  The nullptr is checked
             return MagicDisallowEnchanting(dynamic_cast<RE::BGSKeywordForm*>(enchantable)) ? 2 : 0;
 		}
@@ -1007,7 +1007,7 @@ RE::IngredientItem* CAHZScaleform::GetIngredient(RE::TESForm *thisObject)
         auto tree = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESObjectTREE);
         if (tree)
         {
-           auto form = static_cast<RE::TESForm*>(tree->produceItem);//DYNAMIC_CAST(tree->produce.produce, IngredientItem, TESForm);
+           auto form = static_cast<RE::TESForm*>(tree->produceItem);//DYNAMIC_CAST(tree->produce.produce, IngredientItem,RE::TESForm);
 
             if (!form) {
                 return nullptr;
@@ -1258,7 +1258,7 @@ string CAHZScaleform::GetTargetName(RE::TESForm *thisObject)
    }
    else // second attempt to get the name
    {
-       // TODO Port Note:  There is no GetFullName at the TESForm level
+       // TODO Port Note:  There is no GetFullName at theRE::TESForm level
        //auto asForm = static_cast<RE::TESForm*>(reference->GetBaseObject());
        //name.append(asForm->GetFullName());
    }

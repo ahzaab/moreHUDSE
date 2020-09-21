@@ -13,11 +13,12 @@
 #include <string>
 #include "xbyak/xbyak.h"
 #include "skse64/skse64_common/BranchTrampoline.h"
+#include <mutex>
 
 using namespace std;
 static bool ahzMenuLoaded = false;
 static SafeEnemyDataHolder ahzEnemyData;
-TESObjectREFR *g_ahzTargetReference;
+static std::recursive_mutex enemyLock;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
 {
@@ -58,7 +59,7 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
     return EventResult::kEvent_Continue;
 }
 
-EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher)
+RE::EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher)
 {
     g_ahzTargetReference = evn->crosshairRef;
     return EventResult::kEvent_Continue;

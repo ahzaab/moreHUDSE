@@ -1,12 +1,9 @@
 #include "PCH.h"
-
 #include "Scaleform.h"
-
 #include "AHZScaleform.h"
-
-
 #include "SKSE/API.h"
-
+#include "AHZPapyrusMoreHud.h"
+#include "HashUtil.h"
 
 namespace Scaleform
 {
@@ -44,7 +41,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                a_params->result->SetBool(CAHZPlayerInfo::GetIsInCombat());
+                a_params.retVal->SetBoolean(CAHZPlayerInfo::GetIsInCombat());
             }
         };
 
@@ -53,7 +50,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), args);
+                CAHZScaleform::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), a_params);
             }
         };
 
@@ -62,14 +59,14 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                TESObjectREFR* pTargetReference = CAHZPlayerInfo::GetTargetRef();
+                auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
 
                 // If the target is not valid or it can't be picked up by the player
                 if (!pTargetReference) {
-                    args->result->SetBool(false);
+                    a_params.retVal->SetBoolean(false);
                     return;
                 }
-                args->result->SetBool(CAHZScaleform::GetIsBookAndWasRead(pTargetReference));
+                a_params.retVal->SetBoolean(CAHZScaleform::GetIsBookAndWasRead(pTargetReference));
             }
         };
 
@@ -78,7 +75,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), args);
+                CAHZScaleform::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), a_params);
             }
         };
 
@@ -87,7 +84,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), args);
+                CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), a_params);
             }
         };
 
@@ -96,7 +93,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                args->result->SetNumber(CAHZScaleform::GetArmorWarmthRating(CAHZPlayerInfo::GetTargetRef()));
+                a_params.retVal->SetNumber(CAHZScaleform::GetArmorWarmthRating(CAHZPlayerInfo::GetTargetRef()));
             }
         };
 
@@ -105,9 +102,8 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-#if _DEBUG
-                _MESSAGE("%s", args->args[0].GetString());
-#endif
+                assert(a_params.argCount); 
+                logger::trace("{}", a_params.args[0].GetString());
             }
         };
 
@@ -116,7 +112,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), args);
+                CAHZScaleform::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), a_params);
             }
         };
 
@@ -125,7 +121,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), args);
+                CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), a_params);
             }
         };
 
@@ -134,7 +130,7 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                CAHZScaleform::ProcessEnemyInformation(args);
+                CAHZScaleform::ProcessEnemyInformation(a_params);
             }
         };
 
@@ -143,14 +139,14 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                TESObjectREFR* pTargetReference = CAHZPlayerInfo::GetTargetRef();
+                auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
 
                 // If the target is not valid or it can't be picked up by the player
                 if (!pTargetReference) {
-                    args->result->SetNumber(0);
+                    a_params.retVal->SetNumber(0);
                     return;
                 }
-                args->result->SetNumber(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
+                a_params.retVal->SetNumber(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
             }
         };
 
@@ -159,24 +155,23 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                if (args &&
-                    args->args &&
-                    args->numArgs > 0 &&
-                    args->args[0].GetType() == GFxValue::kType_String) {
-                    TESObjectREFR* pTargetReference = CAHZPlayerInfo::GetTargetRef();
+                assert(a_params.args);
+                assert(a_params.argCount);
+                if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
+                    auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
                     // If the target is not valid then say false
                     if (!pTargetReference) {
-                        args->result->SetBool(false);
+                        a_params.retVal->SetBoolean(false);
                         return;
                     }
 
-                    auto keyName = string(args->args[0].GetString());
+                    auto keyName = string(a_params.args[0].GetString());
 
-                    args->result->SetBool(papyrusMoreHud::HasForm(keyName, pTargetReference->baseForm->formID));
+                    a_params.retVal->SetBoolean(PapyrusMoreHud::HasForm(keyName, pTargetReference->GetBaseObject()->formID));
                     return;
                 }
 
-                args->result->SetBool(false);
+                a_params.retVal->SetBoolean(false);
                 return;
             }
         };
@@ -186,43 +181,42 @@ namespace Scaleform
         public:
             virtual void Call(Params& a_params)
             {
-                if (args &&
-                    args->args &&
-                    args->numArgs > 0 &&
-                    args->args[0].GetType() == GFxValue::kType_String) {
-                    auto iconName = string(args->args[0].GetString());
+                assert(a_params.args);
+                assert(a_params.argCount);
+                if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
+                    auto iconName = string(a_params.args[0].GetString());
 
-                    TESObjectREFR* pTargetReference = CAHZPlayerInfo::GetTargetRef();
+                    auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
                     // If the target is not valid then say false
                     if (!pTargetReference) {
-                        args->result->SetBool(false);
+                        a_params.retVal->SetBoolean(false);
                         return;
                     }
 
-                    const char*  name = NULL;
-                    TESFullName* pFullName = DYNAMIC_CAST(pTargetReference->baseForm, TESForm, TESFullName);
+                    const char*  name = nullptr;
+                    auto pFullName = DYNAMIC_CAST(pTargetReference->GetBaseObject() ,RE::TESForm, RE::TESFullName);
                     if (pFullName)
-                        name = pFullName->name.data;
+                        name = pFullName->GetFullName();
 
                     // Can't get the same for the crc
                     if (!name) {
-                        args->result->SetBool(false);
+                        a_params.retVal->SetBoolean(false);
                         return;
                     }
 
-                    auto hash = (SInt32)HashUtil::CRC32(name, pTargetReference->baseForm->formID & 0x00FFFFFF);
+                    auto hash = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, pTargetReference->GetBaseObject()->formID & 0x00FFFFFF));
 
-                    auto resultIconName = string(papyrusMoreHud::GetIconName(hash));
+                    auto resultIconName = string(PapyrusMoreHud::GetIconName(hash));
 
                     if (!resultIconName.length()) {
-                        args->result->SetBool(false);
+                        a_params.retVal->SetBoolean(false);
                         return;
                     }
 
-                    args->result->SetBool(resultIconName == iconName);
+                    a_params.retVal->SetBoolean(resultIconName == iconName);
                     return;
                 }
-                args->result->SetBool(false);
+                a_params.retVal->SetBoolean(false);
             }
         };
 
@@ -239,12 +233,6 @@ namespace Scaleform
 
 	void RegisterCreators()
 	{
-		//BirthSignMenu::Register();
-		//LevelUpMenu::Register();
-		MeterMenu::Register();
-		SpellmakingMenu::Register();
-		StatsMenuEx::Register();
-
 		logger::info("Registered all scaleform creators");
 	}
 }
