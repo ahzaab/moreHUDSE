@@ -10,12 +10,12 @@ CAHZArmorInfo::~CAHZArmorInfo(void)
 {
 }
 
-AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(uint32_t slotMask)
+AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask)
 {
 	AHZArmorData data;
     auto         pPC = RE::PlayerCharacter::GetSingleton();
     auto         inventoryChanges = pPC->GetInventoryChanges();
-    auto         armor = inventoryChanges->GetArmorInSlot(slotMask);
+    auto         armor = inventoryChanges->GetArmorInSlot(static_cast<uint32_t>(slotMask));
 
 	if (armor) {
         auto list = inventoryChanges->entryList;
@@ -29,15 +29,15 @@ AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(uint32_t slotMask)
 					if (extraData &&
 						(extraData->HasType(RE::ExtraDataType::kWorn) || extraData->HasType(RE::ExtraDataType::kWornLeft)))
 					{
-                        data.equipData.pForm = entry->object;
+                        data.equipData.boundObject = entry->object;
                         data.equipData.pExtraData = extraData;
 
-						if (data.equipData.pForm) {
-                            if (data.equipData.pForm->GetFormType() == RE::FormType::Armor) {
-                                data.armor = DYNAMIC_CAST(data.equipData.pForm, RE::TESForm, RE::TESObjectARMO);
+						if (data.equipData.boundObject) {
+                            if (data.equipData.boundObject->GetFormType() == RE::FormType::Armor) {
+                                data.armor = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectARMO);
                             }
-                            if (data.equipData.pForm->GetFormType() == RE::FormType::Light) {
-                                data.torch = DYNAMIC_CAST(data.equipData.pForm, RE::TESForm, RE::TESObjectLIGH);
+                            if (data.equipData.boundObject->GetFormType() == RE::FormType::Light) {
+                                data.torch = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectLIGH);
                             }
                         }
 

@@ -1,4 +1,5 @@
-﻿#include "AHZFormLookup.h"
+﻿#include "PCH.h"
+#include "AHZFormLookup.h"
 
 // Base Address = 7FF62ACA0000
 //.text:00007FF62BEEF240; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
@@ -102,10 +103,10 @@
 //
 
 
-class CAHZGetScriptVariableFunctor : public IForEachScriptObjectFunctor
+class CAHZGetScriptVariableFunctor : public RE::IForEachScriptObjectFunctor
 {
 public:
-   CAHZGetScriptVariableFunctor(VMClassRegistry * registry, UInt64 handle, string var)
+   CAHZGetScriptVariableFunctor(RE::VMClassRegistry * registry, UInt64 handle, string var)
    {
       m_registry = registry;
       m_handle = handle;
@@ -205,15 +206,15 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 	}
 }
 
-TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
+RE::TESForm * CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef)
 {
-	if (!targetRef->baseForm)
-		return NULL;
+	if (!targetRef || !targetRef->GetBaseObject())
+		return nullptr;
 
-	if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
+	if (m_LUT.find(targetRef->GetBaseObject()->formID) != m_LUT.end())
 	{
-		UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
-		TESForm * form = LookupFormByID(formID);
+        uint32_t formID = m_LUT.find(targetRef->GetBaseObject()->formID)->second;
+		auto form = RE::TESForm::LookupByID(formID);
 		return form;
 	}
 	return NULL;
@@ -240,118 +241,126 @@ void CAHZFormLookup::AddScriptVarable(string vmVariableName)
    }
 }
 
-void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID)
+void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID)
 {
-   DataHandler * dataHandler = DataHandler::GetSingleton();
-   const ModInfo * baseModInfo = dataHandler->LookupModByName(baseFormModName.c_str());
-   if (!baseModInfo || !baseModInfo->IsActive())
-      return;
+    auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-   const ModInfo * targetModInfo = dataHandler->LookupModByName(targetFormModName.c_str());
-   if (!targetModInfo || !targetModInfo->IsActive())
-      return;
+    // Normalize to the raw formIDs
+    auto isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
+    baseFormID = isBaseLight ? baseFormID & 0x00000FFF : baseFormID & 0x00FFFFFF;
+    auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
+    targetFormID = isBaseLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
 
-   // If not exists
-   if (m_modIndexLUT.find(baseFormModName) == m_modIndexLUT.end())
-   {
-      UInt32 modIndex = baseModInfo->GetPartialIndex();
+    auto baseForm = dataHandler->LookupForm(baseFormID, baseFormModName);
 
-      //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
-      _VMESSAGE("ACTI Base Mod:%s, idx:%08X", baseFormModName.c_str(), modIndex);
-      m_modIndexLUT[baseFormModName] = modIndex;
-   }
+    if (!baseForm) {
+        return;
+    }
 
-   // If not exists
-   if (m_modIndexLUT.find(targetFormModName) == m_modIndexLUT.end())
-   {
-      UInt32 modIndex = targetModInfo->GetPartialIndex();
+    auto targetForm = dataHandler->LookupForm(targetFormID, targetFormModName);
+    if (!targetForm) {
+        return;
+    }
 
-      //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
-      _VMESSAGE("ACTI Targ Mod:%s, idx:%08X", targetFormModName.c_str(), modIndex);
-      m_modIndexLUT[targetFormModName] = modIndex;
-   }
-
-   // If exists
-   if (m_modIndexLUT.find(baseFormModName) != m_modIndexLUT.end() && m_modIndexLUT.find(targetFormModName) != m_modIndexLUT.end())
-   {
-      //UInt32 baseModIndex = m_modIndexLUT[baseFormModName];
-      //UInt32 targetModIndex = m_modIndexLUT[targetFormModName];
-      UInt32 baseForm = baseModInfo->GetFormID(baseFormID); //(baseFormID & 0x00FFFFFF) | baseModIndex;
-      UInt32 targetForm = targetModInfo->GetFormID(targetFormID); //(targetFormID & 0x00FFFFFF) | targetModIndex;
-      // Load into map if the entry does not already exist
-      if (m_LUT.find(baseForm) == m_LUT.end())
-      {
-         m_LUT[baseForm] = targetForm;
-         _VMESSAGE("ACTI BASE ID:%08X, ACTI Targ ID:%08X", baseForm, targetForm);
-      }
-   }
+    // Load into map if the entry does not already exist
+    if (m_LUT.find(baseForm->formID) == m_LUT.end()) {
+        m_LUT[baseForm->formID] = targetForm->formID;
+        logger::trace("ACTI BASE ID:{:#08x}, ACTI Targ ID:{:#08x}", baseForm->formID, targetForm->formID);
+    }
 }
 
-TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
+RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form)
 {
-   vector<string>::iterator p;
+    vector<string>::iterator p;
 
-   if (!form)
-   {
-      return NULL;
-   }
+    if (!form) {
+        return nullptr;
+    }
 
-   if (!form->baseForm)
-   {
-	   return NULL;
-   }
+    if (!form->GetBaseObject()) {
+        return NULL;
+    }
 
-   if (form->baseForm->formType != kFormType_Activator)
-   {
-      return NULL;
-   }
+    if (form->GetBaseObject()->formType != RE::FormType::Activator) {
+        return nullptr;
+    }
 
-   for (p = m_scriptVMVariables.begin(); p != m_scriptVMVariables.end(); p++) {
+    for (p = m_scriptVMVariables.begin(); p != m_scriptVMVariables.end(); p++) {
+        //_MESSAGE("GetAttachedForm");
+        RE::TESForm* attachedForm = NULL;
+        if ((attachedForm = GetAttachedForm(form, *p)) != NULL) {
+            if (attachedForm->formType == RE::FormType::LeveledItem) {
+                auto lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::TESLevItem);
 
-      //_MESSAGE("GetAttachedForm");
-     RE::TESForm* attachedForm = NULL;
-      if ((attachedForm = GetAttachedForm(form, *p)) != NULL)
-      {
-         if (attachedForm->formType == kFormType_LeveledItem)
-         {
-            TESLevItem *lvli = DYNAMIC_CAST(attachedForm,RE::TESForm, TESLevItem);
+                // Get the first form and see if it is an ingredient
+                if (lvli && lvli->entries.size() > 0) {
+                    auto itemform = lvli->entries[0].form;
+                    return itemform;
+                }
+            } else if (attachedForm->formType == RE::FormType::FormList) {
+                auto* lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::BGSListForm);
 
-            // Get the first form and see if it is an ingredient
-            if (lvli && lvli->leveledList.length > 0)
-            {
-              RE::TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
-               return itemform;
+                // Get the first form and see if it is an ingredient
+                if (lvli && lvli->forms.size() > 0) {
+                    auto itemform = lvli->forms[0];
+                    return itemform;
+                }
+            } else {
+                return attachedForm;
             }
-         }
-         else if (attachedForm->formType == kFormType_List)
-         {
-            BGSListForm *lvli = DYNAMIC_CAST(attachedForm,RE::TESForm, BGSListForm);
+        }
+    }
 
-            // Get the first form and see if it is an ingredient
-            if (lvli && lvli->forms.count > 0)
-            {
-              RE::TESForm *itemform = (TESForm *)lvli->forms.entries[0];
-               return itemform;
-            }
-         }
-         else
-         {
-            return attachedForm;
-         }
-      }
-   }
-
-   return NULL;
+    return nullptr;
 }
 
-TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableName)
+
+auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const
+{
+    RE::BSScript::Variable var;
+    if (a_form == nullptr) {
+        return var;
+    }
+
+    auto variableName = std::string(a_scriptVariable);
+    variableName.insert(0, "::");
+    variableName.append("_var");
+    auto                                      vm = RE::SkyrimVM::GetSingleton();
+    auto                                      vmImpl = vm->impl;
+    auto                                      handlePolicy = vmImpl.get()->GetObjectHandlePolicy();
+    auto                                      handle = handlePolicy->GetHandleForObject(a_form->GetFormType(), a_form);
+    RE::BSTSmartPointer<RE::BSScript::Object> result;
+
+    vmImpl->FindBoundObject(handle, a_scriptName, result);
+
+    if (!result.get()) {
+        return var;
+    }
+
+    RE::BSTSmartPointer<RE::BSScript::ObjectTypeInfo> info;
+    vmImpl->GetScriptObjectType(a_scriptName, info);
+    auto iter = info->GetVariableIter();
+    if (iter) {
+        for (std::uint32_t i = 0; i < info->GetTotalNumVariables(); ++i) {
+            auto& prop = iter[i];
+            if (std::string(prop.name.c_str()) == variableName) {
+                vmImpl->GetVariableValue(result, i, var);
+                return var;
+            }
+        }
+    }
+
+    return var;
+}
+
+RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR *form, string variableName)
 {
    if (form) {
       VMClassRegistry		* registry = (*g_skyrimVM)->GetClassRegistry();
       IObjectHandlePolicy	* policy = registry->GetHandlePolicy();
 
-	  if (!form->baseForm)
-		  return NULL;
+	  if (!form->GetBaseObject())
+		  return nullptr;
 
       UInt64 handle = policy->Create(form->baseForm->formType, form);
       if (handle != policy->GetInvalidHandle())

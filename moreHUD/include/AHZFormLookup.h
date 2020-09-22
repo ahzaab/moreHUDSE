@@ -4,18 +4,6 @@
 #include <stdlib.h>
 #include <list>
 #include <algorithm>
-#include "skse64/GameReferences.h"
-#include "skse64/GameObjects.h"
-#include "skse64/GameData.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameSettings.h"
-#include "skse64/GameExtraData.h"
-#include "skse64/ScaleformCallbacks.h"
-#include "skse64/ScaleformMovie.h"
-#include "skse64/PapyrusIngredient.h"
-#include "skse64/PapyrusSpell.h"
-#include "skse64/PapyrusArgs.h"
-#include "skse64/PapyrusVM.h"
 #include "AHZArmorInfo.h"
 #include "AHZPlayerInfo.h"
 #include "AHZWeaponInfo.h"
@@ -57,8 +45,37 @@ private:
    CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
    std::vector<string> m_scriptVMVariables;
    std::map<uint32_t, uint32_t> m_LUT;
-   std::map<string, uint32_t>   m_modIndexLUT;
+   auto GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const;
 };
 
 #define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))
 #define AHZGetReference(x) (CAHZFormLookup::Instance().GetReference((x)))
+
+namespace RE
+{
+    namespace BSScript
+    {
+        // This type is not fully decoded or correctly sized, just enough to use the functor
+        class ScriptObjectMessage
+        {
+        public: 
+            uint32_t                      unk00;
+            ObjectTypeInfo* typeInfo;
+            void*                         unk08;
+            uint32_t                      unk0C;
+            uint32_t                      unk10;
+            uint32_t                      unk14;
+            uint32_t                      unk18;
+        };
+
+        class IForEachScriptObjectFunctor
+        {
+        public:
+            IForEachScriptObjectFunctor() = default;
+            virtual ~IForEachScriptObjectFunctor() = default;
+
+            // return true to continue
+            virtual bool Visit(ScriptObjectMessage* arg, void* arg2) = 0;
+        };
+    }
+}

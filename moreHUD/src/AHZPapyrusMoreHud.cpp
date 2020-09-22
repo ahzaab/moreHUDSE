@@ -1,5 +1,6 @@
 #include "PCH.h"
 #include "AHZPapyrusMoreHud.h"
+#include "version.h"
 #include <mutex>
 
 
@@ -11,7 +12,11 @@
 
 	uint32_t PapyrusMoreHud::GetVersion(RE::StaticFunctionTag* base)
 	{
-        return 0;  //PLUGIN_VERSION;
+        uint32_t major = MHUD_VERSION_MAJOR * pow(10,6);
+        uint32_t minor = MHUD_VERSION_MINOR * pow(10, 4);
+        uint32_t patch = MHUD_VERSION_PATCH * pow(10, 2);
+        uint32_t beta = MHUD_VERSION_BETA * pow(10, 0);
+        return major + minor + patch + beta;
 	}
 
 	void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)

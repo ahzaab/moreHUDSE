@@ -204,7 +204,7 @@ double CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
    if (!armorData->armor)
       return 0.0;
 
-   RE::InventoryEntryData objDesc(armorData->equipData.pForm, 0);
+   RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
 
    // Allocate a dummy list so skyrim does not crash. For armor information
    // skyrim doesn't appear to need the list
@@ -255,7 +255,7 @@ double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
 
    if (pPC)
    {
-      RE::InventoryEntryData objDesc(armorData->equipData.pForm, 0);
+      RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
 
       // Allocate a dummy list so skyrim does not crash. For armor information
       // skyrim doesn't appear to need the list
@@ -289,11 +289,11 @@ double CAHZScaleform::GetTotalActualArmorRating(void)
    for (uint64_t slot = 1; slot <= static_cast<uint64_t>(0x2000); slot <<= 1)
    {
       AHZArmorData armorData = CAHZArmorInfo::GetArmorFromSlotMask(slot);
-      if (armorData.equipData.pForm)
+      if (armorData.equipData.boundObject)
       {
-         if (find(clist.begin(), clist.end(), armorData.equipData.pForm) == clist.end())
+         if (find(clist.begin(), clist.end(), armorData.equipData.boundObject) == clist.end())
          {
-            clist.push_front(armorData.equipData.pForm);
+            clist.push_front(armorData.equipData.boundObject);
             if (armorData.armor)
             {
                totalRating += GetActualArmorRating(&armorData);
@@ -341,7 +341,7 @@ double CAHZScaleform::GetArmorRatingDiff(RE::TESObjectREFR *thisArmor)
 
    // Get the armor rating from the armor that shares the same slot
    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(
-      armorData.armor->bipedObject.GetSlotMask());
+       armorData.armor->GetSlotMask());
    if (sameSlotData.armor)
    {
       oldArmorRating = GetActualArmorRating(&sameSlotData);
