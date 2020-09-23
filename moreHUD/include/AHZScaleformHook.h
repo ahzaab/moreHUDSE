@@ -3,28 +3,30 @@
 
 void AHZInstallEnemyHealthUpdateHook();
 CAHZActorData GetCurrentEnemyData();
+#include <mutex>
 
+static std::recursive_mutex mtx;
 
-
-class SafeEnemyDataHolder: public RE::SafeDataHolder<CAHZActorData>
+class SafeEnemyDataHolder
 {
 public:
-   SafeEnemyDataHolder() {};
-   ~SafeEnemyDataHolder() {};
+   SafeEnemyDataHolder() = default;
+    ~SafeEnemyDataHolder() = default;
 
    CAHZActorData GetData()
    {
+       std::lock_guard<recursive_mutex> lock(mtx);
 	   CAHZActorData data;
-	   Lock();
 	   data = m_data;
-	   Release();
 	   return data;
    };
 
    void SetData(const CAHZActorData &data)
    {
-	   Lock();
+       std::lock_guard<recursive_mutex> lock(mtx);
 	   m_data = data;
-	   Release();
    };
+
+   private:
+		CAHZActorData m_data;
 };

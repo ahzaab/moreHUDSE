@@ -14,7 +14,7 @@
 #include "string.h"
 using namespace std;
 
-class CAHZFormLookup
+class CAHZFormLookup: public RE::BSScript::IForEachScriptObjectFunctor
 {
 public:
    static CAHZFormLookup& Instance();
@@ -36,8 +36,9 @@ public:
    }
 
 private:
-   CAHZFormLookup();
-   ~CAHZFormLookup();
+    // Force singleton
+   CAHZFormLookup() = default;
+   ~CAHZFormLookup() = default;
    RE::TESForm * GetAttachedForm(RE::TESObjectREFR *form);
    RE::TESForm*    GetFormFromLookup(RE::TESObjectREFR* targetRef);
    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, string variableName);
@@ -64,8 +65,7 @@ namespace RE
             void*                         unk08;
             uint32_t                      unk0C;
             uint32_t                      unk10;
-            uint32_t                      unk14;
-            uint32_t                      unk18;
+            RE::VMHandle                  handle;
         };
 
         class IForEachScriptObjectFunctor
