@@ -168,7 +168,7 @@
 	}
 
 
-void PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm)
+bool PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm)
     {
         a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion);
         a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);
@@ -179,4 +179,5 @@ void PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm)
         a_vm->RegisterFunction("RegisterIconFormList", "AhzMoreHud", RegisterIconFormList);
         a_vm->RegisterFunction("UnRegisterIconFormList", "AhzMoreHud", UnRegisterIconFormList);
         a_vm->RegisterFunction("IsIconFormListRegistered", "AhzMoreHud", IsIconFormListRegistered);
+        return true;
     }

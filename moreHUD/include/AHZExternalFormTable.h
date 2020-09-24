@@ -22,7 +22,7 @@ public:
 
          // Get the number of entries
          int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
-         _MESSAGE("Loading %d ACTI Form Entries", iNumOfEntries);
+         logger::info("Loading {} ACTI Form Entries", iNumOfEntries);
          cout << iNumOfEntries << endl;
 
          // Get each entry and load into the lookup table
@@ -45,7 +45,7 @@ public:
                }
                else
                {
-                  _MESSAGE("Could not entry Entry: %s", returnValue);
+                   logger::info("Could not entry Entry: {}", returnValue);
                }
             }
          }
@@ -62,7 +62,7 @@ public:
          string fullPath = skyrimDataPath + *p;
          // Get the number of entries
          int iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
-         _MESSAGE("Loading %d Script Variable(s)", iNumOfEntries);
+         logger::info("Loading {} Script Variable(s)", iNumOfEntries);
          cout << iNumOfEntries << endl;
 
          // Get each entry and load into the lookup table
@@ -81,7 +81,7 @@ public:
             }
             else
             {
-               _MESSAGE("Could not load script variable: %s", returnValue);
+                logger::info("Could not load script variable: {}", returnValue);
             }
          }
       }

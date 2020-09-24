@@ -36,7 +36,8 @@ namespace Events
 
         inline RE::TESObjectREFR* GetCrosshairReference()
         {
-            _cachedRef.get();
+            return _cachedRef.get().get();
+
         }
 
     protected:
@@ -75,6 +76,10 @@ namespace Events
     {
         CrosshairRefManager::Register();
         logger::info("registered crosshair event"sv);
+        MenuHandler::Sink();
+        logger::info("registered menu event"sv);
+
+        logger::info("Installed all event sinks"sv);
     }
 
 }

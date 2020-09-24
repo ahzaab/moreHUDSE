@@ -16,8 +16,8 @@ public:
    static string& trim(string& s);
    static string GetConfigOption(const char * section, const char * key);
 
-   CAHZUtilities();
-   ~CAHZUtilities();
+   CAHZUtilities() = default;
+   ~CAHZUtilities() = default;
 
 private:
    static string& rtrim(string& s);

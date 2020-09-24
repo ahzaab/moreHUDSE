@@ -1,4 +1,4 @@
-LIBRARY	"Skywind"
+LIBRARY	"moreHUD"
 EXPORTS
 SKSEPlugin_Query
 SKSEPlugin_Load

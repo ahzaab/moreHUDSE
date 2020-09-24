@@ -14,7 +14,35 @@
 #include "string.h"
 using namespace std;
 
-class CAHZFormLookup: public RE::BSScript::IForEachScriptObjectFunctor
+namespace RE
+{
+    namespace BSScript
+    {
+        // This type is not fully decoded or correctly sized, just enough to use the functor
+        class ScriptObjectMessage
+        {
+        public:
+            uint32_t        unk00;
+            ObjectTypeInfo* typeInfo;
+            void*           unk08;
+            uint32_t        unk0C;
+            uint32_t        unk10;
+            RE::VMHandle    handle;
+        };
+
+        class IForEachScriptObjectFunctor
+        {
+        public:
+            IForEachScriptObjectFunctor() = default;
+            virtual ~IForEachScriptObjectFunctor() = default;
+
+            // return true to continue
+            virtual bool Visit(ScriptObjectMessage* arg, void* arg2) = 0;
+        };
+    }
+}
+
+class CAHZFormLookup
 {
 public:
    static CAHZFormLookup& Instance();
@@ -52,30 +80,3 @@ private:
 #define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))
 #define AHZGetReference(x) (CAHZFormLookup::Instance().GetReference((x)))
 
-namespace RE
-{
-    namespace BSScript
-    {
-        // This type is not fully decoded or correctly sized, just enough to use the functor
-        class ScriptObjectMessage
-        {
-        public: 
-            uint32_t                      unk00;
-            ObjectTypeInfo* typeInfo;
-            void*                         unk08;
-            uint32_t                      unk0C;
-            uint32_t                      unk10;
-            RE::VMHandle                  handle;
-        };
-
-        class IForEachScriptObjectFunctor
-        {
-        public:
-            IForEachScriptObjectFunctor() = default;
-            virtual ~IForEachScriptObjectFunctor() = default;
-
-            // return true to continue
-            virtual bool Visit(ScriptObjectMessage* arg, void* arg2) = 0;
-        };
-    }
-}

@@ -14,6 +14,6 @@ namespace SKSE
 
     RE::ActorValueInfo* ActorValueList::GetActorValue(RE::ActorValue id)
     {
-        return (id < RE::ActorValue::kTotal) ? actorValues[id] : nullptr;
+        return (id < RE::ActorValue::kTotal) ? actorValues[static_cast<uint32_t>(id)] : nullptr;
     }
 }

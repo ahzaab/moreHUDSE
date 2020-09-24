@@ -10,7 +10,7 @@ using namespace std;
 class PapyrusMoreHud
 {
 public:
-    static void RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+    static bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
     static bool HasForm(std::string iconName, uint32_t formId);
     static string GetIconName(uint32_t itemID);
 

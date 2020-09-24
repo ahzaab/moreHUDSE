@@ -1,3 +1,4 @@
+#include "PCH.h"
 #include "AHZUtilities.h"
 #include <io.h> 
 
@@ -6,7 +7,7 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
    vector<string> names;
    string search_path = folder + "/*.MHUD";
    WIN32_FIND_DATA fd;
-   _MESSAGE("Search the '%s' directory...", folder.c_str());
+   logger::info("Search the '{}' directory...", folder.c_str());
    HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
    if (hFind != INVALID_HANDLE_VALUE) {
       do {
@@ -19,7 +20,7 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
             //_MESSAGE("-> file '%s'", fileName.c_str());
            // if (found != string::npos)
             //{
-               _MESSAGE("--> FOUND '%s'", fileName.c_str());
+            logger::info("--> FOUND '{}'", fileName.c_str());
                names.push_back(fd.cFileName);
            // }
          }
@@ -32,7 +33,7 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
 vector<string> CAHZUtilities::SplitString(string& str, string& token) {
    vector<string>result;
    while (str.size()) {
-      int index = str.find(token);
+      auto index = str.find(token);
       if (index != string::npos) {
          result.push_back(str.substr(0, index));
          str = str.substr(index + token.size());
@@ -48,13 +49,16 @@ vector<string> CAHZUtilities::SplitString(string& str, string& token) {
 
 AHZLUTObject CAHZUtilities::ParseLUTObject(string & stringValue)
 {
-   vector<string> items = SplitString(string(stringValue), string(","));
+    string         split = ","; 
+   vector<string> items = SplitString(stringValue, split);
+    string         pipe = "|";
+
    AHZLUTObject lutObject;
 
    if (items.size() == 2)
    {
-      vector<string> baseItem = SplitString(string(items[0]), string("|"));
-      vector<string> targetItem = SplitString(string(items[1]), string("|"));
+       vector<string> baseItem = SplitString(items[0], pipe);
+       vector<string> targetItem = SplitString(items[1], pipe);
 
       if (baseItem.size() == 2 && targetItem.size() == 2)
       {
@@ -73,7 +77,7 @@ AHZLUTObject CAHZUtilities::ParseLUTObject(string & stringValue)
       }
    }
 
-   _MESSAGE("The line %s could not be parsed", stringValue.c_str());
+   logger::info("The line {} could not be parsed", stringValue.c_str());
    return AHZLUTObject();
 }
 
@@ -181,17 +185,10 @@ string CAHZUtilities::GetConfigOption(const char * section, const char * key)
 
    if (_access_s(s_pluginPath.c_str(), 0) == 0)
    {
-      UInt32	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
+      uint32_t	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
       result = resultBuf;
    }
    return result;
 }
 
-CAHZUtilities::CAHZUtilities()
-{
-}
 
-
-CAHZUtilities::~CAHZUtilities()
-{
-}

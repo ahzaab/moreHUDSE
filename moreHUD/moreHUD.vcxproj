@@ -172,24 +172,12 @@
     <ClCompile Include="src\AHZVanillaFormTable.cpp" />
     <ClCompile Include="src\AHZWeaponInfo.cpp" />
     <ClCompile Include="src\HashUtil.cpp" />
-    <ClCompile Include="src\HUDObject.cpp" />
     <ClCompile Include="src\moreHUDMenu.cpp" />
     <ClCompile Include="src\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\CLIK\Array.cpp" />
-    <ClCompile Include="src\CLIK\Button.cpp" />
-    <ClCompile Include="src\CLIK\CoreList.cpp" />
-    <ClCompile Include="src\CLIK\DropdownMenu.cpp" />
-    <ClCompile Include="src\CLIK\MovieClip.cpp" />
-    <ClCompile Include="src\CLIK\Object.cpp" />
-    <ClCompile Include="src\CLIK\ScrollingList.cpp" />
-    <ClCompile Include="src\CLIK\Slider.cpp" />
-    <ClCompile Include="src\CLIK\TextField.cpp" />
-    <ClCompile Include="src\CLIK\TextInput.cpp" />
-    <ClCompile Include="src\CLIK\UIComponent.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Papyrus.cpp" />
     <ClCompile Include="src\Patches.cpp" />
@@ -211,21 +199,9 @@
     <ClInclude Include="include\AHZUtilities.h" />
     <ClInclude Include="include\AHZVanillaFormTable.h" />
     <ClInclude Include="include\AHZWeaponInfo.h" />
-    <ClInclude Include="include\CLIK\Array.h" />
-    <ClInclude Include="include\CLIK\Button.h" />
-    <ClInclude Include="include\CLIK\CoreList.h" />
-    <ClInclude Include="include\CLIK\DropdownMenu.h" />
-    <ClInclude Include="include\CLIK\MovieClip.h" />
-    <ClInclude Include="include\CLIK\Object.h" />
-    <ClInclude Include="include\CLIK\ScrollingList.h" />
-    <ClInclude Include="include\CLIK\Slider.h" />
-    <ClInclude Include="include\CLIK\TextField.h" />
-    <ClInclude Include="include\CLIK\TextInput.h" />
-    <ClInclude Include="include\CLIK\UIComponent.h" />
     <ClInclude Include="include\Events.h" />
     <ClInclude Include="include\HashUtil.h" />
     <ClInclude Include="include\moreHUDMenu.h" />
-    <ClInclude Include="include\HUDObject.h" />
     <ClInclude Include="include\Offsets.h" />
     <ClInclude Include="include\Papyrus.h" />
     <ClInclude Include="include\Patches.h" />

@@ -10,7 +10,7 @@ namespace Scaleform
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        virtual void Call([[maybe_unused]] Params& a_params)
         {
         }
     };
@@ -20,7 +20,7 @@ namespace Scaleform
     public:
         virtual void Call(Params& a_params)
         {
-            CAHZScaleform::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), args);
+            CAHZScaleform::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
@@ -217,26 +217,19 @@ namespace Scaleform
         }
     };
 
-    void RegisterCallbacks()
-    {
-        auto scaleform = SKSE::GetScaleformInterface();
-        scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDPlugin");
-    }
-
     template <typename T>
     void RegisterFunction(RE::GFxValue* dst, RE::GFxMovieView* movie, const char* name)
     {
         // not found, allocate a new one
-        RE::GFxFunctionHandler fn = new T;
+        T* fn = new T;
 
         // create the function object
         RE::GFxValue fnValue;
-        movie->CreateFunction(&fnValue, fn);
+        movie->CreateFunction(&fnValue, static_cast<RE::GFxFunctionHandler*>(fn));
 
         // register it
         dst->SetMember(name, &fnValue);
     }
-
 
     bool RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root)
     {
@@ -259,7 +252,17 @@ namespace Scaleform
 
 
         logger::info("Registered all scaleform callbacks");
+
+        return true;
     }
+
+    void RegisterCallbacks()
+    {
+        auto scaleform = SKSE::GetScaleformInterface();
+        scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDPlugin");
+    }
+
+
 
 
     void RegisterCreators()

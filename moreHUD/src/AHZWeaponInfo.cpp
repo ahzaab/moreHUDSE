@@ -22,9 +22,9 @@ public:
                     auto extraList = *it;
 					if (extraList->HasType(RE::ExtraDataType::kWorn))
 					{
-						ammoData.equipData.pForm = pEntryData->object;
+						ammoData.equipData.boundObject = pEntryData->object;
 						ammoData.equipData.pExtraData = extraList;
-						ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.pForm, RE::TESForm, RE::TESAmmo);
+						ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
 						if (ammoData.ammo)
 						{
 							return false;
@@ -58,19 +58,19 @@ AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR * thisObject)
 		return weaponData;
 	}
 
-	weaponData.equipData.pForm = baseForm;
+	weaponData.equipData.boundObject = baseForm;
 	weaponData.equipData.pExtraData = &thisObject->extraList;
 
 	if (baseForm->GetFormType() == RE::FormType::Weapon)
-		weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm, RE::TESObjectWEAP);
+		weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject,RE::TESForm, RE::TESObjectWEAP);
     else if (baseForm->GetFormType() == RE::FormType::Ammo)
-		weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.pForm,RE::TESForm,RE::TESAmmo);
+		weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.boundObject,RE::TESForm,RE::TESAmmo);
     else if (baseForm->GetFormType() == RE::FormType::Projectile)
 	{
 		auto asArrowProjectile = DYNAMIC_CAST(thisObject, RE::TESObjectREFR, RE::ArrowProjectile);
 		weaponData.ammo = DYNAMIC_CAST(AHZGetForm(thisObject),RE::TESForm, RE::TESAmmo);
 		if (asArrowProjectile) {
-			weaponData.equipData.pForm = weaponData.ammo;
+			weaponData.equipData.boundObject = weaponData.ammo;
 			weaponData.equipData.pExtraData = &asArrowProjectile->extraList;
 		}
 	}
@@ -98,7 +98,7 @@ AHZWeaponData CAHZWeaponInfo::GetLeftHandWeapon(void)
                         weaponData.equipData.pExtraData = extraData;
 
                         if (weaponData.equipData.boundObject) {
-                            weaponData.weapon == DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
+                            weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
                         }
 
                         return weaponData;
@@ -129,7 +129,7 @@ AHZWeaponData CAHZWeaponInfo::GetRightHandWeapon(void)
                         weaponData.equipData.pExtraData = extraData;
 
                         if (weaponData.equipData.boundObject) {
-                            weaponData.weapon == DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
+                            weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
                         }
 
                         return weaponData;
@@ -159,7 +159,7 @@ AHZWeaponData CAHZWeaponInfo::GetEquippedAmmo(void)
                         ammoData.equipData.pExtraData = extraData;
 
                         if (ammoData.equipData.boundObject) {
-                            ammoData.ammo == DYNAMIC_CAST(ammoData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
+                            ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
                             return ammoData;
                         }                      
                     }

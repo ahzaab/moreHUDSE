@@ -51,11 +51,4 @@ namespace Events
         }
         return RE::BSEventNotifyControl::kContinue;
     }
-
-    void Install()
-    {
-        MenuHandler::Sink();
-        logger::info("Installed all event sinks");
-    }
-
 }

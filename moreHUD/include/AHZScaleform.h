@@ -3,17 +3,6 @@
 #include <stdlib.h>
 #include <list>
 #include <algorithm>
-#include "skse64/GameReferences.h"
-#include "skse64/GameObjects.h"
-#include "skse64/GameData.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameSettings.h"
-#include "skse64/GameExtraData.h"
-#include "skse64/ScaleformCallbacks.h"
-#include "skse64/ScaleformMovie.h"
-#include "skse64/ScaleformLoader.h"
-#include "skse64/PapyrusIngredient.h"
-#include "skse64/PapyrusSpell.h"
 #include "AHZArmorInfo.h"
 #include "AHZPlayerInfo.h"
 #include "AHZWeaponInfo.h"

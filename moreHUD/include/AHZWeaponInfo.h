@@ -32,7 +32,7 @@ public:
         weapon = nullptr;
         ammo = nullptr;
 	}
-	~AHZWeaponData() = default
+    ~AHZWeaponData() = default;
 };
 
 class CAHZWeaponInfo

@@ -176,7 +176,7 @@ double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
 
    if (pPC)
    {
-      RE::InventoryEntryData objDesc(weaponData->equipData.pForm, 0);
+      RE::InventoryEntryData objDesc(weaponData->equipData.boundObject, 0);
 
       // Allocate a list to send
       // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
@@ -288,7 +288,7 @@ double CAHZScaleform::GetTotalActualArmorRating(void)
    std::list<RE::TESForm*> clist;
    for (uint64_t slot = 1; slot <= static_cast<uint64_t>(0x2000); slot <<= 1)
    {
-      AHZArmorData armorData = CAHZArmorInfo::GetArmorFromSlotMask(slot);
+      AHZArmorData armorData = CAHZArmorInfo::GetArmorFromSlotMask(static_cast<RE::BIPED_MODEL::BipedObjectSlot>(slot));
       if (armorData.equipData.boundObject)
       {
          if (find(clist.begin(), clist.end(), armorData.equipData.boundObject) == clist.end())
@@ -376,7 +376,7 @@ double CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR *thisArmor)
 
    // Get the armor rating from the armor that shares the same slot
    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(
-      armorData.armor->bipedObject.GetSlotMask());
+      armorData.armor->GetSlotMask());
    if (sameSlotData.armor)
    {
       oldArmorRating = GetArmorWarmthRating(&sameSlotData);
@@ -552,7 +552,7 @@ double CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR *targetWeaponOrAmmo)
       }
       else if (IsCrossBow(leftWeapon.weapon))
       {
-         float tempDamage = GetActualDamage(&leftWeapon);
+         auto tempDamage = GetActualDamage(&leftWeapon);
          float tempArrowDamage = 0.0;
 
          // Add the arrow damage
@@ -1349,12 +1349,12 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params & arg
 
 	if (pPC)
 	{
-		actorData = GetCurrentEnemyData();
+		actorData = AHZEnemyHealthUpdateHook::GetCurrentEnemyData();
 		if (actorData.Level)
 		{
             playerLevel = pPC->GetLevel();
 			if (!actorData.IsSentient) {  // If sentient, then don't bother all sentients have grand soul gem levels
-				soulType = CAHZActorInfo::GetSoulType(actorData.Level, actorData.IsSentient);
+				soulType = CAHZActorInfo::GetSoulType(actorData.Level, static_cast<uint8_t>(actorData.IsSentient));
 			}
 		}
 	}
@@ -1565,7 +1565,7 @@ void CAHZScaleform::AppendDescription(RE::TESDescription *desObj, RE::TESForm *p
       if (!bsDescription.empty())
       {
          tempString.clear();
-         tempString.append(bsDescription.data());
+         tempString.append(bsDescription.c_str());
          if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
          {
             string formatted = "";
@@ -1584,7 +1584,7 @@ void CAHZScaleform::AppendDescription(RE::TESDescription *desObj, RE::TESForm *p
           desc->GetDescription(bsDescription2, parent, 0x43534544);
          tempString.clear();
          if (!bsDescription2.empty())
-            tempString.append(bsDescription2.data());
+             tempString.append(bsDescription2.c_str());
          if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
          {
             string formatted = "";
@@ -1597,7 +1597,7 @@ void CAHZScaleform::AppendDescription(RE::TESDescription *desObj, RE::TESForm *p
             desc->GetDescription(bsDescription2, parent, 0);
             tempString.clear();
             if (&bsDescription2)
-               tempString.append(bsDescription2.data());
+                tempString.append(bsDescription2.c_str());
             if (tempString != "LOOKUP FAILED!" && tempString.length() > 1)
             {
                string formatted = "";
@@ -2021,8 +2021,6 @@ bool CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t 
         kType_FourthEffect = 1 << 3
     };
 
-
-        return false;
     switch (index) {
     case 0:
         isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_FirstEffect) == kType_FirstEffect);
@@ -2098,7 +2096,7 @@ void CAHZScaleform::BuildInventoryObject(RE::TESForm* form, RE::GFxFunctionHandl
     string name;
 
     // Used to store the count of the item
-    uint32_t itemCount;
+    uint32_t itemCount = 0;
 
     auto reference = AHZGetReference(form);
 
@@ -2246,7 +2244,7 @@ void CAHZScaleform::GetMagicItemDescription(RE::MagicItem * item, std::string& d
     GetMagicItemDescription2(nullptr, item, &temp);
     char *temp2 = ProcessSurvivalMode(&temp);
 
-    description.append(temp.data());
+    description.append(temp.c_str());
 }
 
 void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& formatted)
