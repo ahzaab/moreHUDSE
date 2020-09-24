@@ -1,5 +1,8 @@
 #pragma once
 #include "RE/Skyrim.h"
+#include <xbyak/xbyak.h>  // must be between these two
+#include "SKSE/SKSE.h"
+
 #include "SKSE/Logger.h"
 
 #include <spdlog/sinks/basic_file_sink.h>

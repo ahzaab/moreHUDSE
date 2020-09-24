@@ -10,7 +10,7 @@ class CAHZVanillaFormTable
 {
 public:
 
-   typedef std::tuple<string, UInt32> AHZFormEntry;
+   typedef std::tuple<string, uint32_t> AHZFormEntry;
 	typedef std::vector<string> VMScriptEntries;
 	typedef std::vector<AHZFormEntry> AHZLookupMap;
 
@@ -106,12 +106,12 @@ public:
 
    static void LoadACTIForms(CAHZFormLookup& loader)
    {
-      _MESSAGE("Loading Vanilla ACTI Forms...");
+      logger::info("Loading Vanilla ACTI Forms...");
       const AHZLookupMap AHZACTIForms = CreateACTIBaseMap();
       const AHZLookupMap AHZACTITargetForms = CreateACTITargetMap();
 
 		// They must be of equal size
-      ASSERT((AHZACTIForms.size() == AHZACTITargetForms.size()));
+      assert((AHZACTIForms.size() == AHZACTITargetForms.size()));
 
 		AHZLookupMap::const_iterator itEnd = AHZACTIForms.cend();
 		AHZLookupMap::const_iterator itSource = AHZACTIForms.cbegin();
@@ -125,7 +125,7 @@ public:
 
 	static void LoadVMVariables(CAHZFormLookup& loader)
 	{
-		_MESSAGE("Loading Vanilla VM Script Variables...");
+	  logger::info("Loading Vanilla VM Script Variables...");
       const VMScriptEntries AHZVMVariables = CreateVMVariables();
 
 		VMScriptEntries::const_iterator itEnd = AHZVMVariables.cend();

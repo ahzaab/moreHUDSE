@@ -1,15 +1,16 @@
 #pragma once
 
-struct FoundEquipData
-{
-    RE::TESBoundObject*       boundObject;
-    RE::ExtraDataList* pExtraData;
-};
-
 
 class AHZArmorData
 {
 public:
+
+	struct FoundEquipData
+    {
+        RE::TESBoundObject* boundObject;
+        RE::ExtraDataList*  pExtraData;
+    };
+
     FoundEquipData equipData;
 	RE::TESObjectARMO *armor;
 	RE::TESObjectLIGH *torch;

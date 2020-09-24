@@ -22,24 +22,6 @@
 #include <regex>
 
 using namespace std;
-//using namespace papyrusIngredient;
-
-typedef void (*GET_MAGIC_ITEM_DESCRIPTION)(void*, RE::TESForm* a1, RE::BSString* a2);  // , SInt64 a3, const char *a4, const char *a5, unsigned int a6);
-extern RelocAddr<GET_MAGIC_ITEM_DESCRIPTION> GetMagicItemDescription2;
-
-typedef char* (*PROCESS_SURVIVAL_MODE)(RE::BSString* a2);  // , SInt64 a3, const char *a4, const char *a5, unsigned int a6);
-extern RelocAddr<PROCESS_SURVIVAL_MODE> ProcessSurvivalMode;
-
-typedef bool(*_IsSurvivalMode)();
-extern RelocAddr<_IsSurvivalMode> IsSurvivalMode;
-
-typedef float (*GET_ARMOR_WARMTH_RATING)(RE::TESForm* a1);
-extern RelocAddr<GET_ARMOR_WARMTH_RATING> GetArmorWarmthRating_Native;
-
-typedef float (*GET_ACTOR_WARMTH_RATING)(RE::Actor* a1, float s2);
-extern RelocAddr<GET_ACTOR_WARMTH_RATING> GetActorWarmthRating_Native;
-
-//3BD850
 
 class CAHZScaleform
 {

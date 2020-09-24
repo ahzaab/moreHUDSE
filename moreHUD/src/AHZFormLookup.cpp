@@ -63,36 +63,26 @@ private:
 
 CAHZFormLookup& CAHZFormLookup::Instance() {
    static CAHZFormLookup theInstance;
-
-   if (theInstance.m_scriptVMVariables.empty())
-   {
-      //theInstance.m_scriptVMVariables.push_back("::lootable_var");
-      //theInstance.m_scriptVMVariables.push_back("::Nirnroot_var");
-      //theInstance.m_scriptVMVariables.push_back("::TempleBlessing_var");
-      //theInstance.m_scriptVMVariables.push_back("::nonIngredientLootable_var");
-      //theInstance.m_scriptVMVariables.push_back("::myIngredient_var");
-      //theInstance.m_scriptVMVariables.push_back("::myFood_var");
-   }
    return theInstance;
 }
 
-TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
+RE::TESForm * CAHZFormLookup::GetTESForm(RE::TESObjectREFR * targetReference)
 {
-	TESForm * lutForm = NULL;
-	if ((lutForm = GetFormFromLookup(targetReference)) != NULL)
+	RE::TESForm * lutForm = nullptr;
+	if ((lutForm = GetFormFromLookup(targetReference)) != nullptr)
 	{
 		return lutForm;
 	}
-	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Activator)
+	else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator)
 	{
 		return GetAttachedForm(targetReference);
-	}
-	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Projectile)
+	} 
+    else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile)
 	{
-		Projectile *pProjectile = (DYNAMIC_CAST(targetReference, TESObjectREFR, Projectile));
+		auto pProjectile = (DYNAMIC_CAST(targetReference, RE::TESObjectREFR, RE::Projectile));
 
 		if (pProjectile) {
-			AHZProjectile *a = (AHZProjectile*)(pProjectile);
+			AHZProjectile *a = reinterpret_cast<AHZProjectile*>(pProjectile);
 			if (a && a->sourceAmmo)
 				return a->sourceAmmo;
 			else
@@ -123,16 +113,6 @@ RE::TESForm * CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef)
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 {
-   if (vmVariableName.length() < prefix.length() || vmVariableName.substr(0, prefix.length()) != prefix)
-   {
-      vmVariableName.insert(0, prefix);
-   }
-
-   if (vmVariableName.length() < suffix.length() || vmVariableName.substr(vmVariableName.length() - suffix.length(), suffix.length()) != suffix)
-   {
-      vmVariableName.append(suffix);
-   }
-
    if (find(m_scriptVMVariables.begin(), m_scriptVMVariables.end(), vmVariableName) == m_scriptVMVariables.end())
    {
       m_scriptVMVariables.push_back(vmVariableName);
@@ -274,12 +254,4 @@ RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR *form, string var
    }
 
    return nullptr;
-}
-
-CAHZFormLookup::CAHZFormLookup()
-{
-}
-
-CAHZFormLookup::~CAHZFormLookup()
-{
 }
