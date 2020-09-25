@@ -99,6 +99,14 @@ extern "C"
 
     auto SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
+
+        //while (!IsDebuggerPresent())
+        //{
+        //   Sleep(10);
+        //}
+
+        //Sleep(1000 * 2);
+
         try {
             logger::info("moreHUD loading"sv);
 
@@ -124,11 +132,6 @@ extern "C"
 
             logger::info("Registering Callbacks"sv);
             Scaleform::RegisterCallbacks();
-
-            logger::info("Installing Looks"sv);
-            
-            //auto scaleform = SKSE::GetScaleformInterface();
-            //scaleform->Register(Scaleform::Inventory::RegisterForInventory);
 
             logger::info("moreHUD loaded"sv);
 

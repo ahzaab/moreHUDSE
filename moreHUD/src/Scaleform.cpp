@@ -262,11 +262,4 @@ namespace Scaleform
         scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDPlugin");
     }
 
-
-
-
-    void RegisterCreators()
-    {
-        logger::info("Registered all scaleform creators");
-    }
 }

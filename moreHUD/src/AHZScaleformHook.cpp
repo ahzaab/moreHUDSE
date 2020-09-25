@@ -91,12 +91,11 @@ void AHZEnemyHealthUpdateHook::EnemyHealthUpdateHook_impl(uint32_t* refHandle, R
         }
     };
 
-    Code code(EnemyUpdateHook);
+    Code code(RE::unrestricted_cast<std::uintptr_t>(EnemyHealthUpdateHook_impl));
     code.ready();
-
     auto& trampoline = SKSE::GetTrampoline();
     trampoline.write_branch<5>(
-        reinterpret_cast<std::uintptr_t>(EnemyHealthUpdateHook_impl),
+        RE::unrestricted_cast<std::uintptr_t>(EnemyUpdateHook),
         trampoline.allocate(code));
 }
 

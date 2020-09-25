@@ -33,5 +33,4 @@ namespace Scaleform
 
 
 	void RegisterCallbacks();
-	void RegisterCreators();
 }
