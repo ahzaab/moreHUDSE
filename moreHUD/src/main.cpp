@@ -1,6 +1,7 @@
 ﻿#include "PCH.h"
 
 #include <memory>
+#include <vector>
 
 #include "Events.h"
 #include "Patches.h"
@@ -16,9 +17,12 @@
 #include "RE/Skyrim.h"
 #include "SKSE/API.h"
 #include <Papyrus.h>
+#include "AHZExternalFormTable.h"
+#include "AHZVanillaFormTable.h"
 
 
 using namespace moreHUD;
+using namespace std;
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
@@ -30,6 +34,36 @@ namespace
         switch (a_msg->type) {
         case SKSE::MessagingInterface::kDataLoaded:
         {
+
+	   // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
+            CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
+            CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
+
+            // Second load any addional forms added externally
+            logger::info("Processing any third party .mhud files that may exist...");
+
+            // Read all .mhuf files and load in the lookup tables
+            string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+
+            // Get all .mhud files from the skyrim data folder
+            vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+
+            if (!mHudFiles.size()) {
+                logger::info("No third party .mHud files where detected.");
+            } else {
+                // Load the external ACTI Forms and VM Script Variables
+                CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
+                CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
+
+                logger::info("%d third party .mHud file(s) processed", mHudFiles.size());
+            }
+
+            logger::info("Third party .mHud file processing completed.");
+
+
+
+
+
             logger::info("Registering Events"sv);
             Events::Install();
 

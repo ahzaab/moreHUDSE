@@ -1,4 +1,4 @@
-LIBRARY	"moreHUD"
+LIBRARY	"AHZmoreHUDPlugin"
 EXPORTS
 SKSEPlugin_Query
 SKSEPlugin_Load

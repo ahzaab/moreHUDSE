@@ -1384,11 +1384,11 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params & arg
 
 	if (args.args[0].HasMember("player"))
 	{
-		args.args[0].SetMember("player", &playerObj);
+		args.args[0].SetMember("player", playerObj);
 	}
 	if (args.args[0].HasMember("enemy"))
 	{
-		args.args[0].SetMember("enemy", &enemyObj);
+		args.args[0].SetMember("enemy", enemyObj);
 	}
 }
 
@@ -1857,7 +1857,7 @@ void CAHZScaleform::ProcessTargetEffects(RE::TESObjectREFR* targetObject, RE::GF
       RegisterString(&obj, "effectsDescription",  name.c_str());
 
       // Add the object to the scaleform function
-      args.args[0].SetMember("effectsObj", &obj);
+      args.args[0].SetMember("effectsObj", obj);
    }
    else
    {
@@ -2005,7 +2005,7 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
 
    // Used by the scaleform script to know if this is a weapon, armor, or something else
    RegisterNumber(&obj, "formType", static_cast<uint32_t>(baseForm->GetFormType()));
-   args.args[0].SetMember("targetObj", &obj);
+   args.args[0].SetMember("targetObj", obj);
 };
 
 bool CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index)
@@ -2087,7 +2087,7 @@ void CAHZScaleform::BuildIngredientObject(RE::IngredientItem* ingredient, RE::GF
 
    if (effectsCount >= 4)
       RegisterString(&obj2, "effect4", strings[3].c_str());
-   args.args[0].SetMember("ingredientObj", &obj2);
+   args.args[0].SetMember("ingredientObj", obj2);
 };
 
 void CAHZScaleform::BuildInventoryObject(RE::TESForm* form, RE::GFxFunctionHandler::Params &args)
@@ -2127,7 +2127,7 @@ void CAHZScaleform::BuildInventoryObject(RE::TESForm* form, RE::GFxFunctionHandl
         RegisterNumber(&obj, "inventoryCount", itemCount);
 
         // Add the object to the scaleform function
-        args.args[0].SetMember("inventoryObj", &obj);
+        args.args[0].SetMember("inventoryObj", obj);
     }
     else
     {
@@ -2139,21 +2139,21 @@ void CAHZScaleform::RegisterString(RE::GFxValue * dst, const char * name, const 
 {
     RE::GFxValue fxValue;
     fxValue.SetString(str);
-    dst->SetMember(name, &fxValue);
+    dst->SetMember(name, fxValue);
 }
 
 void CAHZScaleform::RegisterNumber(RE::GFxValue * dst, const char * name, double value)
 {
     RE::GFxValue fxValue;
     fxValue.SetNumber(value);
-    dst->SetMember(name, &fxValue);
+    dst->SetMember(name, fxValue);
 }
 
 void CAHZScaleform::RegisterBoolean(RE::GFxValue * dst, const char * name, bool value)
 {
     RE::GFxValue fxValue;
     fxValue.SetBoolean(value);
-    dst->SetMember(name, &fxValue);
+    dst->SetMember(name, fxValue);
 }
 
 void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxFunctionHandler::Params &args)
@@ -2202,7 +2202,7 @@ void CAHZScaleform::ProcessValidTarget(RE::TESObjectREFR* targetObject, RE::GFxF
         RegisterBoolean(&obj, "canCarry", canCarry);
 
         // Add the object to the scaleform function
-        args.args[0].SetMember("outObj", &obj);
+        args.args[0].SetMember("outObj", obj);
 
         // return false, indicating that the target object is not valid for acquiring data
         args.retVal->SetBoolean(true);
@@ -2231,7 +2231,7 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);
     RegisterNumber(&obj, "maxEncumbranceNumber", maxEncumbranceNumber);
     RegisterNumber(&obj, "goldNumber", CAHZPlayerInfo::GetGoldAmount());
-    args.args[0].SetMember("playerObj", &obj);
+    args.args[0].SetMember("playerObj", obj);
 }
 
 void CAHZScaleform::GetMagicItemDescription(RE::MagicItem * item, std::string& description)

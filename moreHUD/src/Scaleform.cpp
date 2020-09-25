@@ -217,18 +217,35 @@ namespace Scaleform
         }
     };
 
+    typedef std::map<const std::type_info*, RE::GFxFunctionHandler*> FunctionHandlerCache;
+    static FunctionHandlerCache g_functionHandlerCache;
+
     template <typename T>
     void RegisterFunction(RE::GFxValue* dst, RE::GFxMovieView* movie, const char* name)
     {
-        // not found, allocate a new one
-        T* fn = new T;
+        // either allocate the object or retrieve an existing instance from the cache
+        RE::GFxFunctionHandler* fn = nullptr;
+
+        // check the cache
+        FunctionHandlerCache::iterator iter = g_functionHandlerCache.find(&typeid(T));
+        if (iter != g_functionHandlerCache.end())
+            fn = iter->second;
+
+        if (!fn) {
+            // not found, allocate a new one
+            fn = new T;
+
+            // add it to the cache
+            // cache now owns the object as far as refcounting goes
+            g_functionHandlerCache[&typeid(T)] = fn;
+        }
 
         // create the function object
         RE::GFxValue fnValue;
-        movie->CreateFunction(&fnValue, static_cast<RE::GFxFunctionHandler*>(fn));
+        movie->CreateFunction(&fnValue, fn);
 
         // register it
-        dst->SetMember(name, &fnValue);
+        dst->SetMember(name, fnValue);
     }
 
     bool RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root)
@@ -250,9 +267,6 @@ namespace Scaleform
         RegisterFunction<SKSEScaleform_IsTargetInIconList>(a_root, a_view, "IsTargetInIconList");
         RegisterFunction<SKSEScaleform_AHZLog>(a_root, a_view, "AHZLog");
 
-
-        logger::info("Registered all scaleform callbacks");
-
         return true;
     }
 
@@ -260,6 +274,7 @@ namespace Scaleform
     {
         auto scaleform = SKSE::GetScaleformInterface();
         scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDPlugin");
+        logger::info("Registered all scaleform callbacks");
     }
 
 }

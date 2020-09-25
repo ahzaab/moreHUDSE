@@ -137,6 +137,6 @@ public:
 	};
 
    private:
-      CAHZVanillaFormTable() {};
-      ~CAHZVanillaFormTable() {};
+      CAHZVanillaFormTable() = default;
+      ~CAHZVanillaFormTable() = default;
 };

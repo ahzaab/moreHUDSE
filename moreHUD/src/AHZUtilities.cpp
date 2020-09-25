@@ -14,8 +14,13 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
          // read all (real) files in current folder
          // , delete '!' read other 2 default folder . and ..
          if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-            string fileName(fd.cFileName);
-            transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
+            string fileName=fd.cFileName;
+
+            std::for_each(fileName.begin(), fileName.end(), [](char& c) {
+                c = ::toupper(c);
+            });
+
+           // transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
             //size_t found = fileName.find(".MHUD");
             //_MESSAGE("-> file '%s'", fileName.c_str());
            // if (found != string::npos)

@@ -35,7 +35,7 @@ namespace Events
                 }
 
                 args[0].SetString("AHZWidgetContainer");
-                view->Invoke("_root.getNextHighestDepth", &args[1], NULL, 0);
+                view->Invoke("_root.getNextHighestDepth", &args[1], nullptr, 0);
                 view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2);
 
                 if (!hudComponent.IsObject()) {

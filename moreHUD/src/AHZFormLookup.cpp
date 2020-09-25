@@ -5,21 +5,21 @@
 class CAHZGetScriptVariableFunctor : public RE::BSScript::IForEachScriptObjectFunctor
 {
 public:
-   CAHZGetScriptVariableFunctor(
+    CAHZGetScriptVariableFunctor(
         string a_varName)
-   {
-       m_result.SetNone();
+    {
+        m_result.SetNone();
 
-       string prefix = "::";
-       string suffix = "_var";
+        string prefix = "::";
+        string suffix = "_var";
 
-       // Properties omit the prefix and sufix, but we are looking at variables
-       m_variable = prefix + a_varName + suffix;
-   }
+        // Properties omit the prefix and sufix, but we are looking at variables
+        m_variable = prefix + a_varName + suffix;
+    }
 
-   virtual ~CAHZGetScriptVariableFunctor() = default;
+    virtual ~CAHZGetScriptVariableFunctor() = default;
 
-   virtual inline bool Visit(RE::BSScript::ScriptObjectMessage* script, void* arg2)
+   virtual inline bool Visit(RE::BSScript::ScriptObjectMessage* script, [[maybe_unused ]] void* arg2)
    {
        auto classInfo = script->typeInfo;
        if (!classInfo) {
