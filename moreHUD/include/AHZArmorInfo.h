@@ -41,14 +41,17 @@ public:
 		}
 	}
 
-	~AHZArmorData(void){}
+	~AHZArmorData() = default;
 };
 
 class CAHZArmorInfo
 {
 public:
-	CAHZArmorInfo(void);
-	~CAHZArmorInfo(void);
+	CAHZArmorInfo() = default;
+	~CAHZArmorInfo() = default;
     static AHZArmorData GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask);
+
+private:
+    static RE::ExtraDataList* GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extraList);
 };
 
