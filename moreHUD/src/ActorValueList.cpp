@@ -4,7 +4,6 @@
 
 namespace SKSE
 {
-
     ActorValueList::ActorValueList()
     {
         using AV = RE::ActorValue;
@@ -44,7 +43,6 @@ namespace SKSE
         m_actorValueInfo.insert({ AV::kSneakingModifier, AVForm::kAVSneakMod });
         m_actorValueInfo.insert({ AV::kHeavyArmorModifier, AVForm::kAVHeavyArmorMod });
         m_actorValueInfo.insert({ AV::kSmithingModifier, AVForm::kAVSmithingMod });
-
     }
 
     ActorValueList* ActorValueList::GetSingleton()
@@ -68,7 +66,7 @@ namespace SKSE
         auto dataHandler = RE::BGSDefaultObjectManager::GetSingleton();
 
         auto form = dataHandler->LookupByID(static_cast<RE::FormID>(avInfo));
-        
+
         assert(form);
         assert(form->GetFormType() == RE::FormType::ActorValueInfo);
 

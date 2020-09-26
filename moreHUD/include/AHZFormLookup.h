@@ -45,38 +45,34 @@ namespace RE
 class CAHZFormLookup
 {
 public:
-   static CAHZFormLookup& Instance();
-   RE::TESForm * GetTESForm(RE::TESObjectREFR * targetReference);
-   void AddScriptVarable(string vmVariableName);
-   void                   AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID);
+    static CAHZFormLookup& Instance();
+    RE::TESForm*           GetTESForm(RE::TESObjectREFR* targetReference);
+    void                   AddScriptVarable(string vmVariableName);
+    void                   AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID);
 
-   inline static RE::TESObjectREFR* GetReference(RE::TESForm* theForm)
-   {
-      if (theForm->GetFormType() == RE::FormType::Reference)
-      {
-         auto reference = theForm->As<RE::TESObjectREFR>();
-         return reference;
-      }
-      else
-      {
-         return nullptr;
-      }
-   }
+    inline static RE::TESObjectREFR* GetReference(RE::TESForm* theForm)
+    {
+        if (theForm->GetFormType() == RE::FormType::Reference) {
+            auto reference = theForm->As<RE::TESObjectREFR>();
+            return reference;
+        } else {
+            return nullptr;
+        }
+    }
 
 private:
     // Force singleton
-   CAHZFormLookup() = default;
-   ~CAHZFormLookup() = default;
-   RE::TESForm * GetAttachedForm(RE::TESObjectREFR *form);
-   RE::TESForm*    GetFormFromLookup(RE::TESObjectREFR* targetRef);
-   static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, string variableName);
-   CAHZFormLookup(CAHZFormLookup const&);      // copy ctor is hidden
-   CAHZFormLookup& operator=(CAHZFormLookup const&) {}; // assign op is hidden
-   std::vector<string> m_scriptVMVariables;
-   std::map<uint32_t, uint32_t> m_LUT;
-   auto GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const;
+    CAHZFormLookup() = default;
+    ~CAHZFormLookup() = default;
+    RE::TESForm*        GetAttachedForm(RE::TESObjectREFR* form);
+    RE::TESForm*        GetFormFromLookup(RE::TESObjectREFR* targetRef);
+    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, string variableName);
+    CAHZFormLookup(CAHZFormLookup const&);                            // copy ctor is hidden
+    CAHZFormLookup&              operator=(CAHZFormLookup const&){};  // assign op is hidden
+    std::vector<string>          m_scriptVMVariables;
+    std::map<uint32_t, uint32_t> m_LUT;
+    auto                         GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const;
 };
 
-#define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))
+#define AHZGetForm(x)      (CAHZFormLookup::Instance().GetTESForm((x)))
 #define AHZGetReference(x) (CAHZFormLookup::Instance().GetReference((x)))
-

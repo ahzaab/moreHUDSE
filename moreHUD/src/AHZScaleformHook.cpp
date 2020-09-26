@@ -60,7 +60,7 @@ void AHZEnemyHealthUpdateHook::EnemyHealthUpdateHook_impl(uint32_t* refHandle, R
     ahzEnemyData.SetData(data);
 }
 
-    void AHZEnemyHealthUpdateHook::Install()
+void AHZEnemyHealthUpdateHook::Install()
 {
     struct Code : Xbyak::CodeGenerator
     {

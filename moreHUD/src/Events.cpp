@@ -47,7 +47,7 @@ namespace Events
                 hudComponent.Invoke("loadMovie", &result, &args[0], 1);
                 s_ahzMenuLoaded = true;
                 return RE::BSEventNotifyControl::kStop;
-            }        
+            }
         }
         return RE::BSEventNotifyControl::kContinue;
     }

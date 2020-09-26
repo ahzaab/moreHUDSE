@@ -9,9 +9,9 @@
 
 namespace Patches
 {
-	void Install()
-	{
+    void Install()
+    {
         AHZEnemyHealthUpdateHook::Install();
-		logger::info("Installed all patches");
-	}
+        logger::info("Installed all patches");
+    }
 }

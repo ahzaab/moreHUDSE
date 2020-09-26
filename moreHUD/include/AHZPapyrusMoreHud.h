@@ -10,8 +10,8 @@ using namespace std;
 class PapyrusMoreHud
 {
 public:
-    static bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
-    static bool HasForm(std::string iconName, uint32_t formId);
+    static bool   RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+    static bool   HasForm(std::string iconName, uint32_t formId);
     static string GetIconName(uint32_t itemID);
 
 private:
@@ -25,6 +25,4 @@ private:
     static void     UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
     static bool     IsIconFormListRegistered(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
     static bool     IsIconFormListRegistered_Internal(std::string iconName);
-    
-    
 };

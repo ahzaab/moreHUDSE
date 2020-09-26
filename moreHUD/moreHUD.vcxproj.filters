@@ -58,9 +58,6 @@
     <ClCompile Include="src\AHZWeaponInfo.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\moreHUDMenu.cpp">
-      <Filter>src\Scaleform</Filter>
-    </ClCompile>
     <ClCompile Include="src\ActorValueList.cpp">
       <Filter>src\SKSE</Filter>
     </ClCompile>
@@ -129,12 +126,6 @@
     </ClInclude>
     <ClInclude Include="include\AHZWeaponInfo.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\resource2.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\moreHUDMenu.h">
-      <Filter>include\Scaleform</Filter>
     </ClInclude>
     <ClInclude Include="include\ActorValueList.h">
       <Filter>include\SKSE</Filter>

@@ -13,7 +13,6 @@ namespace Events
 
     private:
         static bool s_ahzMenuLoaded;
-
     };
 
     class CrosshairRefManager :

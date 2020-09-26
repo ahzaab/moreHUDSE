@@ -1,7 +1,7 @@
 ﻿#include "PCH.h"
 #include "AHZActorInfo.h"
 
-uint32_t CAHZActorInfo::IsSentient(RE::Actor *actor)
+uint32_t CAHZActorInfo::IsSentient(RE::Actor* actor)
 {
     using func_t = decltype(&CAHZActorInfo::IsSentient);
     REL::Relocation<func_t> func{ REL::ID(36889) };

@@ -4,16 +4,15 @@
 
 namespace moreHUD
 {
-	bool Papyrus::Register()
-	{
-		auto papyrus = SKSE::GetPapyrusInterface();
-		if (!papyrus->Register(PapyrusMoreHud::RegisterFunctions)) {
-			return false;
-		} else {
-			logger::info("registered papyrus PapyrusMoreHud funcs");
-		}
+    bool Papyrus::Register()
+    {
+        auto papyrus = SKSE::GetPapyrusInterface();
+        if (!papyrus->Register(PapyrusMoreHud::RegisterFunctions)) {
+            return false;
+        } else {
+            logger::info("registered papyrus PapyrusMoreHud funcs");
+        }
 
-		return true;
-	}
+        return true;
+    }
 }
-

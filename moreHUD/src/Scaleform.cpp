@@ -218,7 +218,7 @@ namespace Scaleform
     };
 
     typedef std::map<const std::type_info*, RE::GFxFunctionHandler*> FunctionHandlerCache;
-    static FunctionHandlerCache g_functionHandlerCache;
+    static FunctionHandlerCache                                      g_functionHandlerCache;
 
     template <typename T>
     void RegisterFunction(RE::GFxValue* dst, RE::GFxMovieView* movie, const char* name)

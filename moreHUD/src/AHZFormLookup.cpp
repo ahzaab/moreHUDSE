@@ -19,104 +19,95 @@ public:
 
     virtual ~CAHZGetScriptVariableFunctor() = default;
 
-   virtual inline bool Visit(RE::BSScript::ScriptObjectMessage* script, [[maybe_unused ]] void* arg2)
-   {
-       auto classInfo = script->typeInfo;
-       if (!classInfo) {
-           return true;
-       }
+    virtual inline bool Visit(RE::BSScript::ScriptObjectMessage* script, [[maybe_unused]] void* arg2)
+    {
+        auto classInfo = script->typeInfo;
+        if (!classInfo) {
+            return true;
+        }
 
-       if (classInfo->variableCount) {
-           return true;
-       }
+        if (!classInfo->variableCount) {
+            return true;
+        }
 
-       auto iter = classInfo->GetVariableIter();
-       if (iter) {
-           for (std::uint32_t i = 0; i < classInfo->GetTotalNumVariables(); ++i) {
-               auto& prop = iter[i];
-               if (std::string(prop.name.c_str()) == m_variable) {
-                   auto vm = RE::SkyrimVM::GetSingleton()->impl;
-                   RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
-                   vm->FindBoundObject(script->handle, classInfo->name.data(), boundObject);
-                   
-                   auto found = vm->GetVariableValue(boundObject, i, m_result);
+        auto iter = classInfo->GetVariableIter();
+        if (iter) {
+            for (std::uint32_t i = 0; i < classInfo->GetTotalNumVariables(); ++i) {
+                auto& prop = iter[i];
+                if (std::string(prop.name.c_str()) == m_variable) {
+                    auto                                      vm = RE::SkyrimVM::GetSingleton()->impl;
+                    RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
+                    vm->FindBoundObject(script->handle, classInfo->name.data(), boundObject);
 
-                   if (found) {
-                       logger::trace("found variable: {}, on script: {}", prop.name.c_str(), classInfo->name);
-                   }
+                    auto found = vm->GetVariableValue(boundObject, i, m_result);
 
-                   // Found returns false to stop the visitor
-                   return !found;
-               }
-           }
-       }
-       return true;
-   }
+                    if (found) {
+                        logger::trace("found variable: {}, on script: {}", prop.name.c_str(), classInfo->name);
+                    }
 
-   auto GetScriptVariable() -> RE::BSScript::Variable* { return (m_result.IsNoneObject() || m_result.IsNoneArray()) ? nullptr : &m_result; }
-   
+                    // Found returns false to stop the visitor
+                    return !found;
+                }
+            }
+        }
+        return true;
+    }
+
+    auto GetScriptVariable() -> RE::BSScript::Variable* { return (m_result.IsNoneObject() || m_result.IsNoneArray()) ? nullptr : &m_result; }
+
 
 private:
-   string	m_variable;
-   RE::BSScript::Variable m_result;
+    string                 m_variable;
+    RE::BSScript::Variable m_result;
 };
 
-CAHZFormLookup& CAHZFormLookup::Instance() {
-   static CAHZFormLookup theInstance;
-   return theInstance;
+CAHZFormLookup& CAHZFormLookup::Instance()
+{
+    static CAHZFormLookup theInstance;
+    return theInstance;
 }
 
-RE::TESForm * CAHZFormLookup::GetTESForm(RE::TESObjectREFR * targetReference)
+RE::TESForm* CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference)
 {
-	RE::TESForm * lutForm = nullptr;
-	if ((lutForm = GetFormFromLookup(targetReference)) != nullptr)
-	{
-		return lutForm;
-	}
-	else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator)
-	{
-		return GetAttachedForm(targetReference);
-	} 
-    else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile)
-	{
-		auto pProjectile = (DYNAMIC_CAST(targetReference, RE::TESObjectREFR, RE::Projectile));
+    RE::TESForm* lutForm = nullptr;
+    if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
+        return lutForm;
+    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
+        return GetAttachedForm(targetReference);
+    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
+        auto pProjectile = (DYNAMIC_CAST(targetReference, RE::TESObjectREFR, RE::Projectile));
 
-		if (pProjectile) {
-			AHZProjectile *a = reinterpret_cast<AHZProjectile*>(pProjectile);
-			if (a && a->sourceAmmo)
-				return a->sourceAmmo;
-			else
-				return targetReference;
-		}
-		else
-			return targetReference;
-	}
-	else
-	{
-		return targetReference;
-	}
+        if (pProjectile) {
+            AHZProjectile* a = reinterpret_cast<AHZProjectile*>(pProjectile);
+            if (a && a->sourceAmmo)
+                return a->sourceAmmo;
+            else
+                return targetReference;
+        } else
+            return targetReference;
+    } else {
+        return targetReference;
+    }
 }
 
-RE::TESForm * CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef)
+RE::TESForm* CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef)
 {
-	if (!targetRef || !targetRef->GetBaseObject())
-		return nullptr;
+    if (!targetRef || !targetRef->GetBaseObject())
+        return nullptr;
 
-	if (m_LUT.find(targetRef->GetBaseObject()->formID) != m_LUT.end())
-	{
+    if (m_LUT.find(targetRef->GetBaseObject()->formID) != m_LUT.end()) {
         uint32_t formID = m_LUT.find(targetRef->GetBaseObject()->formID)->second;
-		auto form = RE::TESForm::LookupByID(formID);
-		return form;
-	}
-	return NULL;
+        auto     form = RE::TESForm::LookupByID(formID);
+        return form;
+    }
+    return NULL;
 }
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
 {
-   if (find(m_scriptVMVariables.begin(), m_scriptVMVariables.end(), vmVariableName) == m_scriptVMVariables.end())
-   {
-      m_scriptVMVariables.push_back(vmVariableName);
-   }
+    if (find(m_scriptVMVariables.begin(), m_scriptVMVariables.end(), vmVariableName) == m_scriptVMVariables.end()) {
+        m_scriptVMVariables.push_back(vmVariableName);
+    }
 }
 
 void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID)
@@ -230,28 +221,27 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     return var;
 }
 
-RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR *form, string variableName)
+RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, string variableName)
 {
-   if (form) {
+    if (form) {
         if (!form->GetBaseObject())
             return nullptr;
 
-        auto                                      vm = RE::SkyrimVM::GetSingleton()->impl;
-        auto                                      handlePolicy = vm.get()->GetObjectHandlePolicy();
-        auto                                      handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
+        auto vm = RE::SkyrimVM::GetSingleton()->impl;
+        auto handlePolicy = vm.get()->GetObjectHandlePolicy();
+        auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
 
-      if (handle != handlePolicy->EmptyHandle())
-      {
+        if (handle != handlePolicy->EmptyHandle()) {
             CAHZGetScriptVariableFunctor functor(variableName);
             vm->ForEachBoundObject(handle, &functor);
-            auto     variable = functor.GetScriptVariable();
+            auto variable = functor.GetScriptVariable();
 
             if (variable && variable->IsObject()) {
                 auto retForm = variable->Unpack<RE::TESForm*>();
                 return retForm;
             }
-      }
-   }
+        }
+    }
 
-   return nullptr;
+    return nullptr;
 }

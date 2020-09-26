@@ -3,13 +3,5 @@
 
 namespace Patches
 {
-	namespace
-	{
-		void DisableLegendaryPrompt();
-		void DisableTemperString();
-		void PatchEra();
-	}
-
-
-	void Install();
+    void Install();
 }

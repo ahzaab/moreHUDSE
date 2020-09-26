@@ -34,8 +34,7 @@ namespace
         switch (a_msg->type) {
         case SKSE::MessagingInterface::kDataLoaded:
         {
-
-	   // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
+            // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
             CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
             CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
 
@@ -59,9 +58,6 @@ namespace
             }
 
             logger::info("Third party .mHud file processing completed.");
-
-
-
 
 
             logger::info("Registering Events"sv);
@@ -133,7 +129,6 @@ extern "C"
 
     auto SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
-
         //while (!IsDebuggerPresent())
         //{
         //   Sleep(10);

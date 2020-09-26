@@ -3,14 +3,6 @@
 #include "Events.h"
 
 
-CAHZPlayerInfo::CAHZPlayerInfo(void)
-{
-}
-
-CAHZPlayerInfo::~CAHZPlayerInfo(void)
-{
-}
-
 uint32_t CAHZPlayerInfo::GetItemAmount(uint32_t formID)
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
@@ -34,22 +26,21 @@ uint32_t CAHZPlayerInfo::GetItemAmount(uint32_t formID)
 
 uint32_t CAHZPlayerInfo::GetGoldAmount(void)
 {
-    auto goldAmount =  RE::PlayerCharacter::GetSingleton()->GetGoldAmount();
+    auto goldAmount = RE::PlayerCharacter::GetSingleton()->GetGoldAmount();
     return goldAmount < 0 ? 0 : goldAmount;
 }
 
 
-RE::TESObjectREFR * CAHZPlayerInfo::GetTargetRef()
+RE::TESObjectREFR* CAHZPlayerInfo::GetTargetRef()
 {
     return Events::CrosshairRefManager::GetSingleton()->GetCrosshairReference();
 }
 
-bool CAHZPlayerInfo::GetIsInCombat(void)
+bool CAHZPlayerInfo::GetIsInCombat()
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
-	if (pPC)
-	{	
-		return pPC->IsInCombat();
-	}
-	return false;
+    if (pPC) {
+        return pPC->IsInCombat();
+    }
+    return false;
 }

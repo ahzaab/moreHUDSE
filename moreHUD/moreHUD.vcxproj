@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>AHZmoreHUDPlugin</ProjectName>
+    <ProjectName>moreHUD</ProjectName>
     <ProjectGuid>{A4D9A123-F9BB-4787-BAD7-37D373EB05CC}</ProjectGuid>
     <RootNamespace>ScaleformTranslationPP</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -172,7 +172,6 @@
     <ClCompile Include="src\AHZVanillaFormTable.cpp" />
     <ClCompile Include="src\AHZWeaponInfo.cpp" />
     <ClCompile Include="src\HashUtil.cpp" />
-    <ClCompile Include="src\moreHUDMenu.cpp" />
     <ClCompile Include="src\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
@@ -201,11 +200,9 @@
     <ClInclude Include="include\AHZWeaponInfo.h" />
     <ClInclude Include="include\Events.h" />
     <ClInclude Include="include\HashUtil.h" />
-    <ClInclude Include="include\moreHUDMenu.h" />
     <ClInclude Include="include\Offsets.h" />
     <ClInclude Include="include\Papyrus.h" />
     <ClInclude Include="include\Patches.h" />
-    <ClInclude Include="include\resource2.h" />
     <ClInclude Include="include\Scaleform.h" />
     <ClInclude Include="include\version.h" />
     <ClInclude Include="include\PCH.h" />

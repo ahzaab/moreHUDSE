@@ -19,9 +19,9 @@ RE::ExtraDataList* CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDat
 
 AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask)
 {
-    AHZArmorData data;
-    auto         pPC = RE::PlayerCharacter::GetSingleton();
-    auto         inventoryChanges = pPC->GetInventoryChanges();
+    AHZArmorData        data;
+    auto                pPC = RE::PlayerCharacter::GetSingleton();
+    auto                inventoryChanges = pPC->GetInventoryChanges();
     RE::TESBoundObject* armor;
     //= inventoryChanges->GetArmorInSlot(static_cast<uint32_t>(slotMask));
 
@@ -31,8 +31,7 @@ AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlo
             for (auto it = list->begin(); it != list->end(); ++it) {
                 auto element = *it;
                 if (element) {
-                    if (element->object && element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light)
-                    {
+                    if (element->object && element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light) {
                         auto form = DYNAMIC_CAST(element->object, RE::TESBoundObject, RE::BGSBipedObjectForm);
                         if (form && (static_cast<uint32_t>(form->GetSlotMask()) & static_cast<uint32_t>(slotMask))) {
                             armor = element->object;
@@ -52,14 +51,11 @@ AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlo
                                 }
                                 return data;
                             }
-
                         }
                     }
-
                 }
             }
         }
     }
     return data;
 }
-

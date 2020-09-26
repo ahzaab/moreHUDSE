@@ -24,5 +24,3 @@ inline T2* dyna_cast(T1* base)
     return ret;
 }
 #define DYNAMIC_CAST(base, srcType, targetType) (dyna_cast<srcType, targetType>(base))
-
-

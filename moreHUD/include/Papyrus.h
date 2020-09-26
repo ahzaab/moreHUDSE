@@ -5,9 +5,9 @@
 
 namespace moreHUD
 {
-	class Papyrus
-	{
-	public:
-		static bool Register();
-	};
+    class Papyrus
+    {
+    public:
+        static bool Register();
+    };
 }
