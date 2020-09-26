@@ -36,8 +36,7 @@ namespace Events
 
         inline RE::TESObjectREFR* GetCrosshairReference()
         {
-            return _cachedRef.get().get();
-
+            return _cachedRef;
         }
 
     protected:
@@ -45,15 +44,21 @@ namespace Events
 
         inline EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*) override
         {
-            auto crosshairRef =
-                a_event && a_event->crosshairRef ?
-                    a_event->crosshairRef->CreateRefHandle() :
-                    RE::ObjectRefHandle();
-            if (_cachedRef == crosshairRef) {
-                return EventResult::kContinue;
+            //auto crosshairRef =
+            //    a_event && a_event->crosshairRef ?
+            //        a_event->crosshairRef->CreateRefHandle() :
+            //        RE::ObjectRefHandle();
+            //if (_cachedRef == crosshairRef) {
+            //    return EventResult::kContinue;
+            //}
+
+            if (a_event && a_event->crosshairRef) {
+                _cachedRef = a_event->crosshairRef.get();
+            } else {
+                _cachedRef = nullptr;
             }
 
-            _cachedRef = crosshairRef;
+            //_cachedRef = crosshairRef;
 
             return EventResult::kContinue;
         }
@@ -69,7 +74,7 @@ namespace Events
         CrosshairRefManager& operator=(const CrosshairRefManager&) = delete;
         CrosshairRefManager& operator=(CrosshairRefManager&&) = delete;
 
-        RE::ObjectRefHandle _cachedRef;
+        RE::TESObjectREFR* _cachedRef;
     };
 
     inline void Install()

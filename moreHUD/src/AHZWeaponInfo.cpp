@@ -87,6 +87,10 @@ AHZWeaponData CAHZWeaponInfo::GetLeftHandWeapon(void)
         auto list = pPC->GetInventoryChanges()->entryList;
         auto equippedItem = pPC->GetEquippedObject(true);
 
+        if (!equippedItem) {
+            return weaponData;
+        }
+
 		for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
             if (entry->object->GetFormID() == equippedItem->formID) {
@@ -118,21 +122,27 @@ AHZWeaponData CAHZWeaponInfo::GetRightHandWeapon(void)
         auto list = pPC->GetInventoryChanges()->entryList;
         auto equippedItem = pPC->GetEquippedObject(false);
 
+        if (!equippedItem) {
+            return weaponData;
+        }
+
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
-            if (entry->object->GetFormID() == equippedItem->formID) {
-                for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
-                    auto extraData = *entryListIT;
-                    if (extraData &&
-                        extraData->HasType(RE::ExtraDataType::kWorn)) {
-                        weaponData.equipData.boundObject = entry->object;
-                        weaponData.equipData.pExtraData = extraData;
+            if (entry && entry->object->GetFormID() == equippedItem->formID) {
+                if (entry->extraLists) {
+                    for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
+                        auto extraData = *entryListIT;
+                        if (extraData &&
+                            extraData->HasType(RE::ExtraDataType::kWorn)) {
+                            weaponData.equipData.boundObject = entry->object;
+                            weaponData.equipData.pExtraData = extraData;
 
-                        if (weaponData.equipData.boundObject) {
-                            weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
+                            if (weaponData.equipData.boundObject) {
+                                weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
+                            }
+
+                            return weaponData;
                         }
-
-                        return weaponData;
                     }
                 }
             }
@@ -150,18 +160,20 @@ AHZWeaponData CAHZWeaponInfo::GetEquippedAmmo(void)
 
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
-            if (entry->object->GetFormType() == RE::FormType::Ammo) {
-                for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
-                    auto extraData = *entryListIT;
-                    if (extraData &&
-                        extraData->HasType(RE::ExtraDataType::kWorn)) {
-                        ammoData.equipData.boundObject = entry->object;
-                        ammoData.equipData.pExtraData = extraData;
+            if (entry && entry->object->GetFormType() == RE::FormType::Ammo) {
+                if (entry->extraLists) {
+                    for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
+                        auto extraData = *entryListIT;
+                        if (extraData &&
+                            extraData->HasType(RE::ExtraDataType::kWorn)) {
+                            ammoData.equipData.boundObject = entry->object;
+                            ammoData.equipData.pExtraData = extraData;
 
-                        if (ammoData.equipData.boundObject) {
-                            ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
-                            return ammoData;
-                        }                      
+                            if (ammoData.equipData.boundObject) {
+                                ammoData.ammo = DYNAMIC_CAST(ammoData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
+                                return ammoData;
+                            }
+                        }
                     }
                 }
             }

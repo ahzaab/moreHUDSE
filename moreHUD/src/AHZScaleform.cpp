@@ -180,7 +180,7 @@ double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
 
       // Allocate a list to send
       // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-      objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
+      //objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
 
       if (weaponData->equipData.pExtraData)
       {
@@ -190,7 +190,7 @@ double CAHZScaleform::GetActualDamage(AHZWeaponData *weaponData)
       float fDamage = pPC->GetDamage(&objDesc);
 
       // Delete the allocated dummy list
-      delete objDesc.extraLists;
+      //delete objDesc.extraLists;
 
       // This could be rounded, but the the script decide
       return mRound(fDamage);
@@ -209,7 +209,7 @@ double CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
    // Allocate a dummy list so skyrim does not crash. For armor information
    // skyrim doesn't appear to need the list
    // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-   objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
+   //objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
    if (armorData->equipData.pExtraData)
    {
        objDesc.extraLists->push_front(armorData->equipData.pExtraData);
@@ -218,7 +218,7 @@ double CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
    double fRating = GetArmorWarmthRating_Native(objDesc.object);
 
    // Delete the allocated dummy list
-   delete objDesc.extraLists;
+   //delete objDesc.extraLists;
 
    // This could be rounded, but the the script decide
    return mRound(fRating);
@@ -260,7 +260,7 @@ double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
       // Allocate a dummy list so skyrim does not crash. For armor information
       // skyrim doesn't appear to need the list
       // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-      objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
+     // objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
       if (armorData->equipData.pExtraData)
       {
           objDesc.extraLists->push_front(armorData->equipData.pExtraData);
@@ -269,7 +269,7 @@ double CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
       double fRating = pPC->GetArmorValue(&objDesc);
 
       // Delete the allocated dummy list
-      delete objDesc.extraLists;
+      //delete objDesc.extraLists;
 
       // This could be rounded, but the the script decide
       return mRound(fRating);
