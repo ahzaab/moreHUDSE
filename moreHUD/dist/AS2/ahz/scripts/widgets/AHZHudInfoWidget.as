@@ -639,11 +639,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}
 		
 		
-		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha|| !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
+		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
 		{			
 			MagickaStats_mc._alpha = 0;
 			StaminaStats_mc._alpha = 0;
-		}
+		}	
 	}
 
 	function UpdateEnemyHealthStats(enemy:Object):Void{
