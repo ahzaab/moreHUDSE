@@ -141,7 +141,7 @@ extern "C"
 
             SKSE::Init(a_skse);
 
-            SKSE::AllocTrampoline(1 << 10);
+            SKSE::AllocTrampoline(1 << 6);
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {

@@ -51,4 +51,48 @@ namespace Events
         }
         return RE::BSEventNotifyControl::kContinue;
     }
+
+    void CrosshairRefManager::Register()
+    {
+        auto crosshair = SKSE::GetCrosshairRefEventSource();
+        if (crosshair) {
+            crosshair->AddEventSink(GetSingleton());
+            logger::info("Registered {}"sv, typeid(SKSE::CrosshairRefEvent).name());
+        }
+    }
+
+    RE::TESObjectREFR* CrosshairRefManager::GetCrosshairReference()
+    {
+        return _cachedRef;
+    }
+
+    CrosshairRefManager::CrosshairRefManager() :
+        _cachedRef(nullptr) {}
+
+    CrosshairRefManager* CrosshairRefManager::GetSingleton()
+    {
+        static CrosshairRefManager singleton;
+        return std::addressof(singleton);
+    }
+
+    EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
+    {
+        if (a_event && a_event->crosshairRef) {
+            _cachedRef = a_event->crosshairRef.get();
+        } else {
+            _cachedRef = nullptr;
+        }
+        return EventResult::kContinue;
+    }
+
+    void Install()
+    {
+        CrosshairRefManager::Register();
+        logger::info("registered crosshair event"sv);
+        MenuHandler::Sink();
+        logger::info("registered menu event"sv);
+
+        logger::info("Installed all event sinks"sv);
+    }
+
 }

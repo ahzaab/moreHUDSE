@@ -17,13 +17,15 @@ BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904b0"
-        BEGIN
-            VALUE "FileDescription", "moreHUD"
-			VALUE "FileVersion", MHUD_VERSION_VERSTRING
-            VALUE "InternalName", "moreHUD"
-            VALUE "LegalCopyright", "MIT License"
-            VALUE "ProductName", "moreHUD"
-			VALUE "ProductVersion", MHUD_VERSION_VERSTRING
+        BEGIN 
+            VALUE "CompanyName", "Ahzaab"
+            VALUE "FileDescription", "SKSE64 moreHUD plugin"
+            VALUE "FileVersion", MHUD_VERSION_VERSTRING
+            VALUE "InternalName", "AHZmoreHUDPlugin.dll"
+            VALUE "LegalCopyright", "MIT License" 
+            VALUE "OriginalFilename", "AHZmoreHUDPlugin.dll"
+            VALUE "ProductName", "moreHUD Plugin"
+            VALUE "ProductVersion", MHUD_VERSION_VERSTRING
         END
     END
     BLOCK "VarFileInfo"

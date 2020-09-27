@@ -99,15 +99,19 @@ auto CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef) -> uint3
 
     auto pPC = RE::PlayerCharacter::GetSingleton();
     auto baseForm = targetRef->GetBaseObject();
+
     if ((baseForm) &&
         (baseForm->GetFormType() == RE::FormType::Weapon ||
             baseForm->GetFormType() == RE::FormType::Armor ||
             baseForm->GetFormType() == RE::FormType::Ammo ||
             baseForm->GetFormType() == RE::FormType::Projectile)) {
         RE::EnchantmentItem* enchantment = nullptr;
+        auto                 keyWordForm = baseForm->As<RE::BGSKeywordForm>();
         auto                 enchantable = baseForm->As<RE::TESEnchantableForm>();
-        if (baseForm->GetFormType() == RE::FormType::Projectile)
+        if (baseForm->GetFormType() == RE::FormType::Projectile) {
             enchantable = AHZGetForm(targetRef)->As<RE::TESEnchantableForm>();
+            keyWordForm = AHZGetForm(targetRef)->As<RE::BGSKeywordForm>();
+        }
 
         bool wasExtra = false;
         if (enchantable) {  // Check the item for a base enchantment
@@ -120,16 +124,16 @@ auto CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef) -> uint3
 
         if (enchantment) {
             if ((enchantment->formFlags & RE::TESForm::RecordFlags::kKnown) == RE::TESForm::RecordFlags::kKnown) {
-                return MagicDisallowEnchanting(DYNAMIC_CAST(enchantment, RE::EnchantmentItem, RE::BGSKeywordForm)) ? 2 : 1;
-            } else if (MagicDisallowEnchanting(DYNAMIC_CAST(enchantment, RE::EnchantmentItem, RE::BGSKeywordForm))) {
+                return MagicDisallowEnchanting(enchantment) ? 2 : 1;
+            } else if (MagicDisallowEnchanting(enchantment)) {
                 return 2;
             }
 
             auto baseEnchantment = static_cast<RE::EnchantmentItem*>(enchantment->data.baseEnchantment);
             if (baseEnchantment) {
                 if ((baseEnchantment->formFlags & RE::TESForm::RecordFlags::kKnown) == RE::TESForm::RecordFlags::kKnown) {
-                    return MagicDisallowEnchanting(DYNAMIC_CAST(baseEnchantment, RE::EnchantmentItem, RE::BGSKeywordForm)) ? 2 : 1;
-                } else if (MagicDisallowEnchanting(DYNAMIC_CAST(baseEnchantment, RE::EnchantmentItem, RE::BGSKeywordForm))) {
+                    return MagicDisallowEnchanting(baseEnchantment) ? 2 : 1;
+                } else if (MagicDisallowEnchanting(baseEnchantment)) {
                     return 2;
                 }
             }
@@ -140,10 +144,7 @@ auto CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef) -> uint3
         if (wasExtra) {
             return 1;
         } else if (enchantable) {
-            // TODO: Opps Bet this doen't work.
-            // It probably always returned nullptr prior to the port.  It use to use the old DYNAMIC_CAST but the TESEnchantanbleForm does derive fromRE::TESForm
-            // Just sticking this in for now.  The nullptr is checked
-            return MagicDisallowEnchanting(dynamic_cast<RE::BGSKeywordForm*>(enchantable)) ? 2 : 0;
+            return MagicDisallowEnchanting(keyWordForm) ? 2 : 0;
         }
     }
     return 0;
@@ -2010,7 +2011,7 @@ void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& form
     const string survivalConst = const_cast<string&>(unFormated);
     if ((regex_search(survivalConst.begin(), survivalConst.end(), survivalMatch, survivalRegex))) {
         ReplaceStringInPlace(unFormated, "[SURV=", "");
-        auto offset = (size_t)(unFormated.length() - 1);
+        auto   offset = (size_t)(unFormated.length() - 1);
         size_t count = 1;
         unFormated.erase(offset, count);
         canBeAdded = IsSurvivalMode();
