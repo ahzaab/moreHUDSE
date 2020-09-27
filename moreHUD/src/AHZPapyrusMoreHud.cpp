@@ -3,11 +3,11 @@
 #include "version.h"
 #include <mutex>
 
-typedef std::map<uint32_t, RE::BSFixedString>   AhzIconItemCache;
-typedef std::map<std::string, RE::BGSListForm*> AhzIconFormListCache;
-static AhzIconItemCache                         s_ahzRegisteredIcons;
-static AhzIconFormListCache                     s_ahzRegisteredIconFormLists;
-static std::recursive_mutex                     mtx;
+using AhzIconItemCache = std::map<uint32_t, RE::BSFixedString>;
+using AhzIconFormListCache = std::map<std::string, RE::BGSListForm*>;
+static AhzIconItemCache     s_ahzRegisteredIcons;
+static AhzIconFormListCache s_ahzRegisteredIconFormLists;
+static std::recursive_mutex mtx;
 
 uint32_t PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base)
 {

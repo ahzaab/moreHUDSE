@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>moreHUD</ProjectName>
+    <ProjectName>AHZmoreHUDPlugin</ProjectName>
     <ProjectGuid>{A4D9A123-F9BB-4787-BAD7-37D373EB05CC}</ProjectGuid>
     <RootNamespace>ScaleformTranslationPP</RootNamespace>
     <Keyword>Win32Proj</Keyword>

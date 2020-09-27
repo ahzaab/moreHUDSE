@@ -43,8 +43,8 @@ public:
 class CAHZActorInfo
 {
 public:
-    CAHZActorInfo(void);
-    ~CAHZActorInfo(void);
+    CAHZActorInfo() = default;
+    ~CAHZActorInfo() = default;
 
     static uint32_t IsSentient(RE::Actor* actor);
     static uint32_t GetSoulType(uint16_t actorLevel, uint8_t isActorSentient);

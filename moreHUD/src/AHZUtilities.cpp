@@ -17,17 +17,11 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
                 string fileName = fd.cFileName;
 
                 std::for_each(fileName.begin(), fileName.end(), [](char& c) {
-                    c = ::toupper(c);
+                    c = static_cast<char>(::toupper(static_cast<int32_t>(c)));
                 });
 
-                // transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
-                //size_t found = fileName.find(".MHUD");
-                //_MESSAGE("-> file '%s'", fileName.c_str());
-                // if (found != string::npos)
-                //{
                 logger::info("--> FOUND '{}'", fileName.c_str());
                 names.push_back(fd.cFileName);
-                // }
             }
         } while (::FindNextFile(hFind, &fd));
         ::FindClose(hFind);
@@ -90,8 +84,8 @@ string& CAHZUtilities::GetSkyrimDataPath()
     static string s_dataPath;
 
     if (s_dataPath.empty()) {
-        HMODULE hModule = GetModuleHandle(NULL);
-        if (hModule != NULL) {
+        HMODULE hModule = GetModuleHandle(nullptr);
+        if (hModule != nullptr) {
             char skyrimPath[_MAX_PATH];
             char skyrimDir[_MAX_DIR];
             char skyrimDrive[_MAX_DRIVE];
@@ -104,9 +98,9 @@ string& CAHZUtilities::GetSkyrimDataPath()
                 (size_t)sizeof(skyrimDrive),
                 &skyrimDir[0],
                 (size_t)sizeof(skyrimDir),
-                NULL,
+                nullptr,
                 0,
-                NULL,
+                nullptr,
                 0);
 
             s_dataPath.append(skyrimDrive);
@@ -154,26 +148,6 @@ string CAHZUtilities::GetConfigOption(const char* section, const char* key)
     static string s_pluginPath;
 
     if (s_pluginPath.empty()) {
-        //if (!g_hPluginModule)
-        //{
-        //   string();
-        //}
-        //char pluginName[_MAX_FNAME];
-        //// Use GetModuleFileName() with module handle to get the path
-        //GetModuleFileName(g_hPluginModule, pluginName, (sizeof(pluginName)));
-
-        //_splitpath_s(
-        //   (const char*)pluginName,
-        //   NULL,
-        //   0,
-        //   NULL,
-        //   0,
-        //   pluginName,
-        //   (size_t)_MAX_FNAME,
-        //   NULL,
-        //   0
-        //);
-
         s_pluginPath.append(GetPluginPath().c_str());
         s_pluginPath.append("AHZmoreHUDPlugin");
         s_pluginPath.append(".ini");

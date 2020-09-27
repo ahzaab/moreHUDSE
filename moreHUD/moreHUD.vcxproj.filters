@@ -64,8 +64,12 @@
     <ClCompile Include="src\HashUtil.cpp">
       <Filter>src\SKSE</Filter>
     </ClCompile>
-    <ClCompile Include="src\AHZForEachScriptObjectFunctor.cpp" />
-    <ClCompile Include="src\IForEachScriptObjectFunctor.cpp" />
+    <ClCompile Include="src\AHZForEachScriptObjectFunctor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IForEachScriptObjectFunctor.cpp">
+      <Filter>src\RE\BSScript</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\version.h">
@@ -135,8 +139,12 @@
     <ClInclude Include="include\HashUtil.h">
       <Filter>include\SKSE</Filter>
     </ClInclude>
-    <ClInclude Include="include\AHZForEachScriptObjectFunctor.h" />
-    <ClInclude Include="include\IForEachScriptObjectFunctor.h" />
+    <ClInclude Include="include\IForEachScriptObjectFunctor.h">
+      <Filter>include\RE\BSScript</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AHZForEachScriptObjectFunctor.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc" />
@@ -163,6 +171,18 @@
     </Filter>
     <Filter Include="src\SKSE">
       <UniqueIdentifier>{f527845d-08f5-46d3-b82e-3512d896f592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RE">
+      <UniqueIdentifier>{63725543-c031-4012-850b-172a339c790c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RE\BSScript">
+      <UniqueIdentifier>{1253ac91-27df-479a-8ea7-511bdcabcbdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\RE">
+      <UniqueIdentifier>{789ee7f9-38c8-4574-b8ea-fdb98012287b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\RE\BSScript">
+      <UniqueIdentifier>{0b46dd68-3382-492e-b7d5-e304d659ac13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
