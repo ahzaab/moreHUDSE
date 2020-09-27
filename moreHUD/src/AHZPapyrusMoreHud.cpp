@@ -3,7 +3,6 @@
 #include "version.h"
 #include <mutex>
 
-
 typedef std::map<uint32_t, RE::BSFixedString>   AhzIconItemCache;
 typedef std::map<std::string, RE::BGSListForm*> AhzIconFormListCache;
 static AhzIconItemCache                         s_ahzRegisteredIcons;

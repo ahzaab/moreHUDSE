@@ -64,6 +64,8 @@
     <ClCompile Include="src\HashUtil.cpp">
       <Filter>src\SKSE</Filter>
     </ClCompile>
+    <ClCompile Include="src\AHZForEachScriptObjectFunctor.cpp" />
+    <ClCompile Include="src\IForEachScriptObjectFunctor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\version.h">
@@ -133,6 +135,8 @@
     <ClInclude Include="include\HashUtil.h">
       <Filter>include\SKSE</Filter>
     </ClInclude>
+    <ClInclude Include="include\AHZForEachScriptObjectFunctor.h" />
+    <ClInclude Include="include\IForEachScriptObjectFunctor.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc" />

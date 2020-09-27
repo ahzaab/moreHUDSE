@@ -172,6 +172,7 @@
     <ClCompile Include="src\AHZVanillaFormTable.cpp" />
     <ClCompile Include="src\AHZWeaponInfo.cpp" />
     <ClCompile Include="src\HashUtil.cpp" />
+    <ClCompile Include="src\IForEachScriptObjectFunctor.cpp" />
     <ClCompile Include="src\PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
@@ -182,6 +183,7 @@
     <ClCompile Include="src\Patches.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Scaleform.cpp" />
+    <ClCompile Include="src\AHZForEachScriptObjectFunctor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ActorValueList.h" />
@@ -189,6 +191,7 @@
     <ClInclude Include="include\AHZArmorInfo.h" />
     <ClInclude Include="include\AHZConsole.h" />
     <ClInclude Include="include\AHZExternalFormTable.h" />
+    <ClInclude Include="include\AHZForEachScriptObjectFunctor.h" />
     <ClInclude Include="include\AHZFormLookup.h" />
     <ClInclude Include="include\AHZLUTObject.h" />
     <ClInclude Include="include\AHZPapyrusMoreHud.h" />
@@ -200,6 +203,7 @@
     <ClInclude Include="include\AHZWeaponInfo.h" />
     <ClInclude Include="include\Events.h" />
     <ClInclude Include="include\HashUtil.h" />
+    <ClInclude Include="include\IForEachScriptObjectFunctor.h" />
     <ClInclude Include="include\Offsets.h" />
     <ClInclude Include="include\Papyrus.h" />
     <ClInclude Include="include\Patches.h" />
