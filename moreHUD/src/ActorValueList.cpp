@@ -45,7 +45,7 @@ namespace SKSE
         m_actorValueInfo.insert({ AV::kSmithingModifier, AVForm::kAVSmithingMod });
     }
 
-    ActorValueList* ActorValueList::GetSingleton()
+    auto ActorValueList::GetSingleton() -> ActorValueList*
     {
         //using func_t = decltype(&ActorValueList::GetSingleton);
         //REL::Relocation<func_t> func{ REL::ID(514139) };
@@ -53,7 +53,7 @@ namespace SKSE
         return std::addressof(instance);
     }
 
-    RE::ActorValueInfo* ActorValueList::GetActorValue(RE::ActorValue id)
+    auto ActorValueList::GetActorValue(RE::ActorValue id) -> RE::ActorValueInfo*
     {
         if (id >= RE::ActorValue::kTotal) {
             return nullptr;

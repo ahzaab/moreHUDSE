@@ -2,7 +2,7 @@
 #include "AHZArmorInfo.h"
 
 
-RE::ExtraDataList* CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extraList)
+auto CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extraList) -> RE::ExtraDataList*
 {
     if (extraList) {
         for (auto entryListIT = extraList->begin(); entryListIT != extraList->end(); ++entryListIT) {
@@ -17,7 +17,7 @@ RE::ExtraDataList* CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDat
     return nullptr;
 }
 
-AHZArmorData CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask)
+auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask) -> AHZArmorData
 {
     AHZArmorData        data;
     auto                pPC = RE::PlayerCharacter::GetSingleton();

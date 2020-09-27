@@ -9,9 +9,9 @@ class ContainerAmmoVistor
 public:
     AHZWeaponData ammoData;
     ContainerAmmoVistor()
-    {}
+    = default;
 
-    bool Accept(RE::InventoryEntryData* pEntryData)
+    auto Accept(RE::InventoryEntryData* pEntryData) -> bool
     {
         if (pEntryData && pEntryData->object && pEntryData->object->GetFormType() == RE::FormType::Ammo) {
             if (pEntryData->extraLists) {
@@ -32,7 +32,7 @@ public:
     }
 };
 
-AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject)
+auto CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject) -> AHZWeaponData
 {
     AHZWeaponData weaponData;
 
@@ -71,7 +71,7 @@ AHZWeaponData CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject)
     return weaponData;
 }
 
-AHZWeaponData CAHZWeaponInfo::GetLeftHandWeapon(void)
+auto CAHZWeaponInfo::GetLeftHandWeapon() -> AHZWeaponData
 {
     AHZWeaponData weaponData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();
@@ -106,7 +106,7 @@ AHZWeaponData CAHZWeaponInfo::GetLeftHandWeapon(void)
     return weaponData;
 }
 
-AHZWeaponData CAHZWeaponInfo::GetRightHandWeapon(void)
+auto CAHZWeaponInfo::GetRightHandWeapon() -> AHZWeaponData
 {
     AHZWeaponData weaponData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();
@@ -143,7 +143,7 @@ AHZWeaponData CAHZWeaponInfo::GetRightHandWeapon(void)
     return weaponData;
 }
 
-AHZWeaponData CAHZWeaponInfo::GetEquippedAmmo(void)
+auto CAHZWeaponInfo::GetEquippedAmmo() -> AHZWeaponData
 {
     AHZWeaponData ammoData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();

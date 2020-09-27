@@ -38,18 +38,15 @@ static const uint32_t s_crc32Lookup[256] = {
     0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 };
 
-namespace SKSE
-{
-    namespace HashUtil
+namespace SKSE::HashUtil
     {
-        uint32_t CRC32(const char* str, uint32_t start)
+        auto CRC32(const char* str, uint32_t start) -> uint32_t
         {
             uint32_t       result = ~start;
-            unsigned char* c = (unsigned char*)str;
+            auto* c = (unsigned char*)str;
             size_t         len = strlen(str);
             while (len-- > 0)
                 result = (result >> 8) ^ s_crc32Lookup[(result & 0xFF) ^ *c++];
             return ~result;
         }
     }
-}

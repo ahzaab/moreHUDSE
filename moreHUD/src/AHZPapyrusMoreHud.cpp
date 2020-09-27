@@ -9,7 +9,7 @@ static AhzIconItemCache     s_ahzRegisteredIcons;
 static AhzIconFormListCache s_ahzRegisteredIconFormLists;
 static std::recursive_mutex mtx;
 
-uint32_t PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base)
+auto PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) -> uint32_t
 {
     uint32_t major = static_cast<uint32_t>(MHUD_VERSION_MAJOR * pow(10, 6));
     uint32_t minor = static_cast<uint32_t>(MHUD_VERSION_MINOR * pow(10, 4));
@@ -41,7 +41,7 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
     }
 }
 
-bool PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName)
+auto PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName) -> bool
 {
     //_MESSAGE("IsIconItemRegistered %d", itemID);
     std::lock_guard<recursive_mutex> lock(mtx);
@@ -58,12 +58,12 @@ bool PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName)
     return (it != s_ahzRegisteredIconFormLists.end());
 }
 
-bool PapyrusMoreHud::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctionTag* base, RE::BSFixedString iconName)
+auto PapyrusMoreHud::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctionTag* base, RE::BSFixedString iconName) -> bool
 {
     return IsIconFormListRegistered_Internal(iconName.c_str());
 }
 
-bool PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId)
+auto PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId) -> bool
 {
     std::lock_guard<recursive_mutex> lock(mtx);
     if (IsIconFormListRegistered_Internal(iconName)) {
@@ -82,7 +82,7 @@ bool PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId)
     return false;
 }
 
-bool PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag* base, uint32_t itemID)
+auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag* base, uint32_t itemID) -> bool
 {
     //_MESSAGE("IsIconItemRegistered %d", itemID);
     std::lock_guard<recursive_mutex> lock(mtx);
@@ -143,12 +143,12 @@ void PapyrusMoreHud::RemoveIconItems(RE::StaticFunctionTag* base, std::vector<ui
     }
 }
 
-string PapyrusMoreHud::GetIconName(uint32_t itemID)
+auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> string
 {
     string                           iconName("");
     std::lock_guard<recursive_mutex> lock(mtx);
 
-    if (IsIconItemRegistered(NULL, itemID)) {
+    if (IsIconItemRegistered(nullptr, itemID)) {
         iconName.append(s_ahzRegisteredIcons[itemID].c_str());
     }
 
@@ -156,7 +156,7 @@ string PapyrusMoreHud::GetIconName(uint32_t itemID)
 }
 
 
-bool PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm)
+auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {
     a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion);
     a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);

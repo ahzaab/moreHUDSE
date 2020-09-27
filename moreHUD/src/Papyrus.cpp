@@ -4,7 +4,7 @@
 
 namespace moreHUD
 {
-    bool Papyrus::Register()
+    auto Papyrus::Register() -> bool
     {
         auto papyrus = SKSE::GetPapyrusInterface();
         if (!papyrus->Register(PapyrusMoreHud::RegisterFunctions)) {

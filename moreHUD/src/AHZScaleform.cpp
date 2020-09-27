@@ -1,7 +1,7 @@
 ﻿#include "PCH.h"
 
-#include <wchar.h>
-#include <stdlib.h>
+#include <cwchar>
+#include <cstdlib>
 #include <sstream>
 #include <iostream>
 #include <list>
@@ -23,40 +23,40 @@ void CAHZScaleform::GetMagicItemDescription2(void*, RE::TESForm* a1, RE::BSStrin
     func(nullptr, a1, a2);
 }
 
-char* CAHZScaleform::ProcessSurvivalMode(RE::BSString* a2)
+auto CAHZScaleform::ProcessSurvivalMode(RE::BSString* a2) -> char*
 {
     using func_t = decltype(&CAHZScaleform::ProcessSurvivalMode);
     REL::Relocation<func_t> func{ REL::ID(51023) };
     return func(a2);
 }
 
-bool CAHZScaleform::IsSurvivalMode()
+auto CAHZScaleform::IsSurvivalMode() -> bool
 {
     using func_t = decltype(&CAHZScaleform::IsSurvivalMode);
     REL::Relocation<func_t> func{ REL::ID(52058) };
     return func();
 }
 
-float CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1)
+auto CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetArmorWarmthRating_Native);
     REL::Relocation<func_t> func{ REL::ID(25833) };
     return func(a1);
 }
 
-float CAHZScaleform::GetActorWarmthRating_Native(RE::Actor* a1, float s2)
+auto CAHZScaleform::GetActorWarmthRating_Native(RE::Actor* a1, float s2) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetActorWarmthRating_Native);
     REL::Relocation<func_t> func{ REL::ID(25834) };
     return func(a1, s2);
 }
 
-float CAHZScaleform::GetBaseDamage(RE::TESAmmo* pthisAmmo)
+auto CAHZScaleform::GetBaseDamage(RE::TESAmmo* pthisAmmo) -> float
 {
     return pthisAmmo->data.damage;
 }
 
-string CAHZScaleform::GetSoulLevelName(uint8_t soulLevel)
+auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
 {
     if (m_soulMap.empty())  //Cache it,  No need to hit the game setting every time
     {
@@ -73,7 +73,7 @@ string CAHZScaleform::GetSoulLevelName(uint8_t soulLevel)
     return m_soulMap[soulLevel];
 }
 
-bool MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords)
+auto MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool
 {
     if (pKeywords) {
         for (uint32_t k = 0; k < pKeywords->numKeywords; k++) {
@@ -91,7 +91,7 @@ bool MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords)
     return false;
 }
 
-uint32_t CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef)
+auto CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef) -> uint32_t
 {
     if (!targetRef) {
         return 0;
@@ -149,7 +149,7 @@ uint32_t CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef)
     return 0;
 }
 
-float CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData)
+auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
 {
     if (!weaponData)
         return 0.0f;
@@ -179,7 +179,7 @@ float CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData)
     return 0.0;
 }
 
-float CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
+auto CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData) -> float
 {
     if (!armorData->armor)
         return 0.0f;
@@ -205,7 +205,7 @@ float CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData)
     return 0.0;
 }
 
-float CAHZScaleform::GetArmorWarmthRating(RE::TESObjectREFR* targetRef)
+auto CAHZScaleform::GetArmorWarmthRating(RE::TESObjectREFR* targetRef) -> float
 {
     // TODO: Port Note: Checking if the reference base object is null may not be needed
     if (!targetRef || !targetRef->GetBaseObject())
@@ -219,12 +219,12 @@ float CAHZScaleform::GetArmorWarmthRating(RE::TESObjectREFR* targetRef)
     return GetArmorWarmthRating(&armorData);
 }
 
-float CAHZScaleform::GetPlayerWarmthRating()
+auto CAHZScaleform::GetPlayerWarmthRating() -> float
 {
     return 0.0f;
 }
 
-float CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
+auto CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData) -> float
 {
     if (!armorData->armor)
         return 0.0f;
@@ -255,7 +255,7 @@ float CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData)
 }
 
 // TODO: Port Note, I should probably decode the function that already does this
-float CAHZScaleform::GetTotalActualArmorRating()
+auto CAHZScaleform::GetTotalActualArmorRating() -> float
 {
     float totalRating = 0.0f;
     // Keep a list of items to make sure they are not added more than once
@@ -276,7 +276,7 @@ float CAHZScaleform::GetTotalActualArmorRating()
 }
 
 // TODO: Port Note, I should probably decode the function that already does this
-float CAHZScaleform::GetTotalWarmthRating()
+auto CAHZScaleform::GetTotalWarmthRating() -> float
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
 
@@ -287,12 +287,12 @@ float CAHZScaleform::GetTotalWarmthRating()
     return GetActorWarmthRating_Native(pPC, 0.0);
 }
 
-float CAHZScaleform::mRound(float r)
+auto CAHZScaleform::mRound(float r) -> float
 {
     return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
 }
 
-float CAHZScaleform::GetArmorRatingDiff(RE::TESObjectREFR* thisArmor)
+auto CAHZScaleform::GetArmorRatingDiff(RE::TESObjectREFR* thisArmor) -> float
 {
     float oldArmorRating = 0.0f;
     float newArmorRating = 0.0f;
@@ -326,7 +326,7 @@ float CAHZScaleform::GetArmorRatingDiff(RE::TESObjectREFR* thisArmor)
     return deltaRating;
 }
 
-float CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR* thisArmor)
+auto CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR* thisArmor) -> float
 {
     float oldArmorRating = 0.0f;
     float newArmorRating = 0.0f;
@@ -359,7 +359,7 @@ float CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR* thisArmor)
     return deltaRating;
 }
 
-float CAHZScaleform::GetTotalActualWeaponDamage(void)
+auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
 {
     float         totalWeaponDamage = 0.0;
     bool          is2Handed = FALSE;
@@ -420,12 +420,12 @@ float CAHZScaleform::GetTotalActualWeaponDamage(void)
     return totalWeaponDamage;
 }
 
-bool CAHZScaleform::isBolt(RE::TESAmmo* thisAmmo)
+auto CAHZScaleform::isBolt(RE::TESAmmo* thisAmmo) -> bool
 {
     return (thisAmmo->IsBolt());
 }
 
-float CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo)
+auto CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo) -> float
 {
     float         totalWeaponDamage = 0.0f;
     float         targetArrowDamage = 0.0f;
@@ -518,7 +518,7 @@ float CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo)
     return 0.0f;
 }
 
-bool CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon)
+auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -588,7 +588,7 @@ bool CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon)
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-bool CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon)
+auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -676,7 +676,7 @@ bool CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon)
 //			thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 //}
 
-bool CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon)
+auto CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -730,7 +730,7 @@ bool CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon)
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
 }
 
-bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon)
+auto CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -784,7 +784,7 @@ bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon)
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-RE::AlchemyItem* CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject)
+auto CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject) -> RE::AlchemyItem*
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
         RE::TESLevItem* lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
@@ -803,10 +803,10 @@ RE::AlchemyItem* CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisO
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-RE::IngredientItem* CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thisObject)
+auto CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thisObject) -> RE::IngredientItem*
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
         auto lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
@@ -825,13 +825,13 @@ RE::IngredientItem* CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thi
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-RE::IngredientItem* CAHZScaleform::GetIngredient(RE::TESForm* thisObject)
+auto CAHZScaleform::GetIngredient(RE::TESForm* thisObject) -> RE::IngredientItem*
 {
     if (!thisObject)
-        return NULL;
+        return nullptr;
 
     auto reference = AHZGetReference(thisObject);
     if (reference) {
@@ -938,7 +938,7 @@ RE::IngredientItem* CAHZScaleform::GetIngredient(RE::TESForm* thisObject)
     return nullptr;
 }
 
-RE::SpellItem* CAHZScaleform::GetSpellItem(RE::TESForm* thisObject)
+auto CAHZScaleform::GetSpellItem(RE::TESForm* thisObject) -> RE::SpellItem*
 {
     if (!thisObject)
         return nullptr;
@@ -954,7 +954,7 @@ RE::SpellItem* CAHZScaleform::GetSpellItem(RE::TESForm* thisObject)
     return DYNAMIC_CAST(thisObject, RE::TESForm, RE::SpellItem);
 }
 
-RE::AlchemyItem* CAHZScaleform::GetAlchemyItem(RE::TESForm* thisObject)
+auto CAHZScaleform::GetAlchemyItem(RE::TESForm* thisObject) -> RE::AlchemyItem*
 {
     if (!thisObject)
         return nullptr;
@@ -1065,10 +1065,10 @@ RE::AlchemyItem* CAHZScaleform::GetAlchemyItem(RE::TESForm* thisObject)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-bool CAHZScaleform::CanPickUp(RE::TESForm* form)
+auto CAHZScaleform::CanPickUp(RE::TESForm* form) -> bool
 {
     if (!form) {
         return false;
@@ -1091,7 +1091,7 @@ bool CAHZScaleform::CanPickUp(RE::TESForm* form)
     return canCarry;
 }
 
-string CAHZScaleform::GetTargetName(RE::TESForm* thisObject)
+auto CAHZScaleform::GetTargetName(RE::TESForm* thisObject) -> string
 {
     string name;
 
@@ -1139,7 +1139,7 @@ string CAHZScaleform::GetTargetName(RE::TESForm* thisObject)
     return name;
 };
 
-bool CAHZScaleform::GetIsBookAndWasRead(RE::TESObjectREFR* theObject)
+auto CAHZScaleform::GetIsBookAndWasRead(RE::TESObjectREFR* theObject) -> bool
 {
     if (!theObject)
         return false;
@@ -1160,7 +1160,7 @@ bool CAHZScaleform::GetIsBookAndWasRead(RE::TESObjectREFR* theObject)
 
 static uint32_t lasttargetRef;
 
-static bool DoubleCompare(double a, double b)
+static auto DoubleCompare(double a, double b) -> bool
 {
     double delta = fabs(a - b);
     if (delta < std::numeric_limits<double>::epsilon() &&
@@ -1170,7 +1170,7 @@ static bool DoubleCompare(double a, double b)
     return false;
 }
 
-static double GetPct(double current, double max)
+static auto GetPct(double current, double max) -> double
 {
     double percent = -1;
 
@@ -1235,7 +1235,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
     }
 }
 
-string CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR* theObject)
+auto CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR* theObject) -> string
 {
     string desc;
 
@@ -1258,7 +1258,7 @@ string CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR* theObject)
         if (item->IsLightArmor()) {
             auto info = avList->GetActorValue(RE::ActorValue::kLightArmor);
             if (info) {
-                desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
                 desc.append(info->GetFullName());
                 desc.append("<\\FONT>");
             }
@@ -1268,7 +1268,7 @@ string CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR* theObject)
         else if (item->IsHeavyArmor()) {
             auto info = avList->GetActorValue(RE::ActorValue::kHeavyArmor);
             if (info) {
-                desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
                 desc.append(info->GetFullName());
                 desc.append("<\\FONT>");
             }
@@ -1277,7 +1277,7 @@ string CAHZScaleform::GetArmorWeightClass(RE::TESObjectREFR* theObject)
     return desc;
 };
 
-string CAHZScaleform::GetValueToWeight(RE::TESObjectREFR* theObject, const char* stringFromHUD, const char* vmTranslated)
+auto CAHZScaleform::GetValueToWeight(RE::TESObjectREFR* theObject, const char* stringFromHUD, const char* vmTranslated) -> string
 {
     string desc;
 
@@ -1329,7 +1329,7 @@ string CAHZScaleform::GetValueToWeight(RE::TESObjectREFR* theObject, const char*
     float vW = valueValue / weightValue;
 
     // Add the VW label
-    desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">     ");
+    desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
     desc.append(vmTranslated);
     desc.append(" <\\FONT>");
 
@@ -1346,14 +1346,14 @@ string CAHZScaleform::GetValueToWeight(RE::TESObjectREFR* theObject, const char*
         sprintf_s(floatHold, size, "%.0f", vW);
     }
 
-    desc.append("<FONT FACE=\"$EverywhereBoldFont\"SIZE=\"24\"COLOR=\"#FFFFFF\"KERNING=\"0\">");
+    desc.append(R"(<FONT FACE="$EverywhereBoldFont"SIZE="24"COLOR="#FFFFFF"KERNING="0">)");
     desc.append(floatHold);
     desc.append("<\\FONT>");
 
     return desc;
 };
 
-string CAHZScaleform::GetBookSkill(RE::TESObjectREFR* theObject)
+auto CAHZScaleform::GetBookSkill(RE::TESObjectREFR* theObject) -> string
 {
     string desc;
     if (theObject->GetBaseObject()->GetFormType() == RE::FormType::Book) {
@@ -1372,7 +1372,7 @@ string CAHZScaleform::GetBookSkill(RE::TESObjectREFR* theObject)
             if (avList) {
                 auto info = avList->GetActorValue(item->data.teaches.actorValueToAdvance);
                 if (info) {
-                    desc.append("<FONT FACE=\"$EverywhereMediumFont\"SIZE=\"15\"COLOR=\"#999999\"KERNING=\"0\">       ");
+                    desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">       )");
                     desc.append(info->GetFullName());
                     desc.append("<\\FONT>");
                 }
@@ -1428,7 +1428,7 @@ void CAHZScaleform::AppendDescription(RE::TESDescription* desObj, RE::TESForm* p
     }
 }
 
-string CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR* theObject)
+auto CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR* theObject) -> string
 {
     RE::BSString   description;
     string         effectDescription;
@@ -1609,7 +1609,7 @@ void CAHZScaleform::ProcessTargetEffects(RE::TESObjectREFR* targetObject, RE::GF
     }
 
     // Spell items like blessings
-    else if ((spellItem = GetSpellItem(targetForm)) != NULL) {
+    else if ((spellItem = GetSpellItem(targetForm)) != nullptr) {
         AppendDescription(spellItem, spellItem, name);
 
         if (!name.length()) {
@@ -1779,7 +1779,7 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
     args.args[0].SetMember("targetObj", obj);
 };
 
-bool CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index)
+auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index) -> bool
 {
     bool isKnown = false;
 
@@ -2010,7 +2010,7 @@ void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& form
     const string survivalConst = const_cast<string&>(unFormated);
     if ((regex_search(survivalConst.begin(), survivalConst.end(), survivalMatch, survivalRegex))) {
         ReplaceStringInPlace(unFormated, "[SURV=", "");
-        size_t offset = (size_t)(unFormated.length() - 1);
+        auto offset = (size_t)(unFormated.length() - 1);
         size_t count = 1;
         unFormated.erase(offset, count);
         canBeAdded = IsSurvivalMode();

@@ -10,7 +10,7 @@ namespace Scaleform
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call([[maybe_unused]] Params& a_params)
+        void Call([[maybe_unused]] Params& a_params) override
         {
         }
     };
@@ -18,7 +18,7 @@ namespace Scaleform
     class SKSEScaleform_GetTargetObjectData : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessTargetObject(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -27,7 +27,7 @@ namespace Scaleform
     class SKSEScaleform_GetPlayerData : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessPlayerData(a_params);
         }
@@ -36,7 +36,7 @@ namespace Scaleform
     class SKSEScaleform_GetIsPlayerInCombat : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             a_params.retVal->SetBoolean(CAHZPlayerInfo::GetIsInCombat());
         }
@@ -45,7 +45,7 @@ namespace Scaleform
     class SKSEScaleform_GetTargetEffects : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessTargetEffects(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -54,7 +54,7 @@ namespace Scaleform
     class SKSEScaleform_GetIsBookAndWasRead : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
 
@@ -70,7 +70,7 @@ namespace Scaleform
     class SKSEScaleform_GetArmorWeightClassString : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessArmorClass(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -79,7 +79,7 @@ namespace Scaleform
     class SKSEScaleform_GetValueToWeightString : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessValueToWeight(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -88,7 +88,7 @@ namespace Scaleform
     class SKSEScaleform_GetTargetWarmthRating : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             a_params.retVal->SetNumber(CAHZScaleform::GetArmorWarmthRating(CAHZPlayerInfo::GetTargetRef()));
         }
@@ -97,7 +97,7 @@ namespace Scaleform
     class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             assert(a_params.argCount);
             logger::trace("{}", a_params.args[0].GetString());
@@ -107,7 +107,7 @@ namespace Scaleform
     class SKSEScaleform_GetBookSkillString : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessBookSkill(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -116,7 +116,7 @@ namespace Scaleform
     class SKSEScaleform_GetIsValidTarget : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessValidTarget(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
@@ -125,7 +125,7 @@ namespace Scaleform
     class SKSEScaleform_GetEnemyInformation : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             CAHZScaleform::ProcessEnemyInformation(a_params);
         }
@@ -134,7 +134,7 @@ namespace Scaleform
     class SKSEScaleform_IsAKnownEnchantedItem : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
 
@@ -150,7 +150,7 @@ namespace Scaleform
     class SKSEScaleform_IsTargetInFormList : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             assert(a_params.args);
             assert(a_params.argCount);
@@ -176,7 +176,7 @@ namespace Scaleform
     class SKSEScaleform_IsTargetInIconList : public RE::GFxFunctionHandler
     {
     public:
-        virtual void Call(Params& a_params)
+        void Call(Params& a_params) override
         {
             assert(a_params.args);
             assert(a_params.argCount);
@@ -248,7 +248,7 @@ namespace Scaleform
         dst->SetMember(name, fnValue);
     }
 
-    bool RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root)
+    auto RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root) -> bool
     {
         RegisterFunction<SKSEScaleform_InstallHooks>(a_root, a_view, "InstallHooks");
         RegisterFunction<SKSEScaleform_GetTargetObjectData>(a_root, a_view, "GetTargetObjectData");

@@ -2,13 +2,13 @@
 #include "AHZFormLookup.h"
 #include "AHZForEachScriptObjectFunctor.h"
 
-CAHZFormLookup& CAHZFormLookup::Instance()
+auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 {
     static CAHZFormLookup theInstance;
     return theInstance;
 }
 
-RE::TESForm* CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference)
+auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
 {
     RE::TESForm* lutForm = nullptr;
     if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
@@ -31,7 +31,7 @@ RE::TESForm* CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference)
     }
 }
 
-RE::TESForm* CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef)
+auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef) -> RE::TESForm*
 {
     if (!targetRef || !targetRef->GetBaseObject())
         return nullptr;
@@ -41,7 +41,7 @@ RE::TESForm* CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef)
         auto     form = RE::TESForm::LookupByID(formID);
         return form;
     }
-    return NULL;
+    return nullptr;
 }
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
@@ -79,7 +79,7 @@ void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, stri
     }
 }
 
-RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form)
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
 {
     vector<string>::iterator p;
 
@@ -88,7 +88,7 @@ RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form)
     }
 
     if (!form->GetBaseObject()) {
-        return NULL;
+        return nullptr;
     }
 
     if (form->GetBaseObject()->formType != RE::FormType::Activator) {
@@ -162,7 +162,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     return var;
 }
 
-RE::TESForm* CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, string variableName)
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, string variableName) -> RE::TESForm*
 {
     if (form) {
         if (!form->GetBaseObject())

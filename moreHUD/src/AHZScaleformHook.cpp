@@ -99,7 +99,7 @@ void AHZEnemyHealthUpdateHook::Install()
         trampoline.allocate(code));
 }
 
-CAHZActorData AHZEnemyHealthUpdateHook::GetCurrentEnemyData()
+auto AHZEnemyHealthUpdateHook::GetCurrentEnemyData() -> CAHZActorData
 {
     return ahzEnemyData.GetData();
 }

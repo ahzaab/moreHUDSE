@@ -47,7 +47,7 @@ vector<string> CAHZUtilities::SplitString(string& str, string& token)
     return result;
 }
 
-AHZLUTObject CAHZUtilities::ParseLUTObject(string& stringValue)
+auto CAHZUtilities::ParseLUTObject(string& stringValue) -> AHZLUTObject
 {
     string         split = ",";
     vector<string> items = SplitString(stringValue, split);
@@ -79,7 +79,7 @@ AHZLUTObject CAHZUtilities::ParseLUTObject(string& stringValue)
     return AHZLUTObject();
 }
 
-string& CAHZUtilities::GetSkyrimDataPath()
+auto CAHZUtilities::GetSkyrimDataPath() -> string&
 {
     static string s_dataPath;
 
@@ -111,7 +111,7 @@ string& CAHZUtilities::GetSkyrimDataPath()
     return s_dataPath;
 }
 
-string& CAHZUtilities::GetPluginPath()
+auto CAHZUtilities::GetPluginPath() -> string&
 {
     static string s_pluginPath;
 
@@ -123,26 +123,26 @@ string& CAHZUtilities::GetPluginPath()
 }
 
 // trim from end of string (right)
-string& CAHZUtilities::rtrim(string& s)
+auto CAHZUtilities::rtrim(string& s) -> string&
 {
     s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
     return s;
 }
 
 // trim from beginning of string (left)
-string& CAHZUtilities::ltrim(string& s)
+auto CAHZUtilities::ltrim(string& s) -> string&
 {
     s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
     return s;
 }
 
 // trim from both ends of string (left & right)
-string& CAHZUtilities::trim(string& s)
+auto CAHZUtilities::trim(string& s) -> string&
 {
     return ltrim(rtrim(s));
 }
 
-string CAHZUtilities::GetConfigOption(const char* section, const char* key)
+auto CAHZUtilities::GetConfigOption(const char* section, const char* key) -> string
 {
     string        result;
     static string s_pluginPath;
@@ -157,7 +157,7 @@ string CAHZUtilities::GetConfigOption(const char* section, const char* key)
     resultBuf[0] = 0;
 
     if (_access_s(s_pluginPath.c_str(), 0) == 0) {
-        uint32_t resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
+        uint32_t resultLen = GetPrivateProfileString(section, key, nullptr, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
         result = resultBuf;
     }
     return result;
