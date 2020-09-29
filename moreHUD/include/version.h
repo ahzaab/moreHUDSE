@@ -13,3 +13,10 @@
     "." MAKE_STR(MHUD_VERSION_MINOR) "." MAKE_STR(MHUD_VERSION_PATCH) "." MAKE_STR(MHUD_VERSION_BETA)
 
 #endif
+
+// This is terrible, but I have to do it this way for backwords compatibility
+// There are mods that rely on this format MMmmPPBB
+#define MHUD_VERSION_NUMBER (static_cast<uint32_t>((MHUD_VERSION_MAJOR * pow(10, 6)) + \
+                                                   (MHUD_VERSION_MINOR * pow(10, 4)) + \
+                                                   (MHUD_VERSION_PATCH * pow(10, 2)) + \
+                                                   (MHUD_VERSION_BETA * pow(10, 0))))

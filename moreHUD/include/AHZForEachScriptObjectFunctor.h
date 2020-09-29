@@ -10,5 +10,9 @@ public:
 
 private:
     std::string            m_variable;
+    std::string            m_property;
     RE::BSScript::Variable m_result;
+
+    bool VisitProperties(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject);
+    bool VisitVariables(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject);
 };

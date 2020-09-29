@@ -1,6 +1,6 @@
 #include "PCH.h"
-#include "IForEachScriptObjectFunctor.h" 
-#include "AHZForEachScriptObjectFunctor.h" 
+#include "IForEachScriptObjectFunctor.h"
+#include "AHZForEachScriptObjectFunctor.h"
 
 using namespace std;
 
@@ -14,6 +14,7 @@ CAHZForEachScriptObjectFunctor::CAHZForEachScriptObjectFunctor(
 
     // Properties omit the prefix and sufix, but we are looking at variables
     m_variable = prefix + a_varName + suffix;
+    m_property = a_varName;
 }
 
 
@@ -24,30 +25,71 @@ auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFun
         return true;
     }
 
-    if (classInfo->variableCount == 0u) {
+    auto                                      vm = RE::SkyrimVM::GetSingleton()->impl;
+    RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
+
+    // Start with child and look through all parents
+    for (auto iter = classInfo; iter; iter = iter->GetParent()) {
+        vm->FindBoundObject(script->handle, iter->name.data(), boundObject);
+        auto stillLooking = (VisitProperties(iter, boundObject) && VisitVariables(iter, boundObject));
+
+        if (!stillLooking) {
+            return false;
+        }
+    }
+
+    // After all this searching, the variable is still not found
+    return true;
+}
+
+bool CAHZForEachScriptObjectFunctor::VisitVariables(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject)
+{
+    auto vm = RE::SkyrimVM::GetSingleton()->impl;
+    auto it = typeInfo->GetVariableIter();
+
+    if (!it) {
         return true;
     }
 
-    auto iter = classInfo->GetVariableIter();
-    if (iter != nullptr) {
-        for (std::uint32_t i = 0; i < classInfo->GetTotalNumVariables(); ++i) {
-            auto& prop = iter[i];
-            if (std::string(prop.name.c_str()) == m_variable) {
-                auto                                      vm = RE::SkyrimVM::GetSingleton()->impl;
-                RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
-                vm->FindBoundObject(script->handle, classInfo->name.data(), boundObject);
-
-                auto found = vm->GetVariableValue(boundObject, i, m_result);
-
-                if (found) {
-                    logger::trace("found variable: {}, on script: {}", prop.name.c_str(), classInfo->name);
-                }
-
-                // Found returns false to stop the visitor
-                return !found;
+    for (std::uint32_t i = 0; i < typeInfo->GetNumVariables(); i++) {
+        auto& element = it[i];
+        if (element.name.empty()) {
+            continue;
+        }
+        if (element.name.data() == m_variable) {
+            auto found = vm->GetVariableValue(boundObject, i, m_result);
+            found = found && !m_result.IsNoneObject() && !m_result.IsNoneArray();
+            if (found) {
+                return false;
             }
         }
     }
+
+    return true;
+}
+bool CAHZForEachScriptObjectFunctor::VisitProperties(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject)
+{
+    auto vm = RE::SkyrimVM::GetSingleton()->impl;
+    auto it = typeInfo->GetPropertyIter();
+
+    if (!it) {
+        return true;
+    }
+
+    for (std::uint32_t i = 0; i < typeInfo->GetNumProperties(); i++) {
+        auto& element = it[i];
+        if (element.name.empty()) {
+            continue;
+        }
+        if (element.name.data() == m_property) {
+            auto found = vm->GetPropertyValue(boundObject, m_property.c_str(), m_result);
+            found = found && !m_result.IsNoneObject() && !m_result.IsNoneArray();
+            if (found) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 

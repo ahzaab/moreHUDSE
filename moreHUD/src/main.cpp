@@ -103,7 +103,7 @@ extern "C"
 
             a_info->infoVersion = SKSE::PluginInfo::kVersion;
             a_info->name = "Ahzaab's moreHUD Plugin";
-            a_info->version = MHUD_VERSION_MAJOR;
+            a_info->version = MHUD_VERSION_NUMBER;
 
             if (a_skse->IsEditor()) {
                 logger::critical("Loaded in editor, marking as incompatible!"sv);

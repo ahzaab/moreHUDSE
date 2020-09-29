@@ -150,7 +150,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     vmImpl->GetScriptObjectType(a_scriptName, info);
     auto iter = info->GetVariableIter();
     if (iter) {
-        for (std::uint32_t i = 0; i < info->GetTotalNumVariables(); ++i) {
+        for (std::uint32_t i = 0; i < info->GetNumVariables(); ++i) {
             auto& prop = iter[i];
             if (std::string(prop.name.c_str()) == variableName) {
                 vmImpl->GetVariableValue(result, i, var);

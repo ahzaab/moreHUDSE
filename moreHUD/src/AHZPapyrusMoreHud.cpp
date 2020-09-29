@@ -11,16 +11,14 @@ static std::recursive_mutex mtx;
 
 auto PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) -> uint32_t
 {
-    uint32_t major = static_cast<uint32_t>(MHUD_VERSION_MAJOR * pow(10, 6));
-    uint32_t minor = static_cast<uint32_t>(MHUD_VERSION_MINOR * pow(10, 4));
-    uint32_t patch = static_cast<uint32_t>(MHUD_VERSION_PATCH * pow(10, 2));
-    uint32_t beta = static_cast<uint32_t>(MHUD_VERSION_BETA * pow(10, 0));
-    return major + minor + patch + beta;
+    auto version = MHUD_VERSION_NUMBER;
+    logger::trace("GetVersion: {}", version);
+    return version;
 }
 
 void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
 {
-    //_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
+    logger::trace("RegisterIconFormList");
     std::lock_guard<recursive_mutex> lock(mtx);
 
     if (!list)
@@ -33,7 +31,7 @@ void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFix
 
 void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName)
 {
-    //_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
+    logger::trace("UnRegisterIconFormList");
     std::lock_guard<recursive_mutex> lock(mtx);
 
     if (IsIconFormListRegistered(base, iconName)) {
@@ -43,7 +41,7 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
 
 auto PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName) -> bool
 {
-    //_MESSAGE("IsIconItemRegistered %d", itemID);
+    logger::trace("IsIconFormListRegistered_Internal");
     std::lock_guard<recursive_mutex> lock(mtx);
     // Create an iterator of map
     AhzIconFormListCache::iterator it;
@@ -65,6 +63,7 @@ auto PapyrusMoreHud::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctio
 
 auto PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId) -> bool
 {
+    logger::trace("HasForm");
     std::lock_guard<recursive_mutex> lock(mtx);
     if (IsIconFormListRegistered_Internal(iconName)) {
         auto formList = s_ahzRegisteredIconFormLists[iconName];
@@ -84,7 +83,7 @@ auto PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId) -> bool
 
 auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag* base, uint32_t itemID) -> bool
 {
-    //_MESSAGE("IsIconItemRegistered %d", itemID);
+    logger::trace("IsIconItemRegistered");
     std::lock_guard<recursive_mutex> lock(mtx);
     // Create an iterator of map
     AhzIconItemCache::iterator it;
@@ -99,7 +98,7 @@ auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag
 
 void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName)
 {
-    //_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
+    logger::trace("AddIconItem");
     std::lock_guard<recursive_mutex> lock(mtx);
     if (!IsIconItemRegistered(base, itemID)) {
         s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName));
@@ -108,7 +107,7 @@ void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, R
 
 void PapyrusMoreHud::RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID)
 {
-    //_MESSAGE("RemoveIconItem %d", itemID);
+    logger::trace("RemoveIconItem");
     std::lock_guard<recursive_mutex> lock(mtx);
     if (IsIconItemRegistered(base, itemID)) {
         s_ahzRegisteredIcons.erase(itemID);
@@ -117,6 +116,7 @@ void PapyrusMoreHud::RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID
 
 void PapyrusMoreHud::AddIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs, std::vector<RE::BSFixedString> iconNames)
 {
+    logger::trace("AddIconItems");
     std::lock_guard<recursive_mutex> lock(mtx);
     if (itemIDs.size() != iconNames.size()) {
         return;
@@ -133,6 +133,7 @@ void PapyrusMoreHud::AddIconItems(RE::StaticFunctionTag* base, std::vector<uint3
 
 void PapyrusMoreHud::RemoveIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs)
 {
+    logger::trace("RemoveIconItem");
     std::lock_guard<recursive_mutex> lock(mtx);
     for (uint32_t i = 0; i < itemIDs.size(); i++) {
         uint32_t itemID;
@@ -145,6 +146,7 @@ void PapyrusMoreHud::RemoveIconItems(RE::StaticFunctionTag* base, std::vector<ui
 
 auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> string
 {
+    logger::trace("GetIconName");
     string                           iconName("");
     std::lock_guard<recursive_mutex> lock(mtx);
 
