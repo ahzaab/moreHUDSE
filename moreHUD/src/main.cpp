@@ -143,6 +143,13 @@ extern "C"
 
             SKSE::AllocTrampoline(1 << 6);
 
+
+            //890E70
+            //51019
+
+            //auto id = REL::IDDatabase::get().offset2id(0x890E70);
+            //logger::info("id; {}"sv, id);
+
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
                 logger::critical("Could not register MessageHandler"sv);
