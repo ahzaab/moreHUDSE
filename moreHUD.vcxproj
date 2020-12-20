@@ -215,12 +215,6 @@
   <ItemGroup>
     <ResourceCompile Include="version.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CommonLibSSE\CommonLibSSE.vcxproj">
-      <Project>{3e4b6ef3-ec6e-46cf-9003-eeb57a258b82}</Project>
-      <Private>true</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
