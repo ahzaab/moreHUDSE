@@ -70,7 +70,7 @@ namespace
 
 extern "C"
 {
-    auto SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info) -> bool
+    DLLEXPORT auto SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info) -> bool
     {
         try {
 #ifndef NDEBUG
@@ -127,7 +127,7 @@ extern "C"
         return true;
     }
 
-    auto SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
+    DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
         //while (!IsDebuggerPresent())
         //{

@@ -1991,7 +1991,7 @@ void CAHZScaleform::GetMagicItemDescription(RE::MagicItem* item, std::string& de
     RE::BSString temp;
 
     GetMagicItemDescription2(nullptr, item, &temp);
-    //char* temp2 = ProcessSurvivalMode(&temp);
+    ProcessSurvivalMode(&temp);
 
     description.append(temp.c_str());
 }
