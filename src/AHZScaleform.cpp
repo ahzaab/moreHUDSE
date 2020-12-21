@@ -97,7 +97,7 @@ auto CAHZScaleform::GetIsKnownEnchantment(RE::TESObjectREFR* targetRef) -> uint3
         return 0;
     }
 
-    auto pPC = RE::PlayerCharacter::GetSingleton();
+    //auto pPC = RE::PlayerCharacter::GetSingleton();
     auto baseForm = targetRef->GetBaseObject();
 
     if ((baseForm) &&
@@ -1435,7 +1435,7 @@ auto CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR* theObject) -> strin
     string         effectDescription;
     string         desc;
     string         effectsString;
-    RE::MagicItem* magicItem = nullptr;
+   //RE::MagicItem* magicItem = nullptr;
 
     if (!theObject)
         return desc;
@@ -1443,7 +1443,7 @@ auto CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR* theObject) -> strin
     //tArray<MagicItem::EffectItem*> *effectList = NULL;
     //SettingCollectionMap *settings = *g_gameSettingCollection;
 
-    auto settings = RE::GameSettingCollection::GetSingleton();
+    //auto settings = RE::GameSettingCollection::GetSingleton();
 
     if (theObject->GetBaseObject()->GetFormType() == RE::FormType::AlchemyItem) {
         auto item = DYNAMIC_CAST(theObject->GetBaseObject(), RE::TESForm, RE::AlchemyItem);
@@ -1738,8 +1738,8 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
     if (baseForm->GetFormType() == RE::FormType::Weapon ||
         baseForm->GetFormType() == RE::FormType::Ammo ||
         baseForm->GetFormType() == RE::FormType::Projectile) {
-        RE::TESForm* form = nullptr;
-        RE::TESAmmo* ammo = nullptr;
+        //RE::TESForm* form = nullptr;
+        //RE::TESAmmo* ammo = nullptr;
 
         // If ammo is NULL, it is OK
         totalArmorOrWeapon = GetTotalActualWeaponDamage();
@@ -1991,7 +1991,7 @@ void CAHZScaleform::GetMagicItemDescription(RE::MagicItem* item, std::string& de
     RE::BSString temp;
 
     GetMagicItemDescription2(nullptr, item, &temp);
-    char* temp2 = ProcessSurvivalMode(&temp);
+    //char* temp2 = ProcessSurvivalMode(&temp);
 
     description.append(temp.c_str());
 }

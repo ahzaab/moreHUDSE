@@ -1,8 +1,8 @@
 #include <winres.h>
 
 1 VERSIONINFO
-    FILEVERSION MHUD_VERSION_MAJOR,
-    MHUD_VERSION_MINOR, MHUD_VERSION_PATCH, MHUD_VERSION_BETA PRODUCTVERSION MHUD_VERSION_MAJOR, MHUD_VERSION_MINOR, MHUD_VERSION_PATCH, MHUD_VERSION_BETA
+    FILEVERSION @PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@, @PROJECT_VERSION_TWEAK@
+    PRODUCTVERSION @PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@, @PROJECT_VERSION_TWEAK@
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -19,12 +19,12 @@ BEGIN
         BEGIN 
             VALUE "CompanyName", "Ahzaab"
             VALUE "FileDescription", "SKSE64 moreHUD plugin"
-            VALUE "FileVersion", MHUD_VERSION_VERSTRING
+            VALUE "FileVersion", "@PROJECT_VERSION@"
             VALUE "InternalName", "AHZmoreHUDPlugin.dll"
             VALUE "LegalCopyright", "MIT License" 
             VALUE "OriginalFilename", "AHZmoreHUDPlugin.dll"
             VALUE "ProductName", "moreHUD Plugin"
-            VALUE "ProductVersion", MHUD_VERSION_VERSTRING
+            VALUE "ProductVersion", "@PROJECT_VERSION@"
         END
     END
     BLOCK "VarFileInfo"

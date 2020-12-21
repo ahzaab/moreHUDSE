@@ -2,6 +2,8 @@
 #include "AHZScaleformHook.h"
 #include <string>
 #include <mutex>
+#include "SKSE/Trampoline.h"
+#include <Xbyak/xbyak.h>
 
 using namespace std;
 

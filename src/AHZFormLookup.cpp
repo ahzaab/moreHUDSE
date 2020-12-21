@@ -59,7 +59,7 @@ void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, stri
     auto isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
     baseFormID = isBaseLight ? baseFormID & 0x00000FFF : baseFormID & 0x00FFFFFF;
     auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
-    targetFormID = isBaseLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
+    targetFormID = isTargetLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
 
     auto baseForm = dataHandler->LookupForm(baseFormID, baseFormModName);
 

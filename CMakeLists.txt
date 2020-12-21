@@ -1,18 +1,25 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.19)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/ports" CACHE STRING "")
 set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 # ---- Project ----
 
 project(
-	moreHUD
-	VERSION 4.0.0
+	AHZmoreHUDPlugin
+	VERSION 4.0.0.0
 	LANGUAGES CXX
 )
 
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	@ONLY
+)
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
 	${CMAKE_CURRENT_BINARY_DIR}/version.rc
 	@ONLY
 )
@@ -26,35 +33,23 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 )
 endif()
 
-# ---- Dependencies ----
+# ---- Globals ----
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)
-set(Boost_USE_DEBUG_RUNTIME ON)
+add_compile_definitions(
+	SKSE_SUPPORT_XBYAK
+)
 
 if (MSVC)
 	add_compile_definitions(
 		_UNICODE
 	)
 	
-	set(COMPILE_OPTIONS_DEBUG
-		/Zc:inline-	# Keep unreferenced COMDAT
-		/JMC	# Just My Code debugging
-	)
+	string(REPLACE " " ";" MY_CXX_FLAGS "${VCPKG_CXX_FLAGS}")
+	string(REPLACE " " ";" MY_CXX_FLAGS_DEBUG "${VCPKG_CXX_FLAGS_DEBUG}")
+	string(REPLACE " " ";" MY_CXX_FLAGS_RELEASE "${VCPKG_CXX_FLAGS_RELEASE}")
 	
-	set(COMPILE_OPTIONS_RELEASE
-		/Zc:inline	# Remove unreferenced COMDAT
-		/JMC-	# Disable Just My Code debugging
-	)
-
-	add_compile_options(
-		/Gy	# Enable Function-Level Linking
+	add_compile_options(		
 		/MP	# Build with Multiple Processes
-		/Oi	# Generate Intrinsic Functions
 		/sdl	# Enable Additional Security Checks
 		/Zi	# Debug Information Format
 		
@@ -86,45 +81,43 @@ if (MSVC)
 		/external:anglebrackets
 		/external:W0
 		
-		/W4	# Warning level (all warnings)
+		/W4	# Warning level
 		/WX	# Warning level (warnings are errors)
 		
-		"$<$<CONFIG:Debug>:${COMPILE_OPTIONS_DEBUG}>"
-		"$<$<CONFIG:Release>:${COMPILE_OPTIONS_RELEASE}>"
+		${MY_CXX_FLAGS}
+		"$<$<CONFIG:DEBUG>:${MY_CXX_FLAGS_DEBUG}>"
+		"$<$<CONFIG:RELEASE>:${MY_CXX_FLAGS_RELEASE};/Zc:inline;/JMC->"
 	)
-
-	set(LINK_OPTIONS_DEBUG
-		/INCREMENTAL	# Link Incrementally
-		/OPT:NOREF	# Optimizations (keep functions/data never referenced)
-		/OPT:NOICF	# Optimizations (prevent identical COMDAT folding)
-	)
-	
-	set(LINK_OPTIONS_RELEASE
-		/INCREMENTAL:NO	# Link Incrementally
-		/OPT:REF	# Optimizations (eliminate functions/data never referenced)
-		/OPT:ICF	# Optimizations (perform identical COMDAT folding)
-	)
-
-	add_link_options(
-		"$<$<CONFIG:Debug>:${LINK_OPTIONS_DEBUG}>"
-		"$<$<CONFIG:Release>:${LINK_OPTIONS_RELEASE}>"
-	)
+		
+	# fix a warning with /Ob2 being overridden with /Ob3
+	string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
-add_subdirectory(../CommonLibSSE)
+# ---- Dependencies ----
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+# set(Boost_USE_MULTITHREADED ON)
+# set(Boost_USE_STATIC_LIBS ON)
+# set(Boost_USE_STATIC_RUNTIME OFF)
+# set(Boost_USE_DEBUG_RUNTIME ON)
+
+add_subdirectory(external/CommonLibSSE)
+
+# find_package(Boost
+# 	REQUIRED
+# 	COMPONENTS
+# 		regex
+# )
 
 find_package(spdlog REQUIRED)
+find_package(xbyak REQUIRED)
 
 # ---- Add source files ----
 
-set(headers
-	src/PCH.h
-)
-
-set(sources
-	src/main.cpp
-	src/PCH.cpp
-)
+include(cmake/headerlist.cmake)
+include(cmake/sourcelist.cmake)
 
 source_group(
 	TREE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -133,11 +126,20 @@ source_group(
 		${sources}
 )
 
+source_group(
+	TREE ${CMAKE_CURRENT_BINARY_DIR}
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+)
+
 # ---- Create DLL ----
 
-add_library(${PROJECT_NAME} SHARED
+add_library(
+	${PROJECT_NAME}
+	SHARED
 	${headers}
 	${sources}
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
 	${CMAKE_CURRENT_BINARY_DIR}/version.rc
 	.clang-format
 )
@@ -147,37 +149,57 @@ set_property(
 		${PROJECT_NAME}
 		CommonLibSSE
 	PROPERTY
-		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )
 
-target_compile_features(${PROJECT_NAME}
+target_compile_features(
+	${PROJECT_NAME}
 	PUBLIC
 		cxx_std_17
 )
 
-target_compile_options(${PROJECT_NAME}
-	PRIVATE
-		"$<$<BOOL:${MSVC}>:/TP>"
-)
-
-target_include_directories(${PROJECT_NAME}
+target_include_directories(
+	${PROJECT_NAME}
 	PRIVATE 
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:src>
+		${CMAKE_CURRENT_BINARY_DIR}/include
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(
+	${PROJECT_NAME}
 	PUBLIC
 		CommonLibSSE::CommonLibSSE
 		spdlog::spdlog
+		xbyak::xbyak
 )
 
-target_link_options(${PROJECT_NAME}
-	PUBLIC
-		${LINK_OPTIONS_${CONFIG}}
-)
-
-target_precompile_headers(${PROJECT_NAME}
+target_precompile_headers(
+	${PROJECT_NAME}
 	PRIVATE
-		src/PCH.h
+		include/PCH.h
+)
+
+if (MSVC)
+	target_compile_options(
+		${PROJECT_NAME}
+		PRIVATE
+			/wd4324 # 'struct_name' : structure was padded due to __declspec(align())
+	)
+	
+	target_link_options(
+		${PROJECT_NAME}
+		PRIVATE
+			"$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOREF;/OPT:NOICF>"
+			"$<$<CONFIG:RELEASE>:/INCREMENTAL:NO;/OPT:REF;/OPT:ICF;/DEBUG:FULL>"
+	)
+endif()
+
+# ---- Post build ----
+
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64Path}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64Path}/Data/SKSE/Plugins/
 )

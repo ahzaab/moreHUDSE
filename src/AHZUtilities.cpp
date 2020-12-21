@@ -1,14 +1,15 @@
 #include "PCH.h"
 #include "AHZUtilities.h"
 #include <io.h>
+#include <windows.h>
 
 vector<string> CAHZUtilities::GetMHudFileList(string& folder)
 {
     vector<string>  names;
     string          search_path = folder + "/*.MHUD";
-    WIN32_FIND_DATA fd;
+    WIN32_FIND_DATAA fd;
     logger::info("Search the '{}' directory...", folder.c_str());
-    HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+    HANDLE hFind = ::FindFirstFileA(search_path.c_str(), &fd);
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             // read all (real) files in current folder
@@ -23,7 +24,7 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
                 logger::info("--> FOUND '{}'", fileName.c_str());
                 names.push_back(fd.cFileName);
             }
-        } while (::FindNextFile(hFind, &fd));
+        } while (::FindNextFileA(hFind, &fd));
         ::FindClose(hFind);
     }
     return names;
@@ -90,7 +91,7 @@ auto CAHZUtilities::GetSkyrimDataPath() -> string&
             char skyrimDir[_MAX_DIR];
             char skyrimDrive[_MAX_DRIVE];
             // Use GetModuleFileName() with module handle to get the path
-            GetModuleFileName(hModule, skyrimPath, (sizeof(skyrimPath)));
+            GetModuleFileNameA(hModule, skyrimPath, (sizeof(skyrimPath)));
 
             _splitpath_s(
                 (const char*)skyrimPath,
@@ -157,7 +158,7 @@ auto CAHZUtilities::GetConfigOption(const char* section, const char* key) -> str
     resultBuf[0] = 0;
 
     if (_access_s(s_pluginPath.c_str(), 0) == 0) {
-        uint32_t resultLen = GetPrivateProfileString(section, key, nullptr, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
+        GetPrivateProfileStringA(section, key, nullptr, resultBuf, sizeof(resultBuf), s_pluginPath.c_str());
         result = resultBuf;
     }
     return result;

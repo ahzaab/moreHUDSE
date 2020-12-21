@@ -3,6 +3,7 @@
 #include "AHZUtilities.h"
 #include <vector>
 #include <map>
+#include <windows.h>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ public:
             string fullPath = skyrimDataPath + *p;
 
             // Get the number of entries
-            int iNumOfEntries = GetPrivateProfileInt("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
+            int iNumOfEntries = GetPrivateProfileIntA("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
             logger::info("Loading {} ACTI Form Entries", iNumOfEntries);
             cout << iNumOfEntries << endl;
 
@@ -31,7 +32,7 @@ public:
                 sprintf_s(value, (size_t)32, "%d", i + 1);
                 string entrName("oEntry");
                 entrName.append(value);
-                GetPrivateProfileString("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
+                GetPrivateProfileStringA("LookupTable", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
                 if (strlen(returnValue)) {
                     std::string  returnVal = returnValue;
                     AHZLUTObject lutObject = CAHZUtilities::ParseLUTObject(returnVal);
@@ -55,7 +56,7 @@ public:
             logger::info("Loading Script Variables from '{}'", (*p).c_str());
             string fullPath = skyrimDataPath + *p;
             // Get the number of entries
-            int iNumOfEntries = GetPrivateProfileInt("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
+            int iNumOfEntries = GetPrivateProfileIntA("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
             logger::info("Loading {} Script Variable(s)", iNumOfEntries);
             cout << iNumOfEntries << endl;
 
@@ -66,7 +67,7 @@ public:
                 sprintf_s(value, (size_t)32, "%d", i + 1);
                 string entrName("sVariable");
                 entrName.append(value);
-                GetPrivateProfileString("ScriptVariables", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
+                GetPrivateProfileStringA("ScriptVariables", entrName.c_str(), "", returnValue, size_t(1024), fullPath.c_str());
 
                 if (strlen(returnValue)) {
                     loader.AddScriptVarable(string(returnValue));
