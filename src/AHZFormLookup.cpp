@@ -97,8 +97,8 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
 
     for (p = m_scriptVMVariables.begin(); p != m_scriptVMVariables.end(); p++) {
         //_MESSAGE("GetAttachedForm");
-        RE::TESForm* attachedForm = NULL;
-        if ((attachedForm = GetAttachedForm(form, *p)) != NULL) {
+        RE::TESForm* attachedForm = nullptr;
+        if ((attachedForm = GetAttachedForm(form, *p)) != nullptr) {
             if (attachedForm->formType == RE::FormType::LeveledItem) {
                 auto lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::TESLevItem);
 
