@@ -12,15 +12,15 @@
 #include <regex>
 #include "AHZConsole.h"
 #include "string.h"
-using namespace std;
+//using namespace std;
 
 class CAHZFormLookup
 {
 public:
     static CAHZFormLookup& Instance();
     RE::TESForm*           GetTESForm(RE::TESObjectREFR* targetReference);
-    void                   AddScriptVarable(string vmVariableName);
-    void                   AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID);
+    void                   AddScriptVarable(std::string vmVariableName);
+    void                   AddFormID(std::string baseFormModName, uint32_t baseFormID, std::string targetFormModName, uint32_t targetFormID);
 
     inline static RE::TESObjectREFR* GetReference(RE::TESForm* theForm)
     {
@@ -38,10 +38,10 @@ private:
     ~CAHZFormLookup() = default;
     RE::TESForm*        GetAttachedForm(RE::TESObjectREFR* form);
     RE::TESForm*        GetFormFromLookup(RE::TESObjectREFR* targetRef);
-    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, string variableName);
+    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, std::string variableName);
     CAHZFormLookup(CAHZFormLookup const&);                            // copy ctor is hidden
     CAHZFormLookup&              operator=(CAHZFormLookup const&){};  // assign op is hidden
-    std::vector<string>          m_scriptVMVariables;
+    std::vector<std::string>          m_scriptVMVariables;
     std::map<uint32_t, uint32_t> m_LUT;
     auto                         GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const;
 };

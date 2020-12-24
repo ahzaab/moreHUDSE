@@ -44,14 +44,14 @@ auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef) -> RE::TESF
     return nullptr;
 }
 
-void CAHZFormLookup::AddScriptVarable(string vmVariableName)
+void CAHZFormLookup::AddScriptVarable(std::string vmVariableName)
 {
     if (find(m_scriptVMVariables.begin(), m_scriptVMVariables.end(), vmVariableName) == m_scriptVMVariables.end()) {
         m_scriptVMVariables.push_back(vmVariableName);
     }
 }
 
-void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, string targetFormModName, uint32_t targetFormID)
+void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID, std::string targetFormModName, uint32_t targetFormID)
 {
     auto dataHandler = RE::TESDataHandler::GetSingleton();
 
@@ -81,7 +81,7 @@ void CAHZFormLookup::AddFormID(string baseFormModName, uint32_t baseFormID, stri
 
 auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
 {
-    vector<string>::iterator p;
+    std::vector<std::string>::iterator p;
 
     if (!form) {
         return nullptr;
@@ -162,7 +162,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     return var;
 }
 
-auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, string variableName) -> RE::TESForm*
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variableName) -> RE::TESForm*
 {
     if (form) {
         if (!form->GetBaseObject())

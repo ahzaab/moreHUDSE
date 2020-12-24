@@ -65,10 +65,10 @@ namespace SKSE
 
         auto dataHandler = RE::BGSDefaultObjectManager::GetSingleton();
 
-        auto form = dataHandler->LookupByID(static_cast<RE::FormID>(avInfo));
+        //auto form = dataHandler->LookupByID(static_cast<RE::FormID>(avInfo));
 
-        assert(form);
-        assert(form->GetFormType() == RE::FormType::ActorValueInfo);
+        //assert(form);
+        //assert(form->GetFormType() == RE::FormType::ActorValueInfo);
 
         return static_cast<RE::ActorValueInfo*>(dataHandler->LookupByID(static_cast<RE::FormID>(avInfo)));
     }

@@ -5,7 +5,7 @@
 #include "SKSE/Trampoline.h"
 #include <Xbyak/xbyak.h>
 
-using namespace std;
+//using namespace std;
 
 
 constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(50776));

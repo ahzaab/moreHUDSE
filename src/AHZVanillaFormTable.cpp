@@ -109,7 +109,7 @@ void CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup& loader)
     AHZLookupMap::const_iterator itSource = AHZACTIForms.cbegin();
     AHZLookupMap::const_iterator itTarget = AHZACTITargetForms.cbegin();
     while (itSource != itEnd) {
-        loader.AddFormID(get<0>(*itSource), get<1>(*itSource), get<0>(*itTarget), get<1>(*itTarget));
+        loader.AddFormID(std::get<0>(*itSource), std::get<1>(*itSource), std::get<0>(*itTarget), std::get<1>(*itTarget));
         itSource++;
         itTarget++;
     }

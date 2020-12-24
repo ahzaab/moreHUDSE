@@ -2,15 +2,15 @@
 #include "IForEachScriptObjectFunctor.h"
 #include "AHZForEachScriptObjectFunctor.h"
 
-using namespace std;
+//using namespace std;
 
 CAHZForEachScriptObjectFunctor::CAHZForEachScriptObjectFunctor(
-    string a_varName)
+    std::string a_varName)
 {
     m_result.SetNone();
 
-    string prefix = "::";
-    string suffix = "_var";
+    std::string prefix = "::";
+    std::string suffix = "_var";
 
     // Properties omit the prefix and sufix, but we are looking at variables
     m_variable = prefix + a_varName + suffix;

@@ -363,14 +363,14 @@ auto CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR* thisArmor) -> float
 auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
 {
     float         totalWeaponDamage = 0.0;
-    bool          is2Handed = FALSE;
+    bool          is2Handed = false;
     AHZWeaponData leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
     AHZWeaponData rightWeapon = CAHZWeaponInfo::GetRightHandWeapon();
     AHZWeaponData equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
 
     if (leftWeapon.weapon) {
         if (IsBow(leftWeapon.weapon)) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&leftWeapon);
 
             // Add the arrow damage
@@ -378,7 +378,7 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
                 totalWeaponDamage += GetActualDamage(&equippedAmmo);
             }
         } else if (IsCrossBow(leftWeapon.weapon)) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&leftWeapon);
 
             // Add the arrow damage
@@ -386,7 +386,7 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
                 totalWeaponDamage += GetActualDamage(&equippedAmmo);
             }
         } else if (IsTwoHanded(leftWeapon.weapon)) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&leftWeapon);
         } else if (IsOneHanded(leftWeapon.weapon)) {
             totalWeaponDamage = GetActualDamage(&leftWeapon);
@@ -395,7 +395,7 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
 
     if (rightWeapon.weapon) {
         if (IsBow(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&rightWeapon);
 
             // Add the arrow damage
@@ -403,7 +403,7 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
                 totalWeaponDamage += GetActualDamage(&equippedAmmo);
             }
         } else if (IsCrossBow(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&rightWeapon);
 
             // Add the arrow damage
@@ -411,7 +411,7 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
                 totalWeaponDamage += GetActualDamage(&equippedAmmo);
             }
         } else if (IsTwoHanded(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = TRUE;
+            is2Handed = true;
             totalWeaponDamage = GetActualDamage(&rightWeapon);
         } else if (IsOneHanded(rightWeapon.weapon)) {
             // Add the damage from the second weapon

@@ -2,7 +2,7 @@
 
 #include "AHZConsole.h"
 #include <iostream>
-using namespace std;
+//using namespace std;
 
 
 namespace Debug

@@ -5,14 +5,14 @@
 #include <string.h>
 #include <map>
 
-using namespace std;
+//using namespace std;
 
 class PapyrusMoreHud
 {
 public:
     static bool   RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
     static bool   HasForm(std::string iconName, uint32_t formId);
-    static string GetIconName(uint32_t itemID);
+    static std::string GetIconName(uint32_t itemID);
 
 private:
     static uint32_t GetVersion(RE::StaticFunctionTag* base);

@@ -22,7 +22,7 @@
 
 
 using namespace moreHUD;
-using namespace std;
+//using namespace std;
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
@@ -42,10 +42,10 @@ namespace
             logger::info("Processing any third party .mhud files that may exist...");
 
             // Read all .mhuf files and load in the lookup tables
-            string skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+            auto skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
 
             // Get all .mhud files from the skyrim data folder
-            vector<string> mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+            auto mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
 
             if (!mHudFiles.size()) {
                 logger::info("No third party .mHud files where detected.");

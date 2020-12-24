@@ -3,10 +3,10 @@
 #include <io.h>
 #include <windows.h>
 
-vector<string> CAHZUtilities::GetMHudFileList(string& folder)
+std::vector<std::string> CAHZUtilities::GetMHudFileList(std::string& folder)
 {
-    vector<string>  names;
-    string          search_path = folder + "/*.MHUD";
+    std::vector<std::string>  names;
+    std::string          search_path = folder + "/*.MHUD";
     WIN32_FIND_DATAA fd;
     logger::info("Search the '{}' directory...", folder.c_str());
     HANDLE hFind = ::FindFirstFileA(search_path.c_str(), &fd);
@@ -15,7 +15,7 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
             // read all (real) files in current folder
             // , delete '!' read other 2 default folder . and ..
             if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-                string fileName = fd.cFileName;
+                std::string fileName = fd.cFileName;
 
                 std::for_each(fileName.begin(), fileName.end(), [](char& c) {
                     c = static_cast<char>(::toupper(static_cast<int32_t>(c)));
@@ -30,12 +30,12 @@ vector<string> CAHZUtilities::GetMHudFileList(string& folder)
     return names;
 }
 
-vector<string> CAHZUtilities::SplitString(string& str, string& token)
+std::vector<std::string> CAHZUtilities::SplitString(std::string& str, std::string& token)
 {
-    vector<string> result;
+    std::vector<std::string> result;
     while (str.size()) {
         auto index = str.find(token);
-        if (index != string::npos) {
+        if (index != std::string::npos) {
             result.push_back(str.substr(0, index));
             str = str.substr(index + token.size());
             if (str.size() == 0)
@@ -48,17 +48,17 @@ vector<string> CAHZUtilities::SplitString(string& str, string& token)
     return result;
 }
 
-auto CAHZUtilities::ParseLUTObject(string& stringValue) -> AHZLUTObject
+auto CAHZUtilities::ParseLUTObject(std::string& stringValue) -> AHZLUTObject
 {
-    string         split = ",";
-    vector<string> items = SplitString(stringValue, split);
-    string         pipe = "|";
+    std::string         split = ",";
+    std::vector<std::string> items = SplitString(stringValue, split);
+    std::string         pipe = "|";
 
     AHZLUTObject lutObject;
 
     if (items.size() == 2) {
-        vector<string> baseItem = SplitString(items[0], pipe);
-        vector<string> targetItem = SplitString(items[1], pipe);
+        std::vector<std::string> baseItem = SplitString(items[0], pipe);
+        std::vector<std::string> targetItem = SplitString(items[1], pipe);
 
         if (baseItem.size() == 2 && targetItem.size() == 2) {
             baseItem[0] = trim(baseItem[0]);
@@ -80,9 +80,9 @@ auto CAHZUtilities::ParseLUTObject(string& stringValue) -> AHZLUTObject
     return AHZLUTObject();
 }
 
-auto CAHZUtilities::GetSkyrimDataPath() -> string&
+auto CAHZUtilities::GetSkyrimDataPath() -> std::string&
 {
-    static string s_dataPath;
+    static std::string s_dataPath;
 
     if (s_dataPath.empty()) {
         HMODULE hModule = GetModuleHandle(nullptr);
@@ -112,9 +112,9 @@ auto CAHZUtilities::GetSkyrimDataPath() -> string&
     return s_dataPath;
 }
 
-auto CAHZUtilities::GetPluginPath() -> string&
+auto CAHZUtilities::GetPluginPath() -> std::string&
 {
-    static string s_pluginPath;
+    static std::string s_pluginPath;
 
     if (s_pluginPath.empty()) {
         s_pluginPath.append(GetSkyrimDataPath().c_str());
@@ -124,29 +124,29 @@ auto CAHZUtilities::GetPluginPath() -> string&
 }
 
 // trim from end of string (right)
-auto CAHZUtilities::rtrim(string& s) -> string&
+auto CAHZUtilities::rtrim(std::string& s) -> std::string&
 {
     s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
     return s;
 }
 
 // trim from beginning of string (left)
-auto CAHZUtilities::ltrim(string& s) -> string&
+auto CAHZUtilities::ltrim(std::string& s) -> std::string&
 {
     s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
     return s;
 }
 
 // trim from both ends of string (left & right)
-auto CAHZUtilities::trim(string& s) -> string&
+auto CAHZUtilities::trim(std::string& s) -> std::string&
 {
     return ltrim(rtrim(s));
 }
 
-auto CAHZUtilities::GetConfigOption(const char* section, const char* key) -> string
+auto CAHZUtilities::GetConfigOption(const char* section, const char* key) -> std::string
 {
-    string        result;
-    static string s_pluginPath;
+    std::string        result;
+    static std::string s_pluginPath;
 
     if (s_pluginPath.empty()) {
         s_pluginPath.append(GetPluginPath().c_str());

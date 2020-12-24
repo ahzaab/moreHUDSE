@@ -1,9 +1,9 @@
 #pragma once
 
 
-using namespace std;
-using AHZFormEntry = std::tuple<string, uint32_t>;
-using VMScriptEntries = std::vector<string>;
+//using namespace std;
+using AHZFormEntry = std::tuple<std::string, uint32_t>;
+using VMScriptEntries = std::vector<std::string>;
 using AHZLookupMap = std::vector<AHZFormEntry>;
 
 class CAHZVanillaFormTable

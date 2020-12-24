@@ -1,13 +1,13 @@
 #pragma once
 #include <string.h>
-using namespace std;
+//using namespace std;
 
 class AHZLUTObject
 {
 public:
-    string   BaseMod;
+    std::string   BaseMod;
     uint32_t BaseFormID;
-    string   TargetMod;
+    std::string   TargetMod;
     uint32_t TargetFormID;
 
     bool IsEmpty()
