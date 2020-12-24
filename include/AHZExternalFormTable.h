@@ -19,12 +19,12 @@ public:
             std::string fullPath = skyrimDataPath + *p;
 
             // Get the number of entries
-            auto iNumOfEntries = GetPrivateProfileIntA("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
+            uint32_t iNumOfEntries = GetPrivateProfileIntA("LookupTable", "iNumOfEntries", 0, fullPath.c_str());
             logger::info("Loading {} ACTI Form Entries", iNumOfEntries);
             std::cout << iNumOfEntries << std::endl;
 
             // Get each entry and load into the lookup table
-            for (int i = 0; i < iNumOfEntries; i++) {
+            for (uint32_t i = 0; i < iNumOfEntries; i++) {
                 char value[32] = "";
                 char returnValue[1024] = "";
                 sprintf_s(value, (size_t)32, "%d", i + 1);
@@ -54,12 +54,12 @@ public:
             logger::info("Loading Script Variables from '{}'", (*p).c_str());
             std::string fullPath = skyrimDataPath + *p;
             // Get the number of entries
-            auto iNumOfEntries = GetPrivateProfileIntA("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
+            uint32_t iNumOfEntries = GetPrivateProfileIntA("ScriptVariables", "iNumOfVariables", 0, fullPath.c_str());
             logger::info("Loading {} Script Variable(s)", iNumOfEntries);
             std::cout << iNumOfEntries << std::endl;
 
             // Get each entry and load into the lookup table
-            for (int i = 0; i < iNumOfEntries; i++) {
+            for (uint32_t i = 0; i < iNumOfEntries; i++) {
                 char value[32] = "";
                 char returnValue[1024] = "";
                 sprintf_s(value, (size_t)32, "%d", i + 1);

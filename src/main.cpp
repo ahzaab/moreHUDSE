@@ -97,7 +97,7 @@ extern "C"
 #endif
 
             spdlog::set_default_logger(std::move(log));
-            spdlog::set_pattern("%g(%#): [%l] %v");
+            spdlog::set_pattern("%s(%#): [%l] %v");
 
             logger::info("moreHUD v{}"sv, MHUD_VERSION_VERSTRING);
 
