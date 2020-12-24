@@ -99,11 +99,11 @@ extern "C"
             spdlog::set_default_logger(std::move(log));
             spdlog::set_pattern("%s(%#): [%l] %v");
 
-            logger::info("moreHUD v{}"sv, MHUD_VERSION_VERSTRING);
+            logger::info("moreHUD v{}"sv, Version::NAME);
 
             a_info->infoVersion = SKSE::PluginInfo::kVersion;
             a_info->name = "Ahzaab's moreHUD Plugin";
-            a_info->version = MHUD_VERSION_NUMBER;
+            a_info->version = Version::ASINT;
 
             if (a_skse->IsEditor()) {
                 logger::critical("Loaded in editor, marking as incompatible!"sv);

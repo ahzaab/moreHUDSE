@@ -41,6 +41,7 @@ The following environmental variable is required: `Skyrim64Path` which points to
 
 Run the following commands for the debug build
 ```
+rm -R .\build
 mkdir build
 cd .\build
 cmake ..
@@ -49,6 +50,7 @@ cmake --build .
 
 For release build:
 ```
+rm -R .\build
 mkdir build
 cd .\build
 cmake ..

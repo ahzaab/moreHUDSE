@@ -11,7 +11,7 @@ static std::recursive_mutex mtx;
 
 auto PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) -> uint32_t
 {
-    auto version = MHUD_VERSION_NUMBER;
+    auto version = Version::ASINT;
     logger::trace("GetVersion: {}", version);
     return version;
 }
