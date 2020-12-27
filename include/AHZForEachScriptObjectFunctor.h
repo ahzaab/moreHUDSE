@@ -5,7 +5,7 @@ class CAHZForEachScriptObjectFunctor : public RE::BSScript::IForEachScriptObject
 public:
     CAHZForEachScriptObjectFunctor(std::string a_varName);
     ~CAHZForEachScriptObjectFunctor() = default;
-    virtual auto Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSSAGE* script, [[maybe_unused]] void* arg2) -> bool;
+    virtual auto Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSAGE* script, [[maybe_unused]] void* unk1) -> bool;
     auto         GetScriptVariable() -> RE::BSScript::Variable*;
 
 private:

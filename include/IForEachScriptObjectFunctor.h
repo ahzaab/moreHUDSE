@@ -7,8 +7,7 @@ namespace RE
         class IForEachScriptObjectFunctor
         {
         public:
-            // This type is not fully decoded or correctly sized, just enough to use the functor
-            struct SCRIPT_OBJECT_MESSSAGE
+            struct SCRIPT_OBJECT_MESSAGE
             {
                 uint32_t        unk00;
                 ObjectTypeInfo* typeInfo;
@@ -17,12 +16,13 @@ namespace RE
                 uint32_t        unk10;
                 RE::VMHandle    handle;
             };
-
+            //static_assert(sizeof(SCRIPT_OBJECT_MESSAGE) == 0x24);
+            
             IForEachScriptObjectFunctor() = default;
             virtual ~IForEachScriptObjectFunctor() = default;
 
             // return true to continue
-            virtual bool Visit(SCRIPT_OBJECT_MESSSAGE* a_message, [[maybe_unused]] void* arg2) = 0;
+            virtual bool Visit(SCRIPT_OBJECT_MESSAGE* a_message, [[maybe_unused]] void* a_unk1) = 0;
         };
     }
 }

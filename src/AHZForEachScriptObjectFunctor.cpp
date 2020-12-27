@@ -18,7 +18,7 @@ CAHZForEachScriptObjectFunctor::CAHZForEachScriptObjectFunctor(
 }
 
 
-auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSSAGE* script, [[maybe_unused]] void* arg2) -> bool
+auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSAGE* script, [[maybe_unused]] void* unk1) -> bool
 {
     auto classInfo = script->typeInfo;
     if (classInfo == nullptr) {
