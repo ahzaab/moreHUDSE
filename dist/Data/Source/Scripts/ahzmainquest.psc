@@ -47,9 +47,10 @@ int Property iToggleOn Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
 ; <--- Edit These value when updating
-int Property I_THIS_VERSION_MAJOR = 3 autoReadOnly
-int Property I_THIS_VERSION_MINOR = 7 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 9 autoReadOnly
+int Property I_THIS_VERSION_MAJOR = 4 autoReadOnly
+int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
+int Property I_THIS_VERSION_BETA = 2 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -85,9 +86,13 @@ Function Maintenance()
     endIf
 
     if (isSKSEInstalled == true)
-		If iVersion < ((I_THIS_VERSION_MAJOR * 100) + (I_THIS_VERSION_MINOR * 10) + I_THIS_VERSION_BUILD)
-			iVersion = (I_THIS_VERSION_MAJOR * 100) + (I_THIS_VERSION_MINOR * 10) + I_THIS_VERSION_BUILD
-			Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
+		If iVersion < ((I_THIS_VERSION_MAJOR * 1000) + (I_THIS_VERSION_MINOR * 100) + (I_THIS_VERSION_BUILD * 10) + I_THIS_VERSION_BETA)
+			iVersion = (I_THIS_VERSION_MAJOR * 1000) + (I_THIS_VERSION_MINOR * 100) + (I_THIS_VERSION_BUILD * 10) + I_THIS_VERSION_BETA
+            if (I_THIS_VERSION_BETA > 0)
+			    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
+            else
+                Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
+            EndIf
 		EndIf
 	Endif
 	; Other maintenance code that only needs to run once per save load

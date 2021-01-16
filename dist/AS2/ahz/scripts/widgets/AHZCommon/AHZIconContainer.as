@@ -11,7 +11,8 @@ class AHZIconContainer
 
 	/* Static */
 	private static var eventObject: Object;
-  	private static var managerSetup:Boolean = false;		
+  	private static var managerSetup:Boolean = false;	
+	private static var loadErrorCalled:Boolean = false;
 		
   /* INITIALIATZION */
   
@@ -115,7 +116,7 @@ class AHZIconContainer
 		var loadedImage:BitmapData;
 		if (loadedIcons.length)
 		{
-			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Append Dummy");
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Append Dummy");
 	 		loadedImage = BitmapData.loadBitmap("ahzEmpty");
 		}
 		
@@ -147,7 +148,7 @@ class AHZIconContainer
 				
 				// Goto the frame including the icon 
 				loadedIcons[loadedIconNames.length].gotoAndStop(a_imageName);
-				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("GOTO: " + a_imageName);
+				//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("GOTO: " + a_imageName);
 				loadedIcons[loadedIconNames.length]._quality = "BEST";
 				loadedIcons[loadedIconNames.length]._height = (_iconSize * _iconScale);
 				loadedIcons[loadedIconNames.length]._width = (_iconSize * _iconScale);
@@ -266,8 +267,11 @@ class AHZIconContainer
 	
 	private function onLoadError(a_mc:MovieClip, a_errorCode: String): Void
 	{
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ onLoadError ~ ");
-		eventObject.dispatchEvent({type: "iconLoadError", error: a_errorCode});	
+		if (!loadErrorCalled){
+			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ onLoadError ~ ");
+			eventObject.dispatchEvent({type: "iconLoadError", error: a_errorCode});	
+			loadErrorCalled = true;
+		}
 	}
 	
 	private function GetImageSub(a_imageName:String):Object

@@ -1,6 +1,9 @@
-﻿$sourcePath = "$($Env:Skyrim64Path)\Data"
-$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\dist\Data"
-$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\SKSE64\skse64\moreHUD\dist\AS2"
+﻿$Script:path = split-path $SCRIPT:MyInvocation.MyCommand.Path -parent
+Push-Location $Script:path
+
+$sourcePath = "$($Env:Skyrim64Path)\Data"
+$destinationDataPath = $(Resolve-Path "..\dist\Data").Path
+$destinationAS2Path = $(Resolve-Path "..\dist\AS2").Path
 
 if (!$(Test-Path "$destinationDataPath"))
 {
@@ -54,3 +57,6 @@ Copy-Item "$sourcePath\Interface\translations\ahz*.txt" -Destination "$destinati
 
 
 Copy-Item "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\ScaleForm\src\HUDWidgets\*" -Destination $destinationAS2Path -Exclude .git* -Recurse -Force
+
+
+Push-Location

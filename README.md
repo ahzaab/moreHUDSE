@@ -7,7 +7,7 @@ The plugin works in conjunction with the [ahzaab/moreHUDSEScaleform](https://git
 ## How it Works
 
 * The SKSE64 plugin is loaded by [SKSE64](http://skse.silverlock.org/) using the skse64_loader.exe
-* The plugin dynammically loads the Scaleform .swf movie clip into the Hud Menu when the menu loads.
+* The plugin dynamically loads the Scaleform .swf movie clip into the Hud Menu when the menu loads.
 * The plugin registers Scaleform functions used by the ActionScript 2.0 code associated with the [moreHUD SE swf file](https://github.com/ahzaab/moreHUDSEScaleform) 
 * The plugin provides data to the ActionScript such as Known Ingredients, Magic Effects, Enemy Level, Known Echantments, etc.
 
@@ -19,3 +19,41 @@ Not by the Plugin. But only for the .swf file as described [here](https://github
 
 ## Configuration
 HUD mod authors, you can reskin or modify the additional enemy meters by including [these](https://github.com/ahzaab/moreHUDSE/tree/master/Data/Interface/exported/moreHUD) files with your mod as a fmod or standalone patch, and modity to meet your needs.  These files must be placed in the `Data/interface/exported/moreHUD` folder.
+
+---
+
+## Build Dependencies
+* [cmake](https://cmake.org)
+* [vcpkg](https://github.com/microsoft/vcpkg)
+* [CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)
+* [spdlog](https://github.com/gabime/spdlog) (Installed using vcpkg)
+* [Xbyak](https://github.com/herumi/xbyak) (Installed using vcpkg)
+
+## End User Dependencies
+* [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
+* [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
+* [SKSE64](https://skse.silverlock.org/)
+* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604)
+
+
+## Build Instructions
+I use [Visual Studio Code](https://code.visualstudio.com/) for Compilation and Debugging.
+The following environmental variable is required: `Skyrim64Path` which points to your skyrim installation directory
+
+Run the following commands for the debug build
+```
+rm -R .\build
+mkdir build
+cd .\build
+cmake ..
+cmake --build .
+```
+
+For release build:
+```
+rm -R .\build
+mkdir build
+cd .\build
+cmake ..
+cmake --build . --config Release
+```
