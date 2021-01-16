@@ -353,3 +353,7 @@ MigrationBackup/
 out/
 build/
 .vscode/
+!baseIcons.swf
+!enemyMagickaMeter.swf
+!enemyStaminaMeter.swf
+
