@@ -207,92 +207,97 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		initializeClips();
 	}
 
+	function isDefined(obj):Boolean{
+		return (obj != undefined && obj != null);
+	}
+
 	function prepareConfigs() :Void{
 		if (!_config)
 			_config = {};
 		
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET] = 0;
 		
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YOFFSET] = 0;		
 		
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XSCALE] = 1.0;				
 		
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_YSCALE] = 1.0;						
 
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA] = 100;	
 
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET] = 0;			
 
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET] = 0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XSCALE] = 1.0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE])
+		if (!isDefined(isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE])))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YSCALE] = 1.0;	
 			
-		if (!_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA]))
 			_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA] = 100;				
 			
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET] = 0;
 		
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET] = 0;		
 		
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_XSCALE] = 1.0;				
 		
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_YSCALE] = 1.0;						
 
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA] = 100;	
 
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET] = 0;			
 
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YOFFSET] = 0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XSCALE] = 1.0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_YSCALE] = 1.0;	
 	
-		if (!_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA]))
 			_config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA] = 100;	
 	
-		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XOFFSET] = 0;			
 
-		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET]))
 			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET] = 0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE]))
 			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_XSCALE] = 1.0;		
 
-		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE]))
 			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YSCALE] = 1.0;	
 			
-		if (!_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA]))
 			_config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_ALPHA] = 100;			
 			
-		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])){
 			_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] = true;
-			
-		if (!_config[AHZDefines.CFG_ENEMY_METER_HEIGHT])
+		}
+		
+		if (!isDefined(_config[AHZDefines.CFG_ENEMY_METER_HEIGHT]))
 			_config[AHZDefines.CFG_ENEMY_METER_HEIGHT] = ENEMY_METER_HEIGHT;	
 			
-		if (!_config[AHZDefines.CFG_ICONS_SCALE])
+		if (!isDefined(_config[AHZDefines.CFG_ICONS_SCALE]))
 			_config[AHZDefines.CFG_ICONS_SCALE] = 1.0;			
 	}
 	
@@ -400,7 +405,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		enemyMeterHeightScaled = _config[AHZDefines.CFG_ENEMY_METER_HEIGHT] * (_root.HUDMovieBaseInstance.EnemyHealth_mc._yscale/100);
 
 		// Not stacking so height does not matter
-		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		if (_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] == false)
 		{
 			enemyMeterHeightScaled = 1.0;
 		}
@@ -413,6 +418,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		LoadedEnemyMagicka_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_XOFFSET];
 		LoadedEnemyStamina_mc._x = baseX  + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_XOFFSET];
 		staminaMeterBaseY = baseY + enemyMeterHeightScaled + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_YOFFSET];
+		LoadedEnemyStamina_mc._y = staminaMeterBaseY;
 		
 		EnemyMagickaMeter = new Meter(LoadedEnemyMagicka_mc);
 		EnemyStaminaMeter = new Meter(LoadedEnemyStamina_mc);
@@ -568,12 +574,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			LoadedEnemyMagicka_mc._alpha = _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_ALPHA];	
 			LoadedEnemyStamina_mc._alpha = _config[AHZDefines.CFG_ENEMY_STAMINA_METER_ALPHA];
 		}		
-		
-		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
-		{
-			LoadedEnemyStamina_mc._y = staminaMeterBaseY;
-		}
-		else
+				
+		if (_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] == true)
 		{
 			if (magickaPct < 0 && staminaPct < 0)
 			{
@@ -619,7 +621,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
 		StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();		
 		
-		if (!_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING])
+		if (_config[AHZDefines.CFG_ENEMY_METER_USE_STACKING] == false)
 		{
 			MagickaStats_mc._x = baseX + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET];
 			MagickaStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET];
@@ -628,10 +630,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}
 		else
 		{
-			MagickaStats_mc._alpha = (showEnemyMagickaStats && enemy.maxMagicka > 0) ? _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_ALPHA] : 0;
-			StaminaStats_mc._alpha = (showEnemyStaminaStats && enemy.maxStamina > 0) ? _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_ALPHA] : 0;
-			MagickaStats_mc.Stats.text = enemy.magicka.toString() + "/" + enemy.maxMagicka.toString();
-			StaminaStats_mc.Stats.text = enemy.stamina.toString() + "/" + enemy.maxStamina.toString();
 			MagickaStats_mc._x = LoadedEnemyMagicka_mc._x + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_XOFFSET];
 			MagickaStats_mc._y = LoadedEnemyMagicka_mc._y + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_NUMBERS_YOFFSET];
 			StaminaStats_mc._x = LoadedEnemyStamina_mc._x + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_NUMBERS_XOFFSET];

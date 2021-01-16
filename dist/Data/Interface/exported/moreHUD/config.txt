@@ -2,7 +2,8 @@
 ; If any parameters are left blank the built-in default values are used including the default clips
 
 [EnemyMeter]
-; Will stack the meters and numbers in this order Health, Magicka, Stamina
+; Will stack the meters and numbers in this order Health, Magicka, Stamina.  This should be disabled
+; if you plan on moving the stamina and magicka meters to custom locations
 bUseStacking=true
 ; Used for the stacking calculation  this is the height if the visible meter, not the movie clip and this value is "Before Scaling"  
 fHeight = 11.5  
