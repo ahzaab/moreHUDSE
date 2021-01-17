@@ -50,7 +50,7 @@ int Property iToggleOn Auto
 int Property I_THIS_VERSION_MAJOR = 4 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
 int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
-int Property I_THIS_VERSION_BETA = 2 autoReadOnly
+int Property I_THIS_VERSION_BETA = 4 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index

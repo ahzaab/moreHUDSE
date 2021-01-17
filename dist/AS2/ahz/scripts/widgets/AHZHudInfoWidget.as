@@ -941,14 +941,18 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("_root.FloatingContainer: " + _root.FloatingContainer);
 		
+		// This fixes an issue with the floating healthbar mod.  The mod injects the movieclip at the
+		// very bottom.  The moves the hud instance way up above this widget and other widgets
 		if (!swapped && _root.FloatingContainer){
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Before:");
 			//GetRootMovies(_root);
-
+			
+			// This runs the prototypes on movie clips.  This should be done at the static level but sometimes it does not work.
+			var temp = new DepthManager();
+			
 			// I'm patching FloatingContriner because the swapDepth is moving HUDMovieBaseInstance above the as2 reserved depth which is the highest allowed
 			// as long as _root.FloatingContainer is below the z order of HUDMovieBaseInstance then we are good
-			_root.HUDMovieBaseInstance.setDepthTo(_root.FloatingContainer.getDepth() +1);
-			
+			_root.HUDMovieBaseInstance.setDepthAbove(_root.FloatingContainer);
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("After:");
 			//GetRootMovies(_root);
 			swapped = true;
