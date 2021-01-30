@@ -1,0 +1,30 @@
+﻿{
+   "configurations": [
+      {
+         "name": "x64-Debug (default)",
+         "generator": "Ninja",
+         "configurationType": "Debug",
+         "inheritEnvironments": [ "msvc_x64_x64" ],
+         "buildRoot": "${projectDir}\\out\\build\\${name}",
+         "installRoot": "${projectDir}\\out\\install\\${name}",
+         "cmakeCommandArgs": "",
+         "buildCommandArgs": "",
+         "ctestCommandArgs": "",
+         "cmakeExecutable": "C:/Program Files/CMake/bin/cmake.exe",
+         "variables": []
+      },
+      {
+         "name": "x64-Release",
+         "generator": "Ninja",
+         "configurationType": "RelWithDebInfo",
+         "buildRoot": "${projectDir}\\out\\build\\${name}",
+         "installRoot": "${projectDir}\\out\\install\\${name}",
+         "cmakeExecutable": "C:/Program Files/CMake/bin/cmake.exe",
+         "cmakeCommandArgs": "",
+         "buildCommandArgs": "",
+         "ctestCommandArgs": "",
+         "inheritEnvironments": [ "msvc_x64_x64" ],
+         "variables": []
+      }
+   ]
+}

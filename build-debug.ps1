@@ -1,4 +1,4 @@
-rm -R .\build
+Remove-Item -R .\build
 mkdir build | OUT-NULL
 Push-Location .\build
 try
