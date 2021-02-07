@@ -92,12 +92,11 @@ extern "C"
             auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
             auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
             log->set_level(spdlog::level::info);
-            log->flush_on(spdlog::level::warn);
-            spdlog::flush_every(std::chrono::seconds(3));
+            log->flush_on(spdlog::level::info);
 #endif
 
             spdlog::set_default_logger(std::move(log));
-            spdlog::set_pattern("%s(%#): [%l] %v");
+            spdlog::set_pattern("%s(%#): [%^%l%$] %v");
 
             logger::info("moreHUD v{}"sv, Version::NAME);
 

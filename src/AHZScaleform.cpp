@@ -80,7 +80,10 @@ auto MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool
             if (pKeywords->keywords[k]) {
                 auto keyword = pKeywords->GetKeywordAt(k).value_or(nullptr);
                 if (keyword) {
-                    string keyWordName = keyword->GetFormEditorID();
+                    // Had to add this check because https://www.nexusmods.com/skyrimspecialedition/mods/34175?
+                    // sets the editor ID for 'MagicDisallowEnchanting' to null (╯°□°）╯︵ ┻━┻
+                    auto asCstr = keyword->GetFormEditorID();
+                    string keyWordName = asCstr ? asCstr: "";
                     if (keyWordName == "MagicDisallowEnchanting") {
                         return true;  // Is enchanted, but cannot be enchanted by player
                     }
