@@ -264,6 +264,3 @@ Function toggleWidget()
         UI.Invoke("HUD Menu", WidgetRoot + ".TurnOnWidgets")            
     endif  
 EndFunction
-
-
-
