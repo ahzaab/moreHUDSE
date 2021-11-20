@@ -5,6 +5,7 @@
   "homepage": "https://github.com/ahzaab/moreHUDSE",
   "license": "MIT",
   "dependencies": [
+    "boost-stl-interfaces",
     "boost-atomic",
     "span-lite",
     "spdlog",

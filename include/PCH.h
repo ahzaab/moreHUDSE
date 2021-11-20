@@ -39,7 +39,7 @@ namespace WinAPI = SKSE::WinAPI;
 
 #include "IForEachScriptObjectFunctor.h"
 
-//using namespace std::literals;
+using namespace std::literals;
 //namespace logger = SKSE::log;
 
 template <typename T1, typename T2>
@@ -52,11 +52,6 @@ inline T2* dyna_cast(T1* base)
 #define DYNAMIC_CAST(base, srcType, targetType) (dyna_cast<srcType, targetType>(base))
 
 
-using RE::observer;
-using RE::owner;
-
-using namespace std::literals;
-
 namespace logger
 {
 	using namespace SKSE::log;
@@ -65,8 +60,6 @@ namespace logger
 namespace stl
 {
 	using namespace SKSE::stl;
-
-	using SKSE::util::to_underlying;
 
 	namespace detail
 	{
