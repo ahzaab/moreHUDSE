@@ -82,7 +82,7 @@ if (MSVC)
 		# /external:W0
 		
 		/W4	# Warning level
-		/WX	# Warning level (warnings are errors)
+		# /WX	# Warning level (warnings are errors)
 
 		# warnings -> errors
 		/we4715	# 'function' : not all control paths return a value

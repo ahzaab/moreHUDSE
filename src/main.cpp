@@ -68,8 +68,10 @@ namespace
     }
 }
 
+
 extern "C"
 {
+#if 0
     DLLEXPORT auto SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info) -> bool
     {
         try {
@@ -125,18 +127,67 @@ extern "C"
 
         return true;
     }
+#endif
+
+// DLLEXPORT SKSE::PluginVersionData SKSEPlugin_Version =
+// {
+// 	SKSE::PluginInfo::kVersion,
+	
+// 	Version::ASINT,
+// 	"Ahzaab's moreHUD Plugin",
+// 	"ahzaab",
+// 	"",
+
+// 	{false, false},	// not version independent
+// 	{SKSE::RUNTIME_1_6_318.pack(), 0},	// compatible with 1.6.318
+
+// 	0,	// works with any version of the script extender. you probably do not need to put anything here
+// };
+
+    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
+        SKSE::PluginVersionData v{};
+        v.pluginVersion = Version::ASINT;
+        v.PluginName("Ahzaab's moreHUD Plugin"sv);
+        v.AuthorName("Ahzaab"sv);
+        v.CompatibleVersions({ SKSE::RUNTIME_1_6_318 });
+        return v;
+    }();
 
     DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
-        //while (!IsDebuggerPresent())
-        //{
-        //   Sleep(10);
-        //}
+        return true;
+        while (!IsDebuggerPresent())
+        {
+          Sleep(10);
+        }
 
-        //Sleep(1000 * 2);
+        Sleep(1000 * 2);
 
         try {
+#ifndef NDEBUG
+            auto                    msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+            auto                    console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            spdlog::sinks_init_list sink_list = { msvc_sink, console_sink };
+            auto                    log = std::make_shared<spdlog::logger>("multi_sink", sink_list.begin(), sink_list.end());
+            log->set_level(spdlog::level::trace);
+            spdlog::flush_every(std::chrono::seconds(3));
+            spdlog::register_logger(log);
+#else
+            auto path = logger::log_directory();
+            if (!path) {
+                return false;
+            }
+
+            *path /= "moreHUDSE.log"sv;
+
+            auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+            auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+            log->set_level(spdlog::level::info);
+            log->flush_on(spdlog::level::info);
+#endif
+
             logger::info("moreHUD loading"sv);
+            logger::info("moreHUD v{}"sv, Version::NAME);
 
             SKSE::Init(a_skse);
 
