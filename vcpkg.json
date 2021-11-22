@@ -6,9 +6,8 @@
   "license": "MIT",
   "dependencies": [
     "boost-stl-interfaces",
-    "boost-atomic",
-    "span-lite",
     "spdlog",
-    "xbyak"
+    "xbyak",
+    "rsm-binary-io"
   ]
 }

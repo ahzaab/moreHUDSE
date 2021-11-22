@@ -129,20 +129,6 @@ extern "C"
     }
 #endif
 
-// DLLEXPORT SKSE::PluginVersionData SKSEPlugin_Version =
-// {
-// 	SKSE::PluginInfo::kVersion,
-	
-// 	Version::ASINT,
-// 	"Ahzaab's moreHUD Plugin",
-// 	"ahzaab",
-// 	"",
-
-// 	{false, false},	// not version independent
-// 	{SKSE::RUNTIME_1_6_318.pack(), 0},	// compatible with 1.6.318
-
-// 	0,	// works with any version of the script extender. you probably do not need to put anything here
-// };
 
     DLLEXPORT constinit auto SKSEPlugin_Version = []() {
         SKSE::PluginVersionData v{};
@@ -155,13 +141,12 @@ extern "C"
 
     DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
-        return true;
-        while (!IsDebuggerPresent())
-        {
-          Sleep(10);
-        }
+        // while (!IsDebuggerPresent())
+        // {
+        //   Sleep(10);
+        // }
 
-        Sleep(1000 * 2);
+        // Sleep(1000 * 2);
 
         try {
 #ifndef NDEBUG
@@ -214,10 +199,10 @@ extern "C"
             }
 
             logger::info("Installing patched"sv);
-            Patches::Install();
+            //Patches::Install();
 
             logger::info("Registering Callbacks"sv);
-            Scaleform::RegisterCallbacks();
+            //Scaleform::RegisterCallbacks();
 
             logger::info("moreHUD loaded"sv);
 
