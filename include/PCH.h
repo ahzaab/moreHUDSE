@@ -38,7 +38,7 @@ namespace WinAPI = SKSE::WinAPI;
 #endif
 
 #include "IForEachScriptObjectFunctor.h"
-#include "windows.h"
+
 
 using namespace std::literals;
 namespace logger = SKSE::log;

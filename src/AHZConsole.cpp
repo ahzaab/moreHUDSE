@@ -2,6 +2,7 @@
 
 #include "AHZConsole.h"
 #include <iostream>
+#include "windows.h"
 //using namespace std;
 
 

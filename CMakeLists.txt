@@ -8,7 +8,7 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 project(
 	AHZmoreHUDPlugin
-	VERSION 4.0.0.5
+	VERSION 5.0.0.0
 	LANGUAGES CXX
 )
 

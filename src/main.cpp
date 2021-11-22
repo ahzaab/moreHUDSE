@@ -178,12 +178,21 @@ extern "C"
 
             SKSE::AllocTrampoline(1 << 6);
 
+            std::vector<size_t> offsets = {
+            0x8C2D30,
+            0x8C33D0,
+            0x3D4D60,
+            0x3d4e37,
+            0x62DE60,
+            0x3D91A0,
+            0x8B2880};
 
-            //890E70
-            //51019
+            for (auto &offset: offsets){
+                auto o2i = REL::IDDatabase::Offset2ID();
+                auto id1 = o2i(offset);
+                logger::info("offset: {:x}, id {}"sv, offset, id1);
+            }
 
-            //auto id = REL::IDDatabase::get().offset2id(0x890E70);
-            //logger::info("id; {}"sv, id);
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
@@ -199,10 +208,10 @@ extern "C"
             }
 
             logger::info("Installing patched"sv);
-            //Patches::Install();
+            Patches::Install();
 
             logger::info("Registering Callbacks"sv);
-            //Scaleform::RegisterCallbacks();
+            Scaleform::RegisterCallbacks();
 
             logger::info("moreHUD loaded"sv);
 

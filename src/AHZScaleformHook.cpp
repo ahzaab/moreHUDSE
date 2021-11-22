@@ -7,8 +7,8 @@
 
 //using namespace std;
 
-
-constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(50776));
+// 1408B2880
+constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
 uintptr_t           EnemyUpdateHook = (EnemyUpdateHookBase.address() + 0x44);
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
 RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
@@ -101,7 +101,7 @@ void AHZEnemyHealthUpdateHook::Install()
     // trampoline.write_branch<5>(
     //     RE::unrestricted_cast<std::uintptr_t>(EnemyUpdateHook),
     //     trampoline.allocate(code));
-
+return;
     auto& trampoline = SKSE::GetTrampoline();
     trampoline.write_call<5>(EnemyUpdateHook, [](const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
     {

@@ -16,38 +16,46 @@
 
 static std::map<uint8_t, string> m_soulMap;
 
+// 1408C2D30
 void CAHZScaleform::GetMagicItemDescription2(void*, RE::TESForm* a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZScaleform::GetMagicItemDescription2);
-    REL::Relocation<func_t> func{ REL::ID(51022) };
+    REL::Relocation<func_t> func{ REL::ID(51900) };
     func(nullptr, a1, a2);
 }
 
+// 1408C33D0
 auto CAHZScaleform::ProcessSurvivalMode(RE::BSString* a2) -> char*
 {
     using func_t = decltype(&CAHZScaleform::ProcessSurvivalMode);
-    REL::Relocation<func_t> func{ REL::ID(51023) };
+    REL::Relocation<func_t> func{ REL::ID(51901) };
     return func(a2);
 }
 
 auto CAHZScaleform::IsSurvivalMode() -> bool
 {
-    using func_t = decltype(&CAHZScaleform::IsSurvivalMode);
-    REL::Relocation<func_t> func{ REL::ID(52058) };
-    return func();
+    // using func_t = decltype(&CAHZScaleform::IsSurvivalMode);
+    // REL::Relocation<func_t> func{ REL::ID(52058) };
+    // return func();
+    using TESGlobal = RE::TESGlobal;
+    const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
+    const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
+    return survival ? survival->value == 1.0F : false;
 }
 
+// 1403D4D60
 auto CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetArmorWarmthRating_Native);
-    REL::Relocation<func_t> func{ REL::ID(25833) };
+    REL::Relocation<func_t> func{ REL::ID(26393) };
     return func(a1);
 }
 
+// 1403d4e37
 auto CAHZScaleform::GetActorWarmthRating_Native(RE::Actor* a1, float s2) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetActorWarmthRating_Native);
-    REL::Relocation<func_t> func{ REL::ID(25834) };
+    REL::Relocation<func_t> func{ REL::ID(26394) };
     return func(a1, s2);
 }
 
@@ -82,8 +90,8 @@ auto MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool
                 if (keyword) {
                     // Had to add this check because https://www.nexusmods.com/skyrimspecialedition/mods/34175?
                     // sets the editor ID for 'MagicDisallowEnchanting' to null (╯°□°）╯︵ ┻━┻
-                    auto asCstr = keyword->GetFormEditorID();
-                    string keyWordName = asCstr ? asCstr: "";
+                    auto   asCstr = keyword->GetFormEditorID();
+                    string keyWordName = asCstr ? asCstr : "";
                     if (keyWordName == "MagicDisallowEnchanting") {
                         return true;  // Is enchanted, but cannot be enchanted by player
                     }
@@ -162,19 +170,11 @@ auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
 
     if (pPC) {
         RE::InventoryEntryData objDesc(weaponData->equipData.boundObject, 0);
-
-        // Allocate a list to send
-        // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-        //objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
-
         if (weaponData->equipData.pExtraData) {
-            objDesc.extraLists->push_front(weaponData->equipData.pExtraData);
+            objDesc.AddExtraList(weaponData->equipData.pExtraData);
         }
 
         float fDamage = pPC->GetDamage(&objDesc);
-
-        // Delete the allocated dummy list
-        //delete objDesc.extraLists;
 
         // This could be rounded, but the the script decide
         return mRound(fDamage);
@@ -188,20 +188,7 @@ auto CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData) -> float
     if (!armorData->armor)
         return 0.0f;
 
-    RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
-
-    // Allocate a dummy list so skyrim does not crash. For armor information
-    // skyrim doesn't appear to need the list
-    // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-    //objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
-    if (armorData->equipData.pExtraData) {
-        objDesc.extraLists->push_front(armorData->equipData.pExtraData);
-    }
-
-    auto fRating = GetArmorWarmthRating_Native(objDesc.object);
-
-    // Delete the allocated dummy list
-    //delete objDesc.extraLists;
+    auto fRating = GetArmorWarmthRating_Native(armorData->equipData.boundObject);
 
     // This could be rounded, but the the script decide
     return mRound(fRating);
@@ -237,19 +224,11 @@ auto CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData) -> float
 
     if (pPC) {
         RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
-
-        // Allocate a dummy list so skyrim does not crash. For armor information
-        // skyrim doesn't appear to need the list
-        // TODO: Port Note:  This may need to be evaluated again we may not need to do this anymore
-        // objDesc.extraLists = new RE::BSSimpleList<RE::ExtraDataList*>();
         if (armorData->equipData.pExtraData) {
-            objDesc.extraLists->push_front(armorData->equipData.pExtraData);
+            objDesc.AddExtraList(armorData->equipData.pExtraData);
         }
 
         auto fRating = pPC->GetArmorValue(&objDesc);
-
-        // Delete the allocated dummy list
-        //delete objDesc.extraLists;
 
         // This could be rounded, but the the script decide
         return mRound(fRating);
@@ -1434,11 +1413,11 @@ void CAHZScaleform::AppendDescription(RE::TESDescription* desObj, RE::TESForm* p
 
 auto CAHZScaleform::GetEffectsDescription(RE::TESObjectREFR* theObject) -> string
 {
-    RE::BSString   description;
-    string         effectDescription;
-    string         desc;
-    string         effectsString;
-   //RE::MagicItem* magicItem = nullptr;
+    RE::BSString description;
+    string       effectDescription;
+    string       desc;
+    string       effectsString;
+    //RE::MagicItem* magicItem = nullptr;
 
     if (!theObject)
         return desc;

@@ -75,8 +75,9 @@ namespace Events
         return std::addressof(singleton);
     }
 
-    EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
+    EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>* s_source)
     {
+        auto temp = s_source;
         if (a_event && a_event->crosshairRef) {
             _cachedRef = a_event->crosshairRef.get();
         } else {
