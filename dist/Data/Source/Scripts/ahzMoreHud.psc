@@ -32,3 +32,27 @@ Function UnRegisterIconFormList(string aKey) global native
 
 ; Returns true if the form list is registered
 bool Function IsIconFormListRegistered(string aKey) global native
+
+string Function IsBetaPlugin(int aVersion) global
+    return ((aVersion % 100) > 0)
+EndFunction
+
+; Gets the version as a string for viewing
+string Function GetVersionString() global
+    int iVersion = GetVersion()
+
+    if (iVersion == 0)
+        return ""
+    endif
+
+    int iMajor = iVersion / 1000000
+    int iMinor = (iVersion / 10000) % 100
+    int iBug = (iVersion / 100) % 100
+    int iBeta = iVersion % 100
+    string aVersion = iMajor + "." + iMinor + "." + iBug
+
+    if (iBeta > 0)
+        aVersion += " Beta " + iBeta
+    endif
+    return aVersion
+EndFunction

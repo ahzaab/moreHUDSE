@@ -38,5 +38,5 @@ public:
 private:
     static SafeEnemyDataHolder ahzEnemyData;
     static RE::RefHandle       lastRefHandle;
-    static bool                EnemyHealthUpdateHook_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut);
+    static bool                Hook_EnemyHealthLookupReferenceByHandle_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut);
 };

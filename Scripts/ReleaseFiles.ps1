@@ -19,7 +19,7 @@ else{
 
 $executingPath = split-path $SCRIPT:MyInvocation.MyCommand.Path -parent
 
-$sourceDir = "$($Env:Skyrim64Path)"
+$sourceDir = "$($Env:Skyrim64AEPath)"
 $archiveToolDir = "$sourceDir\Tools\Archive"
 $sourceDataDir = "$sourceDir\Data"
 $releaseDir = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUD\Release"

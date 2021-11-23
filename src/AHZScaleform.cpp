@@ -16,7 +16,7 @@
 
 static std::map<uint8_t, string> m_soulMap;
 
-// 1408C2D30
+// 1408C2D30 1.6.318
 void CAHZScaleform::GetMagicItemDescription2(void*, RE::TESForm* a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZScaleform::GetMagicItemDescription2);
@@ -24,7 +24,7 @@ void CAHZScaleform::GetMagicItemDescription2(void*, RE::TESForm* a1, RE::BSStrin
     func(nullptr, a1, a2);
 }
 
-// 1408C33D0
+// 1408C33D0 1.6.318
 auto CAHZScaleform::ProcessSurvivalMode(RE::BSString* a2) -> char*
 {
     using func_t = decltype(&CAHZScaleform::ProcessSurvivalMode);
@@ -43,7 +43,7 @@ auto CAHZScaleform::IsSurvivalMode() -> bool
     return survival ? survival->value == 1.0F : false;
 }
 
-// 1403D4D60
+// 1403D4D60 1.6.318
 auto CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetArmorWarmthRating_Native);
@@ -51,7 +51,7 @@ auto CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1) -> float
     return func(a1);
 }
 
-// 1403d4e37
+// 1403d4e37  1.6.318
 auto CAHZScaleform::GetActorWarmthRating_Native(RE::Actor* a1, float s2) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetActorWarmthRating_Native);
@@ -176,7 +176,6 @@ auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
 
         float fDamage = pPC->GetDamage(&objDesc);
 
-        // This could be rounded, but the the script decide
         return mRound(fDamage);
     }
 
@@ -190,10 +189,7 @@ auto CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData) -> float
 
     auto fRating = GetArmorWarmthRating_Native(armorData->equipData.boundObject);
 
-    // This could be rounded, but the the script decide
     return mRound(fRating);
-
-    return 0.0;
 }
 
 auto CAHZScaleform::GetArmorWarmthRating(RE::TESObjectREFR* targetRef) -> float

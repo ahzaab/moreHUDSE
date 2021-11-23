@@ -43,14 +43,10 @@ GlobalVariable Property AHZIconSize Auto
 
 ; Keeps track of the revision
 int Property iVersion Auto
+int Property iPluginVersion Auto
 int Property iToggleOn Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
-; <--- Edit These value when updating
-int Property I_THIS_VERSION_MAJOR = 4 autoReadOnly
-int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
-int Property I_THIS_VERSION_BETA = 5 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -86,15 +82,17 @@ Function Maintenance()
     endIf
 
     if (isSKSEInstalled == true)
-		If iVersion < ((I_THIS_VERSION_MAJOR * 1000) + (I_THIS_VERSION_MINOR * 100) + (I_THIS_VERSION_BUILD * 10) + I_THIS_VERSION_BETA)
-			iVersion = (I_THIS_VERSION_MAJOR * 1000) + (I_THIS_VERSION_MINOR * 100) + (I_THIS_VERSION_BUILD * 10) + I_THIS_VERSION_BETA
-            if (I_THIS_VERSION_BETA > 0)
-			    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
-            else
-                Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
+        iPluginVersion = AhzMoreHud.GetVersion()
+        if (iPluginVersion == 0)
+            Debug.MessageBox("moreHUD: The moreHUD Plugin dll is not detected!")
+        else
+            If (iVersion < iPluginVersion)
+                iVersion = iPluginVersion
+                Debug.Notification("moreHUD version: " + AhzMoreHud.GetVersionString())
             EndIf
-		EndIf
+        endif
 	Endif
+
 	; Other maintenance code that only needs to run once per save load
 
     UpdateSettings(false)
@@ -103,6 +101,11 @@ Function Maintenance()
     ; the first time.  Since 1.5.3 Some users have reported that the widgets did not
     ; load correctly on startup  
     RegisterForModEvent("SKIWF_widgetManagerReady", "OnWidgetManagerReady")
+
+    Utility.Wait(1)
+
+    UpdateSettings(false)
+
 EndFunction
 
 function RefreshWidgets()
@@ -264,3 +267,6 @@ Function toggleWidget()
         UI.Invoke("HUD Menu", WidgetRoot + ".TurnOnWidgets")            
     endif  
 EndFunction
+
+
+
