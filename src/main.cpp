@@ -76,7 +76,8 @@ extern "C"
         v.pluginVersion = Version::ASINT;
         v.PluginName("Ahzaab's moreHUD Plugin"sv);
         v.AuthorName("Ahzaab"sv);
-        v.CompatibleVersions({ SKSE::RUNTIME_1_6_318 });
+        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
+        v.UsesAddressLibrary(true);
         return v;
     }();
 
@@ -101,6 +102,7 @@ extern "C"
 #else
             auto path = logger::log_directory();
             if (!path) {
+                //stl::report_and_fail("Failed to find standard logging directory"sv);
                 return false;
             }
 
