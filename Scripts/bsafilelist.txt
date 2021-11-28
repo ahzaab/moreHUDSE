@@ -2,7 +2,6 @@ Scripts\ahzconfigmenu.pex
 Scripts\ahzmainquest.pex
 Scripts\ahzmaintenancealiasscript.pex
 Scripts\AhzMoreHud.pex
-Scripts\ahzplayerloadgamealias.pex
 Source\Scripts\ahzconfigmenu.psc
 Source\Scripts\ahzmainquest.psc
 Source\Scripts\ahzmaintenancealiasscript.psc
@@ -23,4 +22,4 @@ Interface\translations\ahzmorehud_japanese.txt
 Interface\translations\ahzmorehud_polish.txt
 Interface\translations\ahzmorehud_russian.txt
 Interface\translations\ahzmorehud_spanish.txt
-Interface\ahzhudinfo.swf
+Interface\AHZHudInfo.swf

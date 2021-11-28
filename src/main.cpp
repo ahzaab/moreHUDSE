@@ -68,10 +68,28 @@ namespace
     }
 }
 
+
 extern "C"
 {
-    DLLEXPORT auto SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info) -> bool
+    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
+        SKSE::PluginVersionData v{};
+        v.pluginVersion = Version::ASINT;
+        v.PluginName("Ahzaab's moreHUD Plugin"sv);
+        v.AuthorName("Ahzaab"sv);
+        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
+        v.UsesAddressLibrary(true);
+        return v;
+    }();
+
+    DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
+        // while (!IsDebuggerPresent())
+        // {
+        //   Sleep(10);
+        // }
+
+        // Sleep(1000 * 2);
+
         try {
 #ifndef NDEBUG
             auto                    msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
@@ -80,10 +98,11 @@ extern "C"
             auto                    log = std::make_shared<spdlog::logger>("multi_sink", sink_list.begin(), sink_list.end());
             log->set_level(spdlog::level::trace);
             spdlog::flush_every(std::chrono::seconds(3));
-            spdlog::register_logger(log);
+            spdlog::set_default_logger(std::move(log));
 #else
             auto path = logger::log_directory();
             if (!path) {
+                //stl::report_and_fail("Failed to find standard logging directory"sv);
                 return false;
             }
 
@@ -93,61 +112,31 @@ extern "C"
             auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
             log->set_level(spdlog::level::info);
             log->flush_on(spdlog::level::info);
+            spdlog::set_default_logger(std::move(log));
 #endif
 
-            spdlog::set_default_logger(std::move(log));
-            spdlog::set_pattern("%s(%#): [%^%l%$] %v");
-
-            logger::info("moreHUD v{}"sv, Version::NAME);
-
-            a_info->infoVersion = SKSE::PluginInfo::kVersion;
-            a_info->name = "Ahzaab's moreHUD Plugin";
-            a_info->version = Version::ASINT;
-
-            if (a_skse->IsEditor()) {
-                logger::critical("Loaded in editor, marking as incompatible!"sv);
-                return false;
-            }
-
-            const auto ver = a_skse->RuntimeVersion();
-            if (ver <= SKSE::RUNTIME_1_5_39) {
-                logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
-                return false;
-            }
-
-        } catch (const std::exception& e) {
-            logger::critical(e.what());
-            return false;
-        } catch (...) {
-            logger::critical("caught unknown exception"sv);
-            return false;
-        }
-
-        return true;
-    }
-
-    DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
-    {
-        //while (!IsDebuggerPresent())
-        //{
-        //   Sleep(10);
-        //}
-
-        //Sleep(1000 * 2);
-
-        try {
             logger::info("moreHUD loading"sv);
+            logger::info("moreHUD v{}"sv, Version::NAME);
 
             SKSE::Init(a_skse);
 
             SKSE::AllocTrampoline(1 << 6);
 
+            // std::vector<size_t> offsets = {
+            // 0x8C2D30,
+            // 0x8C33D0,
+            // 0x3D4D60,
+            // 0x3d4e37,
+            // 0x62DE60,
+            // 0x3D91A0,
+            // 0x8B2880};
 
-            //890E70
-            //51019
+            // for (auto &offset: offsets){
+            //     auto o2i = REL::IDDatabase::Offset2ID();
+            //     auto id1 = o2i(offset);
+            //     logger::info("offset: {:x}, id {}"sv, offset, id1);
+            // }
 
-            //auto id = REL::IDDatabase::get().offset2id(0x890E70);
-            //logger::info("id; {}"sv, id);
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {

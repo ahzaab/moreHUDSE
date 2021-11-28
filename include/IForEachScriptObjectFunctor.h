@@ -16,7 +16,7 @@ namespace RE
                 uint32_t        unk10;
                 RE::VMHandle    handle;
             };
-            //static_assert(sizeof(SCRIPT_OBJECT_MESSAGE) == 0x24);
+            static_assert(sizeof(SCRIPT_OBJECT_MESSAGE) == 0x28);
             
             IForEachScriptObjectFunctor() = default;
             virtual ~IForEachScriptObjectFunctor() = default;

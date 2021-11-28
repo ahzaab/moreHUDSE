@@ -26,8 +26,12 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 * [cmake](https://cmake.org)
 * [vcpkg](https://github.com/microsoft/vcpkg)
 * [CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)
-* [spdlog](https://github.com/gabime/spdlog) (Installed using vcpkg)
-* [Xbyak](https://github.com/herumi/xbyak) (Installed using vcpkg)
+* [spdlog](https://github.com/gabime/spdlog) (Installed by vcpkg)
+* [Xbyak](https://github.com/herumi/xbyak) (Installed by vcpkg)
+* [Boost](https://www.boost.org/)
+	* Stl_interfaces  (Installed by vcpkg)
+* [binary_io](https://github.com/Ryan-rsm-McKenzie/binary_io) (Installed by vcpkg)
+
 
 ## End User Dependencies
 * [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)

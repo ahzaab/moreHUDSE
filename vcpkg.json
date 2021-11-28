@@ -5,9 +5,9 @@
   "homepage": "https://github.com/ahzaab/moreHUDSE",
   "license": "MIT",
   "dependencies": [
-    "boost-atomic",
-    "span-lite",
+    "boost-stl-interfaces",
     "spdlog",
-    "xbyak"
+    "xbyak",
+    "rsm-binary-io"
   ]
 }
