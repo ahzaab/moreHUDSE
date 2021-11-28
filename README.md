@@ -42,7 +42,7 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 
 ## Build Instructions
 I use [Visual Studio Code](https://code.visualstudio.com/) for Compilation and Debugging.
-The following environmental variable is required: `Skyrim64Path` which points to your skyrim installation directory
+The following environmental variable is required: `SkyrimAEPath` which points to your skyrim installation directory
 
 Run the following commands for the debug build
 ```
