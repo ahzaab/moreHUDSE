@@ -43,7 +43,6 @@ GlobalVariable Property AHZIconSize Auto
 
 ; Keeps track of the revision
 int Property iVersion Auto
-int Property iPluginVersion Auto
 int Property iToggleOn Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
@@ -68,6 +67,7 @@ Function Unregister()
 EndFunction
 
 Function Maintenance()
+    Utility.Wait(1)
     ; Detect SKSE
     int skseRelease = SKSE.GetVersionRelease()
     bool isSKSEInstalled = false
@@ -82,7 +82,7 @@ Function Maintenance()
     endIf
 
     if (isSKSEInstalled == true)
-        iPluginVersion = AhzMoreHud.GetVersion()
+        int iPluginVersion = AhzMoreHud.GetVersion()
         if (iPluginVersion == 0)
             Debug.MessageBox("moreHUD: The moreHUD Plugin dll is not detected!")
         else
