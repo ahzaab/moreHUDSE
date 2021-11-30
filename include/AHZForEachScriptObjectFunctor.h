@@ -13,6 +13,8 @@ private:
     std::string            m_property;
     RE::BSScript::Variable m_result;
 
+    std::uint32_t m_variableOffset{ 0 };
+
     bool VisitProperties(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject);
     bool VisitVariables(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject);
 };
