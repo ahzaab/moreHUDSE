@@ -2,6 +2,7 @@ Scripts\ahzconfigmenu.pex
 Scripts\ahzmainquest.pex
 Scripts\ahzmaintenancealiasscript.pex
 Scripts\AhzMoreHud.pex
+Scripts\ahzplayerloadgamealias.pex
 Source\Scripts\ahzconfigmenu.psc
 Source\Scripts\ahzmainquest.psc
 Source\Scripts\ahzmaintenancealiasscript.psc
