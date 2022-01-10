@@ -8,8 +8,11 @@ auto CAHZFormLookup::Instance() -> CAHZFormLookup&
     return theInstance;
 }
 
-auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
+auto CAHZFormLookup::GetTESForm(const RE::TESObjectREFR* targetReference) -> const RE::TESForm*
 {
+    if (!targetReference){
+        return nullptr;
+    }
     RE::TESForm* lutForm = nullptr;
     if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
         return lutForm;
@@ -121,6 +124,19 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
         }
     }
 
+    // Hardcoded for LOTD, I have to lookup by index
+    auto dataHandler = RE::TESDataHandler::GetSingleton();
+    if (dataHandler->LookupModByName("LegacyoftheDragonborn.esm"sv)){
+        RE::TESForm* dbm_displayListBase = GetAttachedForm(form, "afDisplayList");
+        int32_t dbm_displayListIndex = GetAttachedInteger(form, "aiDisplayListIndex");
+        if (dbm_displayListBase && dbm_displayListBase->formType == RE::FormType::FormList){
+            auto* lvli = DYNAMIC_CAST(dbm_displayListBase, RE::TESForm, RE::BGSListForm);
+            if (lvli && dbm_displayListIndex > -1 && dbm_displayListIndex < static_cast<int32_t>(lvli->forms.size())){
+                return lvli->forms[dbm_displayListIndex];
+            }
+        }
+    }
+
     return nullptr;
 }
 
@@ -185,4 +201,28 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variab
     }
 
     return nullptr;
+}
+
+auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string variableName) -> int32_t
+{
+    if (form) {
+        if (!form->GetBaseObject())
+            return -1;
+
+        auto vm = RE::SkyrimVM::GetSingleton()->impl;
+        auto handlePolicy = vm.get()->GetObjectHandlePolicy();
+        auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
+
+        if (handle != handlePolicy->EmptyHandle()) {
+            CAHZForEachScriptObjectFunctor functor(variableName);
+            vm->ForEachBoundObject(handle, &functor);
+            auto variable = functor.GetScriptVariable();
+
+            if (variable && variable->IsInt()){
+                return variable->GetSInt();
+            }
+        }
+    }
+
+    return -1;
 }

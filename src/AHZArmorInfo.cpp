@@ -1,4 +1,5 @@
 #include "PCH.h"
+#include "AHZTarget.h"
 #include "AHZArmorInfo.h"
 
 

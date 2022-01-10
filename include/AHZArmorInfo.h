@@ -6,13 +6,13 @@ class AHZArmorData
 public:
     struct FoundEquipData
     {
-        RE::TESBoundObject* boundObject;
-        RE::ExtraDataList*  pExtraData;
+        const RE::TESBoundObject* boundObject;
+        const RE::ExtraDataList*  pExtraData;
     };
 
     FoundEquipData     equipData;
-    RE::TESObjectARMO* armor;
-    RE::TESObjectLIGH* torch;
+    const RE::TESObjectARMO* armor;
+    const RE::TESObjectLIGH* torch;
 
     AHZArmorData(void)
     {
@@ -22,13 +22,13 @@ public:
         torch = nullptr;
     }
 
-    AHZArmorData(RE::TESObjectREFR* thisObject)
+    AHZArmorData(CAHZTarget target)
     {
-        if (thisObject && thisObject->GetBaseObject()) {
-            equipData.boundObject = thisObject->GetBaseObject();
-            equipData.pExtraData = &thisObject->extraList;
-            armor = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectARMO);
-            torch = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectLIGH);
+        if (target.IsValid()) {
+            equipData.boundObject = target.GetForm()->As<RE::TESBoundObject>();
+            equipData.pExtraData = target.IsReference() ? &target.GetReference()->extraList : nullptr;
+            armor = target.GetForm()->As<RE::TESObjectARMO>();
+            torch = target.GetForm()->As<RE::TESObjectLIGH>();
         } else {
             equipData.boundObject = nullptr;
             equipData.pExtraData = nullptr;

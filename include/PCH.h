@@ -46,6 +46,8 @@ namespace logger = SKSE::log;
 template <typename T1, typename T2>
 inline T2* dyna_cast(T1* base)
 {
+    if (!base)
+        return nullptr;
     auto asForm = static_cast<T1*>(base);
     auto ret = (asForm)->As<T2>();
     return ret;

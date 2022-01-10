@@ -59,7 +59,7 @@ bool CAHZForEachScriptObjectFunctor::VisitVariables(RE::BSScript::ObjectTypeInfo
         if (element.name.empty()) {
             continue;
         }
-        if (element.name.data() == m_variable) { 
+        if (element.name.data() == m_variable || element.name.data() == m_property) { 
             auto                   found = vm->GetVariableValue(boundObject, m_variableOffset + i, m_result);
             found = found && !m_result.IsNoneObject() && !m_result.IsNoneArray();
             if (found) {

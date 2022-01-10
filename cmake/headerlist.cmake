@@ -23,4 +23,5 @@ set(headers ${headers}
     include/Patches.h
     include/Scaleform.h
     include/version.h
+    include/AHZTarget.h
 )
