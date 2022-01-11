@@ -1,7 +1,15 @@
 ﻿#include "PCH.h"
+#include "AHZTarget.h"
 #include "AHZPlayerInfo.h"
 #include "Events.h"
 
+CAHZTarget CAHZPlayerInfo::s_target;
+
+CAHZTarget & CAHZPlayerInfo::GetTarget()
+{
+    s_target.SetTarget(GetTargetRef());
+    return s_target;
+}
 
 auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 {

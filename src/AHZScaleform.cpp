@@ -17,7 +17,7 @@
 static std::map<uint8_t, string> m_soulMap;
 
 // 1408C2D30 1.6.318
-void CAHZScaleform::GetMagicItemDescription2(void*, const RE::TESForm * a1, RE::BSString* a2)
+void CAHZScaleform::GetMagicItemDescription2(void*, RE::TESForm * a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZScaleform::GetMagicItemDescription2);
     REL::Relocation<func_t> func{ REL::ID(51900) };
@@ -44,7 +44,7 @@ auto CAHZScaleform::IsSurvivalMode() -> bool
 }
 
 // 1403D4D60 1.6.318
-auto CAHZScaleform::GetArmorWarmthRating_Native(const RE::TESForm* a1) -> float
+auto CAHZScaleform::GetArmorWarmthRating_Native(RE::TESForm* a1) -> float
 {
     using func_t = decltype(&CAHZScaleform::GetArmorWarmthRating_Native);
     REL::Relocation<func_t> func{ REL::ID(26393) };
@@ -102,7 +102,7 @@ auto MagicDisallowEnchanting(const RE::BGSKeywordForm* pKeywords) -> bool
     return false;
 }
 
-auto CAHZScaleform::GetIsKnownEnchantment(CAHZTarget target) -> uint32_t
+auto CAHZScaleform::GetIsKnownEnchantment(CAHZTarget &target) -> uint32_t
 {
     auto baseForm = target.GetForm();
 
@@ -121,7 +121,7 @@ auto CAHZScaleform::GetIsKnownEnchantment(CAHZTarget target) -> uint32_t
         }
 
         if (target.IsReference()) {
-            if (auto extraEnchant = static_cast<const RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment))) {
+            if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment))) {
                 wasExtra = true;
                 enchantment = extraEnchant->enchantment;
             }
@@ -186,7 +186,7 @@ auto CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData) -> float
     return mRound(fRating);
 }
 
-auto CAHZScaleform::GetArmorWarmthRating(CAHZTarget target) -> float
+auto CAHZScaleform::GetArmorWarmthRating(CAHZTarget &target) -> float
 {
     // TODO: Port Note: Checking if the reference base object is null may not be needed
     if (!target.IsValid())
@@ -213,9 +213,9 @@ auto CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData) -> float
     auto pPC = RE::PlayerCharacter::GetSingleton();
 
     if (pPC) {
-        RE::InventoryEntryData objDesc(const_cast<RE::TESBoundObject*>(armorData->equipData.boundObject), 0);
+        RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
         if (armorData->equipData.pExtraData) {
-            objDesc.AddExtraList(const_cast<RE::ExtraDataList*>(armorData->equipData.pExtraData));
+            objDesc.AddExtraList(armorData->equipData.pExtraData);
         }
 
         auto fRating = pPC->GetArmorValue(&objDesc);
@@ -265,7 +265,7 @@ auto CAHZScaleform::mRound(float r) -> float
     return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
 }
 
-auto CAHZScaleform::GetArmorRatingDiff(CAHZTarget target) -> float
+auto CAHZScaleform::GetArmorRatingDiff(CAHZTarget &target) -> float
 {
     float oldArmorRating = 0.0f;
     float newArmorRating = 0.0f;
@@ -299,7 +299,7 @@ auto CAHZScaleform::GetArmorRatingDiff(CAHZTarget target) -> float
     return deltaRating;
 }
 
-auto CAHZScaleform::GetWarmthRatingDiff(CAHZTarget target) -> float
+auto CAHZScaleform::GetWarmthRatingDiff(CAHZTarget &target) -> float
 {
     float oldArmorRating = 0.0f;
     float newArmorRating = 0.0f;
@@ -393,12 +393,12 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
     return totalWeaponDamage;
 }
 
-auto CAHZScaleform::isBolt(RE::TESAmmo* thisAmmo) -> bool
+auto CAHZScaleform::isBolt(RE::TESAmmo * thisAmmo) -> bool
 {
     return (thisAmmo->IsBolt());
 }
 
-auto CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo) -> float
+auto CAHZScaleform::GetWeaponDamageDiff(CAHZTarget &target) -> float
 {
     float         totalWeaponDamage = 0.0f;
     float         targetArrowDamage = 0.0f;
@@ -407,10 +407,10 @@ auto CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo) -
     AHZWeaponData targetWeapon;
     AHZWeaponData equippedAmmo;
 
-    if (!targetWeaponOrAmmo)
+    if (!target.IsValid())
         return 0.0f;
 
-    targetWeapon = CAHZWeaponInfo::GetWeaponInfo(targetWeaponOrAmmo);
+    targetWeapon = CAHZWeaponInfo::GetWeaponInfo(target);
     equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
 
     //DumpClass(targetWeapon.ammo, 256);
@@ -491,7 +491,7 @@ auto CAHZScaleform::GetWeaponDamageDiff(RE::TESObjectREFR* targetWeaponOrAmmo) -
     return 0.0f;
 }
 
-auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
+auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP * thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -561,7 +561,7 @@ auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
+auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP * thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -649,7 +649,7 @@ auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 //			thisWeapon->type() == TESObjectWEAP::GameData::kType_CBow);
 //}
 
-auto CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon) -> bool
+auto CAHZScaleform::IsBow(RE::TESObjectWEAP * thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -703,7 +703,7 @@ auto CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon) -> bool
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
 }
 
-auto CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon) -> bool
+auto CAHZScaleform::IsCrossBow(RE::TESObjectWEAP * thisWeapon) -> bool
 {
     //kType_HandToHandMelee = 0,
     //kType_OneHandSword,
@@ -757,7 +757,7 @@ auto CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon) -> bool
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-auto CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject) -> const RE::AlchemyItem*
+auto CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject) -> RE::AlchemyItem*
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
         RE::TESLevItem* lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
@@ -779,7 +779,7 @@ auto CAHZScaleform::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject) -> co
     return nullptr;
 }
 
-auto CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thisObject) -> const RE::IngredientItem*
+auto CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thisObject) -> RE::IngredientItem*
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
         auto lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
@@ -801,7 +801,7 @@ auto CAHZScaleform::GetIngredientFromLeveledList(RE::TESForm* thisObject) -> con
     return nullptr;
 }
 
-auto CAHZScaleform::GetIngredient(CAHZTarget target) -> const RE::IngredientItem*
+auto CAHZScaleform::GetIngredient(CAHZTarget &target) -> RE::IngredientItem*
 {
     if (!target.IsValid())
         return nullptr;
@@ -891,7 +891,7 @@ auto CAHZScaleform::GetIngredient(CAHZTarget target) -> const RE::IngredientItem
     return nullptr;
 }
 
-auto CAHZScaleform::GetSpellItem(CAHZTarget target) -> const RE::SpellItem*
+auto CAHZScaleform::GetSpellItem(CAHZTarget &target) -> RE::SpellItem*
 {
     if (!target.IsValid())
         return nullptr;
@@ -899,7 +899,7 @@ auto CAHZScaleform::GetSpellItem(CAHZTarget target) -> const RE::SpellItem*
     return target.GetForm()->As<RE::SpellItem>();
 }
 
-auto CAHZScaleform::GetAlchemyItem(CAHZTarget target) -> const RE::AlchemyItem*
+auto CAHZScaleform::GetAlchemyItem(CAHZTarget &target) -> RE::AlchemyItem*
 {
     if (!target.IsValid())
         return nullptr;
@@ -993,7 +993,7 @@ auto CAHZScaleform::GetAlchemyItem(CAHZTarget target) -> const RE::AlchemyItem*
     return nullptr;
 }
 
-auto CAHZScaleform::CanPickUp(const RE::TESForm * form) -> bool
+auto CAHZScaleform::CanPickUp(RE::TESForm * form) -> bool
 {
     if (!form) {
         return false;
@@ -1016,12 +1016,12 @@ auto CAHZScaleform::CanPickUp(const RE::TESForm * form) -> bool
     return canCarry;
 }
 
-auto CAHZScaleform::GetTargetName(CAHZTarget target) -> string
+auto CAHZScaleform::GetTargetName(CAHZTarget &target) -> string
 {
     string name;
 
     if (!target.IsValid()) {
-        return;
+        return name;
     }
 
     auto pFullName = target.GetForm()->As<RE::TESFullName>();
@@ -1032,8 +1032,7 @@ auto CAHZScaleform::GetTargetName(CAHZTarget target) -> string
     
     if (target.IsReference()){
         auto extraList = target.GetReference()->extraList;
-        auto baseObject = const_cast<RE::TESForm*>(target.GetForm());
-        displayName = extraList.GetDisplayName(baseObject->As<RE::TESBoundObject>());
+        displayName = extraList.GetDisplayName(target.GetForm()->As<RE::TESBoundObject>());
     }
 
     // If the name can be created
@@ -1069,7 +1068,7 @@ auto CAHZScaleform::GetTargetName(CAHZTarget target) -> string
     return name;
 };
 
-auto CAHZScaleform::GetIsBookAndWasRead(CAHZTarget target) -> bool
+auto CAHZScaleform::GetIsBookAndWasRead(CAHZTarget &target) -> bool
 {
     if (!target.IsValid())
         return false;
@@ -1162,7 +1161,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
     }
 }
 
-auto CAHZScaleform::GetArmorWeightClass(CAHZTarget target) -> string
+auto CAHZScaleform::GetArmorWeightClass(CAHZTarget &target) -> string
 {
     string desc;
 
@@ -1201,7 +1200,7 @@ auto CAHZScaleform::GetArmorWeightClass(CAHZTarget target) -> string
     return desc;
 };
 
-auto CAHZScaleform::GetValueToWeight(CAHZTarget target, const char* stringFromHUD, const char* vmTranslated) -> string
+auto CAHZScaleform::GetValueToWeight(CAHZTarget &target, const char* stringFromHUD, const char* vmTranslated) -> string
 {
     string desc;
 
@@ -1274,7 +1273,7 @@ auto CAHZScaleform::GetValueToWeight(CAHZTarget target, const char* stringFromHU
     return desc;
 };
 
-auto CAHZScaleform::GetBookSkill(CAHZTarget target) -> string
+auto CAHZScaleform::GetBookSkill(CAHZTarget &target) -> string
 {
     string desc;
 
@@ -1307,17 +1306,14 @@ auto CAHZScaleform::GetBookSkill(CAHZTarget target) -> string
     return desc;
 }
 
-void CAHZScaleform::AppendDescription(const RE::TESDescription * desObj, const RE::TESForm * parent, std::string& description)
+void CAHZScaleform::AppendDescription(RE::TESDescription * desObj, RE::TESForm * parent, std::string& description)
 {
     RE::BSString bsDescription;
     string       tempString = "";
 
-    // I hate const cast, but I cannot control the downstream functions
-    auto desObj2 = const_cast<RE::TESDescription*>(desObj);
-    auto parent2 = const_cast<RE::TESForm*>(parent);
 
     if (parent->GetFormType() == RE::FormType::Book) {
-        desObj2->GetDescription(bsDescription, parent2, 0x4D414E43);
+        desObj->GetDescription(bsDescription, parent, 0x4D414E43);
         if (!bsDescription.empty()) {
             tempString.clear();
             tempString.append(bsDescription.c_str());
@@ -1329,10 +1325,10 @@ void CAHZScaleform::AppendDescription(const RE::TESDescription * desObj, const R
         }
     } else {
         RE::BSString bsDescription2;
-        auto         desc = DYNAMIC_CAST(parent2, RE::TESForm, RE::TESDescription);
+        auto         desc = DYNAMIC_CAST(parent, RE::TESForm, RE::TESDescription);
         if (desc) {
             //CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0x43534544);
-            desc->GetDescription(bsDescription2, parent2, 0x43534544);
+            desc->GetDescription(bsDescription2, parent, 0x43534544);
             tempString.clear();
             if (!bsDescription2.empty())
                 tempString.append(bsDescription2.c_str());
@@ -1342,7 +1338,7 @@ void CAHZScaleform::AppendDescription(const RE::TESDescription * desObj, const R
                 description.append(formatted);
             } else {
                 //CALL_MEMBER_FN(desc, Get)(&bsDescription2, parent, 0);
-                desc->GetDescription(bsDescription2, parent2, 0);
+                desc->GetDescription(bsDescription2, parent, 0);
                 tempString.clear();
                 if (&bsDescription2)
                     tempString.append(bsDescription2.c_str());
@@ -1356,7 +1352,7 @@ void CAHZScaleform::AppendDescription(const RE::TESDescription * desObj, const R
     }
 }
 
-auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
+auto CAHZScaleform::GetEffectsDescription(CAHZTarget &target) -> string
 {
     RE::BSString description;
     string       effectDescription;
@@ -1376,7 +1372,7 @@ auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
         auto item = target.GetForm()->As<RE::AlchemyItem>();
 
         if (target.IsReference()) {
-            if (auto extraEnchant = static_cast<const RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
+            if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
             {
                 if (extraEnchant->enchantment) {
                     GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
@@ -1408,7 +1404,7 @@ auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
             // Items modified by the player
             else if (target.IsReference())  // Enchanted
             {
-                if (auto extraEnchant = static_cast<const RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))
+                if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))
                 {
                     if (extraEnchant->enchantment) {
                         GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
@@ -1435,7 +1431,7 @@ auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
 
             // Items modified by the player
             else if (target.IsReference()) {
-                if (auto extraEnchant = static_cast<const RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
+                if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
                 {
                     if (extraEnchant->enchantment) {
                         GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
@@ -1454,7 +1450,7 @@ auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
         }
 
         if (target.IsReference()) {
-            if (auto extraEnchant = static_cast<const RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
+            if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
             {
                 if (extraEnchant->enchantment) {
                     GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
@@ -1492,11 +1488,11 @@ auto CAHZScaleform::GetEffectsDescription(CAHZTarget target) -> string
     return desc;
 };
 
-void CAHZScaleform::ProcessTargetEffects(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessTargetEffects(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
-    const RE::AlchemyItem*    alchemyItem = nullptr;
-    const RE::SpellItem*      spellItem = nullptr;
-    const RE::IngredientItem* ingredientItem = nullptr;
+    RE::AlchemyItem*    alchemyItem = nullptr;
+    RE::SpellItem*      spellItem = nullptr;
+    RE::IngredientItem* ingredientItem = nullptr;
     string              name;
 
 
@@ -1576,7 +1572,7 @@ void CAHZScaleform::ProcessTargetEffects(CAHZTarget target, RE::GFxFunctionHandl
     }
 };
 
-void CAHZScaleform::ProcessArmorClass(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessArmorClass(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     static string      weightClass;
 
@@ -1592,7 +1588,7 @@ void CAHZScaleform::ProcessArmorClass(CAHZTarget target, RE::GFxFunctionHandler:
     SetResultString(args, weightClass.c_str());
 };
 
-void CAHZScaleform::ProcessValueToWeight(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessValueToWeight(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     static string      valueToWeight;
 
@@ -1608,7 +1604,7 @@ void CAHZScaleform::ProcessValueToWeight(CAHZTarget target, RE::GFxFunctionHandl
     SetResultString(args, valueToWeight.c_str());
 };
 
-void CAHZScaleform::ProcessBookSkill(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessBookSkill(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     static string      bookSkill;
 
@@ -1639,7 +1635,7 @@ void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string
     }
 };
 
-void CAHZScaleform::ProcessTargetObject(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessTargetObject(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     float              totalArmorOrWeapon = 0.0;
     float              difference = 0.0;
@@ -1665,16 +1661,16 @@ void CAHZScaleform::ProcessTargetObject(CAHZTarget target, RE::GFxFunctionHandle
 
         // If ammo is NULL, it is OK
         totalArmorOrWeapon = GetTotalActualWeaponDamage();
-        difference = GetWeaponDamageDiff(targetObject);
-    } else if (baseForm->GetFormType() == RE::FormType::Armor) {
+        difference = GetWeaponDamageDiff(target);
+    } else if (target.GetForm()->GetFormType() == RE::FormType::Armor) {
         totalArmorOrWeapon = GetTotalActualArmorRating();
-        difference = GetArmorRatingDiff(targetObject);
+        difference = GetArmorRatingDiff(target);
 
         if (IsSurvivalMode()) {
             isSurvivalMode = true;
             totalWarmthRating = GetTotalWarmthRating();
-            warmthDifference = GetWarmthRatingDiff(targetObject);
-            warmthRating = GetArmorWarmthRating(targetObject);
+            warmthDifference = GetWarmthRatingDiff(target);
+            warmthRating = GetArmorWarmthRating(target);
         }
     }
 
@@ -1687,9 +1683,9 @@ void CAHZScaleform::ProcessTargetObject(CAHZTarget target, RE::GFxFunctionHandle
     RegisterBoolean(&obj, "isSurvivalMode", isSurvivalMode);
 
     //float weight = CALL_MEMBER_FN(pTargetReference, GetWeight)();
-    float weight = targetObject->GetWeight();
-    if (targetObject->extraList.HasType(RE::ExtraDataType::kCount)) {
-        auto xCount = static_cast<RE::ExtraCount*>(targetObject->extraList.GetByType(RE::ExtraDataType::kCount));
+    float weight = target.GetForm()->GetWeight();
+    if (target.IsReference() && target.GetReference()->extraList.HasType(RE::ExtraDataType::kCount)) {
+        auto xCount = static_cast<RE::ExtraCount*>(target.GetReference()->extraList.GetByType(RE::ExtraDataType::kCount));
         if (xCount) {
             weight = weight * static_cast<float_t>((static_cast<int16_t>(xCount->count & 0x7FFF)));
         }
@@ -1698,11 +1694,11 @@ void CAHZScaleform::ProcessTargetObject(CAHZTarget target, RE::GFxFunctionHandle
     RegisterNumber(&obj, "objWeight", weight);
 
     // Used by the scaleform script to know if this is a weapon, armor, or something else
-    RegisterNumber(&obj, "formType", static_cast<uint32_t>(baseForm->GetFormType()));
+    RegisterNumber(&obj, "formType", static_cast<uint32_t>(target.GetForm()->GetFormType()));
     args.args[0].SetMember("targetObj", obj);
 };
 
-auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index) -> bool
+auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem * thisMagic, uint32_t index) -> bool
 {
     bool isKnown = false;
 
@@ -1734,7 +1730,7 @@ auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t 
     return isKnown;
 }
 
-void CAHZScaleform::BuildIngredientObject(const RE::IngredientItem * ingredient, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::BuildIngredientObject(RE::IngredientItem * ingredient, RE::GFxFunctionHandler::Params& args)
 {
     // If no ingredient, then we are done here
     if (!ingredient) {
@@ -1777,7 +1773,7 @@ void CAHZScaleform::BuildIngredientObject(const RE::IngredientItem * ingredient,
     args.args[0].SetMember("ingredientObj", obj2);
 };
 
-void CAHZScaleform::BuildInventoryObject(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::BuildInventoryObject(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     // Used to store the name
     string name;
@@ -1838,7 +1834,7 @@ void CAHZScaleform::RegisterBoolean(RE::GFxValue* dst, const char* name, bool va
     dst->SetMember(name, fxValue);
 }
 
-void CAHZScaleform::ProcessValidTarget(CAHZTarget target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessValidTarget(CAHZTarget &target, RE::GFxFunctionHandler::Params& args)
 {
     if (!target.IsValid()) {
         // return false, indicating that the target object is not valid for acquiring data
@@ -1893,7 +1889,7 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     args.args[0].SetMember("playerObj", obj);
 }
 
-void CAHZScaleform::GetMagicItemDescription(const RE::MagicItem * item, std::string& description)
+void CAHZScaleform::GetMagicItemDescription(RE::MagicItem * item, std::string& description)
 {
     string outerString = "";
     description.clear();

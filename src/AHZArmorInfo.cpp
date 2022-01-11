@@ -44,10 +44,10 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
 
                                 if (data.equipData.boundObject) {
                                     if (data.equipData.boundObject->GetFormType() == RE::FormType::Armor) {
-                                        data.armor = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectARMO);
+                                        data.armor = data.equipData.boundObject->As<RE::TESObjectARMO>();
                                     }
                                     if (data.equipData.boundObject->GetFormType() == RE::FormType::Light) {
-                                        data.torch = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectLIGH);
+                                        data.torch = data.equipData.boundObject->As<RE::TESObjectLIGH>();
                                     }
                                 }
                                 return data;

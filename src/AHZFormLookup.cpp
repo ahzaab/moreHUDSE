@@ -2,39 +2,44 @@
 #include "AHZFormLookup.h"
 #include "AHZForEachScriptObjectFunctor.h"
 
+bool CAHZFormLookup::s_lotdCheck = false;
+bool CAHZFormLookup::s_lotdInstalled = false;
+
 auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 {
     static CAHZFormLookup theInstance;
     return theInstance;
 }
 
-auto CAHZFormLookup::GetTESForm(const RE::TESObjectREFR* targetReference) -> const RE::TESForm*
+auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
 {
-    if (!targetReference){
-        return nullptr;
-    }
-    RE::TESForm* lutForm = nullptr;
-    if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
-        return lutForm;
-    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
-        return GetAttachedForm(targetReference);
-    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
-        auto pProjectile = (DYNAMIC_CAST(targetReference, RE::TESObjectREFR, RE::Projectile));
+    // if (!targetReference){
+    //     return nullptr;
+    // }
+    // RE::TESForm* lutForm = nullptr;
+    // if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
+    //     return lutForm;
+    // } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
+    //     return GetAttachedForm(targetReference);
+    // } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
+    //     auto pProjectile = targetReference->As<RE::Projectile>();
 
-        if (pProjectile) {
-            AHZProjectile* a = reinterpret_cast<AHZProjectile*>(pProjectile);
-            if (a && a->sourceAmmo)
-                return a->sourceAmmo;
-            else
-                return targetReference;
-        } else
-            return targetReference;
-    } else {
-        return targetReference;
-    }
+    //     if (pProjectile) {
+    //         auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
+    //         if (a && a->sourceAmmo)
+    //             return a->sourceAmmo;
+    //         else
+    //             return targetReference;
+    //     } else
+    //         return targetReference;
+    // } else {
+    //     return targetReference;
+    // }
+
+    return targetReference;
 }
 
-auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef) -> RE::TESForm*
+auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef) -> RE::TESForm*
 {
     if (!targetRef || !targetRef->GetBaseObject())
         return nullptr;
@@ -82,7 +87,7 @@ void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID,
     }
 }
 
-auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form) -> RE::TESForm*
 {
     std::vector<std::string>::iterator p;
 
@@ -125,8 +130,17 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
     }
 
     // Hardcoded for LOTD, I have to lookup by index
-    auto dataHandler = RE::TESDataHandler::GetSingleton();
-    if (dataHandler->LookupModByName("LegacyoftheDragonborn.esm"sv)){
+    
+
+    if (!s_lotdCheck) {
+        auto dataHandler = RE::TESDataHandler::GetSingleton();
+        if (dataHandler && dataHandler->LookupModByName("LegacyoftheDragonborn.esm"sv)) {
+            s_lotdInstalled = true;
+        }
+        s_lotdCheck = true;
+    }
+
+    if (s_lotdInstalled) {
         RE::TESForm* dbm_displayListBase = GetAttachedForm(form, "afDisplayList");
         int32_t dbm_displayListIndex = GetAttachedInteger(form, "aiDisplayListIndex");
         if (dbm_displayListBase && dbm_displayListBase->formType == RE::FormType::FormList){
@@ -178,7 +192,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     return var;
 }
 
-auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variableName) -> RE::TESForm*
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form, std::string variableName) -> RE::TESForm*
 {
     if (form) {
         if (!form->GetBaseObject())
@@ -203,7 +217,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variab
     return nullptr;
 }
 
-auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string variableName) -> int32_t
+auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR * form, std::string variableName) -> int32_t
 {
     if (form) {
         if (!form->GetBaseObject())

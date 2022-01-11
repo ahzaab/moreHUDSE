@@ -1,30 +1,24 @@
-
+#pragma once
 
 class CAHZTarget
 {
 public:
-    CAHZTarget(const CAHZTarget& other) noexcept
-    {
-        m_pObjectRef = other.m_pObjectRef;
-        m_pForm = other.m_pForm;
-    }
-    CAHZTarget() = default;
+    void SetTarget(RE::TESObjectREFR* pTargetRef);
 
-    void SetTarget(const RE::TESObjectREFR* pTargetRef);
-
-    [nodiscard] bool IsReference() const noexcept
+    [[nodiscard]] bool IsReference()
     {
         return m_pObjectRef != nullptr;
     };
 
-    [nodiscard] bool IsValid() const noexcept {
+    [[nodiscard]] bool IsValid() {
         return m_pForm != nullptr;
     };
 
-    [nodiscard] const RE::TESObjectREFR* GetReference() const noexcept { return m_pObjectRef; };
-    [nodiscard] const RE::TESForm*       GetForm() const noexcept { return m_pForm; };
+    [[nodiscard]] RE::TESObjectREFR* GetReference() { return m_pObjectRef; };
+    [[nodiscard]] RE::TESForm*       GetForm() { return m_pForm; };
 
 private:
-    const RE::TESObjectREFR* m_pObjectRef{ nullptr };
-    const RE::TESForm*       m_pForm{ nullptr };
+    RE::TESObjectREFR* m_pObjectRef;
+    RE::TESForm*       m_pForm;
+    mutable RE::BSReadWriteLock _lock;
 };

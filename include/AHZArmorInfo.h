@@ -1,18 +1,18 @@
 #pragma once
-
+#include "AHZTarget.h"
 
 class AHZArmorData
 {
 public:
     struct FoundEquipData
     {
-        const RE::TESBoundObject* boundObject;
-        const RE::ExtraDataList*  pExtraData;
+        RE::TESBoundObject* boundObject;
+        RE::ExtraDataList*  pExtraData;
     };
 
     FoundEquipData     equipData;
-    const RE::TESObjectARMO* armor;
-    const RE::TESObjectLIGH* torch;
+    RE::TESObjectARMO* armor;
+    RE::TESObjectLIGH* torch;
 
     AHZArmorData(void)
     {
@@ -22,7 +22,7 @@ public:
         torch = nullptr;
     }
 
-    AHZArmorData(CAHZTarget target)
+    AHZArmorData(CAHZTarget& target)
     {
         if (target.IsValid()) {
             equipData.boundObject = target.GetForm()->As<RE::TESBoundObject>();
