@@ -3,7 +3,14 @@
 class CAHZTarget
 {
 public:
-    void SetTarget(RE::TESObjectREFR* pTargetRef);
+    void SetTarget(const RE::NiPointer<RE::TESObjectREFR> &target);
+    void ClearTarget();
+    mutable RE::BSReadWriteLock _lock;
+
+    static CAHZTarget * Singleton(){
+        static CAHZTarget instance;
+        return std::addressof(instance);
+    }
 
     [[nodiscard]] bool IsReference()
     {
@@ -14,11 +21,17 @@ public:
         return m_pForm != nullptr;
     };
 
-    [[nodiscard]] RE::TESObjectREFR* GetReference() { return m_pObjectRef; };
-    [[nodiscard]] RE::TESForm*       GetForm() { return m_pForm; };
+    [[nodiscard]] RE::TESObjectREFR* GetReference();
+    [[nodiscard]] RE::TESForm*       GetForm();
 
 private:
+    CAHZTarget() :
+        m_pObjectRef(nullptr),
+        m_pForm(nullptr) {}
+
+    CAHZTarget(const CAHZTarget &other) = delete;
     RE::TESObjectREFR* m_pObjectRef;
     RE::TESForm*       m_pForm;
-    mutable RE::BSReadWriteLock _lock;
+    
+    RE::NiPointer<RE::TESObjectREFR> s_target;
 };

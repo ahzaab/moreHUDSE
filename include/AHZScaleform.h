@@ -23,18 +23,18 @@ public:
     static float GetActorWarmthRating_Native(RE::Actor* a1, float s2);
 
 
-    static void     ProcessTargetObject(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessTargetEffects(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessArmorClass(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessBookSkill(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessValidTarget(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
+    static void     ProcessTargetObject(RE::GFxFunctionHandler::Params& args);
+    static void     ProcessTargetEffects(RE::GFxFunctionHandler::Params& args);
+    static void     ProcessArmorClass(RE::GFxFunctionHandler::Params& args);
+    static void     ProcessBookSkill(RE::GFxFunctionHandler::Params& args);
+    static void     ProcessValidTarget(RE::GFxFunctionHandler::Params& args);
     static void     ProcessPlayerData(RE::GFxFunctionHandler::Params& args);
-    static void     ProcessValueToWeight(CAHZTarget &target, RE::GFxFunctionHandler::Params& args);
-    static bool     GetIsBookAndWasRead(CAHZTarget &target);
+    static void     ProcessValueToWeight(RE::GFxFunctionHandler::Params& args);
+    static bool     GetIsBookAndWasRead();
     static void     ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args);
-    static uint32_t GetIsKnownEnchantment(CAHZTarget &target);
+    static uint32_t GetIsKnownEnchantment();
     static float    GetTotalWarmthRating();
-    static float    GetArmorWarmthRating(CAHZTarget &target);
+    static float    GetArmorWarmthRating();
 
 
 private:
@@ -49,23 +49,23 @@ private:
     static void AppendDescription(RE::TESDescription * desObj, RE::TESForm * parent, std::string& description);
     static void FormatDescription(std::string& unFormated, std::string& formatted);
 
-    static string GetTargetName(CAHZTarget &target);
-    static string GetArmorWeightClass(CAHZTarget &target);
-    static string GetEffectsDescription(CAHZTarget &target);
-    static string GetBookSkill(CAHZTarget &target);
-    static string GetValueToWeight(CAHZTarget &target, const char* stringFromHUD, const char* vmTranslated);
+    static string GetTargetName();
+    static string GetArmorWeightClass();
+    static string GetEffectsDescription();
+    static string GetBookSkill();
+    static string GetValueToWeight(const char* stringFromHUD, const char* vmTranslated);
     static float  GetBaseDamage(RE::TESAmmo* pthisAmmo);
     static float  GetActualDamage(AHZWeaponData* weaponData);
     static float  GetActualArmorRating(AHZArmorData* armorData);
     static float  GetArmorWarmthRating(AHZArmorData* armorData);
     static float  GetPlayerWarmthRating();
     static float  GetTotalActualArmorRating();
-    static float  GetArmorRatingDiff(CAHZTarget &target);
-    static float  GetWarmthRatingDiff(CAHZTarget &target);
-    static float  GetWeaponDamageDiff(CAHZTarget &target);
+    static float  GetArmorRatingDiff();
+    static float  GetWarmthRatingDiff();
+    static float  GetWeaponDamageDiff();
     static float  GetTotalActualWeaponDamage();
     static void   BuildIngredientObject(RE::IngredientItem * ingredient, RE::GFxFunctionHandler::Params& args);
-    static void   BuildInventoryObject(CAHZTarget &target, RE::GFxFunctionHandler::Params& arg);
+    static void   BuildInventoryObject(RE::GFxFunctionHandler::Params& arg);
     static bool   GetIsNthEffectKnown(RE::IngredientItem * thisMagic, uint32_t index);
 
     static bool                IsTwoHanded(RE::TESObjectWEAP * thisWeapon);
@@ -74,11 +74,11 @@ private:
     static bool                IsCrossBow(RE::TESObjectWEAP * thisWeapon);
     static bool                isBolt(RE::TESAmmo * thisAmmo);
     static float               mRound(float d);
-    static RE::IngredientItem* GetIngredient(CAHZTarget &target);
+    static RE::IngredientItem* GetIngredient();
     static RE::IngredientItem* GetIngredientFromLeveledList(RE::TESForm* thisObject);
-    static RE::AlchemyItem*    GetAlchemyItem(CAHZTarget &target);
+    static RE::AlchemyItem*    GetAlchemyItem();
     static RE::AlchemyItem*    GetAlchemyItemFromLeveledList(RE::TESForm* thisObject);
-    static RE::SpellItem*      GetSpellItem(CAHZTarget &target);
+    static RE::SpellItem*      GetSpellItem();
     static string              GetSoulLevelName(uint8_t soulLevel);
 
     // const char * GetTargetName(TESObjectREFR *thisObject);

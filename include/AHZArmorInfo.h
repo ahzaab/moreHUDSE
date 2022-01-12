@@ -14,21 +14,14 @@ public:
     RE::TESObjectARMO* armor;
     RE::TESObjectLIGH* torch;
 
-    AHZArmorData(void)
+    AHZArmorData()
     {
-        equipData.boundObject = nullptr;
-        equipData.pExtraData = nullptr;
-        armor = nullptr;
-        torch = nullptr;
-    }
-
-    AHZArmorData(CAHZTarget& target)
-    {
-        if (target.IsValid()) {
-            equipData.boundObject = target.GetForm()->As<RE::TESBoundObject>();
-            equipData.pExtraData = target.IsReference() ? &target.GetReference()->extraList : nullptr;
-            armor = target.GetForm()->As<RE::TESObjectARMO>();
-            torch = target.GetForm()->As<RE::TESObjectLIGH>();
+        auto target = CAHZTarget::Singleton();
+        if (target->IsValid()) {
+            equipData.boundObject = target->GetForm()->As<RE::TESBoundObject>();
+            equipData.pExtraData = target->IsReference() ? &target->GetReference()->extraList : nullptr;
+            armor = target->GetForm()->As<RE::TESObjectARMO>();
+            torch = target->GetForm()->As<RE::TESObjectLIGH>();
         } else {
             equipData.boundObject = nullptr;
             equipData.pExtraData = nullptr;

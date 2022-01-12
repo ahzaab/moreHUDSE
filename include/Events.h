@@ -23,21 +23,18 @@ namespace Events
     public:
         static CrosshairRefManager* GetSingleton();
         static void                 Register();
-        RE::TESObjectREFR*          GetCrosshairReference();
 
     protected:
         EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
 
     private:
-        CrosshairRefManager();
+        CrosshairRefManager() = default;
         CrosshairRefManager(const CrosshairRefManager&) = delete;
         CrosshairRefManager(CrosshairRefManager&&) = delete;
         ~CrosshairRefManager() = default;
 
         CrosshairRefManager& operator=(const CrosshairRefManager&) = delete;
         CrosshairRefManager& operator=(CrosshairRefManager&&) = delete;
-
-        RE::TESObjectREFR* _cachedRef;
     };
 
     void Install();

@@ -1,5 +1,6 @@
 #include "PCH.h"
 #include "Events.h"
+#include "AHZTarget.h"
 
 namespace Events
 {
@@ -61,27 +62,24 @@ namespace Events
         }
     }
 
-    RE::TESObjectREFR* CrosshairRefManager::GetCrosshairReference()
-    {
-        return _cachedRef;
-    }
-
-    CrosshairRefManager::CrosshairRefManager() :
-        _cachedRef(nullptr) {}
-
-    CrosshairRefManager* CrosshairRefManager::GetSingleton()
-    {
-        static CrosshairRefManager singleton;
-        return std::addressof(singleton);
-    }
+     CrosshairRefManager* CrosshairRefManager::GetSingleton()
+     {
+         static CrosshairRefManager singleton;
+         return std::addressof(singleton);
+     }
 
     EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
     {
         if (a_event && a_event->crosshairRef) {
-            _cachedRef = a_event->crosshairRef.get();
+            CAHZTarget::Singleton()->SetTarget(a_event->crosshairRef);
+            //_cachedRef = a_event->crosshairRef.get();
         } else {
-            _cachedRef = nullptr;
+            //_cachedRef = nullptr;
+            CAHZTarget::Singleton()->ClearTarget();
         }
+
+
+
         return EventResult::kContinue;
     }
 
