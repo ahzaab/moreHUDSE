@@ -31,7 +31,7 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
             for (auto it = list->begin(); it != list->end(); ++it) {
                 auto element = *it;
                 if (element) {
-                    if (element->object && element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light) {
+                    if (element->object && (element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light)) {
                         auto form = DYNAMIC_CAST(element->object, RE::TESBoundObject, RE::BGSBipedObjectForm);
                         if (form && (static_cast<uint32_t>(form->GetSlotMask()) & static_cast<uint32_t>(slotMask))) {
                             armor = element->object;

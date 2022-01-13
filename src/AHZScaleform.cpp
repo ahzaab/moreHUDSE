@@ -304,8 +304,16 @@ auto CAHZScaleform::GetArmorRatingDiff(RE::TESObjectREFR* thisArmor) -> float
     if (!thisArmor)
         return 0.0f;
 
+    auto wrappedForm = AHZGetForm(thisArmor);
+    auto wrappedRef = AHZGetReference(wrappedForm);
+    wrappedForm = AHZAsBaseForm(wrappedForm);
+
+    if (!wrappedForm) {
+        return 0.0f;
+    }
+
     // Get the new armor rating
-    AHZArmorData armorData(thisArmor);
+    AHZArmorData armorData(wrappedRef);
     if (!armorData.armor)
         return 0.0f;
 
@@ -338,8 +346,16 @@ auto CAHZScaleform::GetWarmthRatingDiff(RE::TESObjectREFR* thisArmor) -> float
     if (!thisArmor)
         return 0.0f;
 
+    auto wrappedForm = AHZGetForm(thisArmor);
+    auto wrappedRef = AHZGetReference(wrappedForm);
+    wrappedForm = AHZAsBaseForm(wrappedForm);
+
+    if (!wrappedForm) {
+        return 0.0f;
+    }
+
     // Get the new armor rating
-    AHZArmorData armorData(thisArmor);
+    AHZArmorData armorData(wrappedRef);
     if (!armorData.armor)
         return 0.0;
 
@@ -1717,7 +1733,6 @@ void CAHZScaleform::ProcessTargetEffects(RE::TESObjectREFR* targetObject, RE::GF
         args.args[0].DeleteMember("inventoryObj");
         return;
     }
-    auto wrappedRef = AHZGetReference(wrappedForm);
     wrappedForm = AHZAsBaseForm(wrappedForm);
 
     // See if its an ingredient.  Note they are formated differently with known effects;
@@ -1758,10 +1773,8 @@ void CAHZScaleform::ProcessTargetEffects(RE::TESObjectREFR* targetObject, RE::GF
         }
     } else  //For all effects from books, potions, weapon enchantments, etc.
     {
-        if (wrappedRef) {
-            // Get the effects description if it exists for this object
-            name = GetEffectsDescription(wrappedRef);
-        }
+        // Get the effects description if it exists for this object
+        name = GetEffectsDescription(targetObject);
 
         if (calculateInvenotry) {
             BuildInventoryObject(wrappedForm, args);
@@ -1882,11 +1895,6 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
     auto wrappedRef = AHZGetReference(wrappedForm);
     wrappedForm = AHZAsBaseForm(wrappedForm);
 
-    if (!wrappedRef) {
-        args.args[0].DeleteMember("targetObj");
-        return;
-    }
-
     RE::GFxValue obj;
     args.movie->CreateObject(&obj);
 
@@ -1899,16 +1907,16 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
 
         // If ammo is NULL, it is OK
         totalArmorOrWeapon = GetTotalActualWeaponDamage();
-        difference = GetWeaponDamageDiff(wrappedRef);
+        difference = GetWeaponDamageDiff(targetObject);
     } else if (wrappedForm->GetFormType() == RE::FormType::Armor) {
         totalArmorOrWeapon = GetTotalActualArmorRating();
-        difference = GetArmorRatingDiff(wrappedRef);
+        difference = GetArmorRatingDiff(targetObject);
 
         if (IsSurvivalMode()) {
             isSurvivalMode = true;
             totalWarmthRating = GetTotalWarmthRating();
-            warmthDifference = GetWarmthRatingDiff(wrappedRef);
-            warmthRating = GetArmorWarmthRating(wrappedRef);
+            warmthDifference = GetWarmthRatingDiff(targetObject);
+            warmthRating = GetArmorWarmthRating(targetObject);
         }
     }
 
@@ -1921,7 +1929,6 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
     RegisterBoolean(&obj, "isSurvivalMode", isSurvivalMode);
 
     float weight = 0.0f;
-
     if (wrappedRef) {
         weight = wrappedRef->GetWeight();
         if (wrappedRef->extraList.HasType(RE::ExtraDataType::kCount)) {
@@ -1930,6 +1937,8 @@ void CAHZScaleform::ProcessTargetObject(RE::TESObjectREFR* targetObject, RE::GFx
                 weight = weight * static_cast<float_t>((static_cast<int16_t>(xCount->count & 0x7FFF)));
             }
         }
+    } else {
+        weight = wrappedForm->GetWeight();
     }
 
     RegisterNumber(&obj, "objWeight", weight);

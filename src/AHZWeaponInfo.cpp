@@ -40,7 +40,15 @@ auto CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject) -> AHZWeaponDa
     if (!thisObject)
         return weaponData;
 
-    auto baseForm = thisObject->GetBaseObject();
+    auto wrappedForm = AHZGetForm(thisObject);
+    auto wrappedRef = AHZGetReference(thisObject);
+    wrappedForm = AHZAsBaseForm(wrappedForm);
+
+    if (!wrappedForm) {
+        return weaponData;
+    }
+
+    auto baseForm = wrappedForm;
 
     if (!baseForm) {
         return weaponData;
@@ -52,8 +60,10 @@ auto CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject) -> AHZWeaponDa
         return weaponData;
     }
 
-    weaponData.equipData.boundObject = baseForm;
-    weaponData.equipData.pExtraData = &thisObject->extraList;
+    weaponData.equipData.boundObject = baseForm->As<RE::TESBoundObject>();
+    if (wrappedRef) {
+        weaponData.equipData.pExtraData = &wrappedRef->extraList;
+    }
 
     if (baseForm->GetFormType() == RE::FormType::Weapon)
         weaponData.weapon = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESObjectWEAP);
@@ -61,7 +71,7 @@ auto CAHZWeaponInfo::GetWeaponInfo(RE::TESObjectREFR* thisObject) -> AHZWeaponDa
         weaponData.ammo = DYNAMIC_CAST(weaponData.equipData.boundObject, RE::TESForm, RE::TESAmmo);
     else if (baseForm->GetFormType() == RE::FormType::Projectile) {
         auto asArrowProjectile = DYNAMIC_CAST(thisObject, RE::TESObjectREFR, RE::ArrowProjectile);
-        weaponData.ammo = DYNAMIC_CAST(AHZGetForm(thisObject), RE::TESForm, RE::TESAmmo);
+        weaponData.ammo = DYNAMIC_CAST(baseForm, RE::TESForm, RE::TESAmmo);
         if (asArrowProjectile) {
             weaponData.equipData.boundObject = weaponData.ammo;
             weaponData.equipData.pExtraData = &asArrowProjectile->extraList;
