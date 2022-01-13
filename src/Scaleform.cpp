@@ -56,14 +56,7 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
-
-            // If the target is not valid or it can't be picked up by the player
-            if (!pTargetReference) {
-                a_params.retVal->SetBoolean(false);
-                return;
-            }
-            a_params.retVal->SetBoolean(CAHZScaleform::GetIsBookAndWasRead(pTargetReference));
+            CAHZScaleform::ProcessIsBookAndWasRead(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
@@ -90,7 +83,7 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            a_params.retVal->SetNumber(CAHZScaleform::GetArmorWarmthRating(CAHZPlayerInfo::GetTargetRef()));
+            CAHZScaleform::ProcessArmorWarmthRating(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
@@ -136,14 +129,7 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
-
-            // If the target is not valid or it can't be picked up by the player
-            if (!pTargetReference) {
-                a_params.retVal->SetNumber(0);
-                return;
-            }
-            a_params.retVal->SetNumber(CAHZScaleform::GetIsKnownEnchantment(pTargetReference));
+            CAHZScaleform::ProcessIsKnownEnchantment(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
@@ -152,24 +138,7 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            assert(a_params.args);
-            assert(a_params.argCount);
-            if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
-                auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
-                // If the target is not valid then say false
-                if (!pTargetReference) {
-                    a_params.retVal->SetBoolean(false);
-                    return;
-                }
-
-                auto keyName = string(a_params.args[0].GetString());
-
-                a_params.retVal->SetBoolean(PapyrusMoreHud::HasForm(keyName, pTargetReference->GetBaseObject()->formID));
-                return;
-            }
-
-            a_params.retVal->SetBoolean(false);
-            return;
+            CAHZScaleform::ProcessIsTargetInFormList(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
@@ -178,42 +147,7 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            assert(a_params.args);
-            assert(a_params.argCount);
-            if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
-                auto iconName = string(a_params.args[0].GetString());
-
-                auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
-                // If the target is not valid then say false
-                if (!pTargetReference) {
-                    a_params.retVal->SetBoolean(false);
-                    return;
-                }
-
-                const char* name = nullptr;
-                auto        pFullName = DYNAMIC_CAST(pTargetReference->GetBaseObject(), RE::TESForm, RE::TESFullName);
-                if (pFullName)
-                    name = pFullName->GetFullName();
-
-                // Can't get the same for the crc
-                if (!name) {
-                    a_params.retVal->SetBoolean(false);
-                    return;
-                }
-
-                auto hash = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, pTargetReference->GetBaseObject()->formID & 0x00FFFFFF));
-
-                auto resultIconName = string(PapyrusMoreHud::GetIconName(hash));
-
-                if (!resultIconName.length()) {
-                    a_params.retVal->SetBoolean(false);
-                    return;
-                }
-
-                a_params.retVal->SetBoolean(resultIconName == iconName);
-                return;
-            }
-            a_params.retVal->SetBoolean(false);
+            CAHZScaleform::ProcessIsTargetInIconList(CAHZPlayerInfo::GetTargetRef(), a_params);
         }
     };
 
