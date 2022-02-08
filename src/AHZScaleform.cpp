@@ -1978,8 +1978,7 @@ void CAHZScaleform::FormatDescription(std::string& unFormated, std::string& form
 {
     string outerString = "";
     formatted.clear();
-
-    const char numberFormatter[] = "<font face = '$EverywhereMediumFont' size = '20' color = '#FFFFFF'>%.0f</font>";
+    
     const char stringFormatter[] = "<font face = '$EverywhereMediumFont' size = '20' color = '#FFFFFF'>%s</font>";
     char       tempformatter[1000];
     bool       canBeAdded = true;

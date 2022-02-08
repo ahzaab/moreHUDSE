@@ -46,6 +46,11 @@ int Property iVersion Auto
 int Property iToggleOn Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
+; <--- Edit These value when updating
+int Property I_THIS_VERSION_MAJOR = 5 autoReadOnly
+int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 3 autoReadOnly
+int Property I_THIS_VERSION_BETA = 0 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
 ; SKSE oldest supported release index
@@ -67,7 +72,6 @@ Function Unregister()
 EndFunction
 
 Function Maintenance()
-    Utility.Wait(1)
     ; Detect SKSE
     int skseRelease = SKSE.GetVersionRelease()
     bool isSKSEInstalled = false
@@ -82,15 +86,14 @@ Function Maintenance()
     endIf
 
     if (isSKSEInstalled == true)
-        int iPluginVersion = AhzMoreHud.GetVersion()
-        if (iPluginVersion == 0)
-            Debug.MessageBox("moreHUD: The moreHUD Plugin dll is not detected!")
-        else
-            If (iVersion < iPluginVersion)
-                iVersion = iPluginVersion
-                Debug.Notification("moreHUD version: " + AhzMoreHud.GetVersionString())
+		If iVersion < ((I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA)
+			iVersion = (I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA
+            if (I_THIS_VERSION_BETA > 0)
+			    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
+            else
+                Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
             EndIf
-        endif
+		EndIf
 	Endif
 
 	; Other maintenance code that only needs to run once per save load
