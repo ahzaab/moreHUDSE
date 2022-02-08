@@ -13,6 +13,7 @@ public:
     static bool   RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
     static bool   HasForm(std::string iconName, uint32_t formId);
     static std::string GetIconName(uint32_t itemID);
+    static std::vector<std::string_view> GetFormIcons(RE::FormID formId);
 
 private:
     static uint32_t GetVersion(RE::StaticFunctionTag* base);
