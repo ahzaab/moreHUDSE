@@ -186,14 +186,14 @@ namespace Scaleform
         void Call(Params& a_params) override
         {
             a_params.movie->CreateArray(a_params.retVal);
-            auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
+            auto ref = CAHZPlayerInfo::GetTarget();
             // If the target is not valid then return an empty array
-            if (!pTargetReference) {
+            if (!ref.IsValid()) {
                 a_params.retVal->SetArraySize(0);
                 return;
             }
 
-			auto formId = pTargetReference->GetBaseObject()->formID;
+			auto formId = ref.GetForm()->formID;
             auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
 
             if (!customIcons.empty()){
