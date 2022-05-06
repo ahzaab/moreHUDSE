@@ -61,7 +61,7 @@ namespace Events
         }
     }
 
-    RE::TESObjectREFR* CrosshairRefManager::GetCrosshairReference()
+    RE::NiPointer<RE::TESObjectREFR> CrosshairRefManager::GetCrosshairReference()
     {
         return _cachedRef;
     }
@@ -78,7 +78,7 @@ namespace Events
     EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
     {
         if (a_event && a_event->crosshairRef) {
-            _cachedRef = a_event->crosshairRef.get();
+            _cachedRef = a_event->crosshairRef;
         } else {
             _cachedRef = nullptr;
         }

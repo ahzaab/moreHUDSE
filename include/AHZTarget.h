@@ -3,7 +3,7 @@
 class CAHZTarget
 {
 public:
-    void SetTarget(RE::TESObjectREFR* pTargetRef);
+    void SetTarget(RE::TESObjectREFRPtr pTargetRef);
 
     [[nodiscard]] bool IsReference()
     {
@@ -18,6 +18,7 @@ public:
     [[nodiscard]] RE::TESForm*       GetForm() { return m_pForm; };
 
 private:
+    RE::TESObjectREFRPtr m_crossHairRef;
     RE::TESObjectREFR* m_pObjectRef;
     RE::TESForm*       m_pForm;
     mutable RE::BSReadWriteLock _lock;

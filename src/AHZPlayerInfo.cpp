@@ -3,12 +3,11 @@
 #include "AHZPlayerInfo.h"
 #include "Events.h"
 
-CAHZTarget CAHZPlayerInfo::s_target;
-
-CAHZTarget & CAHZPlayerInfo::GetTarget()
+CAHZTarget CAHZPlayerInfo::GetTarget()
 {
-    s_target.SetTarget(GetTargetRef());
-    return s_target;
+    CAHZTarget target;
+    target.SetTarget(GetTargetRef());
+    return target;
 }
 
 auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
@@ -39,7 +38,7 @@ auto CAHZPlayerInfo::GetGoldAmount() -> uint32_t
 }
 
 
-auto CAHZPlayerInfo::GetTargetRef() -> RE::TESObjectREFR*
+RE::NiPointer<RE::TESObjectREFR> CAHZPlayerInfo::GetTargetRef()
 {
     return Events::CrosshairRefManager::GetSingleton()->GetCrosshairReference();
 }

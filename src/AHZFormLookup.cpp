@@ -13,30 +13,28 @@ auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 
 auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
 {
-    // if (!targetReference){
-    //     return nullptr;
-    // }
-    // RE::TESForm* lutForm = nullptr;
-    // if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
-    //     return lutForm;
-    // } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
-    //     return GetAttachedForm(targetReference);
-    // } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
-    //     auto pProjectile = targetReference->As<RE::Projectile>();
+    if (!targetReference){
+        return nullptr;
+    }
+    RE::TESForm* lutForm = nullptr;
+    if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
+        return lutForm;
+    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
+        return GetAttachedForm(targetReference);
+    } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
+        auto pProjectile = targetReference->As<RE::Projectile>();
 
-    //     if (pProjectile) {
-    //         auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
-    //         if (a && a->sourceAmmo)
-    //             return a->sourceAmmo;
-    //         else
-    //             return targetReference;
-    //     } else
-    //         return targetReference;
-    // } else {
-    //     return targetReference;
-    // }
-
-    return targetReference;
+        if (pProjectile) {
+            auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
+            if (a && a->sourceAmmo)
+                return a->sourceAmmo;
+            else
+                return targetReference;
+        } else
+            return targetReference;
+    } else {
+        return targetReference;
+    }
 }
 
 auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef) -> RE::TESForm*
