@@ -10,6 +10,7 @@ constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
 uintptr_t           EnemyUpdateHook = (EnemyUpdateHookBase.address() + 0x44);
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
 RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
+RE::BGSKeyword* AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
 
 bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
 {
@@ -36,7 +37,12 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
             auto pNPC = DYNAMIC_CAST(reference, RE::TESObjectREFR, RE::Actor);
             if (pNPC) {
                 npcLevel = pNPC->GetLevel();
-                isSentient = CAHZActorInfo::IsSentient(pNPC);
+                if (NoSoulTrapRace == nullptr)
+                {
+                    NoSoulTrapRace = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("NoSoulTrap");
+                }
+                auto noSoulTrapRace = NoSoulTrapRace && pNPC->GetRace()->HasKeyword(NoSoulTrapRace);
+                isSentient = CAHZActorInfo::IsSentient(pNPC) || noSoulTrapRace;
                 maxHealth = pNPC->GetPermanentActorValue(RE::ActorValue::kHealth);
                 health = pNPC->GetActorValue(RE::ActorValue::kHealth);
                 maxMagicka = pNPC->GetPermanentActorValue(RE::ActorValue::kMagicka);

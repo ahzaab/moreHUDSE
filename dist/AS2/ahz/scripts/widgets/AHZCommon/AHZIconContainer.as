@@ -8,6 +8,7 @@ class AHZIconContainer
   	private static var MAX_CONCURRENT_ICONS:Number = 16;
 	private static var MIN_ICON_SIZE:Number = 16;
 	private static var ICON_YOFFSET:Number = 1;
+	private static var FAKE_SPACE:String = "ahzFakeSpace";
 
 	/* Static */
 	private static var eventObject: Object;
@@ -114,10 +115,12 @@ class AHZIconContainer
 	
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("~AppendImage~ " + a_imageName, false);
 		var loadedImage:BitmapData;
+		var loadedFakeSpaceImage:BitmapData;
 		if (loadedIcons.length)
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Append Dummy");
 	 		loadedImage = BitmapData.loadBitmap("ahzEmpty");
+			loadedFakeSpaceImage = BitmapData.loadBitmap(FAKE_SPACE);
 		}
 		
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("loadedImage: " + loadedImage, false);
@@ -125,6 +128,12 @@ class AHZIconContainer
 		{
 			if (loadedIcons.length || !GetImageSub(a_imageName))   // Already exists
 			{
+				// Add fake space image
+				if (_iconSpacing && loadedFakeSpaceImage && !GetImageSub(FAKE_SPACE))
+				{
+					_imageSubs.push({ subString:"[" + FAKE_SPACE + "]", image:loadedFakeSpaceImage, width:2, height:20, id:"id" + FAKE_SPACE });
+				}
+				
 				_imageSubs.push({ subString:"[" + a_imageName + "]", image:loadedImage, width:(_iconSize * _iconScale), height:20, id:"id" + a_imageName });
 			}	
 		}
@@ -306,13 +315,8 @@ class AHZIconContainer
 	private function getSpaces():String
 	{
 		var spaces:String = "";
-		var oneSpace:String = " ";
-		
-		if (_tf.html)
-		{
-			oneSpace = "&nbsp;";
-		}
-		
+		var oneSpace:String = "[" + FAKE_SPACE + "]";
+				
 		for (var i:Number=0; i < _iconSpacing; i++)
 		{
 			spaces += oneSpace;

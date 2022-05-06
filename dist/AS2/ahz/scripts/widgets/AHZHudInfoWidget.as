@@ -481,22 +481,17 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			return;
 		}
-		//IconContainer.appendImage("ahzKnown");
-		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmDisp"))
-		{
-			IconContainer.appendImage("dbmDisp");
-		}
-	
-		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmNew"))
-		{
-			IconContainer.appendImage("dbmNew");
-		}
 		
-		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInFormList("dbmFound"))
+		var customIcons = _global.skse.plugins.AHZmoreHUDPlugin.GetFormIcons();
+		if (customIcons && customIcons.length)
 		{
-			IconContainer.appendImage("dbmFound");
+			var i:Number;
+			for (i = 0; i < customIcons.length; i++)
+			{
+				IconContainer.appendImage(customIcons[i]);
+			}		
 		}		
-		
+				
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQ.png"))
 		{
 			IconContainer.appendImage("iEquipQ.png");

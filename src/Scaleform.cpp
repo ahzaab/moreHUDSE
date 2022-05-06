@@ -180,6 +180,38 @@ namespace Scaleform
         }
     };
 
+    class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
+    {
+    public:
+        void Call(Params& a_params) override
+        {
+            a_params.movie->CreateArray(a_params.retVal);
+            auto pTargetReference = CAHZPlayerInfo::GetTargetRef();
+            // If the target is not valid then return an empty array
+            if (!pTargetReference) {
+                a_params.retVal->SetArraySize(0);
+                return;
+            }
+
+			auto formId = pTargetReference->GetBaseObject()->formID;
+            auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
+
+            if (!customIcons.empty()){
+                RE::GFxValue          entry;
+                a_params.retVal->SetArraySize(static_cast<uint32_t>(customIcons.size()));
+                auto idx = 0;
+                for (auto& ci: customIcons)
+                {
+                    entry.SetString(ci);
+                    a_params.retVal->SetElement(idx++, entry);
+                }  
+            }
+            else{
+                a_params.retVal->SetArraySize(0);
+            }
+        }
+    };
+
     class SKSEScaleform_IsTargetInIconList : public RE::GFxFunctionHandler
     {
     public:
@@ -272,6 +304,7 @@ namespace Scaleform
         RegisterFunction<SKSEScaleform_IsAKnownEnchantedItem>(a_root, a_view, "IsAKnownEnchantedItem");
         RegisterFunction<SKSEScaleform_IsTargetInFormList>(a_root, a_view, "IsTargetInFormList");
         RegisterFunction<SKSEScaleform_IsTargetInIconList>(a_root, a_view, "IsTargetInIconList");
+        RegisterFunction<SKSEScaleform_GetFormIcons>(a_root, a_view, "GetFormIcons");
         RegisterFunction<SKSEScaleform_AHZLog>(a_root, a_view, "AHZLog");
 
         return true;

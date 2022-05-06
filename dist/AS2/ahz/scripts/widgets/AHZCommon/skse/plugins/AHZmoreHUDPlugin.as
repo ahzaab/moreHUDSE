@@ -17,4 +17,5 @@ intrinsic class skse.plugins.AHZmoreHUDPlugin
 	static function AHZLog(data:String):String;
 	static function IsTargetInFormList(iconName:String):Boolean;
 	static function IsTargetInIconList(iconName:String):Boolean;
+	static function GetFormIcons():Array;
 }

@@ -39,6 +39,22 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
     }
 }
 
+std::vector<std::string_view> PapyrusMoreHud::GetFormIcons(RE::FormID formId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    std::vector<std::string_view> results;
+    for (auto& kvp: s_ahzRegisteredIconFormLists)
+    {
+        auto list = s_ahzRegisteredIconFormLists[kvp.first];
+
+        if (list && list->HasForm(formId))   
+        {
+            results.emplace_back(kvp.first);
+        }
+    }
+    return results;
+}
+
 auto PapyrusMoreHud::IsIconFormListRegistered_Internal(std::string iconName) -> bool
 {
     logger::trace("IsIconFormListRegistered_Internal");
@@ -160,7 +176,7 @@ auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> std::string
 
 auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {
-    a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion);
+    a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion, true);
     a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);
     a_vm->RegisterFunction("AddIconItem", "AhzMoreHud", AddIconItem);
     a_vm->RegisterFunction("RemoveIconItem", "AhzMoreHud", RemoveIconItem);
