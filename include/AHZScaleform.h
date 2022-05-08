@@ -53,7 +53,7 @@ private:
     static string GetArmorWeightClass(CAHZTarget &target);
     static string GetEffectsDescription(CAHZTarget &target);
     static string GetBookSkill(CAHZTarget &target);
-    static string GetValueToWeight(CAHZTarget &target, const char* stringFromHUD, const char* vmTranslated);
+    static string GetValueToWeight(const char* stringFromHUD, const char* vmTranslated);
     static float  GetBaseDamage(RE::TESAmmo* pthisAmmo);
     static float  GetActualDamage(AHZWeaponData* weaponData);
     static float  GetActualArmorRating(AHZArmorData* armorData);

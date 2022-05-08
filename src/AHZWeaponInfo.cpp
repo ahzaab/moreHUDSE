@@ -37,33 +37,33 @@ auto CAHZWeaponInfo::GetWeaponInfo(CAHZTarget &target) -> AHZWeaponData
 {
     AHZWeaponData weaponData;
 
-    // Must be a weapon
-    if (!target.IsValid() || !target.IsReference())
-        return weaponData;
+    //// Must be a weapon
+    //if (!target.IsValid() || !target.IsReference())
+    //    return weaponData;
 
-    auto baseForm = target.GetForm();
+    //auto baseForm = target.GetForm();
 
 
-    if (baseForm->GetFormType() != RE::FormType::Weapon &&
-        baseForm->GetFormType() != RE::FormType::Ammo) {
-        return weaponData;
-    }
+    //if (baseForm->GetFormType() != RE::FormType::Weapon &&
+    //    baseForm->GetFormType() != RE::FormType::Ammo) {
+    //    return weaponData;
+    //}
 
-    weaponData.equipData.boundObject = baseForm->As<RE::TESBoundObject>();
-    weaponData.equipData.pExtraData = &target.GetReference()->extraList;
+    //weaponData.equipData.boundObject = baseForm->As<RE::TESBoundObject>();
+    //weaponData.equipData.pExtraData = &target.GetReference()->extraList;
 
-    if (baseForm->GetFormType() == RE::FormType::Weapon)
-        weaponData.weapon = weaponData.equipData.boundObject->As<RE::TESObjectWEAP>();
-    else if (baseForm->GetFormType() == RE::FormType::Ammo)
-        weaponData.ammo = weaponData.equipData.boundObject->As<RE::TESAmmo>();
-    else if (baseForm->GetFormType() == RE::FormType::Projectile) {
-        auto asArrowProjectile = target.GetReference()->As<RE::ArrowProjectile>();
-        weaponData.ammo = target.GetReference()->As<RE::TESAmmo>();
-        if (asArrowProjectile) {
-            weaponData.equipData.boundObject = weaponData.ammo;
-            weaponData.equipData.pExtraData = &asArrowProjectile->extraList;
-        }
-    }
+    //if (baseForm->GetFormType() == RE::FormType::Weapon)
+    //    weaponData.weapon = weaponData.equipData.boundObject->As<RE::TESObjectWEAP>();
+    //else if (baseForm->GetFormType() == RE::FormType::Ammo)
+    //    weaponData.ammo = weaponData.equipData.boundObject->As<RE::TESAmmo>();
+    //else if (baseForm->GetFormType() == RE::FormType::Projectile) {
+    //    auto asArrowProjectile = target.GetReference()->As<RE::ArrowProjectile>();
+    //    weaponData.ammo = target.GetReference()->As<RE::TESAmmo>();
+    //    if (asArrowProjectile) {
+    //        weaponData.equipData.boundObject = weaponData.ammo;
+    //        weaponData.equipData.pExtraData = &asArrowProjectile->extraList;
+    //    }
+    //}
 
     return weaponData;
 }

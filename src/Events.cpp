@@ -1,5 +1,6 @@
 #include "PCH.h"
 #include "Events.h"
+#include "AHZTarget.h"
 
 namespace Events
 {
@@ -77,11 +78,19 @@ namespace Events
 
     EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
     {
-        if (a_event && a_event->crosshairRef) {
-            _cachedRef = a_event->crosshairRef;
-        } else {
-            _cachedRef = nullptr;
-        }
+        //_cachedRef.reset();
+        //if (a_event && a_event->crosshairRef) {
+        //   _cachedRef = a_event->crosshairRef;
+        //} else {
+        //   _cachedRef.reset();
+        //}
+
+       //if (a_event) {
+       //     _cachedRef = a_event->crosshairRef;
+       //}
+
+       CAHZTarget::Singleton().SetTarget(a_event->crosshairRef.get());
+        CAHZTarget::Singleton().GetTarget().Dump();
         return EventResult::kContinue;
     }
 

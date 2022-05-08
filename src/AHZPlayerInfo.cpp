@@ -3,12 +3,13 @@
 #include "AHZPlayerInfo.h"
 #include "Events.h"
 
-CAHZTarget CAHZPlayerInfo::GetTarget()
-{
-    CAHZTarget target;
-    target.SetTarget(GetTargetRef());
-    return target;
-}
+//CAHZTarget CAHZPlayerInfo::GetTarget()
+//{
+//    CAHZTarget target;
+//    auto ref = GetTargetRef();
+//    target.SetTarget(ref.get());
+//    return target;
+//}
 
 auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 {
