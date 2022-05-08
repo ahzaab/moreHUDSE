@@ -22,7 +22,7 @@ public:
         torch = nullptr;
     }
 
-    AHZArmorData(CAHZTarget& target)
+    AHZArmorData([[maybe_unused]]CAHZTarget& target)
     {
 /*        if (target.IsValid()) {
             equipData.boundObject = target.GetForm()->As<RE::TESBoundObject>();

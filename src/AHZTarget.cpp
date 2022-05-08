@@ -205,7 +205,7 @@ EnchantmentType CAHZTarget::GetIsKnownEnchantment()
         if (wasExtra) {
             return EnchantmentType::Known;
         } else if (enchantable) {
-            return MagicDisallowEnchanting(keyWordForm) ? EnchantmentType::CannotDisenchant : EnchantmentType::None;
+            return MagicDisallowEnchanting(keyWordForm) ? EnchantmentType::CannotDisenchant : result;
         }
     }
     return result;
@@ -255,17 +255,20 @@ std::vector<std::string> CAHZTarget::GetKnownIngredientEffects()
    if (!item)
        return {};
 
-   auto effectsCount = item->effects.size();
-   auto i = 0;
-   for (auto& pEffect : item->effects) {
-       if (GetIsNthEffectKnown(item, i++)) {
+   auto effectsCount = static_cast<std::uint32_t>(item->effects.size());
+   
+   for (std::uint32_t i = 0; i < effectsCount; i++) {
+       if (GetIsNthEffectKnown(item, i)) {
+           auto pEffect = item->effects[i];
            if (pEffect) {
                auto pFullName = pEffect->baseEffect;
                if (pFullName) {
                    knownEffects.push_back(pFullName->GetFullName());
                }
            }
-       }
+       } else {
+           knownEffects.push_back({});
+       }     
    }
 
    return knownEffects;
@@ -892,6 +895,14 @@ bool CAHZTarget::CanPickUp(RE::TESForm* form)
                      formType == RE::FormType::Outfit ||
                      formType == RE::FormType::KeyMaster ||
                      formType == RE::FormType::Projectile);  // Projectiles with the "Can Pick Up" flag set to false will not even register in the crossshairs
+
+    if (!canCarry && formType == RE::FormType::Light) {
+        auto possibleTorch = form->As<RE::TESObjectLIGH>();
+        if (possibleTorch && possibleTorch->CanBeCarried()) {
+            canCarry = true;
+        }
+    }
+
     return canCarry;
 }
 
