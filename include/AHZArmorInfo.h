@@ -22,21 +22,6 @@ public:
         torch = nullptr;
     }
 
-    AHZArmorData([[maybe_unused]]CAHZTarget& target)
-    {
-/*        if (target.IsValid()) {
-            equipData.boundObject = target.GetForm()->As<RE::TESBoundObject>();
-            equipData.pExtraData = target.IsReference() ? &target.GetReference()->extraList : nullptr;
-            armor = target.GetForm()->As<RE::TESObjectARMO>();
-            torch = target.GetForm()->As<RE::TESObjectLIGH>();
-        } else */{
-            equipData.boundObject = nullptr;
-            equipData.pExtraData = nullptr;
-            armor = nullptr;
-            torch = nullptr;
-        }
-    }
-
     ~AHZArmorData() = default;
 };
 

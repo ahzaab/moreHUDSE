@@ -127,6 +127,11 @@ private:
     RE::TESObjectREFR* m_pObjectRef = nullptr;
     RE::TESForm*       m_pForm = nullptr;
     TargetData         m_target{};
+
+    RE::IngredientItem* m_IngredientItem = nullptr;
+    RE::AlchemyItem*    m_AlchemyItem = nullptr;
+    RE::SpellItem*    m_SpellItem = nullptr;
+
     [[nodiscard]] bool IsReference()
     {
         return m_pObjectRef != nullptr;
