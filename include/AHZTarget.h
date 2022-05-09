@@ -29,11 +29,12 @@ struct TargetData
     std::vector<std::string>           knownIngredientEffects{};
     std::string                      name{};
     std::string                        displayName{};
-    float                              weight;
-    RE::WEAPON_TYPE                    weaponType;
-    EnchantmentType                    enchantmentType;
-    bool                               isSpellTome;
-    RE::ActorValue                     bookSkill;
+    float                              weight{};
+    RE::WEAPON_TYPE                    weaponType{};
+    EnchantmentType                    enchantmentType{};
+    bool                               isSpellTome{};
+    RE::ActorValue                     bookSkill{};
+    bool                               isBoltAmmo{};
 
     void Dump() const
     {
@@ -63,6 +64,8 @@ struct TargetData
         logger::trace("weight: {}", weight);
         logger::trace("weaponType: {}", weaponType);
         logger::trace("enchantmentType: {}", enchantmentType);
+        logger::trace("isAmmoBolt: {}", isBoltAmmo);
+        
     }
 
  private:
@@ -88,6 +91,7 @@ struct TargetData
         weight = 0;
         weaponType = RE::WEAPON_TYPE::kHandToHandMelee; //0
         enchantmentType = EnchantmentType::None;
+        isBoltAmmo = false;
     }
 
 };
@@ -134,7 +138,7 @@ private:
     [[nodiscard]] RE::TESObjectREFR* GetReference() { return m_pObjectRef; };
     [[nodiscard]] RE::TESForm*       GetForm() { return m_pForm; };
 
-
+    [[nodiscard]] bool                             GetIsBoltAmmo();
     [[nodiscard]] EnchantmentType                  GetIsKnownEnchantment();
     [[nodiscard]] RE::WEAPON_TYPE                  GetWeaponType();
     [[nodiscard]] float                            GetWeight();

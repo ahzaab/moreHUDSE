@@ -146,7 +146,7 @@ void CAHZTarget::UpdateTarget()
     m_target.weight = GetWeight();
     m_target.weaponType = GetWeaponType();
     m_target.enchantmentType = GetIsKnownEnchantment();
-
+    m_target.isBoltAmmo = GetIsBoltAmmo();
 
 
 }
@@ -211,6 +211,22 @@ EnchantmentType CAHZTarget::GetIsKnownEnchantment()
     return result;
 }
 
+bool CAHZTarget::GetIsBoltAmmo()
+{
+    if (!IsValid()) {
+        return false;
+    }
+
+    if (GetForm()->GetFormType() != RE::FormType::Ammo)
+        return false;
+
+    auto item = GetForm()->As<RE::TESAmmo>();
+
+    if (!item)
+        return false;
+
+    return item->IsBolt();
+}
 
 RE::WEAPON_TYPE CAHZTarget::GetWeaponType()
 {
@@ -534,6 +550,7 @@ std::string CAHZTarget::GetDescription()
         if (asBook) {
             asBook->itemCardDescription.GetDescription(bsDescription, GetForm(), 0x4D414E43);
             if (!bsDescription.empty()) {
+                ProcessSurvivalMode_Native(&bsDescription);
                 tempString.assign(bsDescription.c_str());
                 if (tempString != "LOOKUP FAILED!" && tempString.length() > 1) {
                     return tempString;
@@ -545,14 +562,18 @@ std::string CAHZTarget::GetDescription()
         auto         desc = GetForm()->As<RE::TESDescription>();
         if (desc) {
             desc->GetDescription(bsDescription2, GetForm(), 0x43534544);
-            if (!bsDescription2.empty())
+            if (!bsDescription2.empty()) {
+                ProcessSurvivalMode_Native(&bsDescription);
                 tempString.append(bsDescription2.c_str());
+            }
             if (tempString != "LOOKUP FAILED!" && tempString.length() > 1) {
                 return tempString;
             } else {
                 desc->GetDescription(bsDescription2, GetForm(), 0);
-                if (!bsDescription2.empty())
+                if (!bsDescription2.empty()) {
+                    ProcessSurvivalMode_Native(&bsDescription);
                     tempString.assign(bsDescription2.c_str());
+                }
                 if (tempString != "LOOKUP FAILED!" && tempString.length() > 1) {
                     return tempString;
                 }
