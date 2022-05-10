@@ -16,17 +16,17 @@ using namespace std;
 class CAHZScaleform
 {
 public:
-    static bool  IsSurvivalMode();
+    static bool IsSurvivalMode();
 
-    static void     ProcessTargetObject(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessTargetEffects(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessArmorClass(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessBookSkill(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessValidTarget(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessPlayerData(RE::GFxFunctionHandler::Params& args);
-    static void     ProcessValueToWeight(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static void     ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args);
-    static float    GetTotalWarmthRating();
+    static void  ProcessTargetObject(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessTargetEffects(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessArmorClass(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessBookSkill(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessValidTarget(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessPlayerData(RE::GFxFunctionHandler::Params& args);
+    static void  ProcessValueToWeight(const TargetData& target, RE::GFxFunctionHandler::Params& args);
+    static void  ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args);
+    static float GetTotalWarmthRating();
 
 
 private:
@@ -53,15 +53,15 @@ private:
     static float  GetTotalActualWeaponDamage();
     static void   BuildIngredientObject(const TargetData& target, RE::GFxFunctionHandler::Params& args);
     static void   BuildInventoryObject(const TargetData& target, RE::GFxFunctionHandler::Params& args);
-    static bool   GetIsNthEffectKnown(RE::IngredientItem * thisMagic, uint32_t index);
+    static bool   GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index);
 
-    static bool                IsTwoHanded(RE::TESObjectWEAP * thisWeapon);
-    static bool                IsOneHanded(RE::TESObjectWEAP * thisWeapon);
-    static bool                IsBow(RE::TESObjectWEAP * thisWeapon);
-    static bool                IsBow(const TargetData& thisWeapon);
-    static bool                IsCrossBow(RE::TESObjectWEAP * thisWeapon);
-    static bool                IsCrossBow(const TargetData& thisWeapon);
-    static bool                isBolt(RE::TESAmmo * thisAmmo);
-    static float               mRound(float d);
-    static string              GetSoulLevelName(uint8_t soulLevel);
+    static bool   IsTwoHanded(RE::TESObjectWEAP* thisWeapon);
+    static bool   IsOneHanded(RE::TESObjectWEAP* thisWeapon);
+    static bool   IsBow(RE::TESObjectWEAP* thisWeapon);
+    static bool   IsBow(const TargetData& thisWeapon);
+    static bool   IsCrossBow(RE::TESObjectWEAP* thisWeapon);
+    static bool   IsCrossBow(const TargetData& thisWeapon);
+    static bool   isBolt(RE::TESAmmo* thisAmmo);
+    static float  mRound(float d);
+    static string GetSoulLevelName(uint8_t soulLevel);
 };

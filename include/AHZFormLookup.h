@@ -24,7 +24,7 @@ public:
 
     inline static RE::TESObjectREFR* GetReference(RE::TESForm* theForm)
     {
-        if (!theForm){
+        if (!theForm) {
             return nullptr;
         }
 
@@ -40,17 +40,17 @@ private:
     // Force singleton
     CAHZFormLookup() = default;
     ~CAHZFormLookup() = default;
-    RE::TESForm*        GetAttachedForm(RE::TESObjectREFR * form);
-    RE::TESForm*        GetFormFromLookup(RE::TESObjectREFR * targetRef);
-    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR * form, std::string variableName);
-    static int32_t GetAttachedInteger(RE::TESObjectREFR * form, std::string variableName);
+    RE::TESForm*        GetAttachedForm(RE::TESObjectREFR* form);
+    RE::TESForm*        GetFormFromLookup(RE::TESObjectREFR* targetRef);
+    static RE::TESForm* GetAttachedForm(RE::TESObjectREFR* form, std::string variableName);
+    static int32_t      GetAttachedInteger(RE::TESObjectREFR* form, std::string variableName);
     CAHZFormLookup(CAHZFormLookup const&);                            // copy ctor is hidden
     CAHZFormLookup&              operator=(CAHZFormLookup const&){};  // assign op is hidden
-    std::vector<std::string>          m_scriptVMVariables;
+    std::vector<std::string>     m_scriptVMVariables;
     std::map<uint32_t, uint32_t> m_LUT;
     auto                         GetScriptVariable(RE::TESForm* a_form, const char* a_scriptName, const char* a_scriptVariable) -> RE::BSScript::Variable const;
-    static bool s_lotdCheck;
-    static bool                       s_lotdInstalled;
+    static bool                  s_lotdCheck;
+    static bool                  s_lotdInstalled;
 };
 
 //#define AHZGetForm(x)      (CAHZFormLookup::Instance().GetTESForm((x)))

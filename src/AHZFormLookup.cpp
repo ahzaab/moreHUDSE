@@ -13,7 +13,7 @@ auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 
 auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
 {
-    if (!targetReference){
+    if (!targetReference) {
         return nullptr;
     }
     RE::TESForm* lutForm = nullptr;
@@ -37,7 +37,7 @@ auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESFo
     }
 }
 
-auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR * targetRef) -> RE::TESForm*
+auto CAHZFormLookup::GetFormFromLookup(RE::TESObjectREFR* targetRef) -> RE::TESForm*
 {
     if (!targetRef || !targetRef->GetBaseObject())
         return nullptr;
@@ -85,7 +85,7 @@ void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID,
     }
 }
 
-auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form) -> RE::TESForm*
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
 {
     std::vector<std::string>::iterator p;
 
@@ -190,7 +190,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     return var;
 }
 
-auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form, std::string variableName) -> RE::TESForm*
+auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variableName) -> RE::TESForm*
 {
     if (form) {
         if (!form->GetBaseObject())
@@ -215,7 +215,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form, std::string varia
     return nullptr;
 }
 
-auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR * form, std::string variableName) -> int32_t
+auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string variableName) -> int32_t
 {
     if (form) {
         if (!form->GetBaseObject())
@@ -230,7 +230,7 @@ auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR * form, std::string va
             vm->ForEachBoundObject(handle, &functor);
             auto variable = functor.GetScriptVariable();
 
-            if (variable && variable->IsInt()){
+            if (variable && variable->IsInt()) {
                 return variable->GetSInt();
             }
         }

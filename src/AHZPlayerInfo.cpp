@@ -29,15 +29,20 @@ auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 
 auto CAHZPlayerInfo::GetGoldAmount() -> uint32_t
 {
-    auto goldAmount = RE::PlayerCharacter::GetSingleton()->GetGoldAmount();
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (!pPC)
+        return 0;
+
+    auto goldAmount = pPC->GetGoldAmount();
     return goldAmount < 0 ? 0 : goldAmount;
 }
 
 auto CAHZPlayerInfo::GetIsInCombat() -> bool
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
-    if (pPC) {
-        return pPC->IsInCombat();
-    }
-    return false;
+    if (!pPC)
+        return false;
+
+    return pPC->IsInCombat();
 }

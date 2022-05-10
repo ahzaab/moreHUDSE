@@ -20,8 +20,12 @@ auto CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extra
 
 auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask) -> AHZArmorData
 {
-    AHZArmorData        data;
-    auto                pPC = RE::PlayerCharacter::GetSingleton();
+    AHZArmorData data;
+    auto         pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (!pPC)
+        return data;
+
     auto                inventoryChanges = pPC->GetInventoryChanges();
     RE::TESBoundObject* armor;
 

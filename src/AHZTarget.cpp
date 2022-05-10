@@ -41,45 +41,43 @@ namespace
 // 1408C2D30 1.6.318
 void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2)
 {
-   using func_t = decltype(&CAHZTarget::GetMagicItemDescription_Native);
-   REL::Relocation<func_t> func{ REL::ID(51900) };
-   func(nullptr, a1, a2);
+    using func_t = decltype(&CAHZTarget::GetMagicItemDescription_Native);
+    REL::Relocation<func_t> func{ REL::ID(51900) };
+    func(nullptr, a1, a2);
 }
 
 // 1408C33D0 1.6.318
 char* CAHZTarget::ProcessSurvivalMode_Native(RE::BSString* a2)
 {
-   using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
-   REL::Relocation<func_t> func{ REL::ID(51901) };
-   return func(a2);
+    using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
+    REL::Relocation<func_t> func{ REL::ID(51901) };
+    return func(a2);
 }
 
 // 1403D4D60 1.6.318
 float CAHZTarget::GetArmorWarmthRating_Native(RE::TESForm* a1)
 {
-   using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
-   REL::Relocation<func_t> func{ REL::ID(26393) };
-   return func(a1);
+    using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
+    REL::Relocation<func_t> func{ REL::ID(26393) };
+    return func(a1);
 }
 
 // 1403d4e37  1.6.318
 float CAHZTarget::GetActorWarmthRating_Native(RE::Actor* a1, float s2)
 {
-   using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
-   REL::Relocation<func_t> func{ REL::ID(26394) };
-   return func(a1, s2);
+    using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
+    REL::Relocation<func_t> func{ REL::ID(26394) };
+    return func(a1, s2);
 }
 
 //------------------End Native Wrappers -------------------------
 
 
-
 void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
-{    
+{
     m_pForm = CAHZFormLookup::Instance().GetTESForm(pTargetRef);
     if (m_pForm) {
-        if (m_pForm->GetFormType() == RE::FormType::Reference)
-        {
+        if (m_pForm->GetFormType() == RE::FormType::Reference) {
             m_pObjectRef = m_pForm->As<RE::TESObjectREFR>();
             if (m_pObjectRef)
                 m_pForm = m_pObjectRef->GetBaseObject();
@@ -92,9 +90,8 @@ void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
         m_pObjectRef = nullptr;
     }
 
-    
-    UpdateTarget();
 
+    UpdateTarget();
 }
 
 void CAHZTarget::UpdateTarget()
@@ -121,9 +118,9 @@ void CAHZTarget::UpdateTarget()
     }
     auto isHarvested = false;
     if (m_IngredientItem && GetForm()->GetFormType() != RE::FormType::Ingredient) {
-         m_pForm = m_IngredientItem;
-         m_pObjectRef = nullptr;
-         isHarvested = true;
+        m_pForm = m_IngredientItem;
+        m_pObjectRef = nullptr;
+        isHarvested = true;
     } else if (m_AlchemyItem && GetForm()->GetFormType() != RE::FormType::AlchemyItem) {
         m_pForm = m_AlchemyItem;
         m_pObjectRef = nullptr;
@@ -162,17 +159,15 @@ void CAHZTarget::UpdateTarget()
     m_target.weaponType = GetWeaponType();
     m_target.enchantmentType = GetIsKnownEnchantment();
     m_target.isBoltAmmo = GetIsBoltAmmo();
-
-
 }
 
 EnchantmentType CAHZTarget::GetIsKnownEnchantment()
 {
-   EnchantmentType result{ EnchantmentType::None };
-   if (!IsValid())
-       return result;
-   
-   auto baseForm = GetForm();
+    EnchantmentType result{ EnchantmentType::None };
+    if (!IsValid())
+        return result;
+
+    auto baseForm = GetForm();
 
     if (baseForm &&
         (baseForm->GetFormType() == RE::FormType::Weapon ||
@@ -196,7 +191,7 @@ EnchantmentType CAHZTarget::GetIsKnownEnchantment()
         }
 
         if (enchantment) {
-           // It has an enchantment be it may not be known.
+            // It has an enchantment be it may not be known.
             result = EnchantmentType::Unknown;
 
             if ((enchantment->formFlags & RE::TESForm::RecordFlags::kKnown) == RE::TESForm::RecordFlags::kKnown) {
@@ -278,31 +273,31 @@ float CAHZTarget::GetWeight()
 
 std::vector<std::string> CAHZTarget::GetKnownIngredientEffects()
 {
-   if (!IsValid())
+    if (!IsValid())
         return {};
-   std::vector<std::string> knownEffects;
-   auto item = m_IngredientItem;
+    std::vector<std::string> knownEffects;
+    auto                     item = m_IngredientItem;
 
-   if (!item)
-       return {};
+    if (!item)
+        return {};
 
-   auto effectsCount = static_cast<std::uint32_t>(item->effects.size());
-   
-   for (std::uint32_t i = 0; i < effectsCount; i++) {
-       if (GetIsNthEffectKnown(item, i)) {
-           auto pEffect = item->effects[i];
-           if (pEffect) {
-               auto pFullName = pEffect->baseEffect;
-               if (pFullName) {
-                   knownEffects.push_back(pFullName->GetFullName());
-               }
-           }
-       } else {
-           knownEffects.push_back({});
-       }     
-   }
+    auto effectsCount = static_cast<std::uint32_t>(item->effects.size());
 
-   return knownEffects;
+    for (std::uint32_t i = 0; i < effectsCount; i++) {
+        if (GetIsNthEffectKnown(item, i)) {
+            auto pEffect = item->effects[i];
+            if (pEffect) {
+                auto pFullName = pEffect->baseEffect;
+                if (pFullName) {
+                    knownEffects.push_back(pFullName->GetFullName());
+                }
+            }
+        } else {
+            knownEffects.push_back({});
+        }
+    }
+
+    return knownEffects;
 }
 
 float CAHZTarget::GetArmorWarmthRating()
@@ -384,9 +379,9 @@ float CAHZTarget::GetWeaponDamage()
     }
 
     auto boundObject = baseForm->As<RE::TESBoundObject>();
-    auto pExtraData = IsReference() ? &GetReference()->extraList: nullptr;
+    auto pExtraData = IsReference() ? &GetReference()->extraList : nullptr;
 
-   if (IsReference() && baseForm->GetFormType() == RE::FormType::Projectile) {
+    if (IsReference() && baseForm->GetFormType() == RE::FormType::Projectile) {
         auto asArrowProjectile = GetReference()->As<RE::ArrowProjectile>();
         auto ammo = GetReference()->As<RE::TESAmmo>();
         if (asArrowProjectile) {
@@ -395,7 +390,7 @@ float CAHZTarget::GetWeaponDamage()
         }
     }
 
-   if (!boundObject)
+    if (!boundObject)
         return {};
 
     auto pPC = RE::PlayerCharacter::GetSingleton();
@@ -428,7 +423,7 @@ bool CAHZTarget::GetIsSpellTome()
     if (!item)
         return false;
 
-   return item->data.flags.any(RE::OBJ_BOOK::Flag::kTeachesSpell);
+    return item->data.flags.any(RE::OBJ_BOOK::Flag::kTeachesSpell);
 }
 
 RE::ActorValue CAHZTarget::GetBookSkill()
@@ -455,9 +450,9 @@ RE::ActorValue CAHZTarget::GetBookSkill()
 std::string CAHZTarget::GetEffectsDescription()
 {
     RE::BSString description;
-    std::string effectDescription;
-    std::string desc;
-    std::string effectsString;
+    std::string  effectDescription;
+    std::string  desc;
+    std::string  effectsString;
 
     if (!IsValid())
         return desc;
@@ -480,83 +475,83 @@ std::string CAHZTarget::GetEffectsDescription()
             desc.append(effectDescription);
         }
     }
-   // Spell items like blessings
-   else if (GetForm()->GetFormType() == RE::FormType::Spell) {
-      auto item = GetForm()->As<RE::SpellItem>();
-      if (item) {
-         GetMagicItemDescription(item, effectDescription);
-         desc.append(effectDescription);
-      }
-   } else if (GetForm()->GetFormType() == RE::FormType::Weapon) {
-      auto item = GetForm()->As<RE::TESObjectWEAP>();
+    // Spell items like blessings
+    else if (GetForm()->GetFormType() == RE::FormType::Spell) {
+        auto item = GetForm()->As<RE::SpellItem>();
+        if (item) {
+            GetMagicItemDescription(item, effectDescription);
+            desc.append(effectDescription);
+        }
+    } else if (GetForm()->GetFormType() == RE::FormType::Weapon) {
+        auto item = GetForm()->As<RE::TESObjectWEAP>();
 
-      if (item) {
+        if (item) {
             //Get enchantment description
             if (item && item->formEnchanting) {
-               GetMagicItemDescription(item->formEnchanting, effectDescription);
-               desc.append(effectDescription);
+                GetMagicItemDescription(item->formEnchanting, effectDescription);
+                desc.append(effectDescription);
             }
 
             // Items modified by the player
             else if (IsReference())  // Enchanted
             {
-               if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment))) {
-                  if (extraEnchant->enchantment) {
+                if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment))) {
+                    if (extraEnchant->enchantment) {
                         GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
                         desc.append(effectDescription);
-                  }
-               }
+                    }
+                }
             }
-      }
-   } else if (GetForm()->GetFormType() == RE::FormType::Armor) {
-      auto item = GetForm()->As<RE::TESObjectARMO>();
+        }
+    } else if (GetForm()->GetFormType() == RE::FormType::Armor) {
+        auto item = GetForm()->As<RE::TESObjectARMO>();
 
-      if (item) {
+        if (item) {
             //Get enchantment description
             if (item && item->formEnchanting) {
-               GetMagicItemDescription(item->formEnchanting, effectDescription);
-               desc.append(effectDescription);
+                GetMagicItemDescription(item->formEnchanting, effectDescription);
+                desc.append(effectDescription);
             }
 
             // Items modified by the player
             else if (IsReference()) {
-               if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
-               {
-                  if (extraEnchant->enchantment) {
+                if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
+                {
+                    if (extraEnchant->enchantment) {
                         GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
                         desc.append(effectDescription);
-                  }
-               }
+                    }
+                }
             }
-      }
-   } else if (GetForm()->GetFormType() == RE::FormType::Ammo) {
-      if (IsReference()) {
+        }
+    } else if (GetForm()->GetFormType() == RE::FormType::Ammo) {
+        if (IsReference()) {
             if (auto extraEnchant = static_cast<RE::ExtraEnchantment*>(GetReference()->extraList.GetByType(RE::ExtraDataType::kEnchantment)))  // Enchanted
             {
-               if (extraEnchant->enchantment) {
-                  GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
-                  desc.append(effectDescription);
-               }
+                if (extraEnchant->enchantment) {
+                    GetMagicItemDescription(extraEnchant->enchantment, effectDescription);
+                    desc.append(effectDescription);
+                }
             }
-      }
-   } else if (GetForm()->GetFormType() == RE::FormType::Book) {
-      auto item = GetForm()->As<RE::TESObjectBOOK>();
+        }
+    } else if (GetForm()->GetFormType() == RE::FormType::Book) {
+        auto item = GetForm()->As<RE::TESObjectBOOK>();
 
-      if (item &&
+        if (item &&
             ((item->data.flags & RE::OBJ_BOOK::Flag::kTeachesSpell) == RE::OBJ_BOOK::Flag::kTeachesSpell) && !desc.length()) {
             if (item->data.teaches.spell) {
-               GetMagicItemDescription(item->data.teaches.spell, effectDescription);
-               desc.append(effectDescription);
+                GetMagicItemDescription(item->data.teaches.spell, effectDescription);
+                desc.append(effectDescription);
             }
-      }
-   } else if (GetForm()->GetFormType() == RE::FormType::Scroll) {
-      auto item = GetForm()->As<RE::ScrollItem>();
-      if (item) {
+        }
+    } else if (GetForm()->GetFormType() == RE::FormType::Scroll) {
+        auto item = GetForm()->As<RE::ScrollItem>();
+        if (item) {
             GetMagicItemDescription(item, effectDescription);
             desc.append(effectDescription);
-      }
-   }
-   return desc;
+        }
+    }
+    return desc;
 };
 
 
@@ -1006,7 +1001,7 @@ bool CAHZTarget::MagicDisallowEnchanting(const RE::BGSKeywordForm* pKeywords)
                 if (keyword) {
                     // Had to add this check because https://www.nexusmods.com/skyrimspecialedition/mods/34175?
                     // sets the editor ID for 'MagicDisallowEnchanting' to null (╯°□°）╯︵ ┻━┻
-                    auto   asCstr = keyword->GetFormEditorID();
+                    auto        asCstr = keyword->GetFormEditorID();
                     std::string keyWordName = asCstr ? asCstr : "";
                     if (keyWordName == "MagicDisallowEnchanting") {
                         return true;  // Is enchanted, but cannot be enchanted by player

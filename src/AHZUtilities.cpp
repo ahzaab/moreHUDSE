@@ -5,9 +5,9 @@
 
 std::vector<std::string> CAHZUtilities::GetMHudFileList(std::string& folder)
 {
-    std::vector<std::string>  names;
-    std::string          search_path = folder + "/*.MHUD";
-    WIN32_FIND_DATAA fd;
+    std::vector<std::string> names;
+    std::string              search_path = folder + "/*.MHUD";
+    WIN32_FIND_DATAA         fd;
     logger::info("Search the '{}' directory...", folder.c_str());
     HANDLE hFind = ::FindFirstFileA(search_path.c_str(), &fd);
     if (hFind != INVALID_HANDLE_VALUE) {
@@ -50,9 +50,9 @@ std::vector<std::string> CAHZUtilities::SplitString(std::string& str, std::strin
 
 auto CAHZUtilities::ParseLUTObject(std::string& stringValue) -> AHZLUTObject
 {
-    std::string         split = ",";
+    std::string              split = ",";
     std::vector<std::string> items = SplitString(stringValue, split);
-    std::string         pipe = "|";
+    std::string              pipe = "|";
 
     AHZLUTObject lutObject;
 

@@ -10,11 +10,11 @@ constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
 uintptr_t           EnemyUpdateHook = (EnemyUpdateHookBase.address() + 0x44);
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
 RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
-RE::BGSKeyword* AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
+RE::BGSKeyword*     AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
 
 bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
 {
-    auto result = RE::LookupReferenceByHandle(refHandle, refrOut);
+    auto               result = RE::LookupReferenceByHandle(refHandle, refrOut);
     RE::TESObjectREFR* reference = refrOut.get();
     if (!reference) {
         return result;
@@ -37,8 +37,7 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
             auto pNPC = reference->As<RE::Actor>();
             if (pNPC) {
                 npcLevel = pNPC->GetLevel();
-                if (NoSoulTrapRace == nullptr)
-                {
+                if (NoSoulTrapRace == nullptr) {
                     NoSoulTrapRace = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("NoSoulTrap");
                 }
                 auto noSoulTrapRace = NoSoulTrapRace && pNPC->GetRace()->HasKeyword(NoSoulTrapRace);

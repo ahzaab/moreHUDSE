@@ -42,13 +42,11 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
 std::vector<std::string_view> PapyrusMoreHud::GetFormIcons(RE::FormID formId)
 {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    std::vector<std::string_view> results;
-    for (auto& kvp: s_ahzRegisteredIconFormLists)
-    {
+    std::vector<std::string_view>         results;
+    for (auto& kvp : s_ahzRegisteredIconFormLists) {
         auto list = s_ahzRegisteredIconFormLists[kvp.first];
 
-        if (list && list->HasForm(formId))   
-        {
+        if (list && list->HasForm(formId)) {
             results.emplace_back(kvp.first);
         }
     }

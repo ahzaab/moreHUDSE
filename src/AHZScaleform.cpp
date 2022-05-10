@@ -44,7 +44,6 @@ auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
 }
 
 
-
 auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
 {
     if (!weaponData)
@@ -139,7 +138,7 @@ auto CAHZScaleform::mRound(float r) -> float
     return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
 }
 
-float CAHZScaleform::GetArmorRatingDiff(const TargetData &target)
+float CAHZScaleform::GetArmorRatingDiff(const TargetData& target)
 {
     float oldArmorRating = 0.0f;
     float newArmorRating = 0.0f;
@@ -263,12 +262,12 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
     return totalWeaponDamage;
 }
 
-auto CAHZScaleform::isBolt(RE::TESAmmo * thisAmmo) -> bool
+auto CAHZScaleform::isBolt(RE::TESAmmo* thisAmmo) -> bool
 {
     return (thisAmmo->IsBolt());
 }
 
-auto CAHZScaleform::GetWeaponDamageDiff(const TargetData &target) -> float
+auto CAHZScaleform::GetWeaponDamageDiff(const TargetData& target) -> float
 {
     float         totalWeaponDamage = 0.0f;
     float         targetArrowDamage = 0.0f;
@@ -359,7 +358,7 @@ auto CAHZScaleform::GetWeaponDamageDiff(const TargetData &target) -> float
     return 0.0f;
 }
 
-auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP * thisWeapon) -> bool
+auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -399,7 +398,7 @@ auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP * thisWeapon) -> bool
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP * thisWeapon) -> bool
+auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -437,7 +436,7 @@ auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP * thisWeapon) -> bool
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HM));
 }
 
-bool CAHZScaleform::IsBow(RE::TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon)
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -469,7 +468,7 @@ bool CAHZScaleform::IsBow(RE::TESObjectWEAP * thisWeapon)
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
 }
 
-bool CAHZScaleform::IsBow(const TargetData &thisWeapon)
+bool CAHZScaleform::IsBow(const TargetData& thisWeapon)
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -501,7 +500,7 @@ bool CAHZScaleform::IsBow(const TargetData &thisWeapon)
             thisWeapon.weaponType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
 }
 
-bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP * thisWeapon)
+bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon)
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -533,7 +532,7 @@ bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP * thisWeapon)
             thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
 }
 
-bool CAHZScaleform::IsCrossBow(const TargetData &thisWeapon)
+bool CAHZScaleform::IsCrossBow(const TargetData& thisWeapon)
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
@@ -642,7 +641,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
     }
 }
 
-auto CAHZScaleform::GetArmorWeightClass(const TargetData &target) -> string
+auto CAHZScaleform::GetArmorWeightClass(const TargetData& target) -> string
 {
     string desc;
 
@@ -747,7 +746,7 @@ auto CAHZScaleform::GetValueToWeight(const char* stringFromHUD, const char* vmTr
     return desc;
 };
 
-auto CAHZScaleform::GetBookSkill(const TargetData &target) -> string
+auto CAHZScaleform::GetBookSkill(const TargetData& target) -> string
 {
     string desc;
 
@@ -762,7 +761,7 @@ auto CAHZScaleform::GetBookSkill(const TargetData &target) -> string
         if (target.bookSkill != RE::ActorValue::kNone) {
             auto avList = SKSE::ActorValueList::GetSingleton();
             if (avList) {
-            auto info = avList->GetActorValue(target.bookSkill);
+                auto info = avList->GetActorValue(target.bookSkill);
                 if (info) {
                     desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">       )");
                     desc.append(info->GetFullName());
@@ -832,9 +831,9 @@ void CAHZScaleform::ProcessTargetEffects(const TargetData& target, RE::GFxFuncti
     }
 }
 
-void CAHZScaleform::ProcessArmorClass(const TargetData &target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessArmorClass(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string      weightClass;
+    static string weightClass;
 
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
@@ -850,7 +849,7 @@ void CAHZScaleform::ProcessArmorClass(const TargetData &target, RE::GFxFunctionH
 
 void CAHZScaleform::ProcessValueToWeight(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string      valueToWeight;
+    static string valueToWeight;
 
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
@@ -866,7 +865,7 @@ void CAHZScaleform::ProcessValueToWeight(const TargetData& target, RE::GFxFuncti
 
 void CAHZScaleform::ProcessBookSkill(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string      bookSkill;
+    static string bookSkill;
 
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
@@ -895,14 +894,14 @@ void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string
     }
 };
 
-void CAHZScaleform::ProcessTargetObject(const TargetData &target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    float              totalArmorOrWeapon = 0.0;
-    float              difference = 0.0;
-    float              totalWarmthRating = 0.0;
-    float              warmthDifference = 0.0;
-    bool               isSurvivalMode = false;
-    float              warmthRating = 0.0;
+    float totalArmorOrWeapon = 0.0;
+    float difference = 0.0;
+    float totalWarmthRating = 0.0;
+    float warmthDifference = 0.0;
+    bool  isSurvivalMode = false;
+    float warmthRating = 0.0;
 
     if (!target.isValid) {
         args.args[0].DeleteMember("targetObj");
@@ -916,7 +915,6 @@ void CAHZScaleform::ProcessTargetObject(const TargetData &target, RE::GFxFunctio
 
     if (target.formType == RE::FormType::Weapon ||
         target.formType == RE::FormType::Ammo) {
-
         // If ammo is NULL, it is OK
         totalArmorOrWeapon = GetTotalActualWeaponDamage();
         difference = GetWeaponDamageDiff(target);
@@ -949,7 +947,7 @@ void CAHZScaleform::ProcessTargetObject(const TargetData &target, RE::GFxFunctio
     args.args[0].SetMember("targetObj", obj);
 };
 
-auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem * thisMagic, uint32_t index) -> bool
+auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index) -> bool
 {
     bool isKnown = false;
 
@@ -1009,7 +1007,7 @@ void CAHZScaleform::BuildIngredientObject(const TargetData& target, RE::GFxFunct
     args.args[0].SetMember("ingredientObj", obj2);
 };
 
-void CAHZScaleform::BuildInventoryObject(const TargetData &target, RE::GFxFunctionHandler::Params& args)
+void CAHZScaleform::BuildInventoryObject(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
     // Used to store the name
     string name;
@@ -1089,10 +1087,10 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
 {
     RE::GFxValue obj;
     args.movie->CreateObject(&obj);
-    auto player = RE::PlayerCharacter::GetSingleton();
-    if (player) {
-        auto encumbranceNumber = player->GetActorValue(RE::ActorValue::kInventoryWeight);
-        auto maxEncumbranceNumber = player->GetActorValue(RE::ActorValue::kCarryWeight);
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+    if (pPC) {
+        auto encumbranceNumber = pPC->GetActorValue(RE::ActorValue::kInventoryWeight);
+        auto maxEncumbranceNumber = pPC->GetActorValue(RE::ActorValue::kCarryWeight);
 
         // Enter the data into the Scaleform function
         RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);

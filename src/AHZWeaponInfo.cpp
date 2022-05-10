@@ -9,8 +9,7 @@ class ContainerAmmoVistor
 {
 public:
     AHZWeaponData ammoData;
-    ContainerAmmoVistor()
-    = default;
+    ContainerAmmoVistor() = default;
 
     auto Accept(RE::InventoryEntryData* pEntryData) -> bool
     {

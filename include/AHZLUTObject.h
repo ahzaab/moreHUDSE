@@ -5,10 +5,10 @@
 class AHZLUTObject
 {
 public:
-    std::string   BaseMod;
-    uint32_t BaseFormID;
-    std::string   TargetMod;
-    uint32_t TargetFormID;
+    std::string BaseMod;
+    uint32_t    BaseFormID;
+    std::string TargetMod;
+    uint32_t    TargetFormID;
 
     bool IsEmpty()
     {
