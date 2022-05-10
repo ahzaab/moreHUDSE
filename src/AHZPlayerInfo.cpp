@@ -3,14 +3,6 @@
 #include "AHZPlayerInfo.h"
 #include "Events.h"
 
-//CAHZTarget CAHZPlayerInfo::GetTarget()
-//{
-//    CAHZTarget target;
-//    auto ref = GetTargetRef();
-//    target.SetTarget(ref.get());
-//    return target;
-//}
-
 auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
@@ -36,12 +28,6 @@ auto CAHZPlayerInfo::GetGoldAmount() -> uint32_t
 {
     auto goldAmount = RE::PlayerCharacter::GetSingleton()->GetGoldAmount();
     return goldAmount < 0 ? 0 : goldAmount;
-}
-
-
-RE::NiPointer<RE::TESObjectREFR> CAHZPlayerInfo::GetTargetRef()
-{
-    return Events::CrosshairRefManager::GetSingleton()->GetCrosshairReference();
 }
 
 auto CAHZPlayerInfo::GetIsInCombat() -> bool

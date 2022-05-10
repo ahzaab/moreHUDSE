@@ -11,33 +11,38 @@ namespace Events
     public:
         static MenuHandler*              GetSingleton();
         static void                      Sink();
-        virtual RE::BSEventNotifyControl ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+        virtual EventResult ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
     private:
         static bool s_ahzMenuLoaded;
+
+    private:
+        MenuHandler(){};
+        MenuHandler(const MenuHandler&) = delete;
+        MenuHandler(MenuHandler&&) = delete;
+        ~MenuHandler() = default;
+
+        MenuHandler& operator=(const MenuHandler&) = delete;
+        MenuHandler& operator=(MenuHandler&&) = delete;
+
     };
 
-    class CrosshairRefManager :
+    class CrosshairHandler :
         public RE::BSTEventSink<SKSE::CrosshairRefEvent>
     {
     public:
-        static CrosshairRefManager* GetSingleton();
-        static void                 Register();
-        RE::NiPointer<RE::TESObjectREFR> GetCrosshairReference();
-
-    protected:
+        static CrosshairHandler* GetSingleton();
+        static void                 Sink();
         EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
 
     private:
-        CrosshairRefManager();
-        CrosshairRefManager(const CrosshairRefManager&) = delete;
-        CrosshairRefManager(CrosshairRefManager&&) = delete;
-        ~CrosshairRefManager() = default;
+        CrosshairHandler(){};
+        CrosshairHandler(const CrosshairHandler&) = delete;
+        CrosshairHandler(CrosshairHandler&&) = delete;
+        ~CrosshairHandler() = default;
 
-        CrosshairRefManager& operator=(const CrosshairRefManager&) = delete;
-        CrosshairRefManager& operator=(CrosshairRefManager&&) = delete;
-
-        RE::TESObjectREFRPtr _cachedRef;
+        CrosshairHandler& operator=(const CrosshairHandler&) = delete;
+        CrosshairHandler& operator=(CrosshairHandler&&) = delete;
     };
 
     void Install();

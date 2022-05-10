@@ -24,7 +24,6 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
     auto                pPC = RE::PlayerCharacter::GetSingleton();
     auto                inventoryChanges = pPC->GetInventoryChanges();
     RE::TESBoundObject* armor;
-    //= inventoryChanges->GetArmorInSlot(static_cast<uint32_t>(slotMask));
 
     if (inventoryChanges) {
         auto list = inventoryChanges->entryList;

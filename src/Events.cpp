@@ -6,7 +6,7 @@ namespace Events
 {
     bool MenuHandler::s_ahzMenuLoaded = false;
 
-    auto MenuHandler::GetSingleton() -> MenuHandler*
+    MenuHandler* MenuHandler::GetSingleton()
     {
         static MenuHandler singleton;
         return std::addressof(singleton);
@@ -18,7 +18,7 @@ namespace Events
         ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(MenuHandler::GetSingleton()));
     }
 
-    auto MenuHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) -> RE::BSEventNotifyControl
+    EventResult MenuHandler::ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
     {
         if (a_event == nullptr) {
             return RE::BSEventNotifyControl::kContinue;
@@ -53,7 +53,13 @@ namespace Events
         return RE::BSEventNotifyControl::kContinue;
     }
 
-    void CrosshairRefManager::Register()
+    CrosshairHandler* CrosshairHandler::GetSingleton()
+    {
+        static CrosshairHandler singleton;
+        return std::addressof(singleton);
+    }
+
+    void CrosshairHandler::Sink()
     {
         auto crosshair = SKSE::GetCrosshairRefEventSource();
         if (crosshair) {
@@ -62,45 +68,18 @@ namespace Events
         }
     }
 
-    RE::NiPointer<RE::TESObjectREFR> CrosshairRefManager::GetCrosshairReference()
+    EventResult CrosshairHandler::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
     {
-        return _cachedRef;
-    }
-
-    CrosshairRefManager::CrosshairRefManager() :
-        _cachedRef(nullptr) {}
-
-    CrosshairRefManager* CrosshairRefManager::GetSingleton()
-    {
-        static CrosshairRefManager singleton;
-        return std::addressof(singleton);
-    }
-
-    EventResult CrosshairRefManager::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
-    {
-        //_cachedRef.reset();
-        //if (a_event && a_event->crosshairRef) {
-        //   _cachedRef = a_event->crosshairRef;
-        //} else {
-        //   _cachedRef.reset();
-        //}
-
-       //if (a_event) {
-       //     _cachedRef = a_event->crosshairRef;
-       //}
-
-       CAHZTarget::Singleton().SetTarget(a_event->crosshairRef.get());
-        CAHZTarget::Singleton().GetTarget().Dump();
+        CAHZTarget::Singleton().SetTarget(a_event->crosshairRef.get());
         return EventResult::kContinue;
     }
 
     void Install()
     {
-        CrosshairRefManager::Register();
+        CrosshairHandler::Sink();
         logger::info("registered crosshair event"sv);
         MenuHandler::Sink();
         logger::info("registered menu event"sv);
-
         logger::info("Installed all event sinks"sv);
     }
 
