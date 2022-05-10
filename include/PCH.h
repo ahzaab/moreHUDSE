@@ -43,24 +43,6 @@ namespace WinAPI = SKSE::WinAPI;
 using namespace std::literals;
 namespace logger = SKSE::log;
 
-template <typename T1, typename T2>
-inline T2* dyna_cast(T1* base)
-{
-    if (!base)
-        return nullptr;
-    auto asForm = static_cast<T1*>(base);
-    auto ret = (asForm)->As<T2>();
-    return ret;
-}
-#define DYNAMIC_CAST(base, srcType, targetType) (dyna_cast<srcType, targetType>(base))
-
-
-// namespace logger
-// {
-// 	using namespace SKSE::log;
-// }
-
-
 
 #define DLLEXPORT __declspec(dllexport)
 

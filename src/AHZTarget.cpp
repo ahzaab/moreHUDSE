@@ -156,7 +156,7 @@ void CAHZTarget::UpdateTarget()
     m_target.damage = GetWeaponDamage();
     m_target.armorRating = GetArmorRating();
     m_target.armorslotMask = GetArmorSlotMask();
-    m_target.armorWarmthRating = GetArmorWarmthRating();
+    m_target.armorWarmthRating = IsSurvivalMode() ? GetArmorWarmthRating() : 0;
     m_target.knownIngredientEffects = GetKnownIngredientEffects();
     m_target.weight = isHarvested ? 0 : GetWeight();  // if harvested, we can't know the weight for sure.  Because we don't always know the amount harvested
     m_target.weaponType = GetWeaponType();
@@ -659,7 +659,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
 
             // If the food is actually food
             if (form->formType == RE::FormType::AlchemyItem) {
-                return DYNAMIC_CAST(form, RE::TESForm, RE::AlchemyItem);
+                return form->As<RE::AlchemyItem>();
             }
 
             // If the food is actually a levelitem (Harvest overhaul mod or a coin purse)
@@ -667,7 +667,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
                 auto itemform = GetAlchemyItemFromLeveledList(form);
                 return itemform ? itemform : nullptr;
             } else if (form->formType == RE::FormType::FormList) {
-                auto lvli = DYNAMIC_CAST(form, RE::TESForm, RE::BGSListForm);
+                auto lvli = form->As<RE::BGSListForm>();
 
                 if (!lvli) {
                     return nullptr;
@@ -677,7 +677,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
                 if (lvli->forms.size() > 0) {
                     auto itemform = lvli->forms[0];
                     if (itemform) {
-                        auto alchmyItem = DYNAMIC_CAST(itemform, RE::TESForm, RE::AlchemyItem);
+                        auto alchmyItem = itemform->As<RE::AlchemyItem>();
                         return alchmyItem;
                     }
                 }
@@ -699,7 +699,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
 
             // If the produce is actually food
             if (form->formType == RE::FormType::AlchemyItem) {
-                return DYNAMIC_CAST(form, RE::TESForm, RE::AlchemyItem);
+                return form->As<RE::AlchemyItem>();
             }
 
             // If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
@@ -707,7 +707,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
                 auto itemform = GetAlchemyItemFromLeveledList(form);
                 return itemform ? itemform : nullptr;
             } else if (form->formType == RE::FormType::FormList) {
-                auto lvli = DYNAMIC_CAST(form, RE::TESForm, RE::BGSListForm);
+                auto lvli = form->As<RE::BGSListForm>();
 
                 if (!lvli) {
                     return nullptr;
@@ -717,7 +717,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
                 if (lvli->forms.size() > 0) {
                     auto itemform = lvli->forms[0];
                     if (itemform) {
-                        auto alchmyItem = DYNAMIC_CAST(itemform, RE::TESForm, RE::AlchemyItem);
+                        auto alchmyItem = itemform->As<RE::AlchemyItem>();
                         return alchmyItem;
                     }
                 }
@@ -753,7 +753,7 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
 
             // If the ingredient is actually an ingredient
             if (form->formType == RE::FormType::Ingredient) {
-                return DYNAMIC_CAST(form, RE::TESForm, RE::IngredientItem);
+                return form->As<RE::IngredientItem>();
             }
 
             // If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
@@ -761,13 +761,13 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
                 auto itemform = GetIngredientFromLeveledList(form);
                 return itemform ? itemform : nullptr;
             } else if (form->formType == RE::FormType::FormList) {
-                auto lvli = DYNAMIC_CAST(form, RE::TESForm, RE::BGSListForm);
+                auto lvli = form->As<RE::BGSListForm>();
 
                 // Get the first form and see if it is an ingredient
                 if (lvli->forms.size() > 0) {
                     auto itemform = lvli->forms[0];
                     if (itemform) {
-                        auto ingredient = DYNAMIC_CAST(itemform, RE::TESForm, RE::IngredientItem);
+                        auto ingredient = itemform->As<RE::IngredientItem>();
                         return ingredient;
                     }
                 }
@@ -789,7 +789,7 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
 
             // If the ingredient is actually an ingredient
             if (form->formType == RE::FormType::Ingredient) {
-                return DYNAMIC_CAST(form, RE::TESForm, RE::IngredientItem);
+                return form->As<RE::IngredientItem>();
             }
 
             // If the ingredient is actually a levelitem (Harvest overhaul mod or a coin purse)
@@ -797,7 +797,7 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
                 auto itemform = GetIngredientFromLeveledList(form);
                 return itemform ? itemform : nullptr;
             } else if (form->formType == RE::FormType::FormList) {
-                auto lvli = DYNAMIC_CAST(form, RE::TESForm, RE::BGSListForm);
+                auto lvli = form->As<RE::BGSListForm>();
 
                 if (!lvli) {
                     return nullptr;
@@ -807,7 +807,7 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
                 if (lvli->forms.size() > 0) {
                     auto itemform = lvli->forms[0];
                     if (itemform) {
-                        auto ingredient = DYNAMIC_CAST(itemform, RE::TESForm, RE::IngredientItem);
+                        auto ingredient = itemform->As<RE::IngredientItem>();
                         return ingredient;
                     }
                 }
@@ -878,7 +878,7 @@ std::string CAHZTarget::GetTargetSoulLevelName()
 RE::AlchemyItem* CAHZTarget::GetAlchemyItemFromLeveledList(RE::TESForm* thisObject)
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
-        RE::TESLevItem* lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
+        RE::TESLevItem* lvli = thisObject->As<RE::TESLevItem>();
 
         // Get the first form and see if it is an ingredient
         if (lvli && lvli->numEntries > 0) {
@@ -886,7 +886,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItemFromLeveledList(RE::TESForm* thisObje
                 auto itemform = lvli->entries[i].form;
                 if (itemform) {
                     if (itemform->formType == RE::FormType::AlchemyItem) {
-                        auto alchemyItem = DYNAMIC_CAST(itemform, RE::TESForm, RE::AlchemyItem);
+                        auto alchemyItem = itemform->As<RE::AlchemyItem>();
                         return alchemyItem;
                     }
                 }
@@ -900,7 +900,7 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItemFromLeveledList(RE::TESForm* thisObje
 RE::IngredientItem* CAHZTarget::GetIngredientFromLeveledList(RE::TESForm* thisObject)
 {
     if (thisObject->formType == RE::FormType::LeveledItem) {
-        auto lvli = DYNAMIC_CAST(thisObject, RE::TESForm, RE::TESLevItem);
+        auto lvli = thisObject->As<RE::TESLevItem>();
 
         // Get the first form and see if it is an ingredient
         if (lvli && lvli->numEntries > 0) {
@@ -908,7 +908,7 @@ RE::IngredientItem* CAHZTarget::GetIngredientFromLeveledList(RE::TESForm* thisOb
                 auto itemform = lvli->entries[i].form;
                 if (itemform) {
                     if (itemform->formType == RE::FormType::Ingredient) {
-                        auto* ingredient = DYNAMIC_CAST(itemform, RE::TESForm, RE::IngredientItem);
+                        auto* ingredient = itemform->As<RE::IngredientItem>();
                         return ingredient;
                     }
                 }

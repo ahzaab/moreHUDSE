@@ -7,7 +7,10 @@ auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
 
-    auto pContainer = DYNAMIC_CAST(pPC->GetBaseObject(), RE::TESForm, RE::TESContainer);
+    if (!pPC)
+        return 0;
+
+    auto pContainer = pPC->GetBaseObject()->As<RE::TESContainer>();
     if (!pContainer)
         return 0;
 

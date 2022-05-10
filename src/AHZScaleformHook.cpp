@@ -34,7 +34,7 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
     if (reference) {
         if (reference->GetBaseObject()->formType == RE::FormType::NPC ||
             reference->GetBaseObject()->formType == RE::FormType::ActorCharacter) {
-            auto pNPC = DYNAMIC_CAST(reference, RE::TESObjectREFR, RE::Actor);
+            auto pNPC = reference->As<RE::Actor>();
             if (pNPC) {
                 npcLevel = pNPC->GetLevel();
                 if (NoSoulTrapRace == nullptr)

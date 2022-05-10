@@ -106,7 +106,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form) -> RE::TESForm*
         RE::TESForm* attachedForm = nullptr;
         if ((attachedForm = GetAttachedForm(form, *p)) != nullptr) {
             if (attachedForm->formType == RE::FormType::LeveledItem) {
-                auto lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::TESLevItem);
+                auto lvli = attachedForm->As<RE::TESLevItem>();
 
                 // Get the first form and see if it is an ingredient
                 if (lvli && lvli->entries.size() > 0) {
@@ -114,7 +114,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form) -> RE::TESForm*
                     return itemform;
                 }
             } else if (attachedForm->formType == RE::FormType::FormList) {
-                auto* lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::BGSListForm);
+                auto* lvli = attachedForm->As<RE::BGSListForm>();
 
                 // Get the first form and see if it is an ingredient
                 if (lvli && lvli->forms.size() > 0) {
@@ -142,7 +142,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR * form) -> RE::TESForm*
     //    RE::TESForm* dbm_displayListBase = GetAttachedForm(form, "afDisplayList");
     //    int32_t dbm_displayListIndex = GetAttachedInteger(form, "aiDisplayListIndex");
     //    if (dbm_displayListBase && dbm_displayListBase->formType == RE::FormType::FormList){
-    //        auto* lvli = DYNAMIC_CAST(dbm_displayListBase, RE::TESForm, RE::BGSListForm);
+    //        auto* lvli = dbm_displayListBase->As<RE::BGSListForm>();
     //        if (lvli && dbm_displayListIndex > -1 && dbm_displayListIndex < static_cast<int32_t>(lvli->forms.size())){
     //            return lvli->forms[dbm_displayListIndex];
     //        }
