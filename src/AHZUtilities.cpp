@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "AHZUtilities.h"
 #include <io.h>
 #include <windows.h>

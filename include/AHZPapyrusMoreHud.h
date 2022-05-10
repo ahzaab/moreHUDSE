@@ -1,7 +1,7 @@
 //class VMClassRegistry;
 //struct StaticFunctionTag;
 
-#include "PCH.h"
+#include "pch.h"
 #include <string.h>
 #include <map>
 

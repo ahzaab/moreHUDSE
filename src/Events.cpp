@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "Events.h"
 #include "AHZTarget.h"
 

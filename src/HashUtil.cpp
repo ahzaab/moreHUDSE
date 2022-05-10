@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "HashUtil.h"
 
 //From SKSE source, brough this in to make sure the CRC matches in the port
