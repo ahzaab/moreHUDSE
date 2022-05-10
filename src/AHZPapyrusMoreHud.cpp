@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "AHZPapyrusMoreHud.h"
 #include "version.h"
 #include <mutex>
@@ -109,7 +109,6 @@ auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag
     return (it != s_ahzRegisteredIcons.end());
 }
 
-
 void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName)
 {
     logger::trace("AddIconItem");
@@ -170,7 +169,6 @@ auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> std::string
 
     return iconName;
 }
-
 
 auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {

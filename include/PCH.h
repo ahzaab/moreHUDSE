@@ -32,17 +32,15 @@
 namespace WinAPI = SKSE::WinAPI;
 
 #ifndef NDEBUG
-#include <iostream>
-#include <spdlog/sinks/msvc_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#    include <iostream>
+#    include <spdlog/sinks/msvc_sink.h>
+#    include <spdlog/sinks/stdout_color_sinks.h>
 #endif
 
 #include "IForEachScriptObjectFunctor.h"
 
-
 using namespace std::literals;
 namespace logger = SKSE::log;
-
 
 #define DLLEXPORT __declspec(dllexport)
 

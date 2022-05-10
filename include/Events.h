@@ -9,8 +9,8 @@ namespace Events
     class MenuHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
     {
     public:
-        static MenuHandler*              GetSingleton();
-        static void                      Sink();
+        static MenuHandler* GetSingleton();
+        static void         Sink();
         virtual EventResult ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
     private:
@@ -24,7 +24,6 @@ namespace Events
 
         MenuHandler& operator=(const MenuHandler&) = delete;
         MenuHandler& operator=(MenuHandler&&) = delete;
-
     };
 
     class CrosshairHandler :
@@ -32,8 +31,8 @@ namespace Events
     {
     public:
         static CrosshairHandler* GetSingleton();
-        static void                 Sink();
-        EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
+        static void              Sink();
+        EventResult              ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
 
     private:
         CrosshairHandler(){};

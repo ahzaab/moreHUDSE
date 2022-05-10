@@ -1,4 +1,4 @@
-﻿#include "PCH.h"
+﻿#include "pch.h"
 
 #include <cwchar>
 #include <cstdlib>
@@ -16,7 +16,6 @@
 
 static std::map<uint8_t, string> m_soulMap;
 
-
 auto CAHZScaleform::IsSurvivalMode() -> bool
 {
     using TESGlobal = RE::TESGlobal;
@@ -24,7 +23,6 @@ auto CAHZScaleform::IsSurvivalMode() -> bool
     const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
     return survival ? survival->value == 1.0F : false;
 }
-
 
 auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
 {
@@ -42,7 +40,6 @@ auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
     }
     return m_soulMap[soulLevel];
 }
-
 
 auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
 {
@@ -362,7 +359,6 @@ auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
 {
     // TODO: Port Note, this is quite different, SKSE had more types defined.  So
     // for now we better stick with the values that were used prior to port
-
 
     enum  // type
     {
@@ -777,7 +773,6 @@ void CAHZScaleform::ProcessTargetEffects(const TargetData& target, RE::GFxFuncti
 {
     string name;
 
-
     bool calculateInventory = args.args[1].GetBool();
 
     if (!calculateInventory) {
@@ -809,7 +804,6 @@ void CAHZScaleform::ProcessTargetEffects(const TargetData& target, RE::GFxFuncti
     } else if (!target.effectsDescription.empty()) {
         name = target.effectsDescription;
     }
-
 
     if (calculateInventory) {
         BuildInventoryObject(target, args);
@@ -1069,7 +1063,6 @@ void CAHZScaleform::ProcessValidTarget(const TargetData& target, RE::GFxFunction
         args.args[0].DeleteMember("dataObj");
         return;
     }
-
 
     RE::GFxValue obj;
     args.movie->CreateObject(&obj);

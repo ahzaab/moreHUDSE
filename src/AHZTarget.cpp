@@ -72,7 +72,6 @@ float CAHZTarget::GetActorWarmthRating_Native(RE::Actor* a1, float s2)
 
 //------------------End Native Wrappers -------------------------
 
-
 void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
 {
     m_pForm = CAHZFormLookup::Instance().GetTESForm(pTargetRef);
@@ -89,7 +88,6 @@ void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
     } else {
         m_pObjectRef = nullptr;
     }
-
 
     UpdateTarget();
 }
@@ -372,7 +370,6 @@ float CAHZTarget::GetWeaponDamage()
 
     auto baseForm = GetForm();
 
-
     if (baseForm->GetFormType() != RE::FormType::Weapon &&
         baseForm->GetFormType() != RE::FormType::Ammo) {
         return {};
@@ -554,7 +551,6 @@ std::string CAHZTarget::GetEffectsDescription()
     return desc;
 };
 
-
 std::string CAHZTarget::GetDescription()
 {
     if (!IsValid())
@@ -633,7 +629,6 @@ RE::AlchemyItem* CAHZTarget::GetAlchemyItem()
 {
     if (!IsValid())
         return nullptr;
-
 
     if (GetForm()->GetFormType() == RE::FormType::AlchemyItem)
         return GetForm()->As<RE::AlchemyItem>();
@@ -728,7 +723,6 @@ RE::IngredientItem* CAHZTarget::GetIngredient()
     if (!IsValid())
         return nullptr;
 
-
     if (GetForm()->GetFormType() == RE::FormType::Ingredient)
         return GetForm()->As<RE::IngredientItem>();
 
@@ -820,7 +814,6 @@ RE::SpellItem* CAHZTarget::GetSpellItem()
 
     return GetForm()->As<RE::SpellItem>();
 }
-
 
 std::string CAHZTarget::GetTargetName()
 {

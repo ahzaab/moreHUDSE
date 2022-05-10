@@ -16,25 +16,25 @@ struct TargetData
 
     bool                             isValid{};
     bool                             canCarry{};
-    bool                               bookRead{};
-    RE::FormType                       formType{ RE::FormType::None };
-    RE::FormID   formId;
-    std::string  effectsDescription{};
-    std::string                        description{};
-    float        damage{};
-    RE::BIPED_MODEL::ArmorType         armorType{ RE::BIPED_MODEL::ArmorType::kLightArmor }; //0
-    float        armorRating{};
-    float        armorWarmthRating{};
-    RE::BIPED_MODEL::BipedObjectSlot   armorslotMask{ RE::BIPED_MODEL::BipedObjectSlot::kNone };
-    std::vector<std::string>           knownIngredientEffects{};
+    bool                             bookRead{};
+    RE::FormType                     formType{ RE::FormType::None };
+    RE::FormID                       formId;
+    std::string                      effectsDescription{};
+    std::string                      description{};
+    float                            damage{};
+    RE::BIPED_MODEL::ArmorType       armorType{ RE::BIPED_MODEL::ArmorType::kLightArmor };  //0
+    float                            armorRating{};
+    float                            armorWarmthRating{};
+    RE::BIPED_MODEL::BipedObjectSlot armorslotMask{ RE::BIPED_MODEL::BipedObjectSlot::kNone };
+    std::vector<std::string>         knownIngredientEffects{};
     std::string                      name{};
-    std::string                        displayName{};
-    float                              weight{};
-    RE::WEAPON_TYPE                    weaponType{};
-    EnchantmentType                    enchantmentType{};
-    bool                               isSpellTome{};
-    RE::ActorValue                     bookSkill{};
-    bool                               isBoltAmmo{};
+    std::string                      displayName{};
+    float                            weight{};
+    RE::WEAPON_TYPE                  weaponType{};
+    EnchantmentType                  enchantmentType{};
+    bool                             isSpellTome{};
+    RE::ActorValue                   bookSkill{};
+    bool                             isBoltAmmo{};
 
     void Dump() const
     {
@@ -56,7 +56,7 @@ struct TargetData
         logger::trace("armorWarmthRating: {}", armorWarmthRating);
         logger::trace("armorslotMask: {}", armorslotMask);
         logger::trace("knownIngredientEffects:");
-        for (auto& i: knownIngredientEffects) {
+        for (auto& i : knownIngredientEffects) {
             logger::trace("   {}", i);
         }
         logger::trace("name: {}", name);
@@ -65,10 +65,9 @@ struct TargetData
         logger::trace("weaponType: {}", weaponType);
         logger::trace("enchantmentType: {}", enchantmentType);
         logger::trace("isAmmoBolt: {}", isBoltAmmo);
-        
     }
 
- private:
+private:
     void Reset()
     {
         isValid = false;
@@ -76,12 +75,12 @@ struct TargetData
         bookRead = false;
         formType = RE::FormType::None;
         formId = static_cast<RE::FormID>(0);
-        effectsDescription.clear(); 
+        effectsDescription.clear();
         description.clear();
         bookSkill = RE::ActorValue::kNone;
         isSpellTome = false;
         damage = 0;
-        armorType = RE::BIPED_MODEL::ArmorType::kLightArmor; //0
+        armorType = RE::BIPED_MODEL::ArmorType::kLightArmor;  //0
         armorRating = 0;
         armorWarmthRating = 0;
         armorslotMask = RE::BIPED_MODEL::BipedObjectSlot::kNone;
@@ -89,13 +88,11 @@ struct TargetData
         name.clear();
         displayName.clear();
         weight = 0;
-        weaponType = RE::WEAPON_TYPE::kHandToHandMelee; //0
+        weaponType = RE::WEAPON_TYPE::kHandToHandMelee;  //0
         enchantmentType = EnchantmentType::None;
         isBoltAmmo = false;
     }
-
 };
-
 
 class CAHZTarget
 {
@@ -106,14 +103,14 @@ public:
         return theInstance;
     };
 
-    void SetTarget(RE::TESObjectREFR* pTargetRef);
+    void              SetTarget(RE::TESObjectREFR* pTargetRef);
     const TargetData& GetTarget() const noexcept { return m_target; };
 
     CAHZTarget(CAHZTarget& other) = delete;
     void operator=(const CAHZTarget&) = delete;
 
     //------------------Native Wrappers -----------------------------
-    static void GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2);
+    static void  GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2);
     static char* ProcessSurvivalMode_Native(RE::BSString* a2);
     static float GetArmorWarmthRating_Native(RE::TESForm* a1);
     static float GetActorWarmthRating_Native(RE::Actor* a1, float s2);
@@ -121,7 +118,7 @@ public:
 
 private:
     CAHZTarget() = default;
-    
+
     void UpdateTarget();
 
     RE::TESObjectREFR* m_pObjectRef = nullptr;
@@ -130,7 +127,7 @@ private:
 
     RE::IngredientItem* m_IngredientItem = nullptr;
     RE::AlchemyItem*    m_AlchemyItem = nullptr;
-    RE::SpellItem*    m_SpellItem = nullptr;
+    RE::SpellItem*      m_SpellItem = nullptr;
 
     [[nodiscard]] bool IsReference()
     {
@@ -150,20 +147,20 @@ private:
     [[nodiscard]] std::vector<std::string>         GetKnownIngredientEffects();
     [[nodiscard]] float                            GetArmorWarmthRating();
     [[nodiscard]] RE::BIPED_MODEL::BipedObjectSlot GetArmorSlotMask();
-    [[nodiscard]] float                      GetArmorRating();
-    [[nodiscard]] float                      GetWeaponDamage();
-    [[nodiscard]] RE::ActorValue             GetBookSkill();
-    [[nodiscard]] bool                       GetIsSpellTome();
-    [[nodiscard]] std::string                GetEffectsDescription();
-    [[nodiscard]] std::string         GetDescription();
-    [[nodiscard]] RE::BIPED_MODEL::ArmorType GetArmorType();
-    [[nodiscard]] bool                GetIsBookAndWasRead();
-    [[nodiscard]] RE::AlchemyItem*    GetAlchemyItem();
-    [[nodiscard]] RE::IngredientItem* GetIngredient();
-    [[nodiscard]] RE::SpellItem*      GetSpellItem();
-    [[nodiscard]] std::string         GetTargetName();
-    [[nodiscard]] std::string         GetTargetSoulLevelName();
-    [[nodiscard]] void         GetMagicItemDescription(RE::MagicItem* item, std::string& description);
+    [[nodiscard]] float                            GetArmorRating();
+    [[nodiscard]] float                            GetWeaponDamage();
+    [[nodiscard]] RE::ActorValue                   GetBookSkill();
+    [[nodiscard]] bool                             GetIsSpellTome();
+    [[nodiscard]] std::string                      GetEffectsDescription();
+    [[nodiscard]] std::string                      GetDescription();
+    [[nodiscard]] RE::BIPED_MODEL::ArmorType       GetArmorType();
+    [[nodiscard]] bool                             GetIsBookAndWasRead();
+    [[nodiscard]] RE::AlchemyItem*                 GetAlchemyItem();
+    [[nodiscard]] RE::IngredientItem*              GetIngredient();
+    [[nodiscard]] RE::SpellItem*                   GetSpellItem();
+    [[nodiscard]] std::string                      GetTargetName();
+    [[nodiscard]] std::string                      GetTargetSoulLevelName();
+    [[nodiscard]] void                             GetMagicItemDescription(RE::MagicItem* item, std::string& description);
 
     [[nodiscard]] static RE::IngredientItem* GetIngredientFromLeveledList(RE::TESForm* thisObject);
     [[nodiscard]] static RE::AlchemyItem*    GetAlchemyItemFromLeveledList(RE::TESForm* thisObject);

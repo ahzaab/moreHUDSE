@@ -1,4 +1,4 @@
-﻿#include "PCH.h"
+﻿#include "pch.h"
 #include "AHZScaleformHook.h"
 #include <string>
 #include <mutex>
@@ -51,7 +51,6 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
             }
         }
     }
-
 
     CAHZActorData data;
     data.targetChanged = targetChanged;

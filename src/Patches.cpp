@@ -1,11 +1,10 @@
-#include "PCH.h"
+#include "pch.h"
 #include "Patches.h"
 #include "AHZScaleformHook.h"
 
 #include "REL/Relocation.h"
 #include "SKSE/API.h"
 #include "SKSE/Trampoline.h"
-
 
 namespace Patches
 {

@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "IForEachScriptObjectFunctor.h"
 #include "AHZForEachScriptObjectFunctor.h"
 
@@ -16,7 +16,6 @@ CAHZForEachScriptObjectFunctor::CAHZForEachScriptObjectFunctor(
     m_variable = prefix + a_varName + suffix;
     m_property = a_varName;
 }
-
 
 auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSAGE* script, [[maybe_unused]] void* unk1) -> bool
 {

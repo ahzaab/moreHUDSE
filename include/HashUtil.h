@@ -8,4 +8,3 @@ namespace SKSE
         uint32_t CRC32(const char* str, uint32_t start = 0);
     }
 }
-

@@ -2,7 +2,6 @@
 
 #include "SKSE/RegistrationSet.h"
 
-
 namespace moreHUD
 {
     class Papyrus

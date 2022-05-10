@@ -1,7 +1,6 @@
-#include "PCH.h"
+#include "pch.h"
 #include "AHZTarget.h"
 #include "AHZArmorInfo.h"
-
 
 auto CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extraList) -> RE::ExtraDataList*
 {

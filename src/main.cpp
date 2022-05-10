@@ -1,4 +1,4 @@
-﻿#include "PCH.h"
+﻿#include "pch.h"
 
 #include <memory>
 #include <vector>
@@ -20,7 +20,6 @@
 #include "AHZExternalFormTable.h"
 #include "AHZVanillaFormTable.h"
 
-
 using namespace moreHUD;
 //using namespace std;
 
@@ -33,41 +32,39 @@ namespace
     {
         switch (a_msg->type) {
         case SKSE::MessagingInterface::kDataLoaded:
-        {
-            // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
-            CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
-            CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
+            {
+                // First load the built-in (Known Vanilla) ACTI Forms and VM Script Variables
+                CAHZVanillaFormTable::LoadACTIForms(CAHZFormLookup::Instance());
+                CAHZVanillaFormTable::LoadVMVariables(CAHZFormLookup::Instance());
 
-            // Second load any addional forms added externally
-            logger::info("Processing any third party .mhud files that may exist...");
+                // Second load any addional forms added externally
+                logger::info("Processing any third party .mhud files that may exist...");
 
-            // Read all .mhuf files and load in the lookup tables
-            auto skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
+                // Read all .mhuf files and load in the lookup tables
+                auto skyrimDataPath = CAHZUtilities::GetSkyrimDataPath();
 
-            // Get all .mhud files from the skyrim data folder
-            auto mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
+                // Get all .mhud files from the skyrim data folder
+                auto mHudFiles = CAHZUtilities::GetMHudFileList(skyrimDataPath);
 
-            if (!mHudFiles.size()) {
-                logger::info("No third party .mHud files where detected.");
-            } else {
-                // Load the external ACTI Forms and VM Script Variables
-                CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
-                CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
+                if (!mHudFiles.size()) {
+                    logger::info("No third party .mHud files where detected.");
+                } else {
+                    // Load the external ACTI Forms and VM Script Variables
+                    CAHZExternalFormTable::LoadACTIForms(CAHZFormLookup::Instance(), mHudFiles);
+                    CAHZExternalFormTable::LoadVMVariables(CAHZFormLookup::Instance(), mHudFiles);
 
-                logger::info("%d third party .mHud file(s) processed", mHudFiles.size());
+                    logger::info("%d third party .mHud file(s) processed", mHudFiles.size());
+                }
+
+                logger::info("Third party .mHud file processing completed.");
+
+                logger::info("Registering Events"sv);
+                Events::Install();
             }
-
-            logger::info("Third party .mHud file processing completed.");
-
-
-            logger::info("Registering Events"sv);
-            Events::Install();
-
-        } break;
+            break;
         }
     }
 }
-
 
 extern "C"
 {
@@ -137,14 +134,12 @@ extern "C"
             //     logger::info("offset: {:x}, id {}"sv, offset, id1);
             // }
 
-
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
                 logger::critical("Could not register MessageHandler"sv);
                 return false;
             }
             logger::info("registered listener"sv);
-
 
             if (!moreHUD::Papyrus::Register()) {
                 logger::critical("Could not register papyrus functions"sv);

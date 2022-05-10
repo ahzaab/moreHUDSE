@@ -17,7 +17,7 @@ namespace RE
                 RE::VMHandle    handle;
             };
             static_assert(sizeof(SCRIPT_OBJECT_MESSAGE) == 0x28);
-            
+
             IForEachScriptObjectFunctor() = default;
             virtual ~IForEachScriptObjectFunctor() = default;
 

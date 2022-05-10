@@ -1,6 +1,5 @@
-#include "PCH.h"
+#include "pch.h"
 #include "ActorValueList.h"
-
 
 namespace SKSE
 {

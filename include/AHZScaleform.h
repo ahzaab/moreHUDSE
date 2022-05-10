@@ -28,7 +28,6 @@ public:
     static void  ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args);
     static float GetTotalWarmthRating();
 
-
 private:
     static void ReplaceStringInPlace(std::string& subject, const std::string& search,
         const std::string& replace);

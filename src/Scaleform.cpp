@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "Scaleform.h"
 #include "AHZScaleform.h"
 #include "SKSE/API.h"
@@ -226,7 +226,6 @@ namespace Scaleform
                     a_params.retVal->SetBoolean(false);
                     return;
                 }
-
 
                 auto name = ref.name;
 
