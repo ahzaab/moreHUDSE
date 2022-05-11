@@ -1,0 +1,48 @@
+
+; If any parameters are left blank the built-in default values are used including the default clips
+
+[EnemyMeter]
+; Will stack the meters and numbers in this order Health, Magicka, Stamina.  This should be disabled
+; if you plan on moving the stamina and magicka meters to custom locations
+bUseStacking=true
+; Used for the stacking calculation  this is the height if the visible meter, not the movie clip and this value is "Before Scaling"  
+fHeight = 11.5  
+
+[EnemyMagickaMeter]
+fXOffset=0
+fYOffset=0
+fXScale=1.0
+fYScale=1.0
+fAlpha=100
+sSWFPath='moreHUD/enemyMagickaMeter.swf'
+fNumbersXOffset=0
+fNumbersYOffset=0
+fNumbersXScale=1.0
+fNumbersYScale=1.0
+fNumbersAlpha=100
+
+[EnemyStaminaMeter]
+fXOffset=0
+fYOffset=0
+fXScale=1.0
+fYScale=1.0
+fAlpha=100
+sSWFPath='moreHUD/enemyStaminaMeter.swf'
+fNumbersXOffset=0
+fNumbersYOffset=0
+fNumbersXScale=1.0
+fNumbersYScale=1.0
+fNumbersAlpha=100
+
+[EnemyHealthMeter]
+fNumbersXOffset=0
+fNumbersYOffset=0
+fNumbersXScale=1.0
+fNumbersYScale=1.0
+fNumbersAlpha=100
+
+[Icons]
+sSWFPath='moreHUD/baseIcons.swf'
+fScale=1.0
+iSpacing=1
+fYOffset=1

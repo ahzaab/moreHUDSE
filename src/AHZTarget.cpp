@@ -1,6 +1,11 @@
 ﻿#include "pch.h"
 #include "AHZTarget.h"
 #include "AHZFormLookup.h"
+#ifdef SE_BUILD
+#include "Offsets-SE.h"
+#else
+#include "Offsets-AE.h"
+#endif
 
 namespace
 {
@@ -42,7 +47,8 @@ namespace
 void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZTarget::GetMagicItemDescription_Native);
-    REL::Relocation<func_t> func{ REL::ID(51900) };
+    //REL::Relocation<func_t> func{ REL::ID(51900) };
+    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetMagicItemDescription };
     func(nullptr, a1, a2);
 }
 
@@ -50,7 +56,8 @@ void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSSt
 char* CAHZTarget::ProcessSurvivalMode_Native(RE::BSString* a2)
 {
     using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
-    REL::Relocation<func_t> func{ REL::ID(51901) };
+    //REL::Relocation<func_t> func{ REL::ID(51901) };
+    REL::Relocation<func_t> func{ moreHUDSE::Offsets::ProcessSurvivalMode };
     return func(a2);
 }
 
@@ -58,7 +65,8 @@ char* CAHZTarget::ProcessSurvivalMode_Native(RE::BSString* a2)
 float CAHZTarget::GetArmorWarmthRating_Native(RE::TESForm* a1)
 {
     using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
-    REL::Relocation<func_t> func{ REL::ID(26393) };
+    //REL::Relocation<func_t> func{ REL::ID(26393) };
+    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetArmorWarmthRating };
     return func(a1);
 }
 
@@ -66,7 +74,8 @@ float CAHZTarget::GetArmorWarmthRating_Native(RE::TESForm* a1)
 float CAHZTarget::GetActorWarmthRating_Native(RE::Actor* a1, float s2)
 {
     using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
-    REL::Relocation<func_t> func{ REL::ID(26394) };
+    //REL::Relocation<func_t> func{ REL::ID(26394) };
+    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetActorWarmthRating };
     return func(a1, s2);
 }
 

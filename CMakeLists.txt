@@ -6,11 +6,25 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 # ---- Project ----
 
+option(USE_SE_BUILD "Build for SE" OFF)
+if (USE_SE_BUILD)
+  add_definitions(-DSE_BUILD)
+endif()
+
+IF( USE_SE_BUILD )
+project(
+	AHZmoreHUDPlugin
+	VERSION 4.1.0.0
+	LANGUAGES CXX
+)
+ELSE()
 project(
 	AHZmoreHUDPlugin
 	VERSION 5.1.0.0
 	LANGUAGES CXX
 )
+ENDIF()
+
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
@@ -129,7 +143,11 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 # set(Boost_USE_STATIC_RUNTIME OFF)
 # set(Boost_USE_DEBUG_RUNTIME ON)
 
+IF( USE_SE_BUILD )
+add_subdirectory(external/CommonLibSSE_SE)
+ELSE()
 add_subdirectory(external/CommonLibSSE)
+ENDIF()
 
 # find_package(Boost
 # 	REQUIRED
@@ -141,6 +159,12 @@ find_package(spdlog REQUIRED)
 find_package(xbyak REQUIRED)
 
 # ---- Add source files ----
+
+IF( USE_SE_BUILD )
+	set(headers ${headers} include/offsets-se.h)
+else()
+	set(headers ${headers} include/offsets-ae.h)
+endif()
 
 include(cmake/headerlist.cmake)
 include(cmake/sourcelist.cmake)
@@ -223,9 +247,18 @@ endif()
 
 # ---- Post build ----
 
+IF( USE_SE_BUILD )
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
+)
+ELSE()
 add_custom_command(
 	TARGET ${PROJECT_NAME}
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
 )
+ENDIF()

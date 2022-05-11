@@ -2,3 +2,7 @@
 	path = external/CommonLibSSE
 	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
 	branch = master
+[submodule "external/CommonLibSSE_SE"]
+	path = external/CommonLibSSE_SE
+	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
+	branch = master

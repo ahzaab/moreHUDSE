@@ -4,10 +4,15 @@
 #include <mutex>
 #include "SKSE/Trampoline.h"
 #include <Xbyak/xbyak.h>
+#ifdef SE_BUILD
+#include "Offsets-SE.h"
+#else
+#include "Offsets-AE.h"
+#endif
 
 // 1408B2880 1.6.318
-constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
-uintptr_t           EnemyUpdateHook = (EnemyUpdateHookBase.address() + 0x44);
+// constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
+uintptr_t           EnemyUpdateHook = (moreHUDSE::Offsets::EnemyUpdateHookBase.address() + 0x44);
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
 RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
 RE::BGSKeyword*     AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
