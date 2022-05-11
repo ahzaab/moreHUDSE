@@ -48,8 +48,8 @@ int Property iToggleOn Auto
 ; Constants -------------------------------------------------------------------------------------------------
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 5 autoReadOnly
-int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 5 autoReadOnly
+int Property I_THIS_VERSION_MINOR = 1 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
 int Property I_THIS_VERSION_BETA = 0 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly
 
@@ -72,9 +72,12 @@ Function Unregister()
 EndFunction
 
 Function Maintenance()
+    Utility.Wait(1.0)
     ; Detect SKSE
     int skseRelease = SKSE.GetVersionRelease()
     bool isSKSEInstalled = false
+    int pluginVersion
+    string pluginVersionStr
     if skseRelease == 0
     	Debug.MessageBox("moreHUD: SKSE is not Detected!")
     	isSKSEInstalled = false
@@ -86,13 +89,18 @@ Function Maintenance()
     endIf
 
     if (isSKSEInstalled == true)
-		If iVersion < ((I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA)
-			iVersion = (I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA
-            if (I_THIS_VERSION_BETA > 0)
-			    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
-            else
-                Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
-            EndIf
+        pluginVersion = AhzMoreHud.GetVersion()
+        if iVersion < pluginVersion
+            iVersion = pluginVersion
+            pluginVersionStr = AhzMoreHud.GetVersionString()
+            Debug.Notification("moreHUD version: " + pluginVersionStr)
+		;If iVersion < ((I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA)
+		;	iVersion = (I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA
+            ;if (I_THIS_VERSION_BETA > 0)
+			;    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
+            ;else
+            ;    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
+            ;EndIf
 		EndIf
 	Endif
 
