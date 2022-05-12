@@ -37,7 +37,7 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 * [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
 * [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
 * [SKSE64](https://skse.silverlock.org/)
-* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604)
+* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604) (Soft requirement.  Only needed for MCM)
 
 
 ## Build Instructions
