@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "AHZActorInfo.h"
-#ifdef SE_BUILD
+#ifdef VR_BUILD
+#include "Offsets-VR.h"
+#elif SE_BUILD
 #include "Offsets-SE.h"
 #else
 #include "Offsets-AE.h"
@@ -10,7 +12,6 @@
 auto CAHZActorInfo::IsSentient(RE::Actor* actor) -> uint32_t
 {
     using func_t = decltype(&CAHZActorInfo::IsSentient);
-    //REL::Relocation<func_t> func{ REL::ID(37913) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::IsSentient };
     return func(actor);
 }
@@ -19,7 +20,6 @@ auto CAHZActorInfo::IsSentient(RE::Actor* actor) -> uint32_t
 auto CAHZActorInfo::GetSoulType(uint16_t actorLevel, uint8_t isActorSentient) -> uint32_t
 {
     using func_t = decltype(&CAHZActorInfo::GetSoulType);
-    //REL::Relocation<func_t> func{ REL::ID(26520) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetSoulType };
     return func(actorLevel, isActorSentient);
 }

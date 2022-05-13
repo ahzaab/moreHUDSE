@@ -158,20 +158,21 @@ DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE
 
             SKSE::AllocTrampoline(1 << 6);
 
-            // std::vector<size_t> offsets = {
-            // 0x8C2D30,
-            // 0x8C33D0,
-            // 0x3D4D60,
-            // 0x3d4e37,
-            // 0x62DE60,
-            // 0x3D91A0,
-            // 0x8B2880};
+            std::vector<size_t> offsets = {
+            0x0053EC60,   //Wand
+            0x0060F1D0, //sentient
+            0x003D0FC0, //actor soul
+            0x008C0940, // item description
+            0x008AFE70, // enemy
+            0x3D91A0,
+            0x8B2880};
 
-            // for (auto &offset: offsets){
-            //     auto o2i = REL::IDDatabase::Offset2ID();
-            //     auto id1 = o2i(offset);
-            //     logger::info("offset: {:x}, id {}"sv, offset, id1);
-            // }
+             for (auto &offset: offsets){
+                 //auto o2i = REL::IDDatabase::Offset2ID();
+                 //auto id1 = o2i(offset);
+                 auto id1 = REL::IDDatabase::get().id2offset(offset);
+                 logger::info("offset: {:x}, id {}"sv, offset, id1);
+             }
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {

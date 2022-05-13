@@ -4,7 +4,9 @@
 #include <mutex>
 #include "SKSE/Trampoline.h"
 #include <Xbyak/xbyak.h>
-#ifdef SE_BUILD
+#ifdef VR_BUILD
+#include "Offsets-VR.h"
+#elif SE_BUILD
 #include "Offsets-SE.h"
 #else
 #include "Offsets-AE.h"

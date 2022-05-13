@@ -1,7 +1,9 @@
 ﻿#include "pch.h"
 #include "AHZTarget.h"
 #include "AHZFormLookup.h"
-#ifdef SE_BUILD
+#ifdef VR_BUILD
+#include "Offsets-VR.h"
+#elif SE_BUILD
 #include "Offsets-SE.h"
 #else
 #include "Offsets-AE.h"
@@ -47,36 +49,42 @@ namespace
 void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZTarget::GetMagicItemDescription_Native);
-    //REL::Relocation<func_t> func{ REL::ID(51900) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetMagicItemDescription };
     func(nullptr, a1, a2);
 }
 
 // 1408C33D0 1.6.318
-char* CAHZTarget::ProcessSurvivalMode_Native(RE::BSString* a2)
+char* CAHZTarget::ProcessSurvivalMode_Native([[maybe_unused]]RE::BSString* a2)
 {
+#ifndef VR_BUILD
     using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
-    //REL::Relocation<func_t> func{ REL::ID(51901) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::ProcessSurvivalMode };
     return func(a2);
+#endif
 }
 
 // 1403D4D60 1.6.318
-float CAHZTarget::GetArmorWarmthRating_Native(RE::TESForm* a1)
+float CAHZTarget::GetArmorWarmthRating_Native([[maybe_unused]]RE::TESForm* a1)
 {
+#ifndef VR_BUILD
     using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
-    //REL::Relocation<func_t> func{ REL::ID(26393) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetArmorWarmthRating };
     return func(a1);
+#else
+    return 0;
+#endif
 }
 
 // 1403d4e37  1.6.318
-float CAHZTarget::GetActorWarmthRating_Native(RE::Actor* a1, float s2)
+float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[maybe_unused]]float s2)
 {
+#ifndef VR_BUILD
     using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
-    //REL::Relocation<func_t> func{ REL::ID(26394) };
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetActorWarmthRating };
     return func(a1, s2);
+#else
+    return 0;
+#endif
 }
 
 //------------------End Native Wrappers -------------------------
