@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Events.h"
 #include "AHZTarget.h"
+#ifdef VR_BUILD
+#include "Offsets-VR.h"
+#endif
 
 namespace Events
 {
@@ -36,7 +39,7 @@ namespace Events
                 }
 
                 RE::GFxValue _lockroot = true;
-                view->SetVariable("_lockroot", &_lockroot, 1);
+                view->SetVariable("_lockroot", &_lockroot, RE::GFxMovie::SetVarType::kSticky);
 
                 args[0].SetString("AHZEnemyLevelInstance");
                 view->Invoke("getNextHighestDepth", &args[1], nullptr, 0);
@@ -108,7 +111,7 @@ namespace Events
     }
 #else
     uintptr_t           WandUpdateHook = (moreHUDSE::Offsets::WandUpdateHookBase.address() + 0x7F);
-    bool Hook_WandLookupREFRByHandle_Impl(UInt32& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
+    bool Hook_WandLookupREFRByHandle_Impl(RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
     {
         auto               result = RE::LookupReferenceByHandle(refHandle, refrOut);
         if (!result){

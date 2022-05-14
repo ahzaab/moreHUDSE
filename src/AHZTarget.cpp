@@ -13,10 +13,14 @@ namespace
 {
     bool IsSurvivalMode()
     {
+#ifndef VR_BUILD
         using TESGlobal = RE::TESGlobal;
         const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
         const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
         return survival ? survival->value == 1.0F : false;
+#else
+    return false;
+#endif
     }
 
     std::string GetSoulLevelName(uint8_t soulLevel)
@@ -60,6 +64,8 @@ char* CAHZTarget::ProcessSurvivalMode_Native([[maybe_unused]]RE::BSString* a2)
     using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
     REL::Relocation<func_t> func{ moreHUDSE::Offsets::ProcessSurvivalMode };
     return func(a2);
+#else
+    return nullptr;
 #endif
 }
 

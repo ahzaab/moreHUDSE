@@ -97,31 +97,31 @@ namespace
 
 extern "C"
 {
-#ifdef SE_BUILD
-DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-{
-    if (!InitLog())
+#if defined(SE_BUILD) || defined(VR_BUILD)
+    DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
     {
-        return false;
+        if (!InitLog())
+        {
+            return false;
+        }
+
+        a_info->infoVersion = SKSE::PluginInfo::kVersion;
+        a_info->name = "Ahzaab's moreHUD Plugin";
+        a_info->version = Version::ASINT;
+
+        if (a_skse->IsEditor()) {
+            logger::critical("Loaded in editor, marking as incompatible!"sv);
+            return false;
+        }
+
+        const auto ver = a_skse->RuntimeVersion();
+        if (ver <= SKSE::RUNTIME_1_5_39) {
+            logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
+            return false;
+        }
+
+        return true;
     }
-
-    a_info->infoVersion = SKSE::PluginInfo::kVersion;
-    a_info->name = "Ahzaab's moreHUD Plugin";
-    a_info->version = Version::ASINT;
-
-    if (a_skse->IsEditor()) {
-        logger::critical("Loaded in editor, marking as incompatible!"sv);
-        return false;
-    }
-
-    const auto ver = a_skse->RuntimeVersion();
-    if (ver <= SKSE::RUNTIME_1_5_39) {
-        logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
-        return false;
-    }
-
-    return true;
-}
 #else
     DLLEXPORT constinit auto SKSEPlugin_Version = []() {
         SKSE::PluginVersionData v{};
@@ -145,7 +145,7 @@ DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE
         // Sleep(1000 * 2);
 
         try {
-#ifndef SE_BUILD
+#if !defined(SE_BUILD) && !defined(VR_BUILD)
             if (!InitLog())
             {
                 return false;

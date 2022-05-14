@@ -18,10 +18,14 @@ static std::map<uint8_t, string> m_soulMap;
 
 auto CAHZScaleform::IsSurvivalMode() -> bool
 {
+#ifndef VR_BUILD
     using TESGlobal = RE::TESGlobal;
     const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
     const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
     return survival ? survival->value == 1.0F : false;
+#else
+    return false;
+#endif
 }
 
 auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
