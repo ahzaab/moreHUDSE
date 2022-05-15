@@ -114,11 +114,19 @@ extern "C"
             return false;
         }
 
+#ifdef VR_BUILD
+        const auto ver = a_skse->RuntimeVersion();
+        if (ver <= SKSE::RUNTIME_VR_1_4_15) {
+            logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
+            return false;
+        }
+#else
         const auto ver = a_skse->RuntimeVersion();
         if (ver <= SKSE::RUNTIME_1_5_39) {
             logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
             return false;
         }
+#endif
 
         return true;
     }
@@ -137,12 +145,12 @@ extern "C"
 
     DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
     {
-        // while (!IsDebuggerPresent())
-        // {
-        //   Sleep(10);
-        // }
+        //  while (!IsDebuggerPresent())
+        //  {
+        //    Sleep(10);
+        //  }
 
-        // Sleep(1000 * 2);
+        //  Sleep(1000 * 2);
 
         try {
 #if !defined(SE_BUILD) && !defined(VR_BUILD)
@@ -158,21 +166,20 @@ extern "C"
 
             SKSE::AllocTrampoline(1 << 6);
 
-            std::vector<size_t> offsets = {
-            0x0053EC60,   //Wand
-            0x0060F1D0, //sentient
-            0x003D0FC0, //actor soul
-            0x008C0940, // item description
-            0x008AFE70, // enemy
-            0x3D91A0,
-            0x8B2880};
+            // std::vector<size_t> offsets = {
+            // 0x0053EC60,   //Wand
+            // 0x0060F1D0, //sentient
+            // 0x003D0FC0, //actor soul
+            // 0x008C0940, // item description
+            // 0x008AFE70 // enemy
+            // };
 
-             for (auto &offset: offsets){
-                 //auto o2i = REL::IDDatabase::Offset2ID();
-                 //auto id1 = o2i(offset);
-                 auto id1 = REL::IDDatabase::get().id2offset(offset);
-                 logger::info("offset: {:x}, id {}"sv, offset, id1);
-             }
+            //  for (auto &offset: offsets){
+            //      auto o2i = REL::IDDatabase::Offset2ID();
+            //      auto id1 = o2i(offset);
+            //      //auto id1 = REL::IDDatabase::Offset2ID(offset);
+            //      logger::info("offset: {:x}, id {}"sv, offset, id1);
+            //  }
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
