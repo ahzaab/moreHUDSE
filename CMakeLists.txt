@@ -14,7 +14,7 @@ endif()
 IF( USE_SE_BUILD )
 project(
 	AHZmoreHUDPlugin
-	VERSION 4.1.0.0
+	VERSION 4.1.1.0
 	LANGUAGES CXX
 )
 ELSE()
