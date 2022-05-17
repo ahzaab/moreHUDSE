@@ -46,7 +46,7 @@ auto CAHZWeaponInfo::GetLeftHandWeapon() -> AHZWeaponData
 
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
-            if (entry->object->GetFormID() == equippedItem->formID) {
+            if (entry && entry->object && entry->object->GetFormID() == equippedItem->formID && entry->extraLists) {
                 for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
                     auto extraData = *entryListIT;
                     if (extraData &&
@@ -81,7 +81,7 @@ auto CAHZWeaponInfo::GetRightHandWeapon() -> AHZWeaponData
 
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
-            if (entry && entry->object->GetFormID() == equippedItem->formID) {
+            if (entry && entry->object && entry->object->GetFormID() == equippedItem->formID) {
                 if (entry->extraLists) {
                     for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
                         auto extraData = *entryListIT;
@@ -113,7 +113,7 @@ auto CAHZWeaponInfo::GetEquippedAmmo() -> AHZWeaponData
 
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;
-            if (entry && entry->object->GetFormType() == RE::FormType::Ammo) {
+            if (entry && entry->object && entry->object->GetFormType() == RE::FormType::Ammo) {
                 if (entry->extraLists) {
                     for (auto entryListIT = entry->extraLists->begin(); entryListIT != entry->extraLists->end(); ++entryListIT) {
                         auto extraData = *entryListIT;

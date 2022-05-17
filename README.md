@@ -18,7 +18,7 @@ The compiled .dll is installed in the Skyrim Data Folder to `Data/SKSE/Plugins`
 Not by the Plugin. But only for the .swf file as described [here](https://github.com/ahzaab/moreHUDSEScaleform) 
 
 ## Configuration
-HUD mod authors, you can reskin or modify the additional enemy meters by including [these](https://github.com/ahzaab/moreHUDSE/tree/master/dist/Data/Interface/exported/moreHUD) files with your mod as a fmod or standalone patch, and modity to meet your needs.  These files must be placed in the `Data/interface/exported/moreHUD` folder.
+HUD mod authors, you can reskin or modify the additional enemy meters by including [these](https://github.com/ahzaab/moreHUDSE/tree/master/dist/AE/Data/Interface/exported/moreHUD) files with your mod as a fmod or standalone patch, and modity to meet your needs.  These files must be placed in the `Data/interface/exported/moreHUD` folder.
 
 ---
 
@@ -37,7 +37,7 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 * [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
 * [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
 * [SKSE64](https://skse.silverlock.org/)
-* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604)
+* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604) (Soft requirement.  Only needed for MCM)
 
 
 ## Build Instructions
