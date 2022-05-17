@@ -27,6 +27,7 @@ namespace Events
             return RE::BSEventNotifyControl::kContinue;
         }        
 #ifdef VR_BUILD
+        logger::trace("Menu: {}"sv, a_event->menuName);
         if (s_ahzMenuLoaded == false && a_event->menuName == "WSEnemyMeters"sv && a_event->opening) {
             auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
             if (view) {
@@ -38,7 +39,8 @@ namespace Events
                     logger::error("The IMenu returned NULL. The moreHUD widgets will not be loaded."sv);
                 }
 
-                RE::GFxValue _lockroot = true;
+                RE::GFxValue _lockroot;
+                _lockroot.SetBoolean(true);
                 view->SetVariable("_lockroot", &_lockroot, RE::GFxMovie::SetVarType::kSticky);
 
                 args[0].SetString("AHZEnemyLevelInstance");

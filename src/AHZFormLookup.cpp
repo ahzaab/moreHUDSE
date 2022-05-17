@@ -62,9 +62,19 @@ void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID,
     auto dataHandler = RE::TESDataHandler::GetSingleton();
 
     // Normalize to the raw formIDs
+#ifndef VR_BUILD
     auto isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
+#else
+    auto isBaseLight = false;
+#endif
     baseFormID = isBaseLight ? baseFormID & 0x00000FFF : baseFormID & 0x00FFFFFF;
+
+#ifndef VR_BUILD
     auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
+#else
+    auto isTargetLight = false;
+#endif
+
     targetFormID = isTargetLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
 
     auto baseForm = dataHandler->LookupForm(baseFormID, baseFormModName);

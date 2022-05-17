@@ -611,6 +611,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
         }
     }
 
+#ifndef VR_BUILD
     RE::GFxValue enemyObj;
     RE::GFxValue playerObj;
     args.movie->CreateObject(&enemyObj);
@@ -639,6 +640,25 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
     if (args.args[0].HasMember("enemy")) {
         args.args[0].SetMember("enemy", enemyObj);
     }
+
+#else
+    RE::GFxValue legacyObj;
+    args.movie->CreateObject(&legacyObj);
+    if (actorData.Level)
+    {
+        playerLevel = pPC->GetLevel();
+        RegisterNumber(&legacyObj, "EnemyLevel", actorData.Level);
+        RegisterNumber(&legacyObj, "PlayerLevel", playerLevel); 
+        std::string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
+        if (soulType && soulName.length()) {
+            RegisterString(&legacyObj, "Soul", soulName.c_str());
+        }  
+    }
+	if (args.args[0].HasMember("outObj"))
+	{
+		args.args[0].SetMember("outObj", legacyObj);
+	}      
+#endif
 }
 
 auto CAHZScaleform::GetArmorWeightClass(const TargetData& target) -> string
