@@ -1,5 +1,8 @@
-rm -R .\build
-mkdir build | OUT-NULL
+if (Test-Path -Path .\build)
+{
+    rm -R -Fo  .\build
+    mkdir build | OUT-NULL
+}
 Push-Location .\build
 try
 {
