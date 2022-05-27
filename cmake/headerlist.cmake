@@ -18,9 +18,9 @@ set(headers ${headers}
     include/Events.h
     include/HashUtil.h
     include/IForEachScriptObjectFunctor.h
-    include/Offsets.h
     include/Papyrus.h
     include/Patches.h
     include/Scaleform.h
     include/version.h
+    include/AHZTarget.h
 )

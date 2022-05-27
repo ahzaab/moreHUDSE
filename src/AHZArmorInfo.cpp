@@ -1,6 +1,6 @@
-#include "PCH.h"
+#include "pch.h"
+#include "AHZTarget.h"
 #include "AHZArmorInfo.h"
-
 
 auto CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extraList) -> RE::ExtraDataList*
 {
@@ -19,11 +19,14 @@ auto CAHZArmorInfo::GetWornExtraList(RE::BSSimpleList<RE::ExtraDataList*>* extra
 
 auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask) -> AHZArmorData
 {
-    AHZArmorData        data;
-    auto                pPC = RE::PlayerCharacter::GetSingleton();
+    AHZArmorData data;
+    auto         pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (!pPC)
+        return data;
+
     auto                inventoryChanges = pPC->GetInventoryChanges();
     RE::TESBoundObject* armor;
-    //= inventoryChanges->GetArmorInSlot(static_cast<uint32_t>(slotMask));
 
     if (inventoryChanges) {
         auto list = inventoryChanges->entryList;
@@ -31,8 +34,8 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
             for (auto it = list->begin(); it != list->end(); ++it) {
                 auto element = *it;
                 if (element) {
-                    if (element->object && element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light) {
-                        auto form = DYNAMIC_CAST(element->object, RE::TESBoundObject, RE::BGSBipedObjectForm);
+                    if (element->object && (element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light)) {
+                        auto form = element->object->As<RE::BGSBipedObjectForm>();
                         if (form && (static_cast<uint32_t>(form->GetSlotMask()) & static_cast<uint32_t>(slotMask))) {
                             armor = element->object;
                             auto wornList = GetWornExtraList(element->extraLists);
@@ -43,10 +46,10 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
 
                                 if (data.equipData.boundObject) {
                                     if (data.equipData.boundObject->GetFormType() == RE::FormType::Armor) {
-                                        data.armor = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectARMO);
+                                        data.armor = data.equipData.boundObject->As<RE::TESObjectARMO>();
                                     }
                                     if (data.equipData.boundObject->GetFormType() == RE::FormType::Light) {
-                                        data.torch = DYNAMIC_CAST(data.equipData.boundObject, RE::TESForm, RE::TESObjectLIGH);
+                                        data.torch = data.equipData.boundObject->As<RE::TESObjectLIGH>();
                                     }
                                 }
                                 return data;

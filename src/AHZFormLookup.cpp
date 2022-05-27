@@ -1,6 +1,9 @@
-﻿#include "PCH.h"
+﻿#include "pch.h"
 #include "AHZFormLookup.h"
 #include "AHZForEachScriptObjectFunctor.h"
+
+bool CAHZFormLookup::s_lotdCheck = false;
+bool CAHZFormLookup::s_lotdInstalled = false;
 
 auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 {
@@ -10,16 +13,19 @@ auto CAHZFormLookup::Instance() -> CAHZFormLookup&
 
 auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESForm*
 {
+    if (!targetReference) {
+        return nullptr;
+    }
     RE::TESForm* lutForm = nullptr;
     if ((lutForm = GetFormFromLookup(targetReference)) != nullptr) {
         return lutForm;
     } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Activator) {
         return GetAttachedForm(targetReference);
     } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
-        auto pProjectile = (DYNAMIC_CAST(targetReference, RE::TESObjectREFR, RE::Projectile));
+        auto pProjectile = targetReference->As<RE::Projectile>();
 
         if (pProjectile) {
-            AHZProjectile* a = reinterpret_cast<AHZProjectile*>(pProjectile);
+            auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
             if (a && a->sourceAmmo)
                 return a->sourceAmmo;
             else
@@ -56,9 +62,19 @@ void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID,
     auto dataHandler = RE::TESDataHandler::GetSingleton();
 
     // Normalize to the raw formIDs
+#ifndef VR_BUILD
     auto isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
+#else
+    auto isBaseLight = false;
+#endif
     baseFormID = isBaseLight ? baseFormID & 0x00000FFF : baseFormID & 0x00FFFFFF;
+
+#ifndef VR_BUILD
     auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
+#else
+    auto isTargetLight = false;
+#endif
+
     targetFormID = isTargetLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
 
     auto baseForm = dataHandler->LookupForm(baseFormID, baseFormModName);
@@ -100,7 +116,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
         RE::TESForm* attachedForm = nullptr;
         if ((attachedForm = GetAttachedForm(form, *p)) != nullptr) {
             if (attachedForm->formType == RE::FormType::LeveledItem) {
-                auto lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::TESLevItem);
+                auto lvli = attachedForm->As<RE::TESLevItem>();
 
                 // Get the first form and see if it is an ingredient
                 if (lvli && lvli->entries.size() > 0) {
@@ -108,7 +124,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
                     return itemform;
                 }
             } else if (attachedForm->formType == RE::FormType::FormList) {
-                auto* lvli = DYNAMIC_CAST(attachedForm, RE::TESForm, RE::BGSListForm);
+                auto* lvli = attachedForm->As<RE::BGSListForm>();
 
                 // Get the first form and see if it is an ingredient
                 if (lvli && lvli->forms.size() > 0) {
@@ -120,6 +136,28 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form) -> RE::TESForm*
             }
         }
     }
+
+    //// Hardcoded for LOTD, I have to lookup by index
+    //
+
+    //if (!s_lotdCheck) {
+    //    auto dataHandler = RE::TESDataHandler::GetSingleton();
+    //    if (dataHandler && dataHandler->LookupModByName("LegacyoftheDragonborn.esm"sv)) {
+    //        s_lotdInstalled = true;
+    //    }
+    //    s_lotdCheck = true;
+    //}
+
+    //if (s_lotdInstalled) {
+    //    RE::TESForm* dbm_displayListBase = GetAttachedForm(form, "afDisplayList");
+    //    int32_t dbm_displayListIndex = GetAttachedInteger(form, "aiDisplayListIndex");
+    //    if (dbm_displayListBase && dbm_displayListBase->formType == RE::FormType::FormList){
+    //        auto* lvli = dbm_displayListBase->As<RE::BGSListForm>();
+    //        if (lvli && dbm_displayListIndex > -1 && dbm_displayListIndex < static_cast<int32_t>(lvli->forms.size())){
+    //            return lvli->forms[dbm_displayListIndex];
+    //        }
+    //    }
+    //}
 
     return nullptr;
 }
@@ -185,4 +223,28 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variab
     }
 
     return nullptr;
+}
+
+auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string variableName) -> int32_t
+{
+    if (form) {
+        if (!form->GetBaseObject())
+            return -1;
+
+        auto vm = RE::SkyrimVM::GetSingleton()->impl;
+        auto handlePolicy = vm.get()->GetObjectHandlePolicy();
+        auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
+
+        if (handle != handlePolicy->EmptyHandle()) {
+            CAHZForEachScriptObjectFunctor functor(variableName);
+            vm->ForEachBoundObject(handle, &functor);
+            auto variable = functor.GetScriptVariable();
+
+            if (variable && variable->IsInt()) {
+                return variable->GetSInt();
+            }
+        }
+    }
+
+    return -1;
 }

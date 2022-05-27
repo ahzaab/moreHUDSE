@@ -1,5 +1,5 @@
 #pragma once
-
+#include "AHZTarget.h"
 
 class AHZArmorData
 {
@@ -20,21 +20,6 @@ public:
         equipData.pExtraData = nullptr;
         armor = nullptr;
         torch = nullptr;
-    }
-
-    AHZArmorData(RE::TESObjectREFR* thisObject)
-    {
-        if (thisObject && thisObject->GetBaseObject()) {
-            equipData.boundObject = thisObject->GetBaseObject();
-            equipData.pExtraData = &thisObject->extraList;
-            armor = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectARMO);
-            torch = DYNAMIC_CAST(thisObject->GetBaseObject(), RE::TESForm, RE::TESObjectLIGH);
-        } else {
-            equipData.boundObject = nullptr;
-            equipData.pExtraData = nullptr;
-            armor = nullptr;
-            torch = nullptr;
-        }
     }
 
     ~AHZArmorData() = default;

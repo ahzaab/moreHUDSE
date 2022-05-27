@@ -9,36 +9,42 @@ namespace Events
     class MenuHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
     {
     public:
-        static MenuHandler*              GetSingleton();
-        static void                      Sink();
-        virtual RE::BSEventNotifyControl ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+        static MenuHandler* GetSingleton();
+        static void         Sink();
+        virtual EventResult ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
     private:
         static bool s_ahzMenuLoaded;
+
+    private:
+        MenuHandler(){};
+        MenuHandler(const MenuHandler&) = delete;
+        MenuHandler(MenuHandler&&) = delete;
+        ~MenuHandler() = default;
+
+        MenuHandler& operator=(const MenuHandler&) = delete;
+        MenuHandler& operator=(MenuHandler&&) = delete;
     };
 
-    class CrosshairRefManager :
+#ifndef VR_BUILD
+    class CrosshairHandler :
         public RE::BSTEventSink<SKSE::CrosshairRefEvent>
     {
     public:
-        static CrosshairRefManager* GetSingleton();
-        static void                 Register();
-        RE::TESObjectREFR*          GetCrosshairReference();
-
-    protected:
-        EventResult ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
+        static CrosshairHandler* GetSingleton();
+        static void              Sink();
+        EventResult              ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*);
 
     private:
-        CrosshairRefManager();
-        CrosshairRefManager(const CrosshairRefManager&) = delete;
-        CrosshairRefManager(CrosshairRefManager&&) = delete;
-        ~CrosshairRefManager() = default;
+        CrosshairHandler(){};
+        CrosshairHandler(const CrosshairHandler&) = delete;
+        CrosshairHandler(CrosshairHandler&&) = delete;
+        ~CrosshairHandler() = default;
 
-        CrosshairRefManager& operator=(const CrosshairRefManager&) = delete;
-        CrosshairRefManager& operator=(CrosshairRefManager&&) = delete;
-
-        RE::TESObjectREFR* _cachedRef;
+        CrosshairHandler& operator=(const CrosshairHandler&) = delete;
+        CrosshairHandler& operator=(CrosshairHandler&&) = delete;
     };
+#endif
 
     void Install();
 }

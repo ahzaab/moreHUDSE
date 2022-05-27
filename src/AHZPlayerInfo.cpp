@@ -1,13 +1,16 @@
-﻿#include "PCH.h"
+﻿#include "pch.h"
+#include "AHZTarget.h"
 #include "AHZPlayerInfo.h"
 #include "Events.h"
-
 
 auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
 
-    auto pContainer = DYNAMIC_CAST(pPC->GetBaseObject(), RE::TESForm, RE::TESContainer);
+    if (!pPC)
+        return 0;
+
+    auto pContainer = pPC->GetBaseObject()->As<RE::TESContainer>();
     if (!pContainer)
         return 0;
 
@@ -26,21 +29,20 @@ auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
 
 auto CAHZPlayerInfo::GetGoldAmount() -> uint32_t
 {
-    auto goldAmount = RE::PlayerCharacter::GetSingleton()->GetGoldAmount();
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (!pPC)
+        return 0;
+
+    auto goldAmount = pPC->GetGoldAmount();
     return goldAmount < 0 ? 0 : goldAmount;
-}
-
-
-auto CAHZPlayerInfo::GetTargetRef() -> RE::TESObjectREFR*
-{
-    return Events::CrosshairRefManager::GetSingleton()->GetCrosshairReference();
 }
 
 auto CAHZPlayerInfo::GetIsInCombat() -> bool
 {
     auto pPC = RE::PlayerCharacter::GetSingleton();
-    if (pPC) {
-        return pPC->IsInCombat();
-    }
-    return false;
+    if (!pPC)
+        return false;
+
+    return pPC->IsInCombat();
 }

@@ -1,10 +1,9 @@
-#include "PCH.h"
+#include "pch.h"
 
 #include "AHZConsole.h"
 #include <iostream>
 #include "windows.h"
 //using namespace std;
-
 
 namespace Debug
 {
@@ -22,7 +21,6 @@ namespace Debug
         }
 #endif
     }
-
 
     CAHZDebugConsole::~CAHZDebugConsole()
     {

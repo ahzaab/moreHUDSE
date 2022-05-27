@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "Papyrus.h"
 #include "AHZPapyrusMoreHud.h"
 

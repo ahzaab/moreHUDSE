@@ -22,4 +22,5 @@ set(sources ${sources}
     src/Papyrus.cpp
     src/Patches.cpp
     src/Scaleform.cpp
+    src/AHZTarget.cpp
 )

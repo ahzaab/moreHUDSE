@@ -8,13 +8,13 @@ namespace SKSE
         inline static constexpr uint32_t kNumActorValues = static_cast<uint32_t>(RE::ActorValue::kTotal);
 
         static ActorValueList* GetSingleton(void);
-        RE::ActorValueInfo*        GetActorValue(RE::ActorValue id);
+        RE::ActorValueInfo*    GetActorValue(RE::ActorValue id);
 
     private:
         ActorValueList();
         ~ActorValueList() = default;
 
-        enum class ActorValueInfoFormID: RE::FormID
+        enum class ActorValueInfoFormID : RE::FormID
         {
             kAVOneHanded = 0x0000044C,
             kAVTwoHanded = 0x0000044D,
@@ -56,5 +56,4 @@ namespace SKSE
 
         std::map<RE::ActorValue, ActorValueInfoFormID> m_actorValueInfo;
     };
-
 }

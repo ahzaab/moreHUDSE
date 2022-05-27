@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "IForEachScriptObjectFunctor.h"
 #include "AHZForEachScriptObjectFunctor.h"
 
@@ -17,7 +17,6 @@ CAHZForEachScriptObjectFunctor::CAHZForEachScriptObjectFunctor(
     m_property = a_varName;
 }
 
-
 auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFunctor::SCRIPT_OBJECT_MESSAGE* script, [[maybe_unused]] void* unk1) -> bool
 {
     auto classInfo = script->typeInfo;
@@ -27,7 +26,7 @@ auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFun
 
     auto                                      vm = RE::SkyrimVM::GetSingleton()->impl;
     RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
-     
+
     m_variableOffset = classInfo->GetTotalNumVariables();
 
     // Start with child and look through all parents
@@ -59,8 +58,8 @@ bool CAHZForEachScriptObjectFunctor::VisitVariables(RE::BSScript::ObjectTypeInfo
         if (element.name.empty()) {
             continue;
         }
-        if (element.name.data() == m_variable) { 
-            auto                   found = vm->GetVariableValue(boundObject, m_variableOffset + i, m_result);
+        if (element.name.data() == m_variable || element.name.data() == m_property) {
+            auto found = vm->GetVariableValue(boundObject, m_variableOffset + i, m_result);
             found = found && !m_result.IsNoneObject() && !m_result.IsNoneArray();
             if (found) {
                 return false;

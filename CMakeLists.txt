@@ -6,11 +6,40 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 # ---- Project ----
 
+option(USE_SE_BUILD "Build for SE" OFF)
+if (USE_SE_BUILD)
+	add_compile_definitions(SE_BUILD)
+endif()
+option(USE_VR_BUILD "Build for SE" OFF)
+if (USE_VR_BUILD)
+	add_compile_definitions(VR_BUILD)
+  	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+  	add_compile_definitions(SKYRIMVR)
+endif()
+
+IF( USE_SE_BUILD )
+set(BUILD_SKYRIMVR OFF)
 project(
 	AHZmoreHUDPlugin
-	VERSION 5.0.5.0
+	VERSION 4.1.1.0
 	LANGUAGES CXX
 )
+ELSEIF(USE_VR_BUILD)
+set(BUILD_SKYRIMVR ON)
+project(
+	AHZmoreHUDPlugin
+	VERSION 1.1.0.0
+	LANGUAGES CXX
+)
+ELSE()
+set(BUILD_SKYRIMVR OFF)
+project(
+	AHZmoreHUDPlugin
+	VERSION 5.1.1.0
+	LANGUAGES CXX
+)
+ENDIF()
+
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
@@ -129,7 +158,13 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 # set(Boost_USE_STATIC_RUNTIME OFF)
 # set(Boost_USE_DEBUG_RUNTIME ON)
 
+IF( USE_SE_BUILD )
+add_subdirectory(external/CommonLibSSE_SE)
+ELSEIF(USE_VR_BUILD)
+add_subdirectory(external/CommonLibVR)
+ELSE()
 add_subdirectory(external/CommonLibSSE)
+ENDIF()
 
 # find_package(Boost
 # 	REQUIRED
@@ -141,6 +176,14 @@ find_package(spdlog REQUIRED)
 find_package(xbyak REQUIRED)
 
 # ---- Add source files ----
+
+IF( USE_SE_BUILD )
+	set(headers ${headers} include/offsets-se.h)
+ELSEIF(USE_VR_BUILD)
+	set(headers ${headers} include/offsets-vr.h)
+else()
+	set(headers ${headers} include/offsets-ae.h)
+endif()
 
 include(cmake/headerlist.cmake)
 include(cmake/sourcelist.cmake)
@@ -170,6 +213,15 @@ add_library(
 	.clang-format
 )
 
+IF(USE_VR_BUILD)
+set_property(
+	TARGET
+		${PROJECT_NAME}
+		CommonLibVR
+	PROPERTY
+		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+)
+ELSE()
 set_property(
 	TARGET
 		${PROJECT_NAME}
@@ -177,6 +229,7 @@ set_property(
 	PROPERTY
 		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )
+ENDIF()
 
 target_compile_features(
 	${PROJECT_NAME}
@@ -192,6 +245,15 @@ target_include_directories(
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+IF(USE_VR_BUILD)
+target_link_libraries(
+	${PROJECT_NAME}
+	PUBLIC
+		CommonLibVR::CommonLibVR
+		spdlog::spdlog
+		xbyak::xbyak
+)
+ELSE()
 target_link_libraries(
 	${PROJECT_NAME}
 	PUBLIC
@@ -199,6 +261,7 @@ target_link_libraries(
 		spdlog::spdlog
 		xbyak::xbyak
 )
+ENDIF()
 
 target_precompile_headers(
 	${PROJECT_NAME}
@@ -223,9 +286,25 @@ endif()
 
 # ---- Post build ----
 
+IF( USE_SE_BUILD )
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
+)
+ELSEIF(USE_VR_BUILD)
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{SkyrimVRPath}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{SkyrimVRPath}/Data/SKSE/Plugins/
+)
+ELSE()
 add_custom_command(
 	TARGET ${PROJECT_NAME}
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
 )
+ENDIF()

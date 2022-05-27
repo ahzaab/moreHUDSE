@@ -28,7 +28,6 @@ private:
     CAHZActorData m_data;
 };
 
-
 class AHZEnemyHealthUpdateHook
 {
 public:

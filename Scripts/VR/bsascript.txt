@@ -1,0 +1,10 @@
+Log: Archive.log
+New Archive
+Check: Menus
+Check: Misc
+Check: Meshes
+Check: Retain Directory Names
+Check: Retain File Names
+Set File Group Root: Data\
+Add File Group: bsafilelist.txt
+Save Archive: _generated

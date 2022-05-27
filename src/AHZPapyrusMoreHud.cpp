@@ -1,4 +1,4 @@
-#include "PCH.h"
+#include "pch.h"
 #include "AHZPapyrusMoreHud.h"
 #include "version.h"
 #include <mutex>
@@ -42,13 +42,11 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
 std::vector<std::string_view> PapyrusMoreHud::GetFormIcons(RE::FormID formId)
 {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    std::vector<std::string_view> results;
-    for (auto& kvp: s_ahzRegisteredIconFormLists)
-    {
+    std::vector<std::string_view>         results;
+    for (auto& kvp : s_ahzRegisteredIconFormLists) {
         auto list = s_ahzRegisteredIconFormLists[kvp.first];
 
-        if (list && list->HasForm(formId))   
-        {
+        if (list && list->HasForm(formId)) {
             results.emplace_back(kvp.first);
         }
     }
@@ -111,7 +109,6 @@ auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag
     return (it != s_ahzRegisteredIcons.end());
 }
 
-
 void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName)
 {
     logger::trace("AddIconItem");
@@ -172,7 +169,6 @@ auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> std::string
 
     return iconName;
 }
-
 
 auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {
