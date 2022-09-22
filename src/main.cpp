@@ -138,6 +138,7 @@ extern "C"
         v.AuthorName("Ahzaab"sv);
         v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
         v.UsesAddressLibrary(true);
+        v.UsesStructsPost629(true);
         return v;
     }();
 #endif
