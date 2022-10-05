@@ -7,6 +7,38 @@
 
 namespace Scaleform
 {
+	struct moreHUDmessage {
+
+		RE::FormID m_formID;
+		bool m_icontype; // false = New, true = Found
+		bool m_display;
+	};
+
+    moreHUDmessage s_messageFromCompletionist{};
+    
+
+    void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+    {
+        if (a_msg->type != 1)
+        {
+            return;
+        }
+
+        if (!a_msg->data)
+        {
+            return;
+        }
+
+        s_messageFromCompletionist = *static_cast<moreHUDmessage*>(a_msg->data);
+    }
+
+    void RegisterMessageListener()
+    {
+        auto messageInterface = SKSE::GetMessagingInterface();
+        auto temp = messageInterface->RegisterListener("Completionist", MessageHandler); 
+    }
+
+    
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
     {
     public:
@@ -195,6 +227,11 @@ namespace Scaleform
 
             auto formId = ref.formId;
             auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
+
+            if (s_messageFromCompletionist.m_display && s_messageFromCompletionist.m_formID == formId)
+            {
+                customIcons.emplace_back(s_messageFromCompletionist.m_icontype ? "cmpFound"sv : "cmpNew"sv);
+            }
 
             if (!customIcons.empty()) {
                 RE::GFxValue entry;
