@@ -34,8 +34,12 @@ namespace Scaleform
 
     void RegisterMessageListener()
     {
-        auto messageInterface = SKSE::GetMessagingInterface();
-        messageInterface->RegisterListener("Completionist", MessageHandler); 
+        if (WinAPI::GetModuleHandle(L"Completionist"))
+        {
+            logger::info("Completionist is installed, registering listener"sv);        
+            auto messageInterface = SKSE::GetMessagingInterface();
+            messageInterface->RegisterListener("Completionist", MessageHandler); 
+        }
     }
 
     
