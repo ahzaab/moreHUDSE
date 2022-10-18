@@ -35,7 +35,7 @@ namespace Scaleform
     void RegisterMessageListener()
     {
         auto messageInterface = SKSE::GetMessagingInterface();
-        auto temp = messageInterface->RegisterListener("Completionist", MessageHandler); 
+        messageInterface->RegisterListener("Completionist", MessageHandler); 
     }
 
     
