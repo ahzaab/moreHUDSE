@@ -17,7 +17,7 @@ $skip = Read-Host "Building SE? (y/n)"
 
 if ($skip.ToUpper() -eq "Y")
 {
-    $version = Read-Host "Enter AE Version"
+    $version = Read-Host "Enter SE Version"
     if (!$version)
     {
         Write-Error "You need to specify a version"
@@ -32,7 +32,7 @@ $skip = Read-Host "Building VR? (y/n)"
 
 if ($skip.ToUpper() -eq "Y")
 {
-    $version = Read-Host "Enter AE Version"
+    $version = Read-Host "Enter VR Version"
     if (!$version)
     {
         Write-Error "You need to specify a version"
