@@ -62,6 +62,12 @@ namespace
                 Events::Install();
             }
             break;
+            case SKSE::MessagingInterface::kPostPostLoad:
+            {
+                logger::info("Registering Message Listener");
+                Scaleform::RegisterMessageListener(); 
+            }
+            break;
         }
     }
 
