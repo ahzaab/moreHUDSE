@@ -1,45 +1,26 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.21)
+message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
-set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-#set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/ports" CACHE STRING "")
-set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
-
-# ---- Project ----
-
-option(USE_SE_BUILD "Build for SE" OFF)
-if (USE_SE_BUILD)
-	add_compile_definitions(SE_BUILD)
-endif()
-option(USE_VR_BUILD "Build for SE" OFF)
-if (USE_VR_BUILD)
-	add_compile_definitions(VR_BUILD)
-  	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-  	add_compile_definitions(SKYRIMVR)
-endif()
-
-IF( USE_SE_BUILD )
-set(BUILD_SKYRIMVR OFF)
+########################################################################################################################
+## Define project
+########################################################################################################################
 project(
-	AHZmoreHUDPlugin
-	VERSION 4.1.2.0
-	LANGUAGES CXX
-)
-ELSEIF(USE_VR_BUILD)
-set(BUILD_SKYRIMVR ON)
-project(
-	AHZmoreHUDPlugin
-	VERSION 1.1.1.0
-	LANGUAGES CXX
-)
-ELSE()
-set(BUILD_SKYRIMVR OFF)
-project(
-	AHZmoreHUDPlugin
-	VERSION 5.2.2.0
-	LANGUAGES CXX
-)
-ENDIF()
+		AHZmoreHUDPlugin
+        VERSION 5.3.0.0
+        LANGUAGES CXX
+        DESCRIPTION "SKSE64 moreHUD plugin")
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
+# Define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING to suppress the specific deprecation warning
+add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+
+# Alternatively, to suppress all MS extension deprecation warnings:
+add_compile_definitions(_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
+
+
+include(GNUInstallDirs)
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
@@ -53,147 +34,67 @@ configure_file(
 	@ONLY
 )
 
-# ---- Include guards ----
-
-if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-	message(
-		FATAL_ERROR
-			"In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there."
+set(headers
+    include/PCH.h
+    include/ActorValueList.h
+    include/AHZActorInfo.h
+    include/AHZArmorInfo.h
+    include/AHZConsole.h
+    include/AHZExternalFormTable.h 
+    include/AHZForEachScriptObjectFunctor.h
+    include/AHZFormLookup.h        
+    include/AHZLUTObject.h
+    include/AHZPapyrusMoreHud.h    
+    include/AHZPlayerInfo.h        
+    include/AHZScaleform.h
+    include/AHZScaleformHook.h     
+    include/AHZUtilities.h
+    include/AHZVanillaFormTable.h  
+    include/AHZWeaponInfo.h        
+    include/Events.h
+    include/HashUtil.h
+    include/IForEachScriptObjectFunctor.h
+    include/Papyrus.h
+    include/Patches.h
+    include/Scaleform.h
+    include/version.h
+    include/AHZTarget.h
 )
-endif()
 
-# ---- Globals ----
+set(sources
+    src/PCH.cpp
+    src/ActorValueList.cpp
+    src/AHZActorInfo.cpp
+    src/AHZArmorInfo.cpp
+    src/AHZConsole.cpp
+    src/AHZExternalFormTable.cpp   
+    src/AHZForEachScriptObjectFunctor.cpp
+    src/AHZFormLookup.cpp
+    src/AHZLUTObject.cpp
+    src/AHZPapyrusMoreHud.cpp      
+    src/AHZPlayerInfo.cpp
+    src/AHZScaleform.cpp
+    src/AHZScaleformHook.cpp       
+    src/AHZUtilities.cpp
+    src/AHZVanillaFormTable.cpp    
+    src/AHZWeaponInfo.cpp
+    src/Events.cpp
+    src/HashUtil.cpp
+    src/IForEachScriptObjectFunctor.cpp
+    src/main.cpp
+    src/Papyrus.cpp
+    src/Patches.cpp
+    src/Scaleform.cpp
+    src/AHZTarget.cpp
 
-add_compile_definitions(
-	SKSE_SUPPORT_XBYAK
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
-
-if (MSVC)
-	add_compile_definitions(
-		_UNICODE
-	)
-	
-	string(REPLACE " " ";" MY_CXX_FLAGS "${VCPKG_CXX_FLAGS}")
-	string(REPLACE " " ";" MY_CXX_FLAGS_DEBUG "${VCPKG_CXX_FLAGS_DEBUG}")
-	string(REPLACE " " ";" MY_CXX_FLAGS_RELEASE "${VCPKG_CXX_FLAGS_RELEASE}")
-	
-	add_compile_options(		
-		/MP	# Build with Multiple Processes
-		/sdl	# Enable Additional Security Checks
-		/Zi	# Debug Information Format
-		
-		/permissive-	# Standards conformance
-		
-		/Zc:alignedNew	# C++17 over-aligned allocation
-		/Zc:auto	# Deduce Variable Type
-		/Zc:char8_t
-		/Zc:__cplusplus	# Enable updated __cplusplus macro
-		/Zc:externC
-		/Zc:externConstexpr	# Enable extern constexpr variables
-		/Zc:forScope	# Force Conformance in for Loop Scope
-		/Zc:hiddenFriend
-		/Zc:implicitNoexcept	# Implicit Exception Specifiers
-		/Zc:lambda
-		/Zc:noexceptTypes	# C++17 noexcept rules
-		/Zc:preprocessor	# Enable preprocessor conformance mode
-		/Zc:referenceBinding	# Enforce reference binding rules
-		/Zc:rvalueCast	# Enforce type conversion rules
-		/Zc:sizedDealloc	# Enable Global Sized Deallocation Functions
-		/Zc:strictStrings	# Disable string literal type conversion
-		/Zc:ternary	# Enforce conditional operator rules
-		/Zc:threadSafeInit	# Thread-safe Local Static Initialization
-		/Zc:tlsGuards
-		/Zc:trigraphs	# Trigraphs Substitution
-		/Zc:wchar_t	# wchar_t Is Native Type
-		
-		/experimental:external
-		/external:anglebrackets
-		# /external:W0
-		
-		/W4	# Warning level
-		# /WX	# Warning level (warnings are errors)
-
-		# warnings -> errors
-		/we4715	# 'function' : not all control paths return a value
-
-		# disable warnings
-		/wd4061 # enumerator 'identifier' in switch of enum 'enumeration' is not explicitly handled by a case label
-		/wd4200 # nonstandard extension used : zero-sized array in struct/union
-		/wd4201 # nonstandard extension used : nameless struct/union
-		/wd4265 # 'type': class has virtual functions, but its non-trivial destructor is not virtual; instances of this class may not be destructed correctly
-		/wd4266 # 'function' : no override available for virtual member function from base 'type'; function is hidden
-		/wd4371 # 'classname': layout of class may have changed from a previous version of the compiler due to better packing of member 'member'
-		/wd4514 # 'function' : unreferenced inline function has been removed
-		/wd4582 # 'type': constructor is not implicitly called
-		/wd4583 # 'type': destructor is not implicitly called
-		/wd4623 # 'derived class' : default constructor was implicitly defined as deleted because a base class default constructor is inaccessible or deleted
-		/wd4625 # 'derived class' : copy constructor was implicitly defined as deleted because a base class copy constructor is inaccessible or deleted
-		/wd4626 # 'derived class' : assignment operator was implicitly defined as deleted because a base class assignment operator is inaccessible or deleted
-		/wd4710 # 'function' : function not inlined
-		/wd4711 # function 'function' selected for inline expansion
-		/wd4820 # 'bytes' bytes padding added after construct 'member_name'
-		/wd5026 # 'type': move constructor was implicitly defined as deleted
-		/wd5027 # 'type': move assignment operator was implicitly defined as deleted
-		/wd5045 # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
-		/wd5053 # support for 'explicit(<expr>)' in C++17 and earlier is a vendor extension
-		/wd5204 # 'type-name': class has virtual functions, but its trivial destructor is not virtual; instances of objects derived from this class may not be destructed correctly
-		/wd5220 # 'member': a non-static data member with a volatile qualified type no longer implies that compiler generated copy / move constructors and copy / move assignment operators are not trivial
-	
-		${MY_CXX_FLAGS}
-		"$<$<CONFIG:DEBUG>:${MY_CXX_FLAGS_DEBUG}>"
-		"$<$<CONFIG:RELEASE>:${MY_CXX_FLAGS_RELEASE};/Zc:inline;/JMC->"
-	)
-		
-	# fix a warning with /Ob2 being overridden with /Ob3
-	string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-endif()
-
-# ---- Dependencies ----
-
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-# set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_LIBS ON)
-# set(Boost_USE_STATIC_RUNTIME OFF)
-# set(Boost_USE_DEBUG_RUNTIME ON)
-
-IF( USE_SE_BUILD )
-add_subdirectory(external/CommonLibSSE_SE)
-ELSEIF(USE_VR_BUILD)
-add_subdirectory(external/CommonLibVR)
-ELSE()
-add_subdirectory(external/CommonLibSSE)
-ENDIF()
-
-# find_package(Boost
-# 	REQUIRED
-# 	COMPONENTS
-# 		regex
-# )
-
-find_package(spdlog REQUIRED)
-find_package(xbyak REQUIRED)
-
-# ---- Add source files ----
-
-IF( USE_SE_BUILD )
-	set(headers ${headers} include/offsets-se.h)
-ELSEIF(USE_VR_BUILD)
-	set(headers ${headers} include/offsets-vr.h)
-else()
-	set(headers ${headers} include/offsets-ae.h)
-endif()
-
-include(cmake/headerlist.cmake)
-include(cmake/sourcelist.cmake)
 
 source_group(
-	TREE ${CMAKE_CURRENT_SOURCE_DIR}
-	FILES
-		${headers}
-		${sources}
-)
+        TREE ${CMAKE_CURRENT_SOURCE_DIR}
+        FILES
+        ${headers}
+        ${sources})
 
 source_group(
 	TREE ${CMAKE_CURRENT_BINARY_DIR}
@@ -201,110 +102,125 @@ source_group(
 		${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
 )
 
-# ---- Create DLL ----
+#########################################################################################################################
+### Build options
+#########################################################################################################################
+message("Options:")
+option(BUILD_TESTS "Build unit tests." OFF)
+message("\tTests: ${BUILD_TESTS}")
 
-add_library(
-	${PROJECT_NAME}
-	SHARED
-	${headers}
-	${sources}
-	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
-	${CMAKE_CURRENT_BINARY_DIR}/version.rc
-	.clang-format
-)
+########################################################################################################################
+## Configure target DLL
+########################################################################################################################
+find_package(CommonLibSSE CONFIG REQUIRED)
+find_package(ryml CONFIG REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(xbyak REQUIRED)
+find_path(ARTICUNO_INCLUDE_DIRS "articuno/articuno.h")
 
-IF(USE_VR_BUILD)
+add_commonlibsse_plugin(${PROJECT_NAME} SOURCES ${headers} ${sources})
+add_library("${PROJECT_NAME}::${PROJECT_NAME}" ALIAS "${PROJECT_NAME}")
+
 set_property(
 	TARGET
 		${PROJECT_NAME}
-		CommonLibVR
 	PROPERTY
 		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )
-ELSE()
-set_property(
-	TARGET
-		${PROJECT_NAME}
-		CommonLibSSE
-	PROPERTY
-		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
-)
-ENDIF()
 
-target_compile_features(
-	${PROJECT_NAME}
-	PUBLIC
-		cxx_std_20
-)
+target_include_directories(${PROJECT_NAME}
+        PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
+        $<INSTALL_INTERFACE:src>
+        ${ARTICUNO_INCLUDE_DIRS})
 
-target_include_directories(
-	${PROJECT_NAME}
-	PRIVATE 
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${CMAKE_CURRENT_SOURCE_DIR}/include
-		${CMAKE_CURRENT_SOURCE_DIR}/src
-)
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-IF(USE_VR_BUILD)
-target_link_libraries(
-	${PROJECT_NAME}
-	PUBLIC
-		CommonLibVR::CommonLibVR
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        ryml::ryml
 		spdlog::spdlog
-		xbyak::xbyak
-)
-ELSE()
-target_link_libraries(
-	${PROJECT_NAME}
-	PUBLIC
-		CommonLibSSE::CommonLibSSE
-		spdlog::spdlog
-		xbyak::xbyak
-)
-ENDIF()
+		xbyak::xbyak)
 
-target_precompile_headers(
-	${PROJECT_NAME}
-	PRIVATE
-		include/PCH.h
-)
+target_precompile_headers(${PROJECT_NAME}
+        PRIVATE
+        include/PCH.h)
 
-if (MSVC)
-	target_compile_options(
-		${PROJECT_NAME}
-		PRIVATE
-			/wd4324 # 'struct_name' : structure was padded due to __declspec(align())
-	)
-	
-	target_link_options(
-		${PROJECT_NAME}
-		PRIVATE
-			"$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOREF;/OPT:NOICF>"
-			"$<$<CONFIG:RELEASE>:/INCREMENTAL:NO;/OPT:REF;/OPT:ICF;/DEBUG:FULL>"
-	)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Sample"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
+
+
+########################################################################################################################
+## Configure unit tests
+########################################################################################################################
+if(BUILD_TESTS)
+    find_package(Catch2 CONFIG REQUIRED)
+
+    include(CTest)
+    include(Catch)
+
+    add_executable(
+            ${PROJECT_NAME}Tests
+            ${headers}
+            ${tests})
+
+    target_link_libraries(
+            ${PROJECT_NAME}Tests
+            PRIVATE
+            ${PROJECT_NAME}
+            Catch2::Catch2WithMain)
+
+    target_precompile_headers(${PROJECT_NAME}Tests
+            PRIVATE
+            src/PCH.h)
+
+    catch_discover_tests(${PROJECT_NAME}Tests)
+    add_test(NAME ${PROJECT_NAME}Tests COMMAND ${PROJECT_NAME}Tests)
 endif()
 
-# ---- Post build ----
+########################################################################################################################
+## Automatic plugin deployment
+########################################################################################################################
+# Automatic deployment to FOMOD directory.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(BUILD_NAME "Debug")
+else()
+    set(BUILD_NAME "Release")
+endif()
+install(DIRECTORY DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Papyrus${BUILD_NAME}/")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
+if(${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
+endif()
+file(GLOB_RECURSE OUTPUT_DLLS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/**/*.dll")
+file(GLOB_RECURSE OUTPUT_PDBS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/**/*.pdb")
+file(GLOB_RECURSE OUTPUT_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/**/*.pex")
+set_property(TARGET ${PROJECT_NAME}
+        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${OUTPUT_DLLS}")
+set_property(TARGET ${PROJECT_NAME}
+        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${OUTPUT_PDBS}")
+set_property(TARGET ${PROJECT_NAME}
+        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${OUTPUT_SCRIPTS}")
 
-IF( USE_SE_BUILD )
-add_custom_command(
-	TARGET ${PROJECT_NAME}
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
-)
-ELSEIF(USE_VR_BUILD)
-add_custom_command(
-	TARGET ${PROJECT_NAME}
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{SkyrimVRPath}/Data/SKSE/Plugins/
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{SkyrimVRPath}/Data/SKSE/Plugins/
-)
-ELSE()
-add_custom_command(
-	TARGET ${PROJECT_NAME}
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
-)
-ENDIF()
+# Automatic deployment to Mod Organizer 2 mod directory.
+foreach (DEPLOY_TARGET $ENV{SkyrimPluginTargets})
+    message("Adding deployment target ${DEPLOY_TARGET}.")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${DEPLOY_TARGET}/SKSE/Plugins/")
+    if(${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${DEPLOY_TARGET}/SKSE/Plugins/")
+    endif()
+endforeach()

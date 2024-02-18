@@ -21,6 +21,7 @@ auto CAHZScaleform::IsSurvivalMode() -> bool
 #ifndef VR_BUILD
     using TESGlobal = RE::TESGlobal;
     const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
+#undef GetObject
     const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
     return survival ? survival->value == 1.0F : false;
 #else
@@ -1106,8 +1107,8 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     args.movie->CreateObject(&obj);
     auto pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto encumbranceNumber = pPC->GetActorValue(RE::ActorValue::kInventoryWeight);
-        auto maxEncumbranceNumber = pPC->GetActorValue(RE::ActorValue::kCarryWeight);
+        auto encumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kInventoryWeight);
+        auto maxEncumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kCarryWeight);
 
         // Enter the data into the Scaleform function
         RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);

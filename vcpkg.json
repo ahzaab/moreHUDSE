@@ -1,21 +1,61 @@
 {
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "morehudse",
-  "version-string": "1",
+  "version-string": "5.3.0.0",
+  "port-version": 0,
   "description": "SKSE64 moreHUD plugin",
   "homepage": "https://github.com/ahzaab/moreHUDSE",
-  "license": "MIT",
-  "dependencies": [
-    "boost-stl-interfaces",
-    "fmt",
-    "spdlog",
-    "xbyak",
-    "rsm-binary-io"
-  ],
-  "builtin-baseline":"bba8794b82a0f44b8709f294850a2c8e96b61415",
-  "overrides":[
+  "license": "Apache-2.0",
+  "builtin-baseline": "c06dfc0ac2649834da8b9f3092b907fb037accab",
+  "overrides": [
     {
-       "name":"fmt",
-       "version":"8.0.1"
+      "name": "fmt",
+      "version": "8.0.1"
     }
- ] 
+  ],
+  "features": {
+    "scripts": {
+      "description": "Install Papyrus sources for this program to develop on top of it."
+    },
+    "scripts-dev": {
+      "description": "Install Papyrus sources necessary to develop scripts for this plugin.",
+      "dependencies": [
+        "bethesda-skyrim-scripts",
+        {
+          "name": "skse",
+          "default-features": false,
+          "features": [
+            "scripts"
+          ]
+        }
+      ]
+    },
+    "plugin": {
+      "description": "Build the SKSE plugin.",
+      "dependencies": [
+        "articuno",
+        "spdlog",
+        "xbyak",
+        "commonlibsse-ng-flatrim"
+      ]
+    },
+    "tests": {
+      "description": "Build tests for the SKSE plugin.",
+      "dependencies": [
+        {
+          "name": "morehudse",
+          "default-features": false,
+          "features": [
+            "plugin"
+          ]
+        },
+        "catch2"
+      ]
+    }
+  },
+  "default-features": [
+    "scripts-dev",
+    "plugin",
+    "tests"
+  ]
 }
