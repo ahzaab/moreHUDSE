@@ -49,12 +49,12 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
                 }
                 auto noSoulTrapRace = NoSoulTrapRace && pNPC->GetRace()->HasKeyword(NoSoulTrapRace);
                 isSentient = CAHZActorInfo::IsSentient(pNPC) || noSoulTrapRace;
-                maxHealth = pNPC->GetPermanentActorValue(RE::ActorValue::kHealth);
-                health = pNPC->GetActorValue(RE::ActorValue::kHealth);
-                maxMagicka = pNPC->GetPermanentActorValue(RE::ActorValue::kMagicka);
-                magicka = pNPC->GetActorValue(RE::ActorValue::kMagicka);
-                maxStamina = pNPC->GetPermanentActorValue(RE::ActorValue::kStamina);
-                stamina = pNPC->GetActorValue(RE::ActorValue::kStamina);
+                maxHealth = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth);
+                health = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+                maxMagicka = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kMagicka);
+                magicka = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka);
+                maxStamina = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kStamina);
+                stamina = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
             }
         }
     }
