@@ -4,17 +4,15 @@
 #include <mutex>
 #include "SKSE/Trampoline.h"
 #include <Xbyak/xbyak.h>
-#ifdef VR_BUILD
 #include "Offsets-VR.h"
-#elif SE_BUILD
 #include "Offsets-SE.h"
-#else
 #include "Offsets-AE.h"
-#endif
+
+#define HOOK_OFFSET (0x44)
 
 // 1408B2880 1.6.318
 // constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
-uintptr_t           EnemyUpdateHook = (moreHUDSE::Offsets::EnemyUpdateHookBase.address() + 0x44);
+uintptr_t           EnemyUpdateHook = (moreHUDSE::AE::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
 RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
 RE::BGSKeyword*     AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
@@ -48,7 +46,7 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
                     NoSoulTrapRace = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("NoSoulTrap");
                 }
                 auto noSoulTrapRace = NoSoulTrapRace && pNPC->GetRace()->HasKeyword(NoSoulTrapRace);
-                isSentient = CAHZActorInfo::IsSentient(pNPC) || noSoulTrapRace;
+                isSentient = CAHZActorInfo::IsSentient(pNPC) != 0 || noSoulTrapRace;
                 maxHealth = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth);
                 health = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
                 maxMagicka = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kMagicka);
@@ -76,6 +74,15 @@ bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(cons
 void AHZEnemyHealthUpdateHook::Install()
 {
     auto& trampoline = SKSE::GetTrampoline();
+
+    if (REL::Module::IsSE()) 
+    {
+        EnemyUpdateHook = (moreHUDSE::SE::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
+    }
+    else if (REL::Module::IsVR())
+    {
+        EnemyUpdateHook = (moreHUDSE::VR::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
+    }
     trampoline.write_call<5>(
         SKSE::stl::unrestricted_cast<std::uintptr_t>(EnemyUpdateHook),
         SKSE::stl::unrestricted_cast<std::uintptr_t>(AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl));

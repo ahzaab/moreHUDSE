@@ -36,7 +36,7 @@
         "articuno",
         "spdlog",
         "xbyak",
-        "commonlibsse-ng-flatrim"
+        "commonlibsse-ng"
       ]
     },
     "tests": {
