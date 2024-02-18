@@ -26,7 +26,6 @@ namespace Events
         MenuHandler& operator=(MenuHandler&&) = delete;
     };
 
-#ifndef VR_BUILD
     class CrosshairHandler :
         public RE::BSTEventSink<SKSE::CrosshairRefEvent>
     {
@@ -44,7 +43,6 @@ namespace Events
         CrosshairHandler& operator=(const CrosshairHandler&) = delete;
         CrosshairHandler& operator=(CrosshairHandler&&) = delete;
     };
-#endif
 
     void Install();
 }
