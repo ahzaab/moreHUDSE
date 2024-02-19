@@ -94,13 +94,6 @@ Function Maintenance()
             iVersion = pluginVersion
             pluginVersionStr = AhzMoreHud.GetVersionString()
             Debug.Notification("moreHUD version: " + pluginVersionStr)
-		;If iVersion < ((I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA)
-		;	iVersion = (I_THIS_VERSION_MAJOR * 1000000) + (I_THIS_VERSION_MINOR * 10000) + (I_THIS_VERSION_BUILD * 100) + I_THIS_VERSION_BETA
-            ;if (I_THIS_VERSION_BETA > 0)
-			;    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD + " beta " + I_THIS_VERSION_BETA)
-            ;else
-            ;    Debug.Notification("moreHUD version: " + I_THIS_VERSION_MAJOR + "." + I_THIS_VERSION_MINOR + "." + I_THIS_VERSION_BUILD)
-            ;EndIf
 		EndIf
 	Endif
 
