@@ -87,7 +87,7 @@ set(sources
     src/Scaleform.cpp
     src/AHZTarget.cpp
 
-	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
 
 source_group(
@@ -99,7 +99,7 @@ source_group(
 source_group(
 	TREE ${CMAKE_CURRENT_BINARY_DIR}
 	FILES
-		${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
 )
 
 #########################################################################################################################
