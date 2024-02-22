@@ -16,7 +16,6 @@ using namespace std;
 class CAHZScaleform
 {
 public:
-    static bool IsSurvivalMode();
 
     static void  ProcessTargetObject(const TargetData& target, RE::GFxFunctionHandler::Params& args);
     static void  ProcessTargetEffects(const TargetData& target, RE::GFxFunctionHandler::Params& args);

@@ -6,13 +6,6 @@
   "description": "SKSE64 moreHUD plugin",
   "homepage": "https://github.com/ahzaab/moreHUDSE",
   "license": "Apache-2.0",
-  "builtin-baseline": "c06dfc0ac2649834da8b9f3092b907fb037accab",
-  "overrides": [
-    {
-      "name": "fmt",
-      "version": "8.0.1"
-    }
-  ],
   "features": {
     "scripts": {
       "description": "Install Papyrus sources for this program to develop on top of it."
@@ -33,10 +26,11 @@
     "plugin": {
       "description": "Build the SKSE plugin.",
       "dependencies": [
+        "fmt",
         "articuno",
         "spdlog",
         "xbyak",
-        "commonlibsse-ng"
+        "rapidcsv"
       ]
     },
     "tests": {
