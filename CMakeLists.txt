@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
+# Define the local path for CommonLibSSE
+set(COMMONLIBSSE_LOCAL_PATH "C:/dev/Projects/CommonLibSSE-NG")
+
+# Include the CommonLibSSE.cmake file from the local path
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonLibSSE-local.cmake")
+
 ########################################################################################################################
 ## Define project
 ########################################################################################################################
@@ -19,6 +25,9 @@ add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 # Alternatively, to suppress all MS extension deprecation warnings:
 add_compile_definitions(_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
 
+add_compile_definitions(ENABLE_SKYRIM_VR)
+add_compile_definitions(ENABLE_SKYRIM_AE)
+add_compile_definitions(ENABLE_SKYRIM_SE)
 
 include(GNUInstallDirs)
 
@@ -105,28 +114,21 @@ source_group(
 #########################################################################################################################
 ### Build options
 #########################################################################################################################
-message("Options:")
-option(BUILD_TESTS "Build unit tests." OFF)
-message("\tTests: ${BUILD_TESTS}")
+
 
 ########################################################################################################################
 ## Configure target DLL
 ########################################################################################################################
-find_package(CommonLibSSE CONFIG REQUIRED)
+#find_package(CommonLibSSE CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 find_package(ryml CONFIG REQUIRED)
-find_package(spdlog REQUIRED)
+#find_package(spdlog REQUIRED)
 find_package(xbyak REQUIRED)
 find_path(ARTICUNO_INCLUDE_DIRS "articuno/articuno.h")
 
 add_commonlibsse_plugin(${PROJECT_NAME} SOURCES ${headers} ${sources})
 add_library("${PROJECT_NAME}::${PROJECT_NAME}" ALIAS "${PROJECT_NAME}")
-
-set_property(
-	TARGET
-		${PROJECT_NAME}
-	PROPERTY
-		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
-)
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
@@ -142,15 +144,17 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
+        fmt::fmt
         ryml::ryml
 		spdlog::spdlog
-		xbyak::xbyak)
+		xbyak::xbyak
+        Version.lib)
 
 target_precompile_headers(${PROJECT_NAME}
         PRIVATE
         include/PCH.h)
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Sample"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 install(TARGETS ${PROJECT_NAME}
@@ -158,33 +162,12 @@ install(TARGETS ${PROJECT_NAME}
 
 
 
+
+
 ########################################################################################################################
 ## Configure unit tests
 ########################################################################################################################
-if(BUILD_TESTS)
-    find_package(Catch2 CONFIG REQUIRED)
 
-    include(CTest)
-    include(Catch)
-
-    add_executable(
-            ${PROJECT_NAME}Tests
-            ${headers}
-            ${tests})
-
-    target_link_libraries(
-            ${PROJECT_NAME}Tests
-            PRIVATE
-            ${PROJECT_NAME}
-            Catch2::Catch2WithMain)
-
-    target_precompile_headers(${PROJECT_NAME}Tests
-            PRIVATE
-            src/PCH.h)
-
-    catch_discover_tests(${PROJECT_NAME}Tests)
-    add_test(NAME ${PROJECT_NAME}Tests COMMAND ${PROJECT_NAME}Tests)
-endif()
 
 ########################################################################################################################
 ## Automatic plugin deployment

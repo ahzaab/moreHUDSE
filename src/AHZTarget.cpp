@@ -7,19 +7,6 @@
 
 namespace
 {
-    bool IsSurvivalMode()
-    {
-        if (!REL::Module::IsVR()) {
-            using TESGlobal = RE::TESGlobal;
-            const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
-            if (dobj) {
-                const auto survival = dobj->GetObject<TESGlobal>(RE::DefaultObjectID::kSurvivalModeEnabled);
-                return survival && *survival ? (*survival)->value == 1.0F : false;
-            }
-        }
-        return false;
-    }
-
     std::string GetSoulLevelName(uint8_t soulLevel)
     {
         static std::map<uint8_t, std::string> s_soulMap;
@@ -43,6 +30,24 @@ namespace
         return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
     }
 }
+
+    bool CAHZTarget::IsSurvivalMode()
+    {
+        if (!REL::Module::IsVR()) {
+            using TESGlobal = RE::TESGlobal;
+            using TESForm = RE::TESForm;
+            using BGSAcousticSpace = RE::BGSAcousticSpace;
+            const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
+            if (dobj) {
+                const auto survival = dobj->GetObject<TESGlobal>(RE::DefaultObjectID::kSurvivalModeEnabled);
+
+                [[maybe_unused]] const auto manualInstalled = dobj->GetObject<BGSAcousticSpace>(RE::DefaultObjectID::kHelpManualInstalledContentAE);
+
+                return survival ? (survival)->value == 1.0F : false;
+            }
+        }
+        return false;
+    }
 
 //------------------Native Wrappers -----------------------------
 

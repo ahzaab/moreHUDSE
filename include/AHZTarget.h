@@ -38,33 +38,33 @@ struct TargetData
 
     void Dump() const
     {
-        logger::trace("\r\n");
-        logger::trace("\r\n");
-        logger::trace("******************************************");
-        logger::trace("isValid: {}", isValid);
-        logger::trace("canCarry: {}", canCarry);
-        logger::trace("bookRead: {}", bookRead);
-        logger::trace("formType: {}", formType);
-        logger::trace("formId: {}", formId);
-        logger::trace("effectsDescription: {}", effectsDescription);
-        logger::trace("description: {}", description);
-        logger::trace("bookSkill: {}", bookSkill);
-        logger::trace("isSpellTome: {}", isSpellTome);
-        logger::trace("damage: {}", damage);
-        logger::trace("armorType: {}", armorType);
-        logger::trace("armorRating: {}", armorRating);
-        logger::trace("armorWarmthRating: {}", armorWarmthRating);
-        logger::trace("armorslotMask: {}", armorslotMask);
-        logger::trace("knownIngredientEffects:");
-        for (auto& i : knownIngredientEffects) {
-            logger::trace("   {}", i);
-        }
-        logger::trace("name: {}", name);
-        logger::trace("displayName: {}", displayName);
-        logger::trace("weight: {}", weight);
-        logger::trace("weaponType: {}", weaponType);
-        logger::trace("enchantmentType: {}", enchantmentType);
-        logger::trace("isAmmoBolt: {}", isBoltAmmo);
+        //logger::trace("\r\n");
+        //logger::trace("\r\n");
+        //logger::trace("******************************************");
+        //logger::trace("isValid: {}", isValid);
+        //logger::trace("canCarry: {}", canCarry);
+        //logger::trace("bookRead: {}", bookRead);
+        //logger::trace("formType: {}", formType);
+        //logger::trace("formId: {}", formId);
+        //logger::trace("effectsDescription: {}", effectsDescription);
+        //logger::trace("description: {}", description);
+        //logger::trace("bookSkill: {}", bookSkill);
+        //logger::trace("isSpellTome: {}", isSpellTome);
+        //logger::trace("damage: {}", damage);
+        //logger::trace("armorType: {}", armorType);
+        //logger::trace("armorRating: {}", armorRating);
+        //logger::trace("armorWarmthRating: {}", armorWarmthRating);
+        //logger::trace("armorslotMask: {}", armorslotMask);
+        //logger::trace("knownIngredientEffects:");
+        //for (auto& i : knownIngredientEffects) {
+        //    logger::trace("   {}", i);
+        //}
+        //logger::trace("name: {}", name);
+        //logger::trace("displayName: {}", displayName);
+        //logger::trace("weight: {}", weight);
+        //logger::trace("weaponType: {}", weaponType);
+        //logger::trace("enchantmentType: {}", enchantmentType);
+        //logger::trace("isAmmoBolt: {}", isBoltAmmo);
     }
 
 private:
@@ -108,6 +108,8 @@ public:
 
     CAHZTarget(CAHZTarget& other) = delete;
     void operator=(const CAHZTarget&) = delete;
+
+    static bool IsSurvivalMode();
 
     //------------------Native Wrappers -----------------------------
     static void  GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2);

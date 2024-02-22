@@ -179,7 +179,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
          logger::info("moreHUD loaded"sv);
 
      } catch (const std::exception& e) {
-         logger::critical(e.what());
+         logger::critical("{}", e.what());
          return false;
      } catch (...) {
          logger::critical("caught unknown exception"sv);

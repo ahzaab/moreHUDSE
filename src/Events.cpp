@@ -25,7 +25,7 @@ namespace Events
             return RE::BSEventNotifyControl::kContinue;
         }
         if (REL::Module::IsVR()) {
-            logger::trace("Menu: {}"sv, a_event->menuName);
+            logger::trace("Menu: {}"sv, a_event->menuName.c_str());
             if (s_ahzMenuLoaded == false && a_event->menuName == "WSEnemyMeters"sv && a_event->opening) {
                 auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
                 if (view) {
