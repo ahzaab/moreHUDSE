@@ -24,12 +24,8 @@ auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESFo
     } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
         auto pProjectile = targetReference->As<RE::Projectile>();
 
-        if (pProjectile) {
-            auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
-            if (a && a->sourceAmmo)
-                return a->sourceAmmo;
-            else
-                return targetReference;
+        if (pProjectile && pProjectile->GetProjectileRuntimeData().ammoSource) {
+            return pProjectile->GetProjectileRuntimeData().ammoSource;
         } else
             return targetReference;
     } else {
