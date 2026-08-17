@@ -100,6 +100,12 @@
 #include <SKSE/SKSE.h>
 #include <REL/Relocation.h>
 
+// Windows defines GetObject as an ANSI/Unicode selection macro, which collides
+// with BGSDefaultObjectManager::GetObject.
+#ifdef GetObject
+#    undef GetObject
+#endif
+
 //#include <ShlObj_core.h>
 //#include <Windows.h>
 //#include <Psapi.h>

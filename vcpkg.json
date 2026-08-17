@@ -5,7 +5,7 @@
   "port-version": 0,
   "description": "SKSE64 moreHUD plugin",
   "homepage": "https://github.com/ahzaab/moreHUDSE",
-  "license": "Apache-2.0",
+  "license": "GPL-3.0-or-later",
   "features": {
     "scripts": {
       "description": "Install Papyrus sources for this program to develop on top of it."
@@ -28,7 +28,11 @@
       "dependencies": [
         "fmt",
         "articuno",
+        "directxtk",
+        "nlohmann-json",
+        "simpleini",
         "spdlog",
+        "toml11",
         "xbyak",
         "rapidcsv"
       ]
@@ -49,7 +53,6 @@
   },
   "default-features": [
     "scripts-dev",
-    "plugin",
-    "tests"
+    "plugin"
   ]
 }

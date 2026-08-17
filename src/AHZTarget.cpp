@@ -34,16 +34,12 @@ namespace
     bool CAHZTarget::IsSurvivalMode()
     {
         if (!REL::Module::IsVR()) {
-            using TESGlobal = RE::TESGlobal;
-            using TESForm = RE::TESForm;
-            using BGSAcousticSpace = RE::BGSAcousticSpace;
             const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
             if (dobj) {
-                const auto survival = dobj->GetObject<TESGlobal>(RE::DefaultObjectID::kSurvivalModeEnabled);
+                const auto survival = dobj->GetObject<RE::TESGlobal>(
+                    RE::DefaultObjectID::kSurvivalModeEnabled);
 
-                [[maybe_unused]] const auto manualInstalled = dobj->GetObject<BGSAcousticSpace>(RE::DefaultObjectID::kHelpManualInstalledContentAE);
-
-                return survival ? (survival)->value == 1.0F : false;
+                return survival && *survival ? (*survival)->value == 1.0F : false;
             }
         }
         return false;
@@ -356,7 +352,7 @@ RE::BIPED_MODEL::BipedObjectSlot CAHZTarget::GetArmorSlotMask()
     if (!item)
         return RE::BIPED_MODEL::BipedObjectSlot::kNone;
 
-    return item->GetSlotMask();
+    return static_cast<RE::BIPED_MODEL::BipedObjectSlot>(item->GetSlotMask().underlying());
 }
 
 float CAHZTarget::GetArmorRating()

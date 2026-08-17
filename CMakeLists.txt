@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
-# Define the local path for CommonLibSSE
-set(COMMONLIBSSE_LOCAL_PATH "C:/dev/Projects/CommonLibSSE-NG")
-
-# Include the CommonLibSSE.cmake file from the local path
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonLibSSE-local.cmake")
-
 ########################################################################################################################
 ## Define project
 ########################################################################################################################
@@ -19,15 +13,21 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
+# Build one DLL for Skyrim SE, AE, and VR using the pinned CommonLibSSE-NG
+# submodule. Keep CommonLib's own test suite out of this consumer build.
+set(ENABLE_SKYRIM_SE ON CACHE BOOL "Enable Skyrim SE support" FORCE)
+set(ENABLE_SKYRIM_AE ON CACHE BOOL "Enable Skyrim AE support" FORCE)
+set(ENABLE_SKYRIM_VR ON CACHE BOOL "Enable Skyrim VR support" FORCE)
+set(SKSE_SUPPORT_XBYAK ON CACHE BOOL "Enable Xbyak trampoline support" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "Build dependency tests" FORCE)
+add_subdirectory(external/CommonLibSSE-NG)
+include(external/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
+
 # Define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING to suppress the specific deprecation warning
 add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 
 # Alternatively, to suppress all MS extension deprecation warnings:
 add_compile_definitions(_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
-
-add_compile_definitions(ENABLE_SKYRIM_VR)
-add_compile_definitions(ENABLE_SKYRIM_AE)
-add_compile_definitions(ENABLE_SKYRIM_SE)
 
 include(GNUInstallDirs)
 
@@ -119,7 +119,6 @@ source_group(
 ########################################################################################################################
 ## Configure target DLL
 ########################################################################################################################
-#find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(ryml CONFIG REQUIRED)
@@ -127,7 +126,12 @@ find_package(ryml CONFIG REQUIRED)
 find_package(xbyak REQUIRED)
 find_path(ARTICUNO_INCLUDE_DIRS "articuno/articuno.h")
 
-add_commonlibsse_plugin(${PROJECT_NAME} SOURCES ${headers} ${sources})
+add_commonlibsse_plugin(${PROJECT_NAME}
+        NAME "Ahzaab's moreHUD Plugin"
+        AUTHOR "Ahzaab"
+        VERSION ${PROJECT_VERSION}
+        USE_ADDRESS_LIBRARY
+        SOURCES ${headers} ${sources})
 add_library("${PROJECT_NAME}::${PROJECT_NAME}" ALIAS "${PROJECT_NAME}")
 
 target_include_directories(${PROJECT_NAME}

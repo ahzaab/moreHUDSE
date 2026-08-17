@@ -23,9 +23,9 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 ---
 
 ## Build Dependencies
-* [cmake](https://cmake.org)
+* [CMake](https://cmake.org)
 * [vcpkg](https://github.com/microsoft/vcpkg)
-* [CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)
+* [CommonLibSSE-NG v6.0.0](https://github.com/alandtse/CommonLibSSE-NG) (included as a pinned submodule)
 * [spdlog](https://github.com/gabime/spdlog) (Installed by vcpkg)
 * [Xbyak](https://github.com/herumi/xbyak) (Installed by vcpkg)
 * [Boost](https://www.boost.org/)
@@ -42,7 +42,13 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 
 ## Build Instructions
 I use [Visual Studio Code](https://code.visualstudio.com/) for Compilation and Debugging.
-The following environmental variable is required: `SkyrimAEPath` which points to your skyrim installation directory
+Clone with submodules, or initialize them after cloning:
+
+```powershell
+git submodule update --init --recursive
+```
+
+The build produces one DLL supporting Skyrim SE, AE, and VR.
 
 Run the following commands for the debug build
 ```

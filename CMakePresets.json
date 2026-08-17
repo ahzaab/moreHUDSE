@@ -80,25 +80,12 @@
             }
         },
         {
-            "name": "build-tests",
-            "displayName": "Build Tests",
-            "hidden": true,
-            "description": "Include test suites in the build.",
-            "cacheVariables": {
-                "BUILD_TESTS": {
-                    "type": "STRING",
-                    "value": "ON"
-                }
-            }
-        },
-        {
             "name": "build-debug-msvc",
             "inherits": [
                 "base",
                 "vcpkg",
                 "win32-unicode",
                 "x64",
-                "build-tests",
                 "msvc"
             ],
             "displayName": "Debug",
@@ -119,7 +106,6 @@
                 "vcpkg",
                 "win32-unicode",
                 "x64",
-                "build-tests",
                 "msvc"
             ],
             "displayName": "Release",
@@ -140,7 +126,6 @@
                 "vcpkg",
                 "win32-unicode",
                 "x64",
-                "build-tests",
                 "clang-cl"
             ],
             "displayName": "Debug",
@@ -161,7 +146,6 @@
                 "vcpkg",
                 "win32-unicode",
                 "x64",
-                "build-tests",
                 "clang-cl"
             ],
             "displayName": "Release",
