@@ -353,6 +353,8 @@ MigrationBackup/
 out/
 build/
 .vscode/
+.idea/
+CMakeUserPresets.json
 !baseIcons.swf
 !enemyMagickaMeter.swf
 !enemyStaminaMeter.swf
