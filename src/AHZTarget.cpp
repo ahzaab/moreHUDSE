@@ -1,28 +1,12 @@
 ﻿#include "pch.h"
 #include "AHZTarget.h"
 #include "AHZFormLookup.h"
-#ifdef VR_BUILD
 #include "Offsets-VR.h"
-#elif SE_BUILD
 #include "Offsets-SE.h"
-#else
 #include "Offsets-AE.h"
-#endif
 
 namespace
 {
-    bool IsSurvivalMode()
-    {
-#ifndef VR_BUILD
-        using TESGlobal = RE::TESGlobal;
-        const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
-        const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
-        return survival ? survival->value == 1.0F : false;
-#else
-    return false;
-#endif
-    }
-
     std::string GetSoulLevelName(uint8_t soulLevel)
     {
         static std::map<uint8_t, std::string> s_soulMap;
@@ -47,50 +31,65 @@ namespace
     }
 }
 
+    bool CAHZTarget::IsSurvivalMode()
+    {
+        if (!REL::Module::IsVR()) {
+            const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
+            if (dobj) {
+                const auto survival = dobj->GetObject<RE::TESGlobal>(
+                    RE::DefaultObjectID::kSurvivalModeEnabled);
+
+                return survival && *survival ? (*survival)->value == 1.0F : false;
+            }
+        }
+        return false;
+    }
+
 //------------------Native Wrappers -----------------------------
 
 // 1408C2D30 1.6.318
 void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSString* a2)
 {
     using func_t = decltype(&CAHZTarget::GetMagicItemDescription_Native);
-    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetMagicItemDescription };
+    REL::Relocation<func_t> func{ REL::VariantID{
+        moreHUDSE::SE::Offsets::GetMagicItemDescription.id(),
+        moreHUDSE::AE::Offsets::GetMagicItemDescription.id(),
+        moreHUDSE::VR::Offsets::GetMagicItemDescription.offset() } };
     func(nullptr, a1, a2);
 }
 
 // 1408C33D0 1.6.318
 char* CAHZTarget::ProcessSurvivalMode_Native([[maybe_unused]]RE::BSString* a2)
 {
-#ifndef VR_BUILD
-    using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
-    REL::Relocation<func_t> func{ moreHUDSE::Offsets::ProcessSurvivalMode };
-    return func(a2);
-#else
-    return nullptr;
-#endif
-}
+    if (REL::Module::IsSE() || REL::Module::IsAE()) {
+        using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
+        REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::ProcessSurvivalMode.id(),
+            moreHUDSE::AE::Offsets::ProcessSurvivalMode.id() } };
+            return func(a2);
+        }
+        return nullptr;
+    }
 
 // 1403D4D60 1.6.318
 float CAHZTarget::GetArmorWarmthRating_Native([[maybe_unused]]RE::TESForm* a1)
 {
-#ifndef VR_BUILD
-    using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
-    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetArmorWarmthRating };
-    return func(a1);
-#else
+    if (REL::Module::IsSE() || REL::Module::IsAE()) {
+        using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
+        REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::GetArmorWarmthRating.id(), moreHUDSE::AE::Offsets::GetArmorWarmthRating.id() } };
+        return func(a1);
+    }
     return 0;
-#endif
 }
 
 // 1403d4e37  1.6.318
 float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[maybe_unused]]float s2)
 {
-#ifndef VR_BUILD
-    using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
-    REL::Relocation<func_t> func{ moreHUDSE::Offsets::GetActorWarmthRating };
-    return func(a1, s2);
-#else
+    if (REL::Module::IsSE() || REL::Module::IsAE()) {
+        using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
+        REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::GetActorWarmthRating.id(), moreHUDSE::AE::Offsets::GetActorWarmthRating.id() } };
+        return func(a1, s2);
+    }
     return 0;
-#endif
 }
 
 //------------------End Native Wrappers -------------------------
@@ -353,7 +352,7 @@ RE::BIPED_MODEL::BipedObjectSlot CAHZTarget::GetArmorSlotMask()
     if (!item)
         return RE::BIPED_MODEL::BipedObjectSlot::kNone;
 
-    return item->GetSlotMask();
+    return static_cast<RE::BIPED_MODEL::BipedObjectSlot>(item->GetSlotMask().underlying());
 }
 
 float CAHZTarget::GetArmorRating()

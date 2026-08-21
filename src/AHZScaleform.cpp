@@ -16,18 +16,6 @@
 
 static std::map<uint8_t, string> m_soulMap;
 
-auto CAHZScaleform::IsSurvivalMode() -> bool
-{
-#ifndef VR_BUILD
-    using TESGlobal = RE::TESGlobal;
-    const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
-    const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
-    return survival ? survival->value == 1.0F : false;
-#else
-    return false;
-#endif
-}
-
 auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
 {
     if (m_soulMap.empty())  //Cache it,  No need to hit the game setting every time
@@ -611,54 +599,51 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
         }
     }
 
-#ifndef VR_BUILD
-    RE::GFxValue enemyObj;
-    RE::GFxValue playerObj;
-    args.movie->CreateObject(&enemyObj);
-    args.movie->CreateObject(&playerObj);
+    if (!REL::Module::IsVR()) {
+        RE::GFxValue enemyObj;
+        RE::GFxValue playerObj;
+        args.movie->CreateObject(&enemyObj);
+        args.movie->CreateObject(&playerObj);
 
-    RegisterNumber(&enemyObj, "level", actorData.Level);
-    RegisterNumber(&playerObj, "level", playerLevel);
-    string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
-    if (soulType && soulName.length()) {
-        RegisterString(&enemyObj, "soul", soulName.c_str());
-    }
-    RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
-    RegisterNumber(&enemyObj, "health", ceil(actorData.health));
-    RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
-    RegisterNumber(&enemyObj, "maxMagicka", ceil(actorData.maxMagicka));
-    RegisterNumber(&enemyObj, "magicka", ceil(actorData.magicka));
-    RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
-    RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
-    RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
-    RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
-    RegisterBoolean(&enemyObj, "targetChanged", actorData.targetChanged);
-
-    if (args.args[0].HasMember("player")) {
-        args.args[0].SetMember("player", playerObj);
-    }
-    if (args.args[0].HasMember("enemy")) {
-        args.args[0].SetMember("enemy", enemyObj);
-    }
-
-#else
-    RE::GFxValue legacyObj;
-    args.movie->CreateObject(&legacyObj);
-    if (actorData.Level)
-    {
-        playerLevel = pPC->GetLevel();
-        RegisterNumber(&legacyObj, "EnemyLevel", actorData.Level);
-        RegisterNumber(&legacyObj, "PlayerLevel", playerLevel); 
-        std::string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
+        RegisterNumber(&enemyObj, "level", actorData.Level);
+        RegisterNumber(&playerObj, "level", playerLevel);
+        string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
         if (soulType && soulName.length()) {
-            RegisterString(&legacyObj, "Soul", soulName.c_str());
-        }  
+            RegisterString(&enemyObj, "soul", soulName.c_str());
+        }
+        RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
+        RegisterNumber(&enemyObj, "health", ceil(actorData.health));
+        RegisterNumber(&enemyObj, "healthPct", GetPct(actorData.health, actorData.maxHealth));
+        RegisterNumber(&enemyObj, "maxMagicka", ceil(actorData.maxMagicka));
+        RegisterNumber(&enemyObj, "magicka", ceil(actorData.magicka));
+        RegisterNumber(&enemyObj, "magickaPct", GetPct(actorData.magicka, actorData.maxMagicka));
+        RegisterNumber(&enemyObj, "maxStamina", ceil(actorData.maxStamina));
+        RegisterNumber(&enemyObj, "stamina", ceil(actorData.stamina));
+        RegisterNumber(&enemyObj, "staminaPct", GetPct(actorData.stamina, actorData.maxStamina));
+        RegisterBoolean(&enemyObj, "targetChanged", actorData.targetChanged);
+
+        if (args.args[0].HasMember("player")) {
+            args.args[0].SetMember("player", playerObj);
+        }
+        if (args.args[0].HasMember("enemy")) {
+            args.args[0].SetMember("enemy", enemyObj);
+        }
+    } else {
+        RE::GFxValue legacyObj;
+        args.movie->CreateObject(&legacyObj);
+        if (actorData.Level) {
+            playerLevel = pPC->GetLevel();
+            RegisterNumber(&legacyObj, "EnemyLevel", actorData.Level);
+            RegisterNumber(&legacyObj, "PlayerLevel", playerLevel);
+            std::string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
+            if (soulType && soulName.length()) {
+                RegisterString(&legacyObj, "Soul", soulName.c_str());
+            }
+        }
+        if (args.args[0].HasMember("outObj")) {
+            args.args[0].SetMember("outObj", legacyObj);
+        }
     }
-	if (args.args[0].HasMember("outObj"))
-	{
-		args.args[0].SetMember("outObj", legacyObj);
-	}      
-#endif
 }
 
 auto CAHZScaleform::GetArmorWeightClass(const TargetData& target) -> string
@@ -940,7 +925,7 @@ void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctio
         totalArmorOrWeapon = GetTotalActualArmorRating();
         difference = GetArmorRatingDiff(target);
 
-        if (IsSurvivalMode()) {
+        if (CAHZTarget::IsSurvivalMode()) {
             isSurvivalMode = true;
             totalWarmthRating = GetTotalWarmthRating();
             warmthDifference = GetWarmthRatingDiff(target);
@@ -1106,8 +1091,8 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     args.movie->CreateObject(&obj);
     auto pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto encumbranceNumber = pPC->GetActorValue(RE::ActorValue::kInventoryWeight);
-        auto maxEncumbranceNumber = pPC->GetActorValue(RE::ActorValue::kCarryWeight);
+        auto encumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kInventoryWeight);
+        auto maxEncumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kCarryWeight);
 
         // Enter the data into the Scaleform function
         RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);

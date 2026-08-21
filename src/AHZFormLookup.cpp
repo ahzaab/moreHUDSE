@@ -24,12 +24,8 @@ auto CAHZFormLookup::GetTESForm(RE::TESObjectREFR* targetReference) -> RE::TESFo
     } else if (targetReference->GetBaseObject() && targetReference->GetBaseObject()->formType == RE::FormType::Projectile) {
         auto pProjectile = targetReference->As<RE::Projectile>();
 
-        if (pProjectile) {
-            auto a = reinterpret_cast<const AHZProjectile*>(pProjectile);
-            if (a && a->sourceAmmo)
-                return a->sourceAmmo;
-            else
-                return targetReference;
+        if (pProjectile && pProjectile->GetProjectileRuntimeData().ammoSource) {
+            return pProjectile->GetProjectileRuntimeData().ammoSource;
         } else
             return targetReference;
     } else {
@@ -61,20 +57,21 @@ void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID,
 {
     auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-    // Normalize to the raw formIDs
-#ifndef VR_BUILD
-    auto isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
-#else
     auto isBaseLight = false;
-#endif
+
+    // Normalize to the raw formIDs
+    if (!REL::Module::IsVR()) {
+         isBaseLight = dataHandler->GetLoadedLightModIndex(baseFormModName).has_value();
+    }
+
     baseFormID = isBaseLight ? baseFormID & 0x00000FFF : baseFormID & 0x00FFFFFF;
 
-#ifndef VR_BUILD
-    auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
-#else
     auto isTargetLight = false;
-#endif
 
+    if (!REL::Module::IsVR()) {
+        auto isTargetLight = dataHandler->GetLoadedLightModIndex(targetFormModName).has_value();
+    }
+    
     targetFormID = isTargetLight ? targetFormID & 0x00000FFF : targetFormID & 0x00FFFFFF;
 
     auto baseForm = dataHandler->LookupForm(baseFormID, baseFormModName);
@@ -173,7 +170,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     variableName.insert(0, "::");
     variableName.append("_var");
     auto                                      vm = RE::SkyrimVM::GetSingleton();
-    auto                                      vmImpl = vm->impl;
+    auto                                      vmImpl = vm->GetImpl();
     auto                                      handlePolicy = vmImpl.get()->GetObjectHandlePolicy();
     auto                                      handle = handlePolicy->GetHandleForObject(a_form->GetFormType(), a_form);
     RE::BSTSmartPointer<RE::BSScript::Object> result;
@@ -206,7 +203,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variab
         if (!form->GetBaseObject())
             return nullptr;
 
-        auto vm = RE::SkyrimVM::GetSingleton()->impl;
+        auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
         auto handlePolicy = vm.get()->GetObjectHandlePolicy();
         auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
 
@@ -231,7 +228,7 @@ auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string var
         if (!form->GetBaseObject())
             return -1;
 
-        auto vm = RE::SkyrimVM::GetSingleton()->impl;
+        auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
         auto handlePolicy = vm.get()->GetObjectHandlePolicy();
         auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
 

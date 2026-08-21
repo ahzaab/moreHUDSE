@@ -36,7 +36,7 @@ auto CAHZArmorInfo::GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMa
                 if (element) {
                     if (element->object && (element->object->GetFormType() == RE::FormType::Armor || element->object->GetFormType() == RE::FormType::Light)) {
                         auto form = element->object->As<RE::BGSBipedObjectForm>();
-                        if (form && (static_cast<uint32_t>(form->GetSlotMask()) & static_cast<uint32_t>(slotMask))) {
+                        if (form && (form->GetSlotMask().underlying() & static_cast<uint32_t>(slotMask))) {
                             armor = element->object;
                             auto wornList = GetWornExtraList(element->extraLists);
 

@@ -1,12 +1,7 @@
-[submodule "external/CommonLibSSE"]
-	path = external/CommonLibSSE
-	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
-	branch = master
-[submodule "external/CommonLibSSE_SE"]
-	path = external/CommonLibSSE_SE
-	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
-	branch = master
-[submodule "external/CommonLibVR"]
-	path = external/CommonLibVR
-	url = https://github.com/ahzaab/CommonLibVR.git
-	branch = vr
+[submodule "external/CommonLibSSE-NG"]
+	path = external/CommonLibSSE-NG
+	url = https://github.com/ahzaab/CommonLibSSE-NG.git
+	branch = feature/skyrim-1.7.99
+[submodule "external/SkyUI-Community"]
+	path = external/SkyUI-Community
+	url = https://github.com/doodlum/SkyUI-Community.git

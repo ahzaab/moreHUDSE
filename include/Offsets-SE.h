@@ -4,14 +4,17 @@
 
 namespace moreHUDSE
 {
-    namespace Offsets
+    namespace SE
     {
-        constexpr REL::ID IsSentient{36889};
-        constexpr REL::ID GetSoulType{25933};        
-        constexpr REL::ID GetMagicItemDescription{51022};
-        constexpr REL::ID ProcessSurvivalMode{51023};
-        constexpr REL::ID GetArmorWarmthRating{25833};
-        constexpr REL::ID GetActorWarmthRating{25834};
-        constexpr REL::ID EnemyUpdateHookBase{50776};
+        namespace Offsets
+        {
+            constexpr REL::ID IsSentient{ 36889 };
+            constexpr REL::ID GetSoulType{ 25933 };
+            constexpr REL::ID GetMagicItemDescription{ 51022 };
+            constexpr REL::ID ProcessSurvivalMode{ 51023 };
+            constexpr REL::ID GetArmorWarmthRating{ 25833 };
+            constexpr REL::ID GetActorWarmthRating{ 25834 };
+            constexpr REL::ID EnemyUpdateHookBase{ 50776 };
+        }
     }
 }

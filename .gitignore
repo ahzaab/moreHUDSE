@@ -349,10 +349,17 @@ healthchecksdb
 MigrationBackup/
 
 *.swf
+*.dll
+*.bsa
+*.7z
+*.zip
+*.rar
 
 out/
 build/
 .vscode/
+.idea/
+CMakeUserPresets.json
 !baseIcons.swf
 !enemyMagickaMeter.swf
 !enemyStaminaMeter.swf
