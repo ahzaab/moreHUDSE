@@ -8,9 +8,7 @@ if ($skip.ToUpper() -eq "Y")
         Write-Error "You need to specify a version"
         return -1
     }
-    & "$PSScriptRoot\AE\ArchiveFiles.ps1"
-    & "$PSScriptRoot\AE\ReleaseFiles.ps1" -Version $version -AsLightPlugin 0
-    & "$PSScriptRoot\AE\ReleaseFiles.ps1" -Version $($version + "esl") -AsLightPlugin 1
+    & "$PSScriptRoot\AE\BuildRelease.ps1" -Version $version
 }
 
 $skip = Read-Host "Building SE? (y/n)"

@@ -48,7 +48,7 @@ int Property iToggleOn Auto
 ; Constants -------------------------------------------------------------------------------------------------
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 5 autoReadOnly
-int Property I_THIS_VERSION_MINOR = 2 autoReadOnly
+int Property I_THIS_VERSION_MINOR = 4 autoReadOnly
 int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
 int Property I_THIS_VERSION_BETA = 0 autoReadOnly
 String Property WidgetRoot = "_root.AHZWidgetContainer.AHZWidget" autoReadOnly

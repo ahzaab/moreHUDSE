@@ -6,11 +6,17 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 ########################################################################################################################
 project(
 		AHZmoreHUDPlugin
-        VERSION 5.3.0.0
+        VERSION 5.4.0.0
         LANGUAGES CXX
         DESCRIPTION "SKSE64 moreHUD plugin")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Preserve full optimization while emitting linker symbols for crash-log resolution.
+if(MSVC)
+    add_compile_options("$<$<CONFIG:Release>:/Zi>")
+    add_link_options("$<$<CONFIG:Release>:/DEBUG:FULL;/OPT:REF;/OPT:ICF>")
+endif()
+
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 # Build one DLL for Skyrim SE, AE, and VR using the pinned CommonLibSSE-NG
@@ -187,7 +193,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
-if(${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+if(CMAKE_BUILD_TYPE MATCHES "^(Debug|RelWithDebInfo|Release)$")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Distribution/Plugin${BUILD_NAME}/")
 endif()
@@ -203,11 +209,15 @@ set_property(TARGET ${PROJECT_NAME}
 
 # Automatic deployment to Mod Organizer 2 mod directory.
 foreach (DEPLOY_TARGET $ENV{SkyrimPluginTargets})
-    message("Adding deployment target ${DEPLOY_TARGET}.")
+    set(PLUGIN_DEPLOY_DIRECTORY "${DEPLOY_TARGET}/SKSE/Plugins")
+    message("Adding deployment target ${PLUGIN_DEPLOY_DIRECTORY}.")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${DEPLOY_TARGET}/SKSE/Plugins/")
-    if(${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${PLUGIN_DEPLOY_DIRECTORY}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    $<TARGET_FILE:${PROJECT_NAME}> "${PLUGIN_DEPLOY_DIRECTORY}/$<TARGET_FILE_NAME:${PROJECT_NAME}>")
+    if(CMAKE_BUILD_TYPE MATCHES "^(Debug|RelWithDebInfo|Release)$")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${DEPLOY_TARGET}/SKSE/Plugins/")
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        $<TARGET_PDB_FILE:${PROJECT_NAME}> "${PLUGIN_DEPLOY_DIRECTORY}/$<TARGET_PDB_FILE_NAME:${PROJECT_NAME}>")
     endif()
 endforeach()

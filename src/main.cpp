@@ -109,6 +109,9 @@ namespace
  * tasks.
  * </p>
  */
+// add_commonlibsse_plugin generates the exported SKSEPlugin_Version and
+// SKSEPlugin_Query declarations. SKSEPluginLoad supplies the one shared load
+// entry point used by SE, AE, and VR.
 SKSEPluginLoad(const SKSE::LoadInterface* skse) {
      //InitializeLogging();
 
@@ -188,122 +191,3 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
 
      return true;
  }
-
-//extern "C"
-//{
-//#if defined(SE_BUILD) || defined(VR_BUILD)
-//    DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-//    {
-//        if (!InitLog())
-//        {
-//            return false;
-//        }
-//
-//        a_info->infoVersion = SKSE::PluginInfo::kVersion;
-//        a_info->name = "Ahzaab's moreHUD Plugin";
-//        a_info->version = Version::ASINT;
-//
-//        if (a_skse->IsEditor()) {
-//            logger::critical("Loaded in editor, marking as incompatible!"sv);
-//            return false;
-//        }
-//
-//#ifdef VR_BUILD
-//        const auto ver = a_skse->RuntimeVersion();
-//        if (ver <= SKSE::RUNTIME_VR_1_4_15) {
-//            logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
-//            return false;
-//        }
-//#else
-//        const auto ver = a_skse->RuntimeVersion();
-//        if (ver <= SKSE::RUNTIME_1_5_39) {
-//            logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
-//            return false;
-//        }
-//#endif
-//
-//        return true;
-//    }
-//#else
-//    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
-//        SKSE::PluginVersionData v{};
-//        v.pluginVersion = Version::ASINT;
-//        v.PluginName("Ahzaab's moreHUD Plugin"sv);
-//        v.AuthorName("Ahzaab"sv);
-//        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
-//        v.UsesAddressLibrary(true);
-//        v.UsesStructsPost629(true);
-//        return v;
-//    }();
-//#endif
-//
-//
-//    DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
-//    {
-//        //  while (!IsDebuggerPresent())
-//        //  {
-//        //    Sleep(10);
-//        //  }
-//
-//        //  Sleep(1000 * 2);
-//
-//        try {
-//#if !defined(SE_BUILD) && !defined(VR_BUILD)
-//            if (!InitLog())
-//            {
-//                return false;
-//            }
-//#endif
-//            logger::info("moreHUD loading"sv);
-//            logger::info("moreHUD v{}"sv, Version::NAME);
-//
-//            SKSE::Init(a_skse);
-//
-//            SKSE::AllocTrampoline(1 << 6);
-//
-//            // std::vector<size_t> offsets = {
-//            // 0x0053EC60,   //Wand
-//            // 0x0060F1D0, //sentient
-//            // 0x003D0FC0, //actor soul
-//            // 0x008C0940, // item description
-//            // 0x008AFE70 // enemy
-//            // };
-//
-//            //  for (auto &offset: offsets){
-//            //      auto o2i = REL::IDDatabase::Offset2ID();
-//            //      auto id1 = o2i(offset);
-//            //      //auto id1 = REL::IDDatabase::Offset2ID(offset);
-//            //      logger::info("offset: {:x}, id {}"sv, offset, id1);
-//            //  }
-//
-//            auto messaging = SKSE::GetMessagingInterface();
-//            if (!messaging->RegisterListener("SKSE", MessageHandler)) {
-//                logger::critical("Could not register MessageHandler"sv);
-//                return false;
-//            }
-//            logger::info("registered listener"sv);
-//
-//            if (!moreHUD::Papyrus::Register()) {
-//                logger::critical("Could not register papyrus functions"sv);
-//                return false;
-//            }
-//
-//            logger::info("Installing patched"sv);
-//            Patches::Install();
-//
-//            logger::info("Registering Callbacks"sv);
-//            Scaleform::RegisterCallbacks();
-//
-//            logger::info("moreHUD loaded"sv);
-//
-//        } catch (const std::exception& e) {
-//            logger::critical(e.what());
-//            return false;
-//        } catch (...) {
-//            logger::critical("caught unknown exception"sv);
-//            return false;
-//        }
-//
-//        return true;
-//    }
-//};

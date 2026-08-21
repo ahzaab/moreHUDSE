@@ -349,6 +349,11 @@ healthchecksdb
 MigrationBackup/
 
 *.swf
+*.dll
+*.bsa
+*.7z
+*.zip
+*.rar
 
 out/
 build/

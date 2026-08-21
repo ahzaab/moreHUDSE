@@ -100,7 +100,21 @@ Copy-Item $destSksePlugin "$tempDir\Data\SKSE\Plugins"
 $fileVersionNane = $Version.Replace('.', '_')
 $zipFileName = $pluginFile.Replace($pluginExtesion, "$fileVersionNane.7z")
 
-Start-Process "C:\Program Files\7-Zip\7z" -ArgumentList "a `"$versionDir\$zipFileName`" `"$tempDir\Data`" -mx5 -t7z" -wait -NoNewWindow -PassThru
+# Resolve 7-Zip without storing a machine-specific installation path.
+$sevenZipExe = $Env:SEVEN_ZIP_EXE
+if (-not $sevenZipExe)
+{
+    $sevenZipCommand = Get-Command 7z.exe -ErrorAction SilentlyContinue
+    if ($sevenZipCommand)
+    {
+        $sevenZipExe = $sevenZipCommand.Source
+    }
+}
+if (-not $sevenZipExe)
+{
+    throw '7z.exe was not found. Supply SEVEN_ZIP_EXE or add 7-Zip to PATH.'
+Start-Process $sevenZipExe -ArgumentList "a `"$versionDir\$zipFileName`" `"$tempDir\Data`" -mx5 -t7z" -wait -NoNewWindow -PassThru
+}
 
 }
 finally
