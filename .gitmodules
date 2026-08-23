@@ -1,7 +1,7 @@
 [submodule "external/CommonLibSSE-NG"]
 	path = external/CommonLibSSE-NG
-	url = https://github.com/ahzaab/CommonLibSSE-NG.git
-	branch = feature/skyrim-1.7.99
+	url = https://github.com/alandtse/CommonLibSSE-NG.git
+	branch = ng
 [submodule "external/SkyUI-Community"]
 	path = external/SkyUI-Community
 	url = https://github.com/doodlum/SkyUI-Community.git

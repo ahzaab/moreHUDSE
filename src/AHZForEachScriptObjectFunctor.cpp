@@ -24,7 +24,7 @@ auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFun
         return true;
     }
 
-    auto                                      vm = RE::SkyrimVM::GetSingleton()->GetImpl();
+    auto                                      vm = RE::SkyrimVM::GetSingleton()->GetVMRuntimeData().impl;
     RE::BSTSmartPointer<RE::BSScript::Object> boundObject;
 
     m_variableOffset = classInfo->GetTotalNumVariables();
@@ -46,7 +46,7 @@ auto CAHZForEachScriptObjectFunctor::Visit(RE::BSScript::IForEachScriptObjectFun
 
 bool CAHZForEachScriptObjectFunctor::VisitVariables(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject)
 {
-    auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
+    auto vm = RE::SkyrimVM::GetSingleton()->GetVMRuntimeData().impl;
     auto it = typeInfo->GetVariableIter();
 
     if (!it) {
@@ -71,7 +71,7 @@ bool CAHZForEachScriptObjectFunctor::VisitVariables(RE::BSScript::ObjectTypeInfo
 }
 bool CAHZForEachScriptObjectFunctor::VisitProperties(RE::BSScript::ObjectTypeInfo* typeInfo, RE::BSTSmartPointer<RE::BSScript::Object>& boundObject)
 {
-    auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
+    auto vm = RE::SkyrimVM::GetSingleton()->GetVMRuntimeData().impl;
     auto it = typeInfo->GetPropertyIter();
 
     if (!it) {

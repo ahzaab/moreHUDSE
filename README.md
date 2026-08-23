@@ -25,7 +25,7 @@ HUD mod authors, you can reskin or modify the additional enemy meters by includi
 ## Build Dependencies
 * [CMake](https://cmake.org)
 * [vcpkg](https://github.com/microsoft/vcpkg)
-* [CommonLibSSE-NG v6.0.0](https://github.com/alandtse/CommonLibSSE-NG) (included as a pinned submodule)
+* [CommonLibSSE-NG v6.6.3](https://github.com/alandtse/CommonLibSSE-NG) (included as a pinned submodule)
 * [spdlog](https://github.com/gabime/spdlog) (Installed by vcpkg)
 * [Xbyak](https://github.com/herumi/xbyak) (Installed by vcpkg)
 * [Boost](https://www.boost.org/)

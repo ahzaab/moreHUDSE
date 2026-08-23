@@ -170,7 +170,7 @@ auto CAHZFormLookup::GetScriptVariable(RE::TESForm* a_form, const char* a_script
     variableName.insert(0, "::");
     variableName.append("_var");
     auto                                      vm = RE::SkyrimVM::GetSingleton();
-    auto                                      vmImpl = vm->GetImpl();
+    auto                                      vmImpl = vm->GetVMRuntimeData().impl;
     auto                                      handlePolicy = vmImpl.get()->GetObjectHandlePolicy();
     auto                                      handle = handlePolicy->GetHandleForObject(a_form->GetFormType(), a_form);
     RE::BSTSmartPointer<RE::BSScript::Object> result;
@@ -203,7 +203,7 @@ auto CAHZFormLookup::GetAttachedForm(RE::TESObjectREFR* form, std::string variab
         if (!form->GetBaseObject())
             return nullptr;
 
-        auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
+        auto vm = RE::SkyrimVM::GetSingleton()->GetVMRuntimeData().impl;
         auto handlePolicy = vm.get()->GetObjectHandlePolicy();
         auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
 
@@ -228,7 +228,7 @@ auto CAHZFormLookup::GetAttachedInteger(RE::TESObjectREFR* form, std::string var
         if (!form->GetBaseObject())
             return -1;
 
-        auto vm = RE::SkyrimVM::GetSingleton()->GetImpl();
+        auto vm = RE::SkyrimVM::GetSingleton()->GetVMRuntimeData().impl;
         auto handlePolicy = vm.get()->GetObjectHandlePolicy();
         auto handle = handlePolicy->GetHandleForObject(form->GetFormType(), form);
 
