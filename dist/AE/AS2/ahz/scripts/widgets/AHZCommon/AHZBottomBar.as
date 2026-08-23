@@ -7,7 +7,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 	var PlayerInfoObj: Object;
 	var iLastItemType: Number;
 	var iLeftOffset: Number;
-	var playerCardWith: Number;
+	var playerCardWidth: Number;
 	
 	var PLAYER_CARD_WIDTH:Number = 651.0;
 
@@ -99,6 +99,16 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				default:
 					PlayerInfoCard_mc.gotoAndStop("Default");
 			}
+
+			// Preserve the right edge authored by the owning HUD movie.  Replacement
+			// HUDs can move the player data card without this class forcing gold back
+			// to moreHUD's original 651-pixel edge.
+			if (playerCardWidth == undefined || isNaN(playerCardWidth)) {
+				playerCardWidth = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue._width;
+				if (playerCardWidth == undefined || isNaN(playerCardWidth)) {
+					playerCardWidth = PLAYER_CARD_WIDTH;
+				}
+			}
 			
 			//PlayerInfoCard_mc.CarryWeightValue.textAutoSize = "shrink";
 			
@@ -163,7 +173,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				PlayerInfoCard_mc.DamageLabel.autoSize = "right";				
 				
 				
-				PlayerInfoCard_mc.PlayerGoldValue._x = PLAYER_CARD_WIDTH - PlayerInfoCard_mc.PlayerGoldValue._width;
+				PlayerInfoCard_mc.PlayerGoldValue._x = playerCardWidth - PlayerInfoCard_mc.PlayerGoldValue._width;
 			
 
 				PlayerInfoCard_mc.PlayerGoldLabel._x = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue.getLineMetrics(0).x - PlayerInfoCard_mc.PlayerGoldLabel._width;
@@ -193,7 +203,7 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				PlayerInfoCard_mc.DamageLabel.autoSize = "right";				
 				
 				
-				PlayerInfoCard_mc.PlayerGoldValue._x = PLAYER_CARD_WIDTH - PlayerInfoCard_mc.PlayerGoldValue._width;
+				PlayerInfoCard_mc.PlayerGoldValue._x = playerCardWidth - PlayerInfoCard_mc.PlayerGoldValue._width;
 			
 
 				PlayerInfoCard_mc.PlayerGoldLabel._x = PlayerInfoCard_mc.PlayerGoldValue._x + PlayerInfoCard_mc.PlayerGoldValue.getLineMetrics(0).x - PlayerInfoCard_mc.PlayerGoldLabel._width;
@@ -214,31 +224,31 @@ class ahz.scripts.widgets.AHZCommon.AHZBottomBar extends MovieClip
 				{
 					if (PlayerInfoCard_mc.WarmthRatingLabel._visible)
 					{
-						deltaVal = ((PLAYER_CARD_WIDTH - PlayerInfoCard_mc.WarmthRatingLabel._x) / 2.0) + PlayerInfoCard_mc.WarmthRatingLabel._x;
-						deltaVal -= (PLAYER_CARD_WIDTH / 2.0);
+						deltaVal = ((playerCardWidth - PlayerInfoCard_mc.WarmthRatingLabel._x) / 2.0) + PlayerInfoCard_mc.WarmthRatingLabel._x;
+						deltaVal -= (playerCardWidth / 2.0);
 						PlayerInfoCard_mc.WarmthRatingLabel._x -= deltaVal;
 						PlayerInfoCard_mc.WarmthRatingValue._x -= deltaVal;	
 					}
 					else
 					{
-						deltaVal = ((PLAYER_CARD_WIDTH - PlayerInfoCard_mc.ArmorRatingLabel._x) / 2.0) + PlayerInfoCard_mc.ArmorRatingLabel._x;
-						deltaVal -= (PLAYER_CARD_WIDTH / 2.0);
+						deltaVal = ((playerCardWidth - PlayerInfoCard_mc.ArmorRatingLabel._x) / 2.0) + PlayerInfoCard_mc.ArmorRatingLabel._x;
+						deltaVal -= (playerCardWidth / 2.0);
 					}
 					PlayerInfoCard_mc.ArmorRatingLabel._x -= deltaVal;
 					PlayerInfoCard_mc.ArmorRatingValue._x -= deltaVal;					
 				} 
 				else if (iItemType === AHZDefines.ICT_WEAPON) 
 				{
-					deltaVal = ((PLAYER_CARD_WIDTH - PlayerInfoCard_mc.DamageLabel._x) / 2.0) + PlayerInfoCard_mc.DamageLabel._x;
-					deltaVal -= (PLAYER_CARD_WIDTH / 2.0);
+					deltaVal = ((playerCardWidth - PlayerInfoCard_mc.DamageLabel._x) / 2.0) + PlayerInfoCard_mc.DamageLabel._x;
+					deltaVal -= (playerCardWidth / 2.0);
 					//deltaVal = PlayerInfoCard_mc.DamageLabel._x - deltaVal;
 					PlayerInfoCard_mc.DamageLabel._x -= deltaVal;
 					PlayerInfoCard_mc.DamageValue._x -= deltaVal;
 				}		
 				else
 				{
-					deltaVal = ((PLAYER_CARD_WIDTH - PlayerInfoCard_mc.CarryWeightLabel._x) / 2.0) + PlayerInfoCard_mc.CarryWeightLabel._x;
-					deltaVal -= (PLAYER_CARD_WIDTH / 2.0);
+					deltaVal = ((playerCardWidth - PlayerInfoCard_mc.CarryWeightLabel._x) / 2.0) + PlayerInfoCard_mc.CarryWeightLabel._x;
+					deltaVal -= (playerCardWidth / 2.0);
 				}
 
 				PlayerInfoCard_mc.CarryWeightLabel._x -= deltaVal;
