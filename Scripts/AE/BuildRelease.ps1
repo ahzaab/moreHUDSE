@@ -151,7 +151,7 @@ function Expand-BsaFile
     }
 }
 
-$sourceDataDirectory = Join-Path $repositoryRoot 'dist\AE\Data'
+$sourceDataDirectory = Join-Path $repositoryRoot 'dist\NG\Data'
 
 if ($BuildScaleform)
 {

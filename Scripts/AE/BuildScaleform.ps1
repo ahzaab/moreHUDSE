@@ -7,7 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$sourceDirectory = Join-Path $repositoryRoot 'dist\AE\AS2'
+$sourceDirectory = Join-Path $repositoryRoot 'dist\NG\AS2'
 
 # Keep generated SWFs under build/ so publishing never writes temporary files beside the FLA sources.
 if (-not $OutputDirectory)
@@ -93,7 +93,7 @@ $destinations = @{
     'enemyStaminaMeter.swf' = @('Interface\exported\moreHUD\enemyStaminaMeter.swf')
 }
 
-$sourceDataDirectory = Join-Path $repositoryRoot 'dist\AE\Data'
+$sourceDataDirectory = Join-Path $repositoryRoot 'dist\NG\Data'
 foreach ($publishedName in $destinations.Keys)
 {
     $publishedFile = Get-ChildItem -LiteralPath $OutputDirectory -Filter $publishedName -File -Recurse | Select-Object -First 1

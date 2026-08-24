@@ -6,6 +6,9 @@ namespace Events
 {
     using EventResult = RE::BSEventNotifyControl;
 
+    bool IsAHZMovieLoaded() noexcept;
+    void NotifyAHZMovieLoaded();
+
     class MenuHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
     {
     public:
@@ -14,7 +17,7 @@ namespace Events
         virtual EventResult ProcessEvent(RE::MenuOpenCloseEvent const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
 
     private:
-        static bool s_ahzMenuLoaded;
+        static bool s_ahzMenuLoadRequested;
 
     private:
         MenuHandler(){};

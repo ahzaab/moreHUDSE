@@ -25,7 +25,7 @@ After publishing, verify all expected movies exist and that only intended files 
 
 ## AE publishing prerequisites
 
-- `Scripts/AE/BuildScaleform.ps1` uses the pinned `flc` 3.1.0 package and publishes `dist/AE/AS2/*.fla` into `build/scaleform/AE` by default.
+- `Scripts/AE/BuildScaleform.ps1` uses the pinned `flc` 3.1.0 package and publishes `dist/NG/AS2/*.fla` into `build/scaleform/AE` by default.
 - Resolve Flash from explicit parameters, environment, PATH, or the Windows App Paths registry. A locally discovered Adobe path is machine state and must not be committed.
 - The AS2 sources use CLIK/Scaleform classes. If Flash cannot resolve them, use the matching pinned classpath from the repository dependencies; do not duplicate or silently replace the dependency tree.
 - If a synced or virtual drive causes `flc` status-file sharing failures, use a unique local temporary output directory, wait for a clean Flash shutdown/status, and copy only verified SWFs to repository destinations.

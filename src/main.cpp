@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include <memory>
 #include <vector>
@@ -143,6 +143,16 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
          logger::info("moreHUD v{}"sv, Version::NAME);
 
          SKSE::Init(skse);
+
+     #ifndef NDEBUG
+         // CommonLib owns the real logger and its file/MSVC sinks. Add only the
+         // console sink needed by moreHUD's debug console window.
+         auto commonLibLogger = spdlog::default_logger();
+         if (commonLibLogger) {
+             commonLibLogger->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+             logger::debug("Attached moreHUD debug console sink"sv);
+         }
+     #endif
 
          SKSE::AllocTrampoline(1 << 6);
 

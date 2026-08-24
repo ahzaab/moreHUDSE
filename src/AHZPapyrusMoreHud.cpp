@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "AHZPapyrusMoreHud.h"
 #include "version.h"
+#include "Events.h"
 #include <mutex>
 
 using AhzIconItemCache = std::map<uint32_t, RE::BSFixedString>;
@@ -14,6 +15,11 @@ auto PapyrusMoreHud::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) ->
     auto version = Version::ASINT;
     logger::trace("GetVersion: {}", version);
     return version;
+}
+
+auto PapyrusMoreHud::IsMovieLoaded([[maybe_unused]] RE::StaticFunctionTag* base) -> bool
+{
+    return Events::IsAHZMovieLoaded();
 }
 
 void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
@@ -173,6 +179,7 @@ auto PapyrusMoreHud::GetIconName(uint32_t itemID) -> std::string
 auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {
     a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion, true);
+    a_vm->RegisterFunction("IsMovieLoaded", "AhzMoreHud", IsMovieLoaded, true);
     a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);
     a_vm->RegisterFunction("AddIconItem", "AhzMoreHud", AddIconItem);
     a_vm->RegisterFunction("RemoveIconItem", "AhzMoreHud", RemoveIconItem);

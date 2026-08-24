@@ -52,8 +52,8 @@ if (-not (Test-Path -LiteralPath $SkyUiSourceDirectory -PathType Container))
     throw "SkyUI source directory was not found: $SkyUiSourceDirectory. Initialize the SkyUI-Community submodule."
 }
 
-$sourceDirectory = Join-Path $repositoryRoot 'dist\AE\Data\Source\Scripts'
-$outputDirectory = Join-Path $repositoryRoot 'dist\AE\Data\Scripts'
+$sourceDirectory = Join-Path $repositoryRoot 'dist\NG\Data\Source\Scripts'
+$outputDirectory = Join-Path $repositoryRoot 'dist\NG\Data\Scripts'
 
 # SKSE's modified base scripts must precede vanilla sources in the import path.
 $gameSourceCandidates = @(

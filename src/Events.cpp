@@ -5,7 +5,57 @@
 
 namespace Events
 {
-    bool MenuHandler::s_ahzMenuLoaded = false;
+    namespace
+    {
+        std::atomic_bool s_ahzMovieLoaded{ false };
+        constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
+    }
+
+    bool MenuHandler::s_ahzMenuLoadRequested = false;
+
+    bool IsAHZMovieLoaded() noexcept
+    {
+        return s_ahzMovieLoaded.load(std::memory_order_acquire);
+    }
+
+    void NotifyAHZMovieLoaded()
+    {
+        if (s_ahzMovieLoaded.exchange(true, std::memory_order_acq_rel)) {
+            logger::debug("AHZHudInfo.swf reported that it is already loaded"sv);
+            return;
+        }
+
+        logger::info("AHZHudInfo.swf loaded and initialized successfully"sv);
+
+        // Scaleform callbacks execute in the UI movie's context. Queue the event so
+        // Papyrus is notified from SKSE's task execution context instead.
+        const auto taskInterface = SKSE::GetTaskInterface();
+        if (!taskInterface) {
+            logger::error("Unable to notify Papyrus that AHZHudInfo.swf loaded: SKSE task interface is unavailable"sv);
+            return;
+        }
+
+        taskInterface->AddTask([]() {
+            if (!IsAHZMovieLoaded()) {
+                return;
+            }
+
+            const auto eventSource = SKSE::GetModCallbackEventSource();
+            if (!eventSource) {
+                logger::error("Unable to notify Papyrus that AHZHudInfo.swf loaded: mod callback event source is unavailable"sv);
+                return;
+            }
+
+            SKSE::ModCallbackEvent event{
+                RE::BSFixedString(AHZ_MOVIE_LOADED_EVENT),
+                RE::BSFixedString(),
+                0.0F,
+                nullptr
+            };
+            eventSource->SendEvent(&event);
+            logger::info("Sent {} event to Papyrus"sv, AHZ_MOVIE_LOADED_EVENT);
+        });
+    }
 
     MenuHandler* MenuHandler::GetSingleton()
     {
@@ -26,7 +76,10 @@ namespace Events
         }
         if (REL::Module::IsVR()) {
             logger::trace("Menu: {}"sv, a_event->menuName.c_str());
-            if (s_ahzMenuLoaded == false && a_event->menuName == "WSEnemyMeters"sv && a_event->opening) {
+            if (!a_event->opening && a_event->menuName == "WSEnemyMeters"sv) {
+                s_ahzMenuLoadRequested = false;
+                s_ahzMovieLoaded.store(false, std::memory_order_release);
+            } else if (s_ahzMenuLoadRequested == false && a_event->menuName == "WSEnemyMeters"sv && a_event->opening) {
                 auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
                 if (view) {
                     RE::GFxValue hudComponent;
@@ -52,12 +105,16 @@ namespace Events
 
                     args[0].SetString("AHZEnemyLevel.swf");
                     hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-                    s_ahzMenuLoaded = true;
+                    s_ahzMenuLoadRequested = true;
                     return RE::BSEventNotifyControl::kStop;
                 }
             }
         } else {
-            if (s_ahzMenuLoaded == false && a_event->menuName == RE::HUDMenu::MENU_NAME && a_event->opening) {
+            if (!a_event->opening && a_event->menuName == RE::HUDMenu::MENU_NAME) {
+                s_ahzMenuLoadRequested = false;
+                s_ahzMovieLoaded.store(false, std::memory_order_release);
+                logger::debug("HUD Menu closed; cleared moreHUD movie state"sv);
+            } else if (s_ahzMenuLoadRequested == false && a_event->menuName == RE::HUDMenu::MENU_NAME && a_event->opening) {
                 auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
 
                 if (view) {
@@ -80,7 +137,7 @@ namespace Events
 
                     args[0].SetString("AHZHudInfo.swf");
                     hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-                    s_ahzMenuLoaded = true;
+                    s_ahzMenuLoadRequested = true;
                     return RE::BSEventNotifyControl::kStop;
                 }
             }

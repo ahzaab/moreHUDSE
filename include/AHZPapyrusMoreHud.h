@@ -17,6 +17,7 @@ public:
 
 private:
     static uint32_t GetVersion(RE::StaticFunctionTag* base);
+    static bool     IsMovieLoaded(RE::StaticFunctionTag* base);
     static bool     IsIconItemRegistered(RE::StaticFunctionTag* base, uint32_t);
     static void     AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName);
     static void     RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID);

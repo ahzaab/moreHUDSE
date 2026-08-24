@@ -7,7 +7,7 @@
 - Project definition: `CMakeLists.txt`, `CMakePresets.json`
 - Release/debug wrappers: `build.ps1`, `build-debug.ps1`
 - Multi-edition/release tooling: `Scripts/`, especially `Scripts/AE/`, `Scripts/SE/`, and `Scripts/VR/`
-- Distribution inputs and generated target trees: `dist/AE`, `dist/SE`, and `dist/VR`
+- Distribution inputs and generated target trees: shared SE/AE `dist/NG` and edition-specific `dist/VR`
 
 Use the root wrappers for ordinary native builds. They import an x64 Visual Studio environment when required, preserve a caller-selected `VCPKG_ROOT`, select the matching CMake/Ninja preset, and deploy only when explicitly given `-DeployTarget`. Do not commit workstation-specific Visual Studio, SDK, game, or Mod Organizer paths.
 
@@ -15,22 +15,21 @@ When tracing a native/UI boundary, search registration and attachment code in `s
 
 ## Edition boundaries
 
-- AE has the maintained automated Papyrus and FLA publishing pipeline under `Scripts/AE/`.
-- SE sources and packaged assets live under `dist/SE/`; do not assume the AE publisher's destinations or dependencies apply unchanged.
-- VR has a distinct AS2/FLA surface under `dist/VR/` and separate release tooling under `Scripts/VR/`.
+- SE and AE share the CommonLibSSE-NG native plugin, Papyrus, Scaleform sources, and packaged assets under `dist/NG/`.
+- The maintained automated Papyrus and FLA publishing pipeline remains under `Scripts/AE/` for historical naming, but its distribution input and output is `dist/NG/`.
+- VR has a distinct AS2/FLA surface under `dist/VR/` and separate release tooling under `Scripts/VR/` until its Papyrus and SWF assets are brought into the shared distribution.
 
 Confirm the intended edition before editing. Do not propagate an AE source change into SE or VR mechanically: compare the corresponding movie structure, AS2 class path, Papyrus source, and release layout first.
 
 ## Papyrus
 
-- AE sources: `dist/AE/Data/Source/Scripts/`
-- AE compiled output: `dist/AE/Data/Scripts/`
-- SE sources/outputs: `dist/SE/Data/Source/Scripts/` and `dist/SE/Data/Scripts/`
+- Shared SE/AE sources: `dist/NG/Data/Source/Scripts/`
+- Shared SE/AE compiled output: `dist/NG/Data/Scripts/`
 - VR sources/outputs: `dist/VR/Data/Source/Scripts/` and `dist/VR/Data/Scripts/`
 - Historical/distribution source copies: `contrib/Distribution/PapyrusSources/`
 - AE compiler wrapper: `Scripts/AE/CompilePapyrus.ps1`
 
-Treat the target `dist/<edition>/Data/Source/Scripts` tree as the build input unless the task establishes another authoritative source. Check duplicate copies before editing and avoid silent source drift.
+Treat `dist/NG/Data/Source/Scripts` as the SE/AE build input and `dist/VR/Data/Source/Scripts` as the VR build input unless the task establishes another authoritative source. Check historical copies before editing and avoid silent source drift.
 
 `CompilePapyrus.ps1` accepts `-PapyrusCompiler`, `-GameDataDirectory`, `-SkyUiSourceDirectory`, `-ScriptNames`, and `-AdditionalImportDirectories`. It resolves game data from `SKYRIM_AE_DATA` or legacy `Skyrim64AEPath`, uses the pinned SkyUI Community script sources by default, puts SKSE-modified game sources in the import path, locates `TESV_Papyrus_Flags.flg`, and writes PEX files into the AE output tree. Its default script is only `ahzmainquest.psc`; pass every changed script explicitly.
 
@@ -42,18 +41,18 @@ Example from the repository root:
 
 Never infer that editing a PSC updates a PEX. Record compiler exit success and confirm the expected output exists. Papyrus primarily supports MCM/global configuration and key events; first establish whether a behavior belongs in Papyrus, native code, or AS2.
 
-## AE Scaleform source and output
+## SE/AE Scaleform source and output
 
-- Authoritative source tree: `dist/AE/AS2/`
-- Main FLA: `dist/AE/AS2/AHZhudInfo.fla`
+- Authoritative source tree: `dist/NG/AS2/`
+- Main FLA: `dist/NG/AS2/AHZhudInfo.fla`
 - Resource FLAs: `baseIcons.fla`, `enemyMagickaMeter.fla`, `enemyStaminaMeter.fla`
-- Main AS2 widget: `dist/AE/AS2/ahz/scripts/widgets/AHZHudInfoWidget.as`
-- Native bridge declaration: `dist/AE/AS2/ahz/scripts/widgets/AHZCommon/skse/plugins/AHZmoreHUDPlugin.as`
+- Main AS2 widget: `dist/NG/AS2/ahz/scripts/widgets/AHZHudInfoWidget.as`
+- Native bridge declaration: `dist/NG/AS2/ahz/scripts/widgets/AHZCommon/skse/plugins/AHZmoreHUDPlugin.as`
 - Publisher: `Scripts/AE/BuildScaleform.ps1`
 - Pinned dependency: `Scripts/AE/package.json` (`flc` 3.1.0)
 - Generated publish directory: `build/scaleform/AE/`
-- Installed main movie: `dist/AE/Data/Interface/AHZHudInfo.swf` and `dist/AE/Data/Interface/exported/AHZHudInfo.swf`
-- Installed resources: `dist/AE/Data/Interface/exported/moreHUD/`
+- Installed main movie: `dist/NG/Data/Interface/AHZHudInfo.swf` and `dist/NG/Data/Interface/exported/AHZHudInfo.swf`
+- Installed resources: `dist/NG/Data/Interface/exported/moreHUD/`
 
 Publish from the repository root:
 

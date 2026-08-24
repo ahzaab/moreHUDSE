@@ -1,24 +1,92 @@
 
 # Description
 
-This Repositiory contains the source for the SKSE64 plugin used by the [moreHUD SE](https://www.nexusmods.com/skyrimspecialedition/mods/12688) mod for Skyrim Special Edition.  
+This repository contains the source for the SKSE64 plugin used by the [moreHUD SE](https://www.nexusmods.com/skyrimspecialedition/mods/12688) mod for Skyrim Special Edition.  
 The plugin works in conjunction with the [ahzaab/moreHUDSEScaleform](https://github.com/ahzaab/moreHUDSEScaleform) Scaleform Elements.  
 
 ## How it Works
 
 * The SKSE64 plugin is loaded by [SKSE64](http://skse.silverlock.org/) using the skse64_loader.exe
-* The plugin dynamically loads the Scaleform .swf movie clip into the Hud Menu when the menu loads.
-* The plugin registers Scaleform functions used by the ActionScript 2.0 code associated with the [moreHUD SE swf file](https://github.com/ahzaab/moreHUDSEScaleform) 
-* The plugin provides data to the ActionScript such as Known Ingredients, Magic Effects, Enemy Level, Known Echantments, etc.
+* The plugin dynamically loads the Scaleform `.swf` movie clip into the HUD Menu when the menu loads.
+* The plugin registers Scaleform functions used by the ActionScript 2.0 code associated with the [moreHUD SE SWF file](https://github.com/ahzaab/moreHUDSEScaleform) 
+* The plugin provides data to ActionScript such as known ingredients, magic effects, enemy level, known enchantments, etc.
 
 ## Installation
 The compiled .dll is installed in the Skyrim Data Folder to `Data/SKSE/Plugins`
 
-## Does it need papyrus?
-Not by the Plugin. But only for the .swf file as described [here](https://github.com/ahzaab/moreHUDSEScaleform) 
+## Does it need Papyrus?
+Not for the plugin itself, but Papyrus is used by the `.swf` file as described [here](https://github.com/ahzaab/moreHUDSEScaleform). 
 
 ## Configuration
-HUD mod authors, you can reskin or modify the additional enemy meters by including [these](https://github.com/ahzaab/moreHUDSE/tree/master/dist/AE/Data/Interface/exported/moreHUD) files with your mod as a fmod or standalone patch, and modity to meet your needs.  These files must be placed in the `Data/interface/exported/moreHUD` folder.
+
+### HUD compatibility and appearance patches
+
+HUD authors can change the appearance and placement of moreHUD's enemy resource meters, numeric values, and icons without replacing `AHZHudInfo.swf`. The supported configuration file and default external movies are in [`dist/NG/Data/Interface/exported/moreHUD`](https://github.com/ahzaab/moreHUDSE/tree/master/dist/NG/Data/Interface/exported/moreHUD).
+
+Copy the files being customized into the following layout in the patch mod:
+
+```text
+Data/
+└── Interface/
+    └── exported/
+        └── moreHUD/
+            ├── config.txt
+            ├── baseIcons.swf
+            ├── enemyMagickaMeter.swf
+            └── enemyStaminaMeter.swf
+```
+
+Only include the SWFs that the patch actually replaces. If a custom movie uses another filename, include that file and set the corresponding `sSWFPath` in `config.txt`. The paths are relative to `Data/Interface`; when the configuration is loaded from the `exported` directory, moreHUD automatically resolves the standard `moreHUD/...` paths beneath `Data/Interface/exported`.
+
+The loader checks `Data/Interface/moreHUD/config.txt` first and then `Data/Interface/exported/moreHUD/config.txt`. The exported location is recommended for compatibility patches. A loose file will override the copy packaged in moreHUD's BSA. If multiple mods distribute `config.txt`, normal mod-manager file priority applies and only the winning file is used, so authors should clearly document the required priority.
+
+Lines beginning with `;` are comments. Setting names and section names are case-insensitive. Boolean values are `true` or `false`, and SWF paths may be enclosed in single quotes. A missing or blank optional setting uses moreHUD's built-in behavior where available.
+
+#### Enemy meter stacking
+
+| Setting | Description |
+| --- | --- |
+| `[EnemyMeter] bUseStacking` | When `true`, moreHUD dynamically stacks health, magicka, and stamina and moves the bracket as meters appear or disappear. Set this to `false` when a HUD places the magicka and stamina meters independently. |
+| `[EnemyMeter] fHeight` | Visible height of one resource meter before HUD scaling. Stacking uses this value as its vertical step. The default is `11.5`. Match it to the visible height of a replacement meter, not the full SWF canvas. |
+
+#### Magicka and stamina meters
+
+The following settings exist in both `[EnemyMagickaMeter]` and `[EnemyStaminaMeter]`:
+
+| Setting | Description |
+| --- | --- |
+| `sSWFPath` | Resource movie to load, such as `'moreHUD/enemyMagickaMeter.swf'`. Leave it blank to use the meter clip built into `AHZHudInfo.swf`. |
+| `fXOffset` | Horizontal offset from the vanilla enemy-health-meter position. Positive values move right; negative values move left. |
+| `fYOffset` | Vertical offset from the calculated meter position. Positive values move down; negative values move up. |
+| `fXScale` | Horizontal scale multiplier. `1.0` preserves the HUD's current scale; `0.5` is half width and `2.0` is double width. |
+| `fYScale` | Vertical scale multiplier, using the same convention as `fXScale`. |
+| `fAlpha` | Meter opacity on Scaleform's `0`–`100` alpha scale. |
+| `fNumbersXOffset` | Horizontal offset for that resource's current/maximum numeric display. |
+| `fNumbersYOffset` | Vertical offset for that resource's numeric display. |
+| `fNumbersXScale` | Horizontal scale multiplier for the numeric display. |
+| `fNumbersYScale` | Vertical scale multiplier for the numeric display. |
+| `fNumbersAlpha` | Numeric-display opacity on the `0`–`100` scale. |
+
+With stacking enabled, magicka and stamina number offsets are relative to their associated meter. With stacking disabled, their number offsets are relative to the base enemy-health-meter position, allowing each element to be placed manually.
+
+#### Health numbers
+
+`[EnemyHealthMeter]` controls the numeric health display. It supports `fNumbersXOffset`, `fNumbersYOffset`, `fNumbersXScale`, `fNumbersYScale`, and `fNumbersAlpha` with the same meanings described above. The vanilla health meter artwork itself is not replaced through this section.
+
+#### Icons
+
+| Setting | Description |
+| --- | --- |
+| `[Icons] sSWFPath` | Icon resource movie to load, normally `'moreHUD/baseIcons.swf'`. |
+| `[Icons] fScale` | Scale multiplier applied to displayed icons. The default is `1.0`. |
+| `[Icons] iSpacing` | Horizontal spacing added between icons. |
+| `[Icons] fYOffset` | Vertical adjustment applied to the icons relative to the item text. Positive values move down; negative values move up. |
+
+### Creating replacement SWFs
+
+The safest approach is to reskin the supplied FLA files in `dist/NG/AS2` and publish them as ActionScript 2/Scaleform-compatible SWFs. Replacement meter movies must retain the timeline and instance contract expected by Scaleform's `Meter` component, and replacement icon movies must retain the linkage names requested by moreHUD. Changing only artwork, colors, fonts, and transforms while preserving those names avoids breaking runtime updates.
+
+Test the patch with both the legacy ESP and light ESL editions. They use the same `dist/NG` interface files, so one compatibility patch can support both Skyrim SE and AE. VR remains separate until its SWF and Papyrus assets are incorporated into the shared distribution.
 
 ---
 

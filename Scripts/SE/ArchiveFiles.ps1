@@ -2,8 +2,8 @@
 Push-Location $Script:path
 
 $sourcePath = "$($Env:Skyrim64SEPath)\Data"
-$destinationDataPath = $(Resolve-Path "..\..\dist\SE\Data").Path
-$destinationAS2Path = $(Resolve-Path "..\..\dist\SE\AS2").Path
+$destinationDataPath = $(Resolve-Path "..\..\dist\NG\Data").Path
+$destinationAS2Path = $(Resolve-Path "..\..\dist\NG\AS2").Path
 
 if (!$(Test-Path "$destinationDataPath"))
 {

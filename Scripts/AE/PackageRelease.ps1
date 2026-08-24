@@ -17,7 +17,7 @@ $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 # Repository-owned inputs and outputs are safe to resolve relative to the checkout.
 if (-not $SourceDataDirectory)
 {
-    $SourceDataDirectory = Join-Path $repositoryRoot 'dist\AE\Data'
+    $SourceDataDirectory = Join-Path $repositoryRoot 'dist\NG\Data'
 }
 
 if (-not $PluginDll)
