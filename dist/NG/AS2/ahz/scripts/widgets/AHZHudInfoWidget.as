@@ -832,6 +832,18 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
 		IconContainer.Reset(iconSize);
+
+		// A direct BookMenu opener can refresh the crosshair after the menu is
+		// already visible (for example, when its modifier key is released). Do
+		// not let that late rollover update recreate moreHUD icons or widgets.
+		if (bookMenuFallbackActive)
+		{
+			this._visible = false;
+			IconContainer.Hide();
+			displayActive = false;
+			return;
+		}
+
 		IconContainer._alpha = TopRolloverText._alpha;
 		
 		// Always reset the delay timer to reset when the cross hair changes
@@ -1757,6 +1769,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	public function ProcessReadBook(isValidTarget:Boolean):Void
 	{
+		if (bookMenuFallbackActive)
+		{
+			return;
+		}
+
 		if (showBooksRead&&isValidTarget)
 		{
 			var bookRead:Boolean=_global.skse.plugins.AHZmoreHUDPlugin.GetIsBookAndWasRead();
