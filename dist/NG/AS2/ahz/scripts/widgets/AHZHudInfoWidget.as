@@ -100,7 +100,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var baseY:Number = 0;
 	private var metersToLoad:Array;
 	private var mcLoader:MovieClipLoader;
-	private var bookMenuFallbackActive:Boolean = false;
+	private var bookModeActive:Boolean = false;
 	
 	
 	// Rects
@@ -681,16 +681,17 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 		if (aMode == "BookMode")
 		{
-			// The normal HUD mode notification supersedes the native Book Menu
-			// fallback, if that fallback was needed before BookMode arrived.
 			if (abShow)
 			{
-				bookMenuFallbackActive = false;
+				// Keep late crosshair refreshes from recreating icons while the book
+				// movie is open. Read Or Take refreshes the target on modifier release.
+				bookModeActive = true;
 			}
 
 			// Leaving book mode
 			if (! abShow)
 			{
+				bookModeActive = false;
 				var outData:Object = {outObj:Object};
 				ProcessReadBook(_global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData));
 			}
@@ -722,44 +723,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			IconContainer.Hide();
 		}
 
-	}
-
-	// Called by the native Book Menu event handler. Some plugins open BookMenu
-	// directly without pushing BookMode to the HUD. Keep this override private to
-	// moreHUD so that we do not modify Skyrim's global HUD mode stack.
-	public function SetBookMenuOpen(abOpen:Boolean):Number
-	{
-		if (abOpen)
-		{
-			var hudModes:Array = _root.HUDMovieBaseInstance.HUDModes;
-			if (hudModes == undefined || hudModes == null)
-			{
-				hudModes = new Array();
-			}
-
-			for (var i:Number = 0; i < hudModes.length; i++)
-			{
-				if (String(hudModes[i]) == "BookMode")
-				{
-					bookMenuFallbackActive = false;
-					return 0;
-				}
-			}
-
-			bookMenuFallbackActive = true;
-			this._visible = false;
-			IconContainer.Hide();
-			return 1;
-		}
-
-		if (!bookMenuFallbackActive)
-		{
-			return 0;
-		}
-
-		bookMenuFallbackActive = false;
-		ShowElements("BookMode", false);
-		return 2;
 	}
 
 	public function checkForClearedHud():Void
@@ -827,7 +790,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	// Hooks the main huds function
 	function SetCrosshairTarget(abActivate:Boolean,aName:String,abShowButton:Boolean,abTextOnly:Boolean,abFavorMode:Boolean,abShowCrosshair:Boolean,aWeight:Number,aCost:Number,aFieldValue:Number,aFieldText):Void
-	{			
+	{
 		var validTarget:Boolean = false;
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
@@ -836,7 +799,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		// A direct BookMenu opener can refresh the crosshair after the menu is
 		// already visible (for example, when its modifier key is released). Do
 		// not let that late rollover update recreate moreHUD icons or widgets.
-		if (bookMenuFallbackActive)
+		if (bookModeActive)
 		{
 			this._visible = false;
 			IconContainer.Hide();
@@ -1769,7 +1732,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	public function ProcessReadBook(isValidTarget:Boolean):Void
 	{
-		if (bookMenuFallbackActive)
+		if (bookModeActive)
 		{
 			return;
 		}
