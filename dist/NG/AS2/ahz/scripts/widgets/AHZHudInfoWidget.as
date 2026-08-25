@@ -100,6 +100,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var baseY:Number = 0;
 	private var metersToLoad:Array;
 	private var mcLoader:MovieClipLoader;
+	private var bookMenuFallbackActive:Boolean = false;
 	
 	
 	// Rects
@@ -680,6 +681,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 		if (aMode == "BookMode")
 		{
+			// The normal HUD mode notification supersedes the native Book Menu
+			// fallback, if that fallback was needed before BookMode arrived.
+			if (abShow)
+			{
+				bookMenuFallbackActive = false;
+			}
+
 			// Leaving book mode
 			if (! abShow)
 			{
@@ -714,6 +722,44 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			IconContainer.Hide();
 		}
 
+	}
+
+	// Called by the native Book Menu event handler. Some plugins open BookMenu
+	// directly without pushing BookMode to the HUD. Keep this override private to
+	// moreHUD so that we do not modify Skyrim's global HUD mode stack.
+	public function SetBookMenuOpen(abOpen:Boolean):Number
+	{
+		if (abOpen)
+		{
+			var hudModes:Array = _root.HUDMovieBaseInstance.HUDModes;
+			if (hudModes == undefined || hudModes == null)
+			{
+				hudModes = new Array();
+			}
+
+			for (var i:Number = 0; i < hudModes.length; i++)
+			{
+				if (String(hudModes[i]) == "BookMode")
+				{
+					bookMenuFallbackActive = false;
+					return 0;
+				}
+			}
+
+			bookMenuFallbackActive = true;
+			this._visible = false;
+			IconContainer.Hide();
+			return 1;
+		}
+
+		if (!bookMenuFallbackActive)
+		{
+			return 0;
+		}
+
+		bookMenuFallbackActive = false;
+		ShowElements("BookMode", false);
+		return 2;
 	}
 
 	public function checkForClearedHud():Void

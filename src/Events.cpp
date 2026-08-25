@@ -9,6 +9,57 @@ namespace Events
     {
         std::atomic_bool s_ahzMovieLoaded{ false };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
+
+		void NotifyBookMenuState(bool a_opening)
+		{
+			const auto taskInterface = SKSE::GetTaskInterface();
+			if (!taskInterface) {
+				logger::error("Unable to notify moreHUD of Book Menu state: SKSE task interface is unavailable"sv);
+				return;
+			}
+
+			taskInterface->AddUITask([a_opening]() {
+				if (!IsAHZMovieLoaded()) {
+					logger::debug("Skipping Book Menu {} notification because AHZHudInfo.swf is not loaded"sv,
+						a_opening ? "open"sv : "close"sv);
+					return;
+				}
+
+				const auto ui = RE::UI::GetSingleton();
+				const auto view = ui ? ui->GetMovieView(RE::HUDMenu::MENU_NAME) : nullptr;
+				if (!view) {
+					logger::debug("Unable to notify moreHUD of Book Menu {}: HUD movie is unavailable"sv,
+						a_opening ? "open"sv : "close"sv);
+					return;
+				}
+
+				RE::GFxValue result;
+				RE::GFxValue argument;
+				argument.SetBoolean(a_opening);
+				if (!view->Invoke("_root.AHZWidgetContainer.SetBookMenuOpen", &result, &argument, 1)) {
+					logger::warn("Unable to invoke moreHUD Book Menu state handler"sv);
+					return;
+				}
+
+				if (!result.IsNumber()) {
+					logger::debug("moreHUD received Book Menu {} notification"sv, a_opening ? "open"sv : "close"sv);
+					return;
+				}
+
+				switch (static_cast<std::int32_t>(result.GetNumber())) {
+				case 1:
+					logger::debug("Book Menu opened without BookMode; engaged moreHUD visibility fallback"sv);
+					break;
+				case 2:
+					logger::debug("Book Menu closed; cleared moreHUD visibility fallback"sv);
+					break;
+				default:
+					logger::debug("Book Menu {} with vanilla BookMode handling active"sv,
+						a_opening ? "opened"sv : "closed"sv);
+					break;
+				}
+			});
+		}
     }
 
     bool MenuHandler::s_ahzMenuLoadRequested = false;
@@ -74,6 +125,11 @@ namespace Events
         if (a_event == nullptr) {
             return RE::BSEventNotifyControl::kContinue;
         }
+
+		if (!REL::Module::IsVR() && a_event->menuName == RE::BookMenu::MENU_NAME) {
+			NotifyBookMenuState(a_event->opening);
+		}
+
         if (REL::Module::IsVR()) {
             logger::trace("Menu: {}"sv, a_event->menuName.c_str());
             if (!a_event->opening && a_event->menuName == "WSEnemyMeters"sv) {

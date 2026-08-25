@@ -1,5 +1,4 @@
 ﻿import flash.utils.*;
-import gfx.events.EventDispatcher;
 import flash.display.BitmapData;
 
 class AHZIconContainer
@@ -80,7 +79,7 @@ class AHZIconContainer
 		_imageSubs = new Array();		
 		managerSetup = true;
 		eventObject = {};
-		EventDispatcher.initialize(eventObject);
+		gfx.events.EventDispatcher.initialize(eventObject);
 		eventObject.addEventListener("iconsLoaded", a_scope, a_loadedCallBack);
 		eventObject.addEventListener("iconLoadError", a_scope, a_errorCallBack);		
 		_tf = textField;

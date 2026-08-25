@@ -1,5 +1,4 @@
 ﻿import flash.utils.*;
-import gfx.events.EventDispatcher;
 
 class AHZConfigManager
 {
@@ -25,7 +24,7 @@ class AHZConfigManager
 		}
 		managerSetup = true;
 		eventObject = {};
-		EventDispatcher.initialize(eventObject);
+		gfx.events.EventDispatcher.initialize(eventObject);
 		eventObject.addEventListener("configLoad", a_scope, a_loadedCallBack);
 		eventObject.addEventListener("configError", a_scope, a_errorCallBack);		
 		
