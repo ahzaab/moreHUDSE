@@ -74,6 +74,8 @@ set(headers
     include/Scaleform.h
     include/version.h
     include/AHZTarget.h
+    include/AHZItemComparison.h
+    include/AHZTargetDataCollector.h
 )
 
 set(sources
@@ -101,6 +103,8 @@ set(sources
     src/Patches.cpp
     src/Scaleform.cpp
     src/AHZTarget.cpp
+    src/AHZItemComparison.cpp
+    src/AHZTargetDataCollector.cpp
 
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )

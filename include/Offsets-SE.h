@@ -14,6 +14,9 @@ namespace moreHUDSE
             constexpr REL::ID ProcessSurvivalMode{ 51023 };
             constexpr REL::ID GetArmorWarmthRating{ 25833 };
             constexpr REL::ID GetActorWarmthRating{ 25834 };
+            constexpr REL::ID BuildEquippedArmorComparisonContext{ 50948 };
+            constexpr REL::ID CalculateItemComparison{ 50949 };
+            constexpr REL::ID DestroyEquippedArmorComparisonContext{ 50239 };
             constexpr REL::ID EnemyUpdateHookBase{ 50776 };
         }
     }

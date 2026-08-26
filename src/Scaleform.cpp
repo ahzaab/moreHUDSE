@@ -66,8 +66,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            const auto ref = CAHZTarget::Singleton().GetTarget();
-            CAHZScaleform::ProcessTargetObject(ref, a_params);
+            const auto& targetManager = CAHZTarget::Singleton();
+            const auto  target = CAHZTargetDataCollector::Collect(
+                targetManager.GetResolvedTarget(), targetManager.GetTarget());
+            CAHZScaleform::ProcessTargetObject(target, a_params);
         }
     };
 

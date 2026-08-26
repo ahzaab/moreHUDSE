@@ -137,6 +137,7 @@ public:
 
     void              SetTarget(RE::TESObjectREFR* pTargetRef);
     const TargetData& GetTarget() const noexcept { return m_target; };
+    const ResolvedTarget& GetResolvedTarget() const noexcept { return m_resolvedTarget; };
 
     CAHZTarget(CAHZTarget& other) = delete;
     void operator=(const CAHZTarget&) = delete;
