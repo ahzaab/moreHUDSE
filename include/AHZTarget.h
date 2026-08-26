@@ -63,6 +63,8 @@ struct TargetData
     bool                             isSpellTome{};
     RE::ActorValue                   bookSkill{};
     bool                             isBoltAmmo{};
+    RE::TESBoundObject*              boundObject{};
+    RE::ExtraDataList*               extraData{};
 
     void Dump() const
     {
@@ -119,6 +121,8 @@ private:
         weaponType = RE::WEAPON_TYPE::kHandToHandMelee;  //0
         enchantmentType = EnchantmentType::None;
         isBoltAmmo = false;
+        boundObject = nullptr;
+        extraData = nullptr;
     }
 };
 

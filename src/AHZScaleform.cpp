@@ -961,6 +961,37 @@ void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctio
         }
     }
 
+    const auto supportsItemComparison = target.formType == RE::FormType::Armor ||
+                                        target.formType == RE::FormType::Weapon ||
+                                        target.formType == RE::FormType::Ammo;
+    if (!REL::Module::IsVR() && supportsItemComparison && target.boundObject) {
+        RE::InventoryEntryData entry(target.boundObject, 0);
+        if (target.extraData) {
+            entry.AddExtraList(target.extraData);
+        }
+
+        auto* movieView = static_cast<RE::GFxMovieView*>(args.movie);
+        RE::ItemCard itemCard(movieView);
+        itemCard.unk28 = nullptr;
+        itemCard.unk30 = 0;
+        itemCard.pad34 = 0;
+        itemCard.SetItem(&entry, false);
+
+        const char* changeMember = target.formType == RE::FormType::Armor ? "armorChange" : "damageChange";
+        RE::GFxValue engineChange;
+        if (itemCard.obj.GetMember(changeMember, &engineChange) && engineChange.IsNumber()) {
+            const auto engineDifference = static_cast<float>(engineChange.GetNumber());
+            if (std::abs(engineDifference - difference) > 0.01F) {
+                logger::debug("[engine experiment] {} differs for {:08X}: engine={}, legacy={}",
+                    changeMember,
+                    target.formId,
+                    engineDifference,
+                    difference);
+            }
+            difference = engineDifference;
+        }
+    }
+
     // Enter the data into the Scaleform function
     RegisterNumber(&obj, "ratingOrDamage", totalArmorOrWeapon);
     RegisterNumber(&obj, "difference", difference);

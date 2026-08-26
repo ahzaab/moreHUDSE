@@ -168,6 +168,8 @@ void CAHZTarget::UpdateTarget()
 
     m_target.formType = GetForm()->GetFormType();
     m_target.formId = GetForm()->GetFormID();
+    m_target.boundObject = m_resolvedTarget.GetBoundObject();
+    m_target.extraData = m_resolvedTarget.extraData;
     m_target.name = GetTargetName();
     m_target.displayName = m_target.name;
 
