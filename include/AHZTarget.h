@@ -8,6 +8,34 @@ enum class EnchantmentType
     Unknown = 3
 };
 
+enum class TargetOrigin
+{
+    None,
+    Reference,
+    Activator,
+    Projectile,
+    HarvestResult,
+    Lookup
+};
+
+struct ResolvedTarget
+{
+    RE::TESObjectREFR* sourceReference{};
+    RE::TESForm*       form{};
+    RE::ExtraDataList* extraData{};
+    TargetOrigin       origin{ TargetOrigin::None };
+
+    [[nodiscard]] RE::TESBoundObject* GetBoundObject() const
+    {
+        return form ? form->As<RE::TESBoundObject>() : nullptr;
+    }
+
+    void ClearInstanceData()
+    {
+        extraData = nullptr;
+    }
+};
+
 class CAHZTarget;
 
 struct TargetData
@@ -123,9 +151,8 @@ private:
 
     void UpdateTarget();
 
-    RE::TESObjectREFR* m_pObjectRef = nullptr;
-    RE::TESForm*       m_pForm = nullptr;
-    TargetData         m_target{};
+    ResolvedTarget m_resolvedTarget{};
+    TargetData     m_target{};
 
     RE::IngredientItem* m_IngredientItem = nullptr;
     RE::AlchemyItem*    m_AlchemyItem = nullptr;
@@ -133,14 +160,14 @@ private:
 
     [[nodiscard]] bool IsReference()
     {
-        return m_pObjectRef != nullptr;
+        return m_resolvedTarget.extraData != nullptr;
     };
     [[nodiscard]] bool IsValid()
     {
-        return m_pForm != nullptr;
+        return m_resolvedTarget.form != nullptr;
     };
-    [[nodiscard]] RE::TESObjectREFR* GetReference() { return m_pObjectRef; };
-    [[nodiscard]] RE::TESForm*       GetForm() { return m_pForm; };
+    [[nodiscard]] RE::TESObjectREFR* GetReference() { return m_resolvedTarget.sourceReference; };
+    [[nodiscard]] RE::TESForm*       GetForm() { return m_resolvedTarget.form; };
 
     [[nodiscard]] bool                             GetIsBoltAmmo();
     [[nodiscard]] EnchantmentType                  GetIsKnownEnchantment();

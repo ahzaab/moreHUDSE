@@ -96,19 +96,31 @@ float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[m
 
 void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
 {
-    m_pForm = CAHZFormLookup::Instance().GetTESForm(pTargetRef);
-    if (m_pForm) {
-        if (m_pForm->GetFormType() == RE::FormType::Reference) {
-            m_pObjectRef = m_pForm->As<RE::TESObjectREFR>();
-            if (m_pObjectRef)
-                m_pForm = m_pObjectRef->GetBaseObject();
-            else
-                m_pForm = nullptr;
+    m_resolvedTarget = {};
+    m_resolvedTarget.sourceReference = pTargetRef;
+    m_resolvedTarget.form = CAHZFormLookup::Instance().GetTESForm(pTargetRef);
+
+    if (m_resolvedTarget.form) {
+        if (m_resolvedTarget.form->GetFormType() == RE::FormType::Reference) {
+            auto resolvedReference = m_resolvedTarget.form->As<RE::TESObjectREFR>();
+            if (resolvedReference) {
+                m_resolvedTarget.sourceReference = resolvedReference;
+                m_resolvedTarget.form = resolvedReference->GetBaseObject();
+                m_resolvedTarget.extraData = &resolvedReference->extraList;
+                m_resolvedTarget.origin = TargetOrigin::Reference;
+            } else {
+                m_resolvedTarget.form = nullptr;
+            }
         } else {
-            m_pObjectRef = nullptr;
+            const auto sourceBase = pTargetRef ? pTargetRef->GetBaseObject() : nullptr;
+            if (sourceBase && sourceBase->GetFormType() == RE::FormType::Activator) {
+                m_resolvedTarget.origin = TargetOrigin::Activator;
+            } else if (sourceBase && sourceBase->GetFormType() == RE::FormType::Projectile) {
+                m_resolvedTarget.origin = TargetOrigin::Projectile;
+            } else {
+                m_resolvedTarget.origin = TargetOrigin::Lookup;
+            }
         }
-    } else {
-        m_pObjectRef = nullptr;
     }
 
     UpdateTarget();
@@ -138,16 +150,19 @@ void CAHZTarget::UpdateTarget()
     }
     auto isHarvested = false;
     if (m_IngredientItem && GetForm()->GetFormType() != RE::FormType::Ingredient) {
-        m_pForm = m_IngredientItem;
-        m_pObjectRef = nullptr;
+        m_resolvedTarget.form = m_IngredientItem;
+        m_resolvedTarget.ClearInstanceData();
+        m_resolvedTarget.origin = TargetOrigin::HarvestResult;
         isHarvested = true;
     } else if (m_AlchemyItem && GetForm()->GetFormType() != RE::FormType::AlchemyItem) {
-        m_pForm = m_AlchemyItem;
-        m_pObjectRef = nullptr;
+        m_resolvedTarget.form = m_AlchemyItem;
+        m_resolvedTarget.ClearInstanceData();
+        m_resolvedTarget.origin = TargetOrigin::HarvestResult;
         isHarvested = true;
     } else if (m_SpellItem && GetForm()->GetFormType() != RE::FormType::Spell) {
-        m_pForm = m_SpellItem;
-        m_pObjectRef = nullptr;
+        m_resolvedTarget.form = m_SpellItem;
+        m_resolvedTarget.ClearInstanceData();
+        m_resolvedTarget.origin = TargetOrigin::HarvestResult;
         isHarvested = true;
     }
 
@@ -361,8 +376,8 @@ float CAHZTarget::GetArmorRating()
     if (!IsValid())
         return {};
 
-    auto boundObject = GetForm()->As<RE::TESBoundObject>();
-    auto pExtraData = IsReference() ? &GetReference()->extraList : nullptr;
+    auto boundObject = m_resolvedTarget.GetBoundObject();
+    auto pExtraData = m_resolvedTarget.extraData;
 
     if (!boundObject)
         return {};
@@ -397,17 +412,8 @@ float CAHZTarget::GetWeaponDamage()
         return {};
     }
 
-    auto boundObject = baseForm->As<RE::TESBoundObject>();
-    auto pExtraData = IsReference() ? &GetReference()->extraList : nullptr;
-
-    if (IsReference() && baseForm->GetFormType() == RE::FormType::Projectile) {
-        auto asArrowProjectile = GetReference()->As<RE::ArrowProjectile>();
-        auto ammo = GetReference()->As<RE::TESAmmo>();
-        if (asArrowProjectile) {
-            boundObject = ammo;
-            pExtraData = &asArrowProjectile->extraList;
-        }
-    }
+    auto boundObject = m_resolvedTarget.GetBoundObject();
+    auto pExtraData = m_resolvedTarget.extraData;
 
     if (!boundObject)
         return {};

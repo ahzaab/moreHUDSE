@@ -108,7 +108,17 @@ auto CAHZScaleform::GetTotalActualArmorRating() -> float
             }
         }
     }
-    return mRound(totalRating);
+    const auto legacyRating = mRound(totalRating);
+    if (auto player = RE::PlayerCharacter::GetSingleton()) {
+        player->WornArmorChanged();
+        const auto engineRating = mRound(player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kDamageResist));
+        if (std::abs(engineRating - legacyRating) > 0.01F) {
+            logger::debug("[engine experiment] armor total differs: engine={}, legacy={}", engineRating, legacyRating);
+        }
+        return engineRating;
+    }
+
+    return legacyRating;
 }
 
 auto CAHZScaleform::GetTotalWarmthRating() -> float
@@ -119,7 +129,11 @@ auto CAHZScaleform::GetTotalWarmthRating() -> float
         return 0.0;
     }
 
+#if !defined(ENABLE_SKYRIM_VR)
+    return pPC->GetWarmthRating();
+#else
     return CAHZTarget::GetActorWarmthRating_Native(pPC, 0.0);
+#endif
 }
 
 auto CAHZScaleform::mRound(float r) -> float
@@ -192,6 +206,13 @@ auto CAHZScaleform::GetWarmthRatingDiff(const TargetData& target) -> float
 
 auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
 {
+    std::optional<float> engineDamage;
+    if (REL::Module::IsAE()) {
+        if (auto player = RE::PlayerCharacter::GetSingleton()) {
+            engineDamage = player->GetEquippedWeaponsDamage();
+        }
+    }
+
     float         totalWeaponDamage = 0.0;
     bool          is2Handed = false;
     AHZWeaponData leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
@@ -248,6 +269,13 @@ auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
             totalWeaponDamage += GetActualDamage(&rightWeapon);
         }
     }
+    if (engineDamage) {
+        if (std::abs(*engineDamage - totalWeaponDamage) > 0.01F) {
+            logger::debug("[engine experiment] weapon total differs: engine={}, legacy={}", *engineDamage, totalWeaponDamage);
+        }
+        return *engineDamage;
+    }
+
     return totalWeaponDamage;
 }
 
@@ -1092,12 +1120,16 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     auto pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
         auto encumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kInventoryWeight);
-        auto maxEncumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kCarryWeight);
+        auto maxEncumbranceNumber = pPC->GetTotalCarryWeight();
+        auto legacyMaxEncumbrance = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kCarryWeight);
+        if (std::abs(maxEncumbranceNumber - legacyMaxEncumbrance) > 0.01F) {
+            logger::debug("[engine experiment] carry weight differs: engine={}, legacy={}", maxEncumbranceNumber, legacyMaxEncumbrance);
+        }
 
         // Enter the data into the Scaleform function
         RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);
         RegisterNumber(&obj, "maxEncumbranceNumber", maxEncumbranceNumber);
-        RegisterNumber(&obj, "goldNumber", CAHZPlayerInfo::GetGoldAmount());
+        RegisterNumber(&obj, "goldNumber", pPC->GetGoldAmount());
         args.args[0].SetMember("playerObj", obj);
     }
 }
