@@ -171,3 +171,37 @@ index 6ff9466..1cc20e6 100644
  	static void SetMoreHUDWidgetVisibility(bool mode);
  
  	static void SetQuickLootWidgetVisibility(bool mode);
+diff --git a/src/lib/FenixUtils.cpp b/src/lib/FenixUtils.cpp
+index bb9416a..f5ab747 100644
+--- a/src/lib/FenixUtils.cpp
++++ b/src/lib/FenixUtils.cpp
+@@ -17,10 +17,10 @@ RE::bhkPickData Util::CrosshairRaycast(RE::Actor* caster, RE::NiPoint3 ray_start
+ 	pick_data.rayInput.from = ray_start * havokWorldScale;
+ 	pick_data.rayInput.to = ray_end * havokWorldScale;
+ 
+-	uint32_t collisionFilterInfo = 0;
++	RE::CFilter collisionFilterInfo{};
+ 	caster->GetCollisionFilterInfo(collisionFilterInfo);
+-	pick_data.rayInput.filterInfo = (static_cast<uint32_t>(collisionFilterInfo >> 16) << 16) |
+-				                    static_cast<uint32_t>(RE::COL_LAYER::kItemPicker);
++	collisionFilterInfo.SetCollisionLayer(RE::COL_LAYER::kItemPick);
++	pick_data.rayInput.filterInfo = collisionFilterInfo;
+ 
+ 	caster->GetParentCell()->GetbhkWorld()->PickObject(pick_data);
+ 	return pick_data;
+diff --git a/src/lib/Util.cpp b/src/lib/Util.cpp
+index 4ef28bc..09c98ef 100644
+--- a/src/lib/Util.cpp
++++ b/src/lib/Util.cpp
+@@ -309,9 +309,9 @@ std::string Util::GetCollisionLayer(CollisionFocusObject clObject)
+ 				auto collidable = havokRigidBody->GetCollidable();
+ 				auto clFilterInfo = collidable->broadPhaseHandle.collisionFilterInfo;
+ 
+-				auto clLayer = clFilterInfo & 0x7f;
++				auto clLayer = clFilterInfo.GetCollisionLayer();
+ 
+-				return std::to_string(clLayer);
++				return std::to_string(static_cast<std::uint32_t>(clLayer));
+ 			}
+ 		}
+ 	}

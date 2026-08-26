@@ -25,7 +25,8 @@ This prevents cumulative transform drift and allows substituted images and
 reskinnable icon clips to continue sizing naturally with the rollover text.
 
 Apply `morehud-rollover-layout-v1.patch` to BTPS commit
-`93e05fb5b404dad43820899c50438dd2ec2d7274` or rebase the four small adapter
-changes onto a later BTPS revision. Older moreHUD releases continue to use the
-existing BTPS compatibility path.
-
+`93e05fb5b1a4caddb24728f3d0aaaacdef7a40f0` or rebase the adapter changes onto
+a later BTPS revision. The patch also includes the two collision-filter API
+migrations needed to build against CommonLibVR `ng` commit
+`3d81614617910e7f34b33d8750881811b5e36445`. Older moreHUD releases continue
+to use the existing BTPS compatibility path.
