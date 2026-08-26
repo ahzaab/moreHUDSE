@@ -29,6 +29,7 @@ class AHZIconContainer
 	private var _iconScale:Number;
 	private var _iconSpacing:Number;
 	private var _iconYOffset:Number;
+	private var externalLayoutBase:Array;
 	
   	public function AHZIconContainer()
 	{	
@@ -183,7 +184,89 @@ class AHZIconContainer
 	{
 		this._alpha = 0;
 	}
-	
+
+	// Capture and transform the separately loaded icon clips as a group with
+	// the rollover text. Image substitution remains responsible for reserving
+	// the correctly sized space in the text field; these clips remain the
+	// independently reskinnable visual layer supplied by baseIcons.swf.
+	public function CaptureExternalLayout():Void
+	{
+		externalLayoutBase = new Array();
+		for (var i:Number = 0; i < loadedIcons.length; i++)
+		{
+			var icon:MovieClip = loadedIcons[i];
+			var origin:Object = {x:icon._x, y:icon._y};
+			icon._parent.localToGlobal(origin);
+			externalLayoutBase.push({
+				icon:icon,
+				x:icon._x,
+				y:icon._y,
+				xscale:icon._xscale,
+				yscale:icon._yscale,
+				alpha:icon._alpha,
+				visible:icon._visible,
+				originX:origin.x,
+				originY:origin.y
+			});
+		}
+	}
+
+	public function ApplyExternalLayout(baseAnchorX:Number, baseAnchorY:Number, targetAnchorX:Number, targetAnchorY:Number, scale:Number, alpha:Number, visible:Boolean):Void
+	{
+		if (!externalLayoutBase)
+		{
+			CaptureExternalLayout();
+		}
+
+		for (var i:Number = 0; i < externalLayoutBase.length; i++)
+		{
+			var state:Object = externalLayoutBase[i];
+			var icon:MovieClip = state.icon;
+			if (!icon || !icon._parent)
+			{
+				continue;
+			}
+
+			var targetOrigin:Object = {
+				x:targetAnchorX + ((state.originX - baseAnchorX) * scale),
+				y:targetAnchorY + ((state.originY - baseAnchorY) * scale)
+			};
+			icon._parent.globalToLocal(targetOrigin);
+
+			icon._x = targetOrigin.x;
+			icon._y = targetOrigin.y;
+			icon._xscale = state.xscale * scale;
+			icon._yscale = state.yscale * scale;
+			icon._alpha = state.alpha * alpha;
+			icon._visible = state.visible && visible;
+		}
+	}
+
+	public function RestoreExternalLayout():Void
+	{
+		if (!externalLayoutBase)
+		{
+			return;
+		}
+
+		for (var i:Number = 0; i < externalLayoutBase.length; i++)
+		{
+			var state:Object = externalLayoutBase[i];
+			var icon:MovieClip = state.icon;
+			if (icon)
+			{
+				icon._x = state.x;
+				icon._y = state.y;
+				icon._xscale = state.xscale;
+				icon._yscale = state.yscale;
+				icon._alpha = state.alpha;
+				icon._visible = state.visible;
+			}
+		}
+
+		externalLayoutBase = null;
+	}
+
 	public function Reset(a_size:Number):Void
 	{
 		_iconSize = a_size;

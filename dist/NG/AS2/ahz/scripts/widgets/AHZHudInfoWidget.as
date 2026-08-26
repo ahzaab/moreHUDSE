@@ -110,6 +110,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private static var hooksInstalled:Boolean = false;
 	static var IconContainer:AHZIconContainer = new AHZIconContainer();
 
+	// External selection widgets (such as Better Third Person Selection) may
+	// provide a viewport-relative anchor, but moreHUD remains responsible for
+	// the rollover text, image substitutions, reskinned icon clips, and side
+	// information.  The saved state makes the transform fully reversible.
+	private var externalRolloverActive:Boolean = false;
+	private var externalRolloverLayout:Object;
+	private var externalRolloverBase:Object;
+
 	/* INITIALIZATION */
 	
 	public function AHZHudInfoWidget()
@@ -471,7 +479,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (! hooksInstalled)
 		{
 			// Apply hooks to hook events
-			hookFunction(_root.HUDMovieBaseInstance,"SetCrosshairTarget",this,"SetCrosshairTarget");
+			hookFunctionBeforeAfter(_root.HUDMovieBaseInstance,"SetCrosshairTarget",this,"BeforeSetCrosshairTarget","SetCrosshairTarget");
 			hookFunction(_root.HUDMovieBaseInstance,"ShowElements",this,"ShowElements");
 			hookFunction(_root.HUDMovieBaseInstance,"SetCompassAngle",this,"SetCompassAngle");
 			_global.skse.plugins.AHZmoreHUDPlugin.InstallHooks();
@@ -863,6 +871,203 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		ProcessWeightClass(validTarget);
 		ProcessReadBook(validTarget);
 		ProcessThirdPartyIcons(validTarget);
+
+		// Skyrim has now populated its rollover fields and moreHUD has added all
+		// image substitutions. Apply the external transform only after that work
+		// so the rollover text remains the single source of truth.
+		ApplyExternalRolloverLayout();
+	}
+
+	private function BeforeSetCrosshairTarget():Void
+	{
+		// The vanilla method calculates the activation-button position from the
+		// rollover text's normal coordinates. Restore those coordinates before
+		// letting it run to prevent transform drift across target changes.
+		RestoreExternalRolloverLayout();
+	}
+
+	public function GetExternalRolloverLayoutVersion():Number
+	{
+		return 1;
+	}
+
+	public function IsExternalRolloverLayoutActive():Boolean
+	{
+		return externalRolloverActive;
+	}
+
+	// centerX and centerY are normalized visible-viewport coordinates (0..1).
+	// scale and alpha are multipliers, where 1 is the normal moreHUD layout.
+	public function SetExternalRolloverLayout(centerX:Number, centerY:Number, scale:Number, alpha:Number, visible:Boolean):Boolean
+	{
+		if (!TopRolloverText || !BottomRolloverText)
+		{
+			return false;
+		}
+
+		RestoreExternalRolloverLayout();
+
+		externalRolloverActive = true;
+		externalRolloverLayout = {
+			centerX:Math.max(0, Math.min(1, centerX)),
+			centerY:Math.max(0, Math.min(1, centerY)),
+			scale:Math.max(0.01, scale),
+			alpha:Math.max(0, Math.min(1, alpha)),
+			visible:visible
+		};
+
+		ApplyExternalRolloverLayout();
+		return true;
+	}
+
+	public function ClearExternalRolloverLayout():Void
+	{
+		RestoreExternalRolloverLayout();
+		externalRolloverActive = false;
+		externalRolloverLayout = null;
+	}
+
+	private function GetExternalRolloverElements():Array
+	{
+		var hud:Object = _root.HUDMovieBaseInstance;
+		return [
+			TopRolloverText,
+			BottomRolloverText,
+			hud.RolloverGrayBar_mc,
+			hud.RolloverButton_tf,
+			content
+		];
+	}
+
+	private function CaptureExternalElementState(element:Object):Object
+	{
+		if (!element || !element._parent)
+		{
+			return null;
+		}
+
+		var origin:Object = {x:element._x, y:element._y};
+		element._parent.localToGlobal(origin);
+
+		return {
+			element:element,
+			x:element._x,
+			y:element._y,
+			xscale:element._xscale,
+			yscale:element._yscale,
+			alpha:element._alpha,
+			visible:element._visible,
+			originX:origin.x,
+			originY:origin.y
+		};
+	}
+
+	private function CaptureExternalRolloverLayout():Boolean
+	{
+		var bounds:Object = TopRolloverText.getBounds(_root);
+		if (!bounds)
+		{
+			return false;
+		}
+
+		var elements:Array = GetExternalRolloverElements();
+		var states:Array = new Array();
+		for (var i:Number = 0; i < elements.length; i++)
+		{
+			var state:Object = CaptureExternalElementState(elements[i]);
+			if (state)
+			{
+				states.push(state);
+			}
+		}
+
+		externalRolloverBase = {
+			anchorX:(bounds.xMin + bounds.xMax) / 2,
+			anchorY:(bounds.yMin + bounds.yMax) / 2,
+			elements:states
+		};
+		IconContainer.CaptureExternalLayout();
+		return true;
+	}
+
+	private function ApplyExternalElementState(state:Object, targetX:Number, targetY:Number, scale:Number, alpha:Number, visible:Boolean):Void
+	{
+		var element:Object = state.element;
+		if (!element || !element._parent)
+		{
+			return;
+		}
+
+		var targetOrigin:Object = {
+			x:targetX + ((state.originX - externalRolloverBase.anchorX) * scale),
+			y:targetY + ((state.originY - externalRolloverBase.anchorY) * scale)
+		};
+		element._parent.globalToLocal(targetOrigin);
+
+		element._x = targetOrigin.x;
+		element._y = targetOrigin.y;
+		element._xscale = state.xscale * scale;
+		element._yscale = state.yscale * scale;
+		element._alpha = state.alpha * alpha;
+		element._visible = state.visible && visible;
+	}
+
+	private function ApplyExternalRolloverLayout():Void
+	{
+		if (!externalRolloverActive || !externalRolloverLayout)
+		{
+			return;
+		}
+
+		RestoreExternalRolloverLayout();
+		if (!CaptureExternalRolloverLayout())
+		{
+			return;
+		}
+
+		var targetX:Number = Stage.visibleRect.x + (Stage.visibleRect.width * externalRolloverLayout.centerX);
+		var targetY:Number = Stage.visibleRect.y + (Stage.visibleRect.height * externalRolloverLayout.centerY);
+		var states:Array = externalRolloverBase.elements;
+		for (var i:Number = 0; i < states.length; i++)
+		{
+			ApplyExternalElementState(states[i], targetX, targetY, externalRolloverLayout.scale, externalRolloverLayout.alpha, externalRolloverLayout.visible);
+		}
+
+		IconContainer.ApplyExternalLayout(
+			externalRolloverBase.anchorX,
+			externalRolloverBase.anchorY,
+			targetX,
+			targetY,
+			externalRolloverLayout.scale,
+			externalRolloverLayout.alpha,
+			externalRolloverLayout.visible);
+	}
+
+	private function RestoreExternalRolloverLayout():Void
+	{
+		if (!externalRolloverBase)
+		{
+			return;
+		}
+
+		var states:Array = externalRolloverBase.elements;
+		for (var i:Number = 0; i < states.length; i++)
+		{
+			var state:Object = states[i];
+			var element:Object = state.element;
+			if (element)
+			{
+				element._x = state.x;
+				element._y = state.y;
+				element._xscale = state.xscale;
+				element._yscale = state.yscale;
+				element._alpha = state.alpha;
+				element._visible = state.visible;
+			}
+		}
+
+		IconContainer.RestoreExternalLayout();
+		externalRolloverBase = null;
 	}
 	
 	function delayedDisplay():Void
@@ -1784,7 +1989,21 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		};
 		return true;
 	}
-	
+
+	public static function hookFunctionBeforeAfter(a_scope:Object, a_memberFn:String, a_hookScope:Object, a_beforeFn:String, a_afterFn:String):Boolean {
+		var memberFn:Function = a_scope[a_memberFn];
+		if (memberFn == null || a_scope[a_memberFn] == null) {
+			return false;
+		}
+
+		a_scope[a_memberFn] = function () {
+			a_hookScope[a_beforeFn].apply(a_hookScope,arguments);
+			memberFn.apply(a_scope,arguments);
+			a_hookScope[a_afterFn].apply(a_hookScope,arguments);
+		};
+		return true;
+	}
+
 	private function removePendingClip(s_mc:MovieClip):Void{
 		var index = metersToLoad.indexOf(s_mc);
 		if (index >= 0){
