@@ -1,1 +1,1 @@
-contrib/BetterThirdPersonSelection/*.patch -whitespace
+src/Events.cpp whitespace=cr-at-eol
