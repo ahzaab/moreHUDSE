@@ -40,30 +40,6 @@ namespace Events
             return a_widget.IsObject();
         }
 
-        void RemoveAHZWidgetContainer(RE::GFxMovieView* a_view)
-        {
-            if (!a_view) {
-                return;
-            }
-
-            RE::GFxValue container;
-            a_view->GetVariable(&container, "_root.AHZWidgetContainer");
-            if (!container.IsObject()) {
-                return;
-            }
-
-            RE::GFxValue widget;
-            if (container.GetMember("AHZWidget", &widget) && widget.IsObject()) {
-                widget.Invoke("Dispose");
-            }
-
-            // HUDMenu's movie can survive an in-session save load. Explicitly
-            // unload the child movie and remove its dynamic container before a
-            // replacement is created, otherwise both copies continue rendering.
-            container.Invoke("unloadMovie");
-            container.Invoke("removeMovieClip");
-        }
-
         bool GetObjectMember(const RE::GFxValue& a_parent, const char* a_name, RE::GFxValue& a_value)
         {
             return a_parent.GetMember(a_name, &a_value) && a_value.IsObject();
@@ -372,8 +348,6 @@ namespace Events
         } else {
             if (!a_event->opening && a_event->menuName == RE::HUDMenu::MENU_NAME) {
                 ClearBTPSRolloverLayout();
-                const auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
-                RemoveAHZWidgetContainer(view.get());
                 s_ahzMenuLoadRequested = false;
                 s_ahzMovieLoaded.store(false, std::memory_order_release);
                 logger::debug("HUD Menu closed; cleared moreHUD movie state"sv);
@@ -381,11 +355,6 @@ namespace Events
                 auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
 
                 if (view) {
-                    // The HUD movie is sometimes retained across an in-session
-                    // load. Make injection idempotent even if close-time cleanup
-                    // could not access the closing movie.
-                    RemoveAHZWidgetContainer(view.get());
-
                     RE::GFxValue hudComponent;
                     RE::GFxValue result;
                     RE::GFxValue args[2];
