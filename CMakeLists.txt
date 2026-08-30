@@ -6,7 +6,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 ########################################################################################################################
 project(
 		AHZmoreHUDPlugin
-		VERSION 5.4.1.0
+		VERSION 5.4.2.0
         LANGUAGES CXX
         DESCRIPTION "SKSE64 moreHUD plugin")
 set(CMAKE_CXX_STANDARD 23)

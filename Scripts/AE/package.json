@@ -1,7 +1,7 @@
 {
   "name": "morehudse-ae-release",
   "private": true,
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Build tooling for moreHUD SE AE Scaleform assets",
   "dependencies": {
     "flc": "3.1.0"
