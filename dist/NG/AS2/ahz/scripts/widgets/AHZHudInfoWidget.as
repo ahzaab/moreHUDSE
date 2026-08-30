@@ -100,7 +100,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var baseY:Number = 0;
 	private var metersToLoad:Array;
 	private var mcLoader:MovieClipLoader;
+	private var meterLoadingComplete:Boolean = false;
+	private var clipsAreReady:Boolean = false;
 	private var bookModeActive:Boolean = false;
+	private var originalBracketX:Number;
+	private var originalBracketY:Number;
+	private var originalBracketXScale:Number;
+	private var originalBracketYScale:Number;
+	private var originalBracketCaptured:Boolean = false;
 	
 	
 	// Rects
@@ -108,7 +115,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	// Statics
 	private static var hooksInstalled:Boolean = false;
-	static var IconContainer:AHZIconContainer = new AHZIconContainer();
+	static var activeWidget:Object;
+	private var IconContainer:AHZIconContainer;
 
 	// External selection widgets (such as Better Third Person Selection) may
 	// provide a viewport-relative anchor, but moreHUD remains responsible for
@@ -123,7 +131,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function AHZHudInfoWidget()
 	{
 		super();
-		
+		activeWidget = this;
+
+		IconContainer = new AHZIconContainer();
 		mcLoader = new MovieClipLoader();
 		mcLoader.addListener(this);
 		metersToLoad = new Array();
@@ -143,6 +153,15 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		hideSideWidget();
 		hideBottomWidget();
 		hideInventoryWidget();
+		// These authored clips are visible by default. Hide them before the
+		// asynchronous config and resource loads can yield to the HUD timeline.
+		HealthStats_mc._alpha = 0;
+		MagickaStats_mc._alpha = 0;
+		StaminaStats_mc._alpha = 0;
+		EnemyMagicka_mc._alpha = 0;
+		EnemyStamina_mc._alpha = 0;
+		EnemyMagicka_mc.stop();
+		EnemyStamina_mc.stop();
 
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("AHZConfigManager.loadConfig");
 		AHZConfigManager.loadConfig(this, "configLoaded", "configError");
@@ -313,14 +332,18 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			_config[AHZDefines.CFG_ICONS_SCALE] = 1.0;			
 	}
 	
-	function initializeClips():Void {	
+	function initializeClips():Void {
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("initializeClips");
+		var staminaMeterPath:String;
+		var magickaMeterPath:String;
+
 		if (_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
-		{			
+		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
-			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH])
 			LoadedEnemyStamina_mc = this.createEmptyMovieClip("LoadedEnemyStamina_mc", EnemyStamina_mc.getDepth());
-			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]), LoadedEnemyStamina_mc);					
+			LoadedEnemyStamina_mc._alpha = 0;
+			metersToLoad.push(LoadedEnemyStamina_mc);
+			staminaMeterPath = AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_STAMINA_METER_PATH]);
 			
 			// Make the built-in movieclip disapear, it is being replaced, pending any loading errors
 			EnemyStamina_mc._alpha = 0;
@@ -334,11 +357,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		
 		if (_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 		{
-			
+
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
-			metersToLoad.push(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH])
 			LoadedEnemyMagicka_mc = this.createEmptyMovieClip("LoadedEnemyMagicka_mc", EnemyMagicka_mc.getDepth());
-			mcLoader.loadClip(AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]), LoadedEnemyMagicka_mc);		
+			LoadedEnemyMagicka_mc._alpha = 0;
+			metersToLoad.push(LoadedEnemyMagicka_mc);
+			magickaMeterPath = AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ENEMY_MAGICKA_METER_PATH]);
 			
 			// Make the built-in movieclip disapear, it is being replaced, pending any loading errorss
 			EnemyMagicka_mc._alpha = 0;
@@ -348,12 +372,18 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		else
 		{
 			LoadedEnemyMagicka_mc = EnemyMagicka_mc;
-		}		
-				
-		if (!metersToLoad.length)
-		{
-			loadIcons();
 		}
+		// Register both pending clips before starting either asynchronous load.
+		if (staminaMeterPath && !mcLoader.loadClip(staminaMeterPath, LoadedEnemyStamina_mc))
+		{
+			onLoadError(LoadedEnemyStamina_mc, "LoadNotStarted");
+		}
+		if (magickaMeterPath && !mcLoader.loadClip(magickaMeterPath, LoadedEnemyMagicka_mc))
+		{
+			onLoadError(LoadedEnemyMagicka_mc, "LoadNotStarted");
+		}
+
+		finishMeterLoading();
 	}
 
 	public function iconsLoaded(event:Object):Void
@@ -396,6 +426,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	function clipsReady()
 	{
+		if (clipsAreReady)
+		{
+			return;
+		}
+		clipsAreReady = true;
+
 		if (!LoadedEnemyMagicka_mc)
 			LoadedEnemyMagicka_mc = EnemyMagicka_mc;			
 		if (!LoadedEnemyStamina_mc)
@@ -446,7 +482,25 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		HealthStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET];
 		
 		var mc:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
-		AHZBracketInstance = mc.duplicateMovieClip("AHZBracketInstance", this.getNextHighestDepth());
+		originalBracketX = mc._x;
+		originalBracketY = mc._y;
+		originalBracketXScale = mc._xscale;
+		originalBracketYScale = mc._yscale;
+		originalBracketCaptured = true;
+		// A retained HUD may contain an external duplicate left by an older
+		// widget generation. Never stack another bracket on top of it.
+		if (_root.HUDMovieBaseInstance.EnemyHealth_mc.AHZBracketInstance)
+		{
+			_root.HUDMovieBaseInstance.EnemyHealth_mc.AHZBracketInstance.removeMovieClip();
+		}
+		// duplicateMovieClip inserts the copy into mc's parent timeline.  The
+		// requested depth must therefore come from that parent, not from this
+		// widget's unrelated timeline.  A retained HUD view can already have the
+		// widget depth occupied after an in-session save load, which made the
+		// second-generation duplicate silently fail.
+		var bracketParent:MovieClip = MovieClip(mc._parent);
+		var bracketDepth:Number = bracketParent.getNextHighestDepth();
+		AHZBracketInstance = mc.duplicateMovieClip("AHZBracketInstance", bracketDepth);
 		AHZBracketInstance.gotoAndStop(100);
 		AHZBracketInstance.RolloverNameInstance.textAutoSize="shrink";	
 		
@@ -526,7 +580,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	}
 
 	function UpdateEnemyMeters(magickaPct:Number, staminaPct:Number, updateRequired:Boolean):Void{
-		
+		if (!EnemyMagickaMeter || !EnemyStaminaMeter)
+		{
+			return;
+		}
+
 		if (magickaPct < 0 && staminaPct < 0)
 		{
 			EnemyMagickaMeter.SetPercent(0);
@@ -1158,7 +1216,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var levelText:String;
 		
 		// The enemy meter is not visible so leave
-		if (!AHZBracketInstance._alpha)
+		if (!AHZBracketInstance || !AHZBracketInstance._alpha)
 		{
 			return;
 		}
@@ -1214,9 +1272,10 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			if (outData && outData.enemy && showEnemyStaminaMeter){
 				staminaPct = outData.enemy.staminaPct;
 			}	
-			UpdateEnemyMeters(magickaPct, staminaPct, outData.enemy.targetChanged || alphaChanged);		
-			UpdateEnemyStats(outData.enemy);
-			UpdateEnemyHealthStats(outData.enemy);
+			var enemy:Object = (outData && outData.enemy) ? outData.enemy : null;
+			UpdateEnemyMeters(magickaPct, staminaPct, (enemy && enemy.targetChanged) || alphaChanged);
+			UpdateEnemyStats(enemy);
+			UpdateEnemyHealthStats(enemy);
 		}
 		else
 		{
@@ -1956,6 +2015,21 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	function onEnterFrame(): Void
 	{
+		// These SWFs are percentage timelines, never animations. Keep their root
+		// timelines stopped even if a different AS2 callback aborts.
+		if (LoadedEnemyMagicka_mc)
+		{
+			LoadedEnemyMagicka_mc.stop();
+		}
+		if (LoadedEnemyStamina_mc)
+		{
+			LoadedEnemyStamina_mc.stop();
+		}
+		if (!AHZBracketInstance)
+		{
+			return;
+		}
+
 		var previousAlpha = AHZBracketInstance._alpha;
 		if (!_root.HUDMovieBaseInstance.EnemyHealth_mc._parent._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc._alpha || !_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance._alpha)
 		{	
@@ -1972,8 +2046,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			alphaChanged = true;
 		}
 		
-		EnemyMagickaMeter.Update();
-		EnemyStaminaMeter.Update();
+		if (EnemyMagickaMeter)
+		{
+			EnemyMagickaMeter.Update();
+		}
+		if (EnemyStaminaMeter)
+		{
+			EnemyStaminaMeter.Update();
+		}
 	
 	}
 
@@ -1985,7 +2065,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 		a_scope[a_memberFn] = function () {
 			memberFn.apply(a_scope,arguments);
-			a_hookScope[a_hookFn].apply(a_hookScope,arguments);
+			var hookTarget:Object = AHZHudInfoWidget.activeWidget;
+			if (hookTarget && hookTarget[a_hookFn])
+			{
+				hookTarget[a_hookFn].apply(hookTarget,arguments);
+			}
 		};
 		return true;
 	}
@@ -1997,11 +2081,59 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		}
 
 		a_scope[a_memberFn] = function () {
-			a_hookScope[a_beforeFn].apply(a_hookScope,arguments);
+			var hookTarget:Object = AHZHudInfoWidget.activeWidget;
+			if (hookTarget && hookTarget[a_beforeFn])
+			{
+				hookTarget[a_beforeFn].apply(hookTarget,arguments);
+			}
 			memberFn.apply(a_scope,arguments);
-			a_hookScope[a_afterFn].apply(a_hookScope,arguments);
+			hookTarget = AHZHudInfoWidget.activeWidget;
+			if (hookTarget && hookTarget[a_afterFn])
+			{
+				hookTarget[a_afterFn].apply(hookTarget,arguments);
+			}
 		};
 		return true;
+	}
+
+	public function Dispose():Void
+	{
+		this._visible = false;
+		if (IconContainer)
+		{
+			IconContainer.Dispose();
+		}
+		HealthStats_mc._alpha = 0;
+		MagickaStats_mc._alpha = 0;
+		StaminaStats_mc._alpha = 0;
+		if (LoadedEnemyMagicka_mc)
+		{
+			LoadedEnemyMagicka_mc._alpha = 0;
+			LoadedEnemyMagicka_mc.stop();
+		}
+		if (LoadedEnemyStamina_mc)
+		{
+			LoadedEnemyStamina_mc._alpha = 0;
+			LoadedEnemyStamina_mc.stop();
+		}
+		if (AHZBracketInstance)
+		{
+			AHZBracketInstance._alpha = 0;
+			AHZBracketInstance.removeMovieClip();
+			AHZBracketInstance = undefined;
+		}
+		var originalBracket:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
+		if (originalBracketCaptured && originalBracket)
+		{
+			originalBracket._x = originalBracketX;
+			originalBracket._y = originalBracketY;
+			originalBracket._xscale = originalBracketXScale;
+			originalBracket._yscale = originalBracketYScale;
+		}
+		if (activeWidget == this)
+		{
+			activeWidget = undefined;
+		}
 	}
 
 	private function removePendingClip(s_mc:MovieClip):Void{
@@ -2010,17 +2142,28 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			metersToLoad.splice(index, 1);
 		}	
 	}
-	
-	public function onLoadInit(s_mc: MovieClip): Void
-	{
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("onLoadInit: " + s_mc);
 
-		removePendingClip(s_mc);
-		if (!metersToLoad.length)
+	private function finishMeterLoading():Void
+	{
+		if (!meterLoadingComplete && !metersToLoad.length)
 		{
-			
+			meterLoadingComplete = true;
 			loadIcons();
 		}
+	}
+
+	public function onLoadStart(s_mc:MovieClip):Void
+	{
+		s_mc._alpha = 0;
+		s_mc.stop();
+	}
+
+	public function onLoadInit(s_mc: MovieClip): Void
+	{
+		s_mc._alpha = 0;
+		s_mc.stop();
+		removePendingClip(s_mc);
+		finishMeterLoading();
 	}
 	
 	public function onLoadError(s_mc:MovieClip, a_errorCode: String): Void
@@ -2028,11 +2171,18 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		// Even on error, we need to pull it from the pending clips.  If the
 		// clip could not load it will revert back to the built-in clip
 		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Error Loading: " + s_mc + " Error: " + a_errorCode);
-		
+
 		removePendingClip(s_mc);
-		if (!metersToLoad.length)
+		if (s_mc == LoadedEnemyStamina_mc)
 		{
-			loadIcons();
-		}		
-	}	
+			s_mc.removeMovieClip();
+			LoadedEnemyStamina_mc = EnemyStamina_mc;
+		}
+		else if (s_mc == LoadedEnemyMagicka_mc)
+		{
+			s_mc.removeMovieClip();
+			LoadedEnemyMagicka_mc = EnemyMagicka_mc;
+		}
+		finishMeterLoading();
+	}
 }

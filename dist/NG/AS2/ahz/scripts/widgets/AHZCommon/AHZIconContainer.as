@@ -9,15 +9,16 @@ class AHZIconContainer
 	private static var ICON_YOFFSET:Number = 1;
 	private static var FAKE_SPACE:String = "ahzFakeSpace";
 
-	/* Static */
-	private static var eventObject: Object;
-  	private static var managerSetup:Boolean = false;	
-	private static var loadErrorCalled:Boolean = false;
+	/* Per-widget loading state. The HUD GFx class domain can survive a logical
+	   menu close/open, so these must not be static. */
+	private var eventObject:Object;
+	private var managerSetup:Boolean = false;
+	private var loadErrorCalled:Boolean = false;
 		
   /* INITIALIATZION */
   
   	public var IconContainer_mc:MovieClip;
-  	private var iconLoader:MovieClipLoader;
+	private var iconLoaders:Array;
   	private var loadedIcons:Array;
 	private var loadedClips:Array;
     private var _imageSubs:Array;
@@ -45,12 +46,12 @@ class AHZIconContainer
 						 a_scale:Number,
 						 a_spacing:Number,
 						 a_yOffset:Number):Void
-	{		
+	{
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("~ LOAD ~ '" + s_filePath + "'" , false);
-		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ LOAD ~ '" + s_filePath + "'" );
 		if (managerSetup){
 			return;
 		}
+		loadErrorCalled = false;
 		_iconSize = a_size;
 		if (_iconSize < MIN_ICON_SIZE)
 		{
@@ -77,7 +78,8 @@ class AHZIconContainer
 		loadedClips = new Array();
 		loadedIcons = new Array();
 		loadedIconNames = new Array();
-		_imageSubs = new Array();		
+		_imageSubs = new Array();
+		iconLoaders = new Array();
 		managerSetup = true;
 		eventObject = {};
 		gfx.events.EventDispatcher.initialize(eventObject);
@@ -91,10 +93,42 @@ class AHZIconContainer
 			clip._y = _tf._y;
 			clip._x = _tf._x;
 			loadedClips.push(clip);
-			iconLoader = new MovieClipLoader();
-			iconLoader.addListener(this);
-			iconLoader.loadClip(s_filePath, clip);
+			var loader:MovieClipLoader = new MovieClipLoader();
+			loader.addListener(this);
+			iconLoaders.push(loader);
+			loader.loadClip(s_filePath, clip);
 		}
+	}
+
+	public function Dispose():Void
+	{
+		for (var loaderIndex:Number = 0; iconLoaders && loaderIndex < iconLoaders.length; loaderIndex++)
+		{
+			iconLoaders[loaderIndex].removeListener(this);
+		}
+		for (var clipIndex:Number = 0; loadedClips && clipIndex < loadedClips.length; clipIndex++)
+		{
+			var clip:MovieClip = MovieClip(loadedClips[clipIndex]);
+			if (clip)
+			{
+				clip.unloadMovie();
+				clip.removeMovieClip();
+			}
+		}
+		if (_tf)
+		{
+			_tf.setImageSubstitutions(null);
+		}
+		iconLoaders = new Array();
+		loadedClips = new Array();
+		loadedIcons = new Array();
+		loadedIconNames = new Array();
+		_imageSubs = new Array();
+		externalLayoutBase = null;
+		eventObject = null;
+		_tf = null;
+		managerSetup = false;
+		loadErrorCalled = false;
 	}
 
 	public function appendImage(a_imageName:String):Void
@@ -351,8 +385,7 @@ class AHZIconContainer
 		loadedIcons.push(a_mc);
 		if (loadedIcons.length == MAX_CONCURRENT_ICONS)
 		{
-			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ dispatchEvent ~ iconsLoaded");
-			eventObject.dispatchEvent({type: "iconsLoaded", tf: this});	
+			eventObject.dispatchEvent({type: "iconsLoaded", tf: this});
 		}
 	}
 	
