@@ -364,3 +364,7 @@ CMakeUserPresets.json
 !enemyMagickaMeter.swf
 !enemyStaminaMeter.swf
 
+# Temporary SkyUI ActionScript compiler dependencies (see AGENTS.md)
+/dist/NG/CLIK/
+/dist/NG/Common/
+

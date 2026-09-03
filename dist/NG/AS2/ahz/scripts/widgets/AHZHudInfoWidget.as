@@ -116,7 +116,11 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	// Statics
 	private static var hooksInstalled:Boolean = false;
 	static var activeWidget:Object;
-	private var IconContainer:AHZIconContainer;
+	// BTPS 0.8.x discovers this exact static member while caching its moreHUD
+	// compatibility objects. Keep it as a public compatibility alias, while
+	// moreHUD itself uses the per-widget instance below for safe HUD reloads.
+	static var IconContainer:AHZIconContainer;
+	private var instanceIconContainer:AHZIconContainer;
 
 	/* INITIALIZATION */
 	
@@ -124,7 +128,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	{
 		super();
 		activeWidget = this;
-		IconContainer = new AHZIconContainer();
+		instanceIconContainer = new AHZIconContainer();
+		IconContainer = instanceIconContainer;
 		mcLoader = new MovieClipLoader();
 		mcLoader.addListener(this);
 		metersToLoad = new Array();
@@ -380,14 +385,14 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function iconsLoaded(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
-		IconContainer.Reset(DEFAULT_ICON_SIZE);
+		instanceIconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
 	public function iconsLoadedError(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
-		IconContainer.Reset(DEFAULT_ICON_SIZE);
+		instanceIconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
@@ -397,7 +402,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (_config[AHZDefines.CFG_ICONS_PATH])
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
-			IconContainer.Load(
+			instanceIconContainer.Load(
 						TopRolloverText, 
 						AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), 
 						this, 
@@ -543,28 +548,28 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			var i:Number;
 			for (i = 0; i < customIcons.length; i++)
 			{
-				IconContainer.appendImage(customIcons[i]);
+				instanceIconContainer.appendImage(customIcons[i]);
 			}		
 		}		
 				
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQ.png"))
 		{
-			IconContainer.appendImage("iEquipQ.png");
+			instanceIconContainer.appendImage("iEquipQ.png");
 		}		
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQB.png"))
 		{
-			IconContainer.appendImage("iEquipQB.png");
+			instanceIconContainer.appendImage("iEquipQB.png");
 		}
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQL.png"))
 		{
-			IconContainer.appendImage("iEquipQL.png");
+			instanceIconContainer.appendImage("iEquipQL.png");
 		}	
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQR.png"))
 		{
-			IconContainer.appendImage("iEquipQR.png");
+			instanceIconContainer.appendImage("iEquipQR.png");
 		}		
 	}
 
@@ -769,13 +774,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": visible");
 			this._visible = true;
-			IconContainer.Show();
+			instanceIconContainer.Show();
 		}
 		else
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": hidden");
 			this._visible = false;
-			IconContainer.Hide();
+			instanceIconContainer.Hide();
 		}
 
 	}
@@ -785,7 +790,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		clearInterval(alphaTimer);
 		if (TopRolloverText._alpha < 50)
 		{
-			IconContainer._alpha = 0;
+			instanceIconContainer._alpha = 0;
 			hideSideWidget();	
 			hideInventoryWidget();
 			//Book_mc._alpha = 0;
@@ -804,7 +809,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			var outData:Object = {outObj:Object};
 			var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
 			var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
-			IconContainer._alpha = TopRolloverText._alpha;
+			instanceIconContainer._alpha = TopRolloverText._alpha;
 			ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 			ProcessTargetAndInventoryWidget(validTarget && hudIsVisible);
 		}	
@@ -821,7 +826,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var outData:Object = {outObj:Object};
 		var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
 		var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
-		IconContainer._alpha = TopRolloverText._alpha;
+		instanceIconContainer._alpha = TopRolloverText._alpha;
 		ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 		ProcessTargetAndInventoryWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 	}
@@ -849,7 +854,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var validTarget:Boolean = false;
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
-		IconContainer.Reset(iconSize);
+		instanceIconContainer.Reset(iconSize);
 
 		// A direct BookMenu opener can refresh the crosshair after the menu is
 		// already visible (for example, when its modifier key is released). Do
@@ -857,12 +862,12 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (bookModeActive)
 		{
 			this._visible = false;
-			IconContainer.Hide();
+			instanceIconContainer.Hide();
 			displayActive = false;
 			return;
 		}
 
-		IconContainer._alpha = TopRolloverText._alpha;
+		instanceIconContainer._alpha = TopRolloverText._alpha;
 		
 		// Always reset the delay timer to reset when the cross hair changes
 		if (widgetDelayTimer)
@@ -1241,13 +1246,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				
 				// Player knows the enchantment
 				if (knownEnchantment == 1){
-					IconContainer._alpha = TopRolloverText._alpha;
-					IconContainer.appendImage("ahzKnown");
+					instanceIconContainer._alpha = TopRolloverText._alpha;
+					instanceIconContainer.appendImage("ahzKnown");
 				}
 				
 				// The item is enchanted, but the player cannot learn the enchantment
 				if (knownEnchantment == 2){
-					IconContainer.appendImage("ahzEnch")
+					instanceIconContainer.appendImage("ahzEnch")
 				}	
 			}
 		}
@@ -1800,7 +1805,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			if (bookRead && TopRolloverText._alpha>0 && TopRolloverText.htmlText!="")
 			{
 				TopRolloverText.html=true;
-				IconContainer.appendImage("ahzEye");
+				instanceIconContainer.appendImage("ahzEye");
 			}
 		}
 	}
@@ -1869,9 +1874,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	public function Dispose():Void
 	{
 		this._visible = false;
-		if (IconContainer)
+		if (instanceIconContainer)
 		{
-			IconContainer.Dispose();
+			instanceIconContainer.Dispose();
+			if (IconContainer == instanceIconContainer)
+			{
+				IconContainer = undefined;
+			}
 		}
 		HealthStats_mc._alpha = 0;
 		MagickaStats_mc._alpha = 0;

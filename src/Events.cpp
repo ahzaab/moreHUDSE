@@ -124,13 +124,13 @@ namespace Events
 
                     if (!hudComponent.IsObject()) {
                         logger::error("moreHUD could not create an empty movie clip for the WSEnemyMeters. The moreHUD enemy data will not be loaded."sv);
-                        return RE::BSEventNotifyControl::kStop;
+                        return RE::BSEventNotifyControl::kContinue;
                     }
 
                     args[0].SetString("AHZEnemyLevel.swf");
                     hudComponent.Invoke("loadMovie", &result, &args[0], 1);
                     s_ahzMenuLoadRequested = true;
-                    return RE::BSEventNotifyControl::kStop;
+                    return RE::BSEventNotifyControl::kContinue;
                 }
             }
         } else {
@@ -163,13 +163,13 @@ namespace Events
 
                     if (!hudComponent.IsObject()) {
                         logger::error("moreHUD could not create an empty movie clip for the HUDMenu. The moreHUD widgets will not be loaded."sv);
-                        return RE::BSEventNotifyControl::kStop;
+                        return RE::BSEventNotifyControl::kContinue;
                     }
 
                     args[0].SetString("AHZHudInfo.swf");
                     hudComponent.Invoke("loadMovie", &result, &args[0], 1);
                     s_ahzMenuLoadRequested = true;
-                    return RE::BSEventNotifyControl::kStop;
+                    return RE::BSEventNotifyControl::kContinue;
                 }
             }
         }

@@ -54,6 +54,7 @@ if (-not (Test-Path -LiteralPath $SkyUiSourceDirectory -PathType Container))
 
 $sourceDirectory = Join-Path $repositoryRoot 'dist\NG\Data\Source\Scripts'
 $outputDirectory = Join-Path $repositoryRoot 'dist\NG\Data\Scripts'
+$compilerDependencyDirectory = Join-Path $PSScriptRoot 'PapyrusDependencies'
 
 # SKSE's modified base scripts must precede vanilla sources in the import path.
 $gameSourceCandidates = @(
@@ -71,7 +72,7 @@ if (-not $flagsFile)
     throw "TESV_Papyrus_Flags.flg was not found below $GameDataDirectory."
 }
 
-$importDirectories = @($sourceDirectory, $SkyUiSourceDirectory) + $gameSourceCandidates + $AdditionalImportDirectories
+$importDirectories = @($sourceDirectory, $compilerDependencyDirectory, $SkyUiSourceDirectory) + $gameSourceCandidates + $AdditionalImportDirectories
 $importDirectories = $importDirectories |
     Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Container) } |
     Select-Object -Unique

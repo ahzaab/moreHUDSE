@@ -27,11 +27,12 @@ Confirm the intended edition before editing. Do not propagate an AE source chang
 - Shared SE/AE compiled output: `dist/NG/Data/Scripts/`
 - VR sources/outputs: `dist/VR/Data/Source/Scripts/` and `dist/VR/Data/Scripts/`
 - Historical/distribution source copies: `contrib/Distribution/PapyrusSources/`
+- Compiler-only external declarations: `Scripts/AE/PapyrusDependencies/`
 - AE compiler wrapper: `Scripts/AE/CompilePapyrus.ps1`
 
 Treat `dist/NG/Data/Source/Scripts` as the SE/AE build input and `dist/VR/Data/Source/Scripts` as the VR build input unless the task establishes another authoritative source. Check historical copies before editing and avoid silent source drift.
 
-`CompilePapyrus.ps1` accepts `-PapyrusCompiler`, `-GameDataDirectory`, `-SkyUiSourceDirectory`, `-ScriptNames`, and `-AdditionalImportDirectories`. It resolves game data from `SKYRIM_AE_DATA` or legacy `Skyrim64AEPath`, uses the pinned SkyUI Community script sources by default, puts SKSE-modified game sources in the import path, locates `TESV_Papyrus_Flags.flg`, and writes PEX files into the AE output tree. Its default script is only `ahzmainquest.psc`; pass every changed script explicitly.
+`CompilePapyrus.ps1` accepts `-PapyrusCompiler`, `-GameDataDirectory`, `-SkyUiSourceDirectory`, `-ScriptNames`, and `-AdditionalImportDirectories`. It resolves game data from `SKYRIM_AE_DATA` or legacy `Skyrim64AEPath`, includes compiler-only external declarations without packaging them, uses the pinned SkyUI Community script sources by default, puts SKSE-modified game sources in the import path, locates `TESV_Papyrus_Flags.flg`, and writes PEX files into the AE output tree. Its default script is only `ahzmainquest.psc`; pass every changed script explicitly.
 
 Example from the repository root:
 
