@@ -9,30 +9,6 @@ namespace Events
     {
         std::atomic_bool s_ahzMovieLoaded{ false };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
-
-        void RemoveAHZWidgetContainer(RE::GFxMovieView* a_view)
-        {
-            if (!a_view) {
-                return;
-            }
-
-            RE::GFxValue container;
-            a_view->GetVariable(&container, "_root.AHZWidgetContainer");
-            if (!container.IsObject()) {
-                return;
-            }
-
-            RE::GFxValue widget;
-            if (container.GetMember("AHZWidget", &widget) && widget.IsObject()) {
-                widget.Invoke("Dispose");
-            }
-
-            // HUDMenu's movie can survive an in-session save load. Explicitly
-            // unload the child movie and remove its dynamic container before a
-            // replacement is created, otherwise both copies continue rendering.
-            container.Invoke("unloadMovie");
-            container.Invoke("removeMovieClip");
-        }
     }
 
     bool MenuHandler::s_ahzMenuLoadRequested = false;
@@ -133,45 +109,55 @@ namespace Events
                     return RE::BSEventNotifyControl::kContinue;
                 }
             }
-        } else {
-            if (!a_event->opening && a_event->menuName == RE::HUDMenu::MENU_NAME) {
-                const auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
-                RemoveAHZWidgetContainer(view.get());
-                s_ahzMenuLoadRequested = false;
-                s_ahzMovieLoaded.store(false, std::memory_order_release);
-                logger::debug("HUD Menu closed; cleared moreHUD movie state"sv);
-            } else if (s_ahzMenuLoadRequested == false && a_event->menuName == RE::HUDMenu::MENU_NAME && a_event->opening) {
-                auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
-
-                if (view) {
-                    // The HUD movie is sometimes retained across an in-session
-                    // load. Make injection idempotent even if close-time cleanup
-                    // could not access the closing movie.
-                    RemoveAHZWidgetContainer(view.get());
-
-                    RE::GFxValue hudComponent;
-                    RE::GFxValue result;
-                    RE::GFxValue args[2];
-
-                    if (!view) {
-                        logger::error("The IMenu returned NULL. The moreHUD widgets will not be loaded."sv);
-                    }
-
-                    args[0].SetString("AHZWidgetContainer");
-                    view->Invoke("_root.getNextHighestDepth", &args[1], nullptr, 0);
-                    view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2);
-
-                    if (!hudComponent.IsObject()) {
-                        logger::error("moreHUD could not create an empty movie clip for the HUDMenu. The moreHUD widgets will not be loaded."sv);
-                        return RE::BSEventNotifyControl::kContinue;
-                    }
-
-                    args[0].SetString("AHZHudInfo.swf");
-                    hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-                    s_ahzMenuLoadRequested = true;
-                    return RE::BSEventNotifyControl::kContinue;
-                }
+        } else if (a_event->menuName == RE::HUDMenu::MENU_NAME) {
+            if (!a_event->opening) {
+                // HUDMenu's GFx movie can remain alive across an in-session save
+                // load. Its moreHUD child belongs to that movie and must remain
+                // attached for as long as the movie does.
+                logger::debug("HUD Menu closed; preserving moreHUD container state"sv);
+                return RE::BSEventNotifyControl::kContinue;
             }
+
+            auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
+            if (!view) {
+                logger::error("The HUDMenu returned NULL. The moreHUD widgets will not be loaded."sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            logger::debug("HUD Menu opened with GFx movie {}"sv, static_cast<const void*>(view.get()));
+
+            RE::GFxValue existingContainer;
+            if (view->GetVariable(&existingContainer, "_root.AHZWidgetContainer") && existingContainer.IsObject()) {
+                s_ahzMenuLoadRequested = true;
+                logger::info("Reusing existing _root.AHZWidgetContainer in GFx movie {}"sv, static_cast<const void*>(view.get()));
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            logger::info("_root.AHZWidgetContainer is absent; injecting AHZHudInfo.swf into GFx movie {}"sv, static_cast<const void*>(view.get()));
+
+            RE::GFxValue hudComponent;
+            RE::GFxValue result;
+            RE::GFxValue args[2];
+
+            args[0].SetString("AHZWidgetContainer");
+            view->Invoke("_root.getNextHighestDepth", &args[1], nullptr, 0);
+            view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2);
+
+            if (!hudComponent.IsObject()) {
+                s_ahzMenuLoadRequested = false;
+                logger::error("moreHUD could not create an empty movie clip for the HUDMenu. The moreHUD widgets will not be loaded."sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            args[0].SetString("AHZHudInfo.swf");
+            if (!hudComponent.Invoke("loadMovie", &result, &args[0], 1)) {
+                s_ahzMenuLoadRequested = false;
+                logger::error("moreHUD could not request AHZHudInfo.swf for the HUDMenu."sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            s_ahzMenuLoadRequested = true;
+            return RE::BSEventNotifyControl::kContinue;
         }
         return RE::BSEventNotifyControl::kContinue;
     }
