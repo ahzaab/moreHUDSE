@@ -5,41 +5,16 @@
 #include "AHZPapyrusMoreHud.h"
 #include "HashUtil.h"
 #include "Events.h"
+#include "CompletionistAPI.h"
 
 namespace Scaleform
 {
-	struct moreHUDmessage {
-
-		RE::FormID m_formID;
-		bool m_icontype; // false = New, true = Found
-		bool m_display;
-	};
-
-    moreHUDmessage s_messageFromCompletionist{};
-    
-
-    void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+    void InitializeCompletionistAPI()
     {
-        if (a_msg->type != 1)
-        {
-            return;
-        }
-
-        if (!a_msg->data)
-        {
-            return;
-        }
-
-        s_messageFromCompletionist = *static_cast<moreHUDmessage*>(a_msg->data);
-    }
-
-    void RegisterMessageListener()
-    {
-        if (GetModuleHandle(L"Completionist"))
-        {
-            logger::info("Completionist is installed, registering listener"sv);        
-            auto messageInterface = SKSE::GetMessagingInterface();
-            messageInterface->RegisterListener("Completionist", MessageHandler); 
+        if (CompletionistAPI::Init()) {
+            logger::info("Initialized Completionist API V20"sv);
+        } else {
+            logger::info("Completionist API V20 is not available"sv);
         }
     }
 
@@ -242,9 +217,12 @@ namespace Scaleform
             auto formId = ref.formId;
             auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
 
-            if (s_messageFromCompletionist.m_display && s_messageFromCompletionist.m_formID == formId)
-            {
-                customIcons.emplace_back(s_messageFromCompletionist.m_icontype ? "cmpFound"sv : "cmpNew"sv);
+            if (auto* object = RE::TESForm::LookupByID<RE::TESBoundObject>(formId)) {
+                const auto iconInfo = CompletionistAPI::GetIconInfo(object);
+                const auto* completionistIcon = iconInfo.GetRequiredIconName();
+                if (completionistIcon[0] != '\0') {
+                    customIcons.emplace_back(completionistIcon);
+                }
             }
 
             if (!customIcons.empty()) {

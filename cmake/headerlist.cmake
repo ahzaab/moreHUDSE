@@ -16,6 +16,7 @@ set(headers ${headers}
     include/AHZVanillaFormTable.h  
     include/AHZWeaponInfo.h        
     include/Events.h
+    include/CompletionistAPI.h
     include/HashUtil.h
     include/IForEachScriptObjectFunctor.h
     include/Papyrus.h

@@ -63,8 +63,8 @@ namespace
             break;
             case SKSE::MessagingInterface::kPostPostLoad:
             {
-                logger::info("Registering Message Listener");
-                Scaleform::RegisterMessageListener(); 
+                logger::info("Initializing third-party APIs");
+                Scaleform::InitializeCompletionistAPI();
             }
             break;
         }
