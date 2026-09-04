@@ -100,14 +100,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 	private var baseY:Number = 0;
 	private var metersToLoad:Array;
 	private var mcLoader:MovieClipLoader;
-	private var meterLoadingComplete:Boolean = false;
-	private var clipsAreReady:Boolean = false;
-	private var bookModeActive:Boolean = false;
-	private var originalBracketX:Number;
-	private var originalBracketY:Number;
-	private var originalBracketXScale:Number;
-	private var originalBracketYScale:Number;
-	private var originalBracketCaptured:Boolean = false;
 	
 	
 	// Rects
@@ -115,21 +107,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	// Statics
 	private static var hooksInstalled:Boolean = false;
-	static var activeWidget:Object;
-	// BTPS 0.8.x discovers this exact static member while caching its moreHUD
-	// compatibility objects. Keep it as a public compatibility alias, while
-	// moreHUD itself uses the per-widget instance below for safe HUD reloads.
-	static var IconContainer:AHZIconContainer;
-	private var instanceIconContainer:AHZIconContainer;
+	static var IconContainer:AHZIconContainer = new AHZIconContainer();
 
 	/* INITIALIZATION */
 	
 	public function AHZHudInfoWidget()
 	{
 		super();
-		activeWidget = this;
-		instanceIconContainer = new AHZIconContainer();
-		IconContainer = instanceIconContainer;
 		mcLoader = new MovieClipLoader();
 		mcLoader.addListener(this);
 		metersToLoad = new Array();
@@ -149,15 +133,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		hideSideWidget();
 		hideBottomWidget();
 		hideInventoryWidget();
-		// These authored clips are visible by default. Hide them before the
-		// asynchronous config and resource loads can yield to the HUD timeline.
-		HealthStats_mc._alpha = 0;
-		MagickaStats_mc._alpha = 0;
-		StaminaStats_mc._alpha = 0;
-		EnemyMagicka_mc._alpha = 0;
-		EnemyStamina_mc._alpha = 0;
-		EnemyMagicka_mc.stop();
-		EnemyStamina_mc.stop();
 
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("AHZConfigManager.loadConfig");
 		AHZConfigManager.loadConfig(this, "configLoaded", "configError");
@@ -377,20 +352,23 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			onLoadError(LoadedEnemyMagicka_mc, "LoadNotStarted");
 		}
 
-		finishMeterLoading();
+		if (!staminaMeterPath && !magickaMeterPath)
+		{
+			loadIcons();
+		}
 	}
 
 	public function iconsLoaded(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoaded event ~");
-		instanceIconContainer.Reset(DEFAULT_ICON_SIZE);
+		IconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
 	public function iconsLoadedError(event:Object):Void
 	{
 		//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("~ iconsLoadedError event ~");
-		instanceIconContainer.Reset(DEFAULT_ICON_SIZE);
+		IconContainer.Reset(DEFAULT_ICON_SIZE);
 		clipsReady();
 	}
 
@@ -400,7 +378,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		if (_config[AHZDefines.CFG_ICONS_PATH])
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading: " + _config[AHZDefines.CFG_ICONS_PATH]);
-			instanceIconContainer.Load(
+			IconContainer.Load(
 						TopRolloverText, 
 						AHZConfigManager.ResolvePath(_config[AHZDefines.CFG_ICONS_PATH]), 
 						this, 
@@ -420,12 +398,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	function clipsReady()
 	{
-		if (clipsAreReady)
-		{
-			return;
-		}
-		clipsAreReady = true;
-
 		if (!LoadedEnemyMagicka_mc)
 			LoadedEnemyMagicka_mc = EnemyMagicka_mc;			
 		if (!LoadedEnemyStamina_mc)
@@ -476,17 +448,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		HealthStats_mc._y = baseY + _config[AHZDefines.CFG_ENEMY_HEALTH_METER_NUMBERS_YOFFSET];
 		
 		var mc:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
-		originalBracketX = mc._x;
-		originalBracketY = mc._y;
-		originalBracketXScale = mc._xscale;
-		originalBracketYScale = mc._yscale;
-		originalBracketCaptured = true;
-		// A retained HUD may contain an external duplicate left by an older
-		// widget generation. Never stack another bracket on top of it.
-		if (_root.HUDMovieBaseInstance.EnemyHealth_mc.AHZBracketInstance)
-		{
-			_root.HUDMovieBaseInstance.EnemyHealth_mc.AHZBracketInstance.removeMovieClip();
-		}
 		// duplicateMovieClip inserts the copy into mc's parent timeline. The
 		// requested depth must therefore come from that parent, not from this
 		// widget's unrelated timeline.
@@ -546,28 +507,28 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			var i:Number;
 			for (i = 0; i < customIcons.length; i++)
 			{
-				instanceIconContainer.appendImage(customIcons[i]);
+				IconContainer.appendImage(customIcons[i]);
 			}		
 		}		
 				
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQ.png"))
 		{
-			instanceIconContainer.appendImage("iEquipQ.png");
+			IconContainer.appendImage("iEquipQ.png");
 		}		
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQB.png"))
 		{
-			instanceIconContainer.appendImage("iEquipQB.png");
+			IconContainer.appendImage("iEquipQB.png");
 		}
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQL.png"))
 		{
-			instanceIconContainer.appendImage("iEquipQL.png");
+			IconContainer.appendImage("iEquipQL.png");
 		}	
 		
 		if (_global.skse.plugins.AHZmoreHUDPlugin.IsTargetInIconList("iEquipQR.png"))
 		{
-			instanceIconContainer.appendImage("iEquipQR.png");
+			IconContainer.appendImage("iEquipQR.png");
 		}		
 	}
 
@@ -739,17 +700,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 		if (aMode == "BookMode")
 		{
-			if (abShow)
-			{
-				// Keep late crosshair refreshes from recreating icons while the book
-				// movie is open. Read Or Take refreshes the target on modifier release.
-				bookModeActive = true;
-			}
-
 			// Leaving book mode
 			if (! abShow)
 			{
-				bookModeActive = false;
 				var outData:Object = {outObj:Object};
 				ProcessReadBook(_global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData));
 			}
@@ -772,13 +725,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": visible");
 			this._visible = true;
-			instanceIconContainer.Show();
+			IconContainer.Show();
 		}
 		else
 		{
 			//_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("hudmode: " + newHUDMode + ": hidden");
 			this._visible = false;
-			instanceIconContainer.Hide();
+			IconContainer.Hide();
 		}
 
 	}
@@ -788,7 +741,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		clearInterval(alphaTimer);
 		if (TopRolloverText._alpha < 50)
 		{
-			instanceIconContainer._alpha = 0;
+			IconContainer._alpha = 0;
 			hideSideWidget();	
 			hideInventoryWidget();
 			//Book_mc._alpha = 0;
@@ -807,7 +760,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			var outData:Object = {outObj:Object};
 			var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
 			var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
-			instanceIconContainer._alpha = TopRolloverText._alpha;
+			IconContainer._alpha = TopRolloverText._alpha;
 			ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 			ProcessTargetAndInventoryWidget(validTarget && hudIsVisible);
 		}	
@@ -824,7 +777,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var outData:Object = {outObj:Object};
 		var validTarget:Boolean = _global.skse.plugins.AHZmoreHUDPlugin.GetIsValidTarget(outData);
 		var hudIsVisible:Boolean = (TopRolloverText._alpha > 0);
-		instanceIconContainer._alpha = TopRolloverText._alpha;
+		IconContainer._alpha = TopRolloverText._alpha;
 		ProcessPlayerWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 		ProcessTargetAndInventoryWidget(validTarget && hudIsVisible, (outData && outData.outObj && outData.outObj.canCarry));
 	}
@@ -852,20 +805,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		var validTarget:Boolean = false;
 		var activateWidgets:Boolean = false;
 		var outData:Object = {outObj:Object};
-		instanceIconContainer.Reset(iconSize);
-
-		// A direct BookMenu opener can refresh the crosshair after the menu is
-		// already visible (for example, when its modifier key is released). Do
-		// not let that late rollover update recreate moreHUD icons or widgets.
-		if (bookModeActive)
-		{
-			this._visible = false;
-			instanceIconContainer.Hide();
-			displayActive = false;
-			return;
-		}
-
-		instanceIconContainer._alpha = TopRolloverText._alpha;
+		IconContainer.Reset(iconSize);
+		IconContainer._alpha = TopRolloverText._alpha;
 		
 		// Always reset the delay timer to reset when the cross hair changes
 		if (widgetDelayTimer)
@@ -1244,13 +1185,13 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 				
 				// Player knows the enchantment
 				if (knownEnchantment == 1){
-					instanceIconContainer._alpha = TopRolloverText._alpha;
-					instanceIconContainer.appendImage("ahzKnown");
+					IconContainer._alpha = TopRolloverText._alpha;
+					IconContainer.appendImage("ahzKnown");
 				}
 				
 				// The item is enchanted, but the player cannot learn the enchantment
 				if (knownEnchantment == 2){
-					instanceIconContainer.appendImage("ahzEnch")
+					IconContainer.appendImage("ahzEnch")
 				}	
 			}
 		}
@@ -1791,11 +1732,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	public function ProcessReadBook(isValidTarget:Boolean):Void
 	{
-		if (bookModeActive)
-		{
-			return;
-		}
-
 		if (showBooksRead&&isValidTarget)
 		{
 			var bookRead:Boolean=_global.skse.plugins.AHZmoreHUDPlugin.GetIsBookAndWasRead();
@@ -1803,7 +1739,7 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 			if (bookRead && TopRolloverText._alpha>0 && TopRolloverText.htmlText!="")
 			{
 				TopRolloverText.html=true;
-				instanceIconContainer.appendImage("ahzEye");
+				IconContainer.appendImage("ahzEye");
 			}
 		}
 	}
@@ -1860,57 +1796,9 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 		a_scope[a_memberFn] = function () {
 			memberFn.apply(a_scope,arguments);
-			var hookTarget:Object = AHZHudInfoWidget.activeWidget;
-			if (hookTarget && hookTarget[a_hookFn])
-			{
-				hookTarget[a_hookFn].apply(hookTarget,arguments);
-			}
+			a_hookScope[a_hookFn].apply(a_hookScope,arguments);
 		};
 		return true;
-	}
-
-	public function Dispose():Void
-	{
-		this._visible = false;
-		if (instanceIconContainer)
-		{
-			instanceIconContainer.Dispose();
-			if (IconContainer == instanceIconContainer)
-			{
-				IconContainer = undefined;
-			}
-		}
-		HealthStats_mc._alpha = 0;
-		MagickaStats_mc._alpha = 0;
-		StaminaStats_mc._alpha = 0;
-		if (LoadedEnemyMagicka_mc)
-		{
-			LoadedEnemyMagicka_mc._alpha = 0;
-			LoadedEnemyMagicka_mc.stop();
-		}
-		if (LoadedEnemyStamina_mc)
-		{
-			LoadedEnemyStamina_mc._alpha = 0;
-			LoadedEnemyStamina_mc.stop();
-		}
-		if (AHZBracketInstance)
-		{
-			AHZBracketInstance._alpha = 0;
-			AHZBracketInstance.removeMovieClip();
-			AHZBracketInstance = undefined;
-		}
-		var originalBracket:MovieClip = MovieClip(_root.HUDMovieBaseInstance.EnemyHealth_mc.BracketsInstance);
-		if (originalBracketCaptured && originalBracket)
-		{
-			originalBracket._x = originalBracketX;
-			originalBracket._y = originalBracketY;
-			originalBracket._xscale = originalBracketXScale;
-			originalBracket._yscale = originalBracketYScale;
-		}
-		if (activeWidget == this)
-		{
-			activeWidget = undefined;
-		}
 	}
 
 	private function removePendingClip(s_mc:MovieClip):Void{
@@ -1922,9 +1810,8 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 
 	private function finishMeterLoading():Void
 	{
-		if (!meterLoadingComplete && !metersToLoad.length)
+		if (!metersToLoad.length)
 		{
-			meterLoadingComplete = true;
 			loadIcons();
 		}
 	}
