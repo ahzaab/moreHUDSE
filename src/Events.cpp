@@ -8,11 +8,87 @@ namespace Events
     namespace
     {
         std::atomic_bool s_ahzMovieLoaded{ false };
+        std::atomic_bool s_bookMenuOpen{ false };
         std::atomic_bool s_hudReadinessProbeArmed{ false };
         std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
+        RE::GFxMovieView* s_bookHiddenMovie{ nullptr };
+        bool              s_containerWasVisibleBeforeBook{ true };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
         constexpr auto   AHZ_WIDGET_PATH = "_root.AHZWidgetContainer.AHZWidget"sv;
+
+        bool SetAHZContainerVisibility(RE::GFxMovieView* a_view, bool a_visible)
+        {
+            if (!a_view) {
+                return false;
+            }
+
+            RE::GFxValue container;
+            if (!a_view->GetVariable(&container, AHZ_CONTAINER_PATH.data()) || !container.IsObject()) {
+                return false;
+            }
+
+            RE::GFxValue visibility{ a_visible };
+            return container.SetMember("_visible", visibility);
+        }
+
+        void HideAHZContainerForBook(RE::GFxMovieView* a_view)
+        {
+            if (!a_view || s_bookHiddenMovie == a_view) {
+                return;
+            }
+
+            RE::GFxValue container;
+            if (!a_view->GetVariable(&container, AHZ_CONTAINER_PATH.data()) || !container.IsObject()) {
+                logger::debug("BookMenu opened before _root.AHZWidgetContainer was available"sv);
+                return;
+            }
+
+            RE::GFxValue visibility;
+            s_containerWasVisibleBeforeBook = !container.GetMember("_visible", &visibility) || !visibility.IsBool() || visibility.GetBool();
+
+            RE::GFxValue hidden{ false };
+            if (container.SetMember("_visible", hidden)) {
+                s_bookHiddenMovie = a_view;
+                logger::debug(
+                    "BookMenu opened; hid moreHUD container in GFx movie {} (previously visible: {})"sv,
+                    static_cast<const void*>(a_view),
+                    s_containerWasVisibleBeforeBook);
+            } else {
+                logger::warn("BookMenu opened, but moreHUD could not hide _root.AHZWidgetContainer"sv);
+            }
+        }
+
+        void RestoreAHZContainerAfterBook(RE::GFxMovieView* a_view)
+        {
+            if (!a_view || s_bookHiddenMovie != a_view) {
+                logger::debug("BookMenu closed without a moreHUD container hidden by the DLL"sv);
+                s_bookHiddenMovie = nullptr;
+                return;
+            }
+
+            const bool restoreVisibility = s_containerWasVisibleBeforeBook;
+            if (!SetAHZContainerVisibility(a_view, restoreVisibility)) {
+                logger::debug("BookMenu closed before _root.AHZWidgetContainer was available"sv);
+                s_bookHiddenMovie = nullptr;
+                return;
+            }
+
+            logger::debug(
+                "BookMenu closed; restored moreHUD container visibility to {} in GFx movie {}"sv,
+                restoreVisibility,
+                static_cast<const void*>(a_view));
+
+            if (restoreVisibility) {
+                RE::GFxValue widget;
+                if (a_view->GetVariable(&widget, AHZ_WIDGET_PATH.data()) && widget.IsObject() && widget.HasMember("RefreshWidgets")) {
+                    widget.Invoke("RefreshWidgets");
+                    logger::debug("Refreshed moreHUD widgets after BookMenu close"sv);
+                }
+            }
+
+            s_bookHiddenMovie = nullptr;
+        }
 
         void ArmHUDReadinessProbe(RE::GFxMovieView* a_view, bool a_forceNewGeneration)
         {
@@ -52,6 +128,9 @@ namespace Events
             logger::info(
                 "_root.AHZWidgetContainer.AHZWidget is ready in GFx movie {}; stopped readiness probing"sv,
                 static_cast<const void*>(a_view));
+            if (s_bookMenuOpen.load(std::memory_order_acquire)) {
+                HideAHZContainerForBook(a_view);
+            }
             NotifyAHZMovieLoaded();
         }
 
@@ -174,6 +253,15 @@ namespace Events
                     return RE::BSEventNotifyControl::kContinue;
                 }
             }
+        } else if (a_event->menuName == RE::BookMenu::MENU_NAME) {
+            s_bookMenuOpen.store(a_event->opening, std::memory_order_release);
+            const auto view = RE::UI::GetSingleton()->GetMovieView(RE::HUDMenu::MENU_NAME);
+            if (a_event->opening) {
+                HideAHZContainerForBook(view.get());
+            } else {
+                RestoreAHZContainerAfterBook(view.get());
+            }
+            return RE::BSEventNotifyControl::kContinue;
         } else if (a_event->menuName == RE::HUDMenu::MENU_NAME) {
             if (!a_event->opening) {
                 // HUDMenu's GFx movie can remain alive across an in-session save
