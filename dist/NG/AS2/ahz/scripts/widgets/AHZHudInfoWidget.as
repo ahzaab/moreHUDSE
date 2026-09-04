@@ -217,8 +217,6 @@ class ahz.scripts.widgets.AHZHudInfoWidget extends MovieClip
 		showEnemyStaminaStats = false;
 		showEnemyMagickaStats = false;
 
-		// Positively acknowledge that the widget object and its settings methods exist.
-		_global.skse.plugins.AHZmoreHUDPlugin.MovieLoaded();
 	}
 
 	function configLoaded(event:Object):Void{

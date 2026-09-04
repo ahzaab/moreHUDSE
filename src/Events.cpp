@@ -8,7 +8,72 @@ namespace Events
     namespace
     {
         std::atomic_bool s_ahzMovieLoaded{ false };
+        std::atomic_bool s_hudReadinessProbeArmed{ false };
+        std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
+        constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
+        constexpr auto   AHZ_WIDGET_PATH = "_root.AHZWidgetContainer.AHZWidget"sv;
+
+        void ArmHUDReadinessProbe(RE::GFxMovieView* a_view, bool a_forceNewGeneration)
+        {
+            const auto previousView = s_hudMovie.exchange(a_view, std::memory_order_acq_rel);
+            const bool newMovie = previousView != a_view;
+            if (newMovie || a_forceNewGeneration) {
+                s_ahzMovieLoaded.store(false, std::memory_order_release);
+            }
+
+            if (newMovie || a_forceNewGeneration || !IsAHZMovieLoaded()) {
+                s_hudReadinessProbeArmed.store(true, std::memory_order_release);
+                logger::debug(
+                    "Armed moreHUD readiness probe for GFx movie {} (new movie: {}, new widget: {})"sv,
+                    static_cast<const void*>(a_view),
+                    newMovie,
+                    a_forceNewGeneration);
+            }
+        }
+
+        void ProbeHUDReadiness(RE::GFxMovieView* a_view)
+        {
+            if (!s_hudReadinessProbeArmed.load(std::memory_order_acquire) || !a_view) {
+                return;
+            }
+
+            const auto expectedView = s_hudMovie.load(std::memory_order_acquire);
+            if (expectedView != a_view) {
+                ArmHUDReadinessProbe(a_view, true);
+            }
+
+            RE::GFxValue widget;
+            if (!a_view->GetVariable(&widget, AHZ_WIDGET_PATH.data()) || !widget.IsObject() || !widget.HasMember("updateSettings")) {
+                return;
+            }
+
+            s_hudReadinessProbeArmed.store(false, std::memory_order_release);
+            logger::info(
+                "_root.AHZWidgetContainer.AHZWidget is ready in GFx movie {}; stopped readiness probing"sv,
+                static_cast<const void*>(a_view));
+            NotifyAHZMovieLoaded();
+        }
+
+        class HUDMenuAdvanceHook
+        {
+        public:
+            static void Install()
+            {
+                REL::Relocation<std::uintptr_t> vtable{ RE::HUDMenu::VTABLE[0] };
+                _advanceMovie = vtable.write_vfunc(0x05, AdvanceMovie);
+                logger::info("Installed HUDMenu::AdvanceMovie readiness hook"sv);
+            }
+
+        private:
+            static void AdvanceMovie(RE::HUDMenu* a_menu, float a_interval, std::uint32_t a_currentTime)
+            {
+                _advanceMovie(a_menu, a_interval, a_currentTime);
+                ProbeHUDReadiness(a_menu ? a_menu->uiMovie.get() : nullptr);
+            }
+
+            static inline REL::Relocation<decltype(AdvanceMovie)> _advanceMovie;
+        };
     }
 
     bool MenuHandler::s_ahzMenuLoadRequested = false;
@@ -127,9 +192,10 @@ namespace Events
             logger::debug("HUD Menu opened with GFx movie {}"sv, static_cast<const void*>(view.get()));
 
             RE::GFxValue existingContainer;
-            if (view->GetVariable(&existingContainer, "_root.AHZWidgetContainer") && existingContainer.IsObject()) {
+            if (view->GetVariable(&existingContainer, AHZ_CONTAINER_PATH.data()) && existingContainer.IsObject()) {
                 s_ahzMenuLoadRequested = true;
                 logger::info("Reusing existing _root.AHZWidgetContainer in GFx movie {}"sv, static_cast<const void*>(view.get()));
+                ArmHUDReadinessProbe(view.get(), false);
                 return RE::BSEventNotifyControl::kContinue;
             }
 
@@ -149,9 +215,11 @@ namespace Events
                 return RE::BSEventNotifyControl::kContinue;
             }
 
+            ArmHUDReadinessProbe(view.get(), true);
             args[0].SetString("AHZHudInfo.swf");
             if (!hudComponent.Invoke("loadMovie", &result, &args[0], 1)) {
                 s_ahzMenuLoadRequested = false;
+                s_hudReadinessProbeArmed.store(false, std::memory_order_release);
                 logger::error("moreHUD could not request AHZHudInfo.swf for the HUDMenu."sv);
                 return RE::BSEventNotifyControl::kContinue;
             }
@@ -211,6 +279,7 @@ namespace Events
                 SKSE::stl::unrestricted_cast<std::uintptr_t>(Hook_WandLookupREFRByHandle_Impl));
         } else {
             CrosshairHandler::Sink();
+            HUDMenuAdvanceHook::Install();
         }
 
         logger::info("registered crosshair event"sv);

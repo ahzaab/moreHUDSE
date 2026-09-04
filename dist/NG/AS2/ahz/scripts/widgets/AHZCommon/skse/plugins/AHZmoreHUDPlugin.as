@@ -6,7 +6,6 @@ intrinsic class skse.plugins.AHZmoreHUDPlugin
 	static function GetIsPlayerInCombat():Boolean;
 	static function GetTargetEffects(data:Object, calculateVentory:Boolean):Void;
 	static function InstallHooks():Void;
-	static function MovieLoaded():Void;
 	static function GetIsBookAndWasRead():Boolean;
 	static function GetIsValidTarget(data:Object):Boolean;
 	static function GetArmorWeightClassString():String;
