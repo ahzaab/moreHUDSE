@@ -10,9 +10,10 @@ namespace Events
         std::atomic_bool s_ahzMovieLoaded{ false };
         std::atomic_bool s_bookMenuOpen{ false };
         std::atomic_bool s_hudReadinessProbeArmed{ false };
+        std::atomic_uint64_t s_hudGeneration{ 0 };
         std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
-        RE::GFxMovieView* s_bookHiddenMovie{ nullptr };
-        bool              s_containerWasVisibleBeforeBook{ true };
+        std::atomic<RE::GFxMovieView*> s_bookHiddenMovie{ nullptr };
+        std::atomic_bool s_containerWasVisibleBeforeBook{ true };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
         constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
@@ -73,7 +74,7 @@ namespace Events
 
         void HideAHZContainerForBook(RE::GFxMovieView* a_view)
         {
-            if (!a_view || s_bookHiddenMovie == a_view) {
+            if (!a_view || s_bookHiddenMovie.load(std::memory_order_acquire) == a_view) {
                 return;
             }
 
@@ -84,15 +85,16 @@ namespace Events
             }
 
             RE::GFxValue visibility;
-            s_containerWasVisibleBeforeBook = !container.GetMember("_visible", &visibility) || !visibility.IsBool() || visibility.GetBool();
+            const bool wasVisible = !container.GetMember("_visible", &visibility) || !visibility.IsBool() || visibility.GetBool();
+            s_containerWasVisibleBeforeBook.store(wasVisible, std::memory_order_release);
 
             RE::GFxValue hidden{ false };
             if (container.SetMember("_visible", hidden)) {
-                s_bookHiddenMovie = a_view;
+                s_bookHiddenMovie.store(a_view, std::memory_order_release);
                 logger::debug(
                     "BookMenu opened; hid moreHUD container in GFx movie {} (previously visible: {})"sv,
                     static_cast<const void*>(a_view),
-                    s_containerWasVisibleBeforeBook);
+                    wasVisible);
             } else {
                 logger::warn("BookMenu opened, but moreHUD could not hide _root.AHZWidgetContainer"sv);
             }
@@ -100,16 +102,16 @@ namespace Events
 
         void RestoreAHZContainerAfterBook(RE::GFxMovieView* a_view)
         {
-            if (!a_view || s_bookHiddenMovie != a_view) {
+            if (!a_view || s_bookHiddenMovie.load(std::memory_order_acquire) != a_view) {
                 logger::debug("BookMenu closed without a moreHUD container hidden by the DLL"sv);
-                s_bookHiddenMovie = nullptr;
+                s_bookHiddenMovie.store(nullptr, std::memory_order_release);
                 return;
             }
 
-            const bool restoreVisibility = s_containerWasVisibleBeforeBook;
+            const bool restoreVisibility = s_containerWasVisibleBeforeBook.load(std::memory_order_acquire);
             if (!SetAHZContainerVisibility(a_view, restoreVisibility)) {
                 logger::debug("BookMenu closed before _root.AHZWidgetContainer was available"sv);
-                s_bookHiddenMovie = nullptr;
+                s_bookHiddenMovie.store(nullptr, std::memory_order_release);
                 return;
             }
 
@@ -126,7 +128,7 @@ namespace Events
                 }
             }
 
-            s_bookHiddenMovie = nullptr;
+            s_bookHiddenMovie.store(nullptr, std::memory_order_release);
         }
 
         void ArmHUDReadinessProbe(RE::GFxMovieView* a_view, bool a_forceNewGeneration)
@@ -134,6 +136,7 @@ namespace Events
             const auto previousView = s_hudMovie.exchange(a_view, std::memory_order_acq_rel);
             const bool newMovie = previousView != a_view;
             if (newMovie || a_forceNewGeneration) {
+                s_hudGeneration.fetch_add(1, std::memory_order_acq_rel);
                 s_ahzMovieLoaded.store(false, std::memory_order_release);
             }
 
@@ -205,22 +208,23 @@ namespace Events
     void NotifyAHZMovieLoaded()
     {
         if (s_ahzMovieLoaded.exchange(true, std::memory_order_acq_rel)) {
-            logger::debug("AHZHudInfo.swf reported that it is already loaded"sv);
+            logger::debug("AHZHudInfo.swf is already marked ready"sv);
             return;
         }
 
-        logger::info("AHZHudInfo.swf loaded and initialized successfully"sv);
+        const auto generation = s_hudGeneration.load(std::memory_order_acquire);
+        logger::info("AHZHudInfo.swf generation {} loaded and initialized successfully"sv, generation);
 
-        // Scaleform callbacks execute in the UI movie's context. Queue the event so
-        // Papyrus is notified from SKSE's task execution context instead.
+        // HUDMenu::AdvanceMovie executes in the UI movie's context. Queue the event
+        // so Papyrus is notified from SKSE's task execution context instead.
         const auto taskInterface = SKSE::GetTaskInterface();
         if (!taskInterface) {
             logger::error("Unable to notify Papyrus that AHZHudInfo.swf loaded: SKSE task interface is unavailable"sv);
             return;
         }
 
-        taskInterface->AddTask([]() {
-            if (!IsAHZMovieLoaded()) {
+        taskInterface->AddTask([generation]() {
+            if (!IsAHZMovieLoaded() || s_hudGeneration.load(std::memory_order_acquire) != generation) {
                 return;
             }
 
@@ -237,7 +241,7 @@ namespace Events
                 nullptr
             };
             eventSource->SendEvent(&event);
-            logger::info("Sent {} event to Papyrus"sv, AHZ_MOVIE_LOADED_EVENT);
+            logger::info("Sent {} event to Papyrus for HUD generation {}"sv, AHZ_MOVIE_LOADED_EVENT, generation);
         });
     }
 
