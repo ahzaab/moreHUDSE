@@ -14,8 +14,47 @@ namespace Events
         RE::GFxMovieView* s_bookHiddenMovie{ nullptr };
         bool              s_containerWasVisibleBeforeBook{ true };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
+        constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
+        constexpr auto   AHZ_GOLD_VALUE_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc.PlayerInfoCard_mc.PlayerGoldValue"sv;
         constexpr auto   AHZ_WIDGET_PATH = "_root.AHZWidgetContainer.AHZWidget"sv;
+
+        void ApplyBottomBarCompatibility(RE::GFxMovieView* a_view)
+        {
+            RE::GFxValue bottomBar;
+            RE::GFxValue goldValue;
+            if (!a_view->GetVariable(&bottomBar, AHZ_BOTTOM_BAR_PATH.data()) || !bottomBar.IsObject() ||
+                !a_view->GetVariable(&goldValue, AHZ_GOLD_VALUE_PATH.data()) || !goldValue.IsObject()) {
+                logger::debug("Bottom-bar compatibility objects are not available in this AHZHudInfo.swf"sv);
+                return;
+            }
+
+            if (!bottomBar.HasMember("PLAYER_CARD_WIDTH")) {
+                logger::debug("AHZBottomBar_mc has no legacy PLAYER_CARD_WIDTH member; skipped native layout adjustment"sv);
+                return;
+            }
+
+            RE::GFxValue authoredX;
+            RE::GFxValue authoredWidth;
+            if (!goldValue.GetMember("_x", &authoredX) || !authoredX.IsNumber() ||
+                !goldValue.GetMember("_width", &authoredWidth) || !authoredWidth.IsNumber()) {
+                logger::warn("Could not read the authored PlayerGoldValue right edge; skipped native bottom-bar adjustment"sv);
+                return;
+            }
+
+            const double rightEdge = authoredX.GetNumber() + authoredWidth.GetNumber();
+            if (!std::isfinite(rightEdge) || rightEdge <= 0.0) {
+                logger::warn("Ignoring invalid authored PlayerGoldValue right edge: {}"sv, rightEdge);
+                return;
+            }
+
+            RE::GFxValue playerCardWidth{ rightEdge };
+            if (bottomBar.SetMember("PLAYER_CARD_WIDTH", playerCardWidth)) {
+                logger::info("Applied native bottom-bar PLAYER_CARD_WIDTH: {}"sv, rightEdge);
+            } else {
+                logger::warn("Could not apply the native bottom-bar PLAYER_CARD_WIDTH adjustment"sv);
+            }
+        }
 
         bool SetAHZContainerVisibility(RE::GFxMovieView* a_view, bool a_visible)
         {
@@ -128,6 +167,7 @@ namespace Events
             logger::info(
                 "_root.AHZWidgetContainer.AHZWidget is ready in GFx movie {}; stopped readiness probing"sv,
                 static_cast<const void*>(a_view));
+            ApplyBottomBarCompatibility(a_view);
             if (s_bookMenuOpen.load(std::memory_order_acquire)) {
                 HideAHZContainerForBook(a_view);
             }
