@@ -9,6 +9,7 @@ namespace Events
     {
         std::atomic_bool s_ahzMovieLoaded{ false };
         std::atomic_bool s_bookMenuOpen{ false };
+        std::atomic_bool s_bookModeActive{ false };
         std::atomic_bool s_hudReadinessProbeArmed{ false };
         std::atomic_uint64_t s_hudGeneration{ 0 };
         std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
@@ -18,10 +19,16 @@ namespace Events
         constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
         constexpr auto   AHZ_GOLD_VALUE_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc.PlayerInfoCard_mc.PlayerGoldValue"sv;
+        constexpr auto   AHZ_ICON_CONTAINER_PATH = "_global.ahz.scripts.widgets.AHZHudInfoWidget.IconContainer"sv;
         constexpr auto   AHZ_WIDGET_PATH = "_root.AHZWidgetContainer.AHZWidget"sv;
 
         void ApplyBottomBarCompatibility(RE::GFxMovieView* a_view)
         {
+            if (!a_view) {
+                logger::debug("Cannot apply bottom-bar compatibility without a HUD movie"sv);
+                return;
+            }
+
             RE::GFxValue bottomBar;
             RE::GFxValue goldValue;
             if (!a_view->GetVariable(&bottomBar, AHZ_BOTTOM_BAR_PATH.data()) || !bottomBar.IsObject() ||
@@ -43,9 +50,12 @@ namespace Events
                 return;
             }
 
+            // Replacement movies may author the player card under a translated
+            // parent, making its valid local right edge negative (Edge UI uses
+            // -383.6). Only non-finite coordinates are invalid here.
             const double rightEdge = authoredX.GetNumber() + authoredWidth.GetNumber();
-            if (!std::isfinite(rightEdge) || rightEdge <= 0.0) {
-                logger::warn("Ignoring invalid authored PlayerGoldValue right edge: {}"sv, rightEdge);
+            if (!std::isfinite(rightEdge)) {
+                logger::warn("Ignoring non-finite authored PlayerGoldValue right edge: {}"sv, rightEdge);
                 return;
             }
 
@@ -72,38 +82,73 @@ namespace Events
             return container.SetMember("_visible", visibility);
         }
 
+        bool HideAHZIconContainer(RE::GFxMovieView* a_view)
+        {
+            if (!a_view) {
+                return false;
+            }
+
+            // moreHUD's icon clips are siblings of the vanilla rollover text,
+            // not children of AHZWidgetContainer. Use the original public static
+            // IconContainer contract so older and third-party movies remain valid.
+            RE::GFxValue iconContainer;
+            if (!a_view->GetVariable(&iconContainer, AHZ_ICON_CONTAINER_PATH.data()) || !iconContainer.IsObject()) {
+                // Some derived movies expose the compatibility object through the
+                // widget instance instead of leaving it only on the AS2 class.
+                RE::GFxValue widget;
+                if (!a_view->GetVariable(&widget, AHZ_WIDGET_PATH.data()) || !widget.IsObject() ||
+                    !widget.GetMember("IconContainer", &iconContainer) || !iconContainer.IsObject()) {
+                    return false;
+                }
+            }
+
+            if (!iconContainer.HasMember("Hide")) {
+                return false;
+            }
+
+            return iconContainer.Invoke("Hide");
+        }
+
+        bool IsBookSuppressionActive() noexcept
+        {
+            return s_bookMenuOpen.load(std::memory_order_acquire) || s_bookModeActive.load(std::memory_order_acquire);
+        }
+
         void HideAHZContainerForBook(RE::GFxMovieView* a_view)
         {
-            if (!a_view || s_bookHiddenMovie.load(std::memory_order_acquire) == a_view) {
+            if (!a_view) {
                 return;
             }
 
-            RE::GFxValue container;
-            if (!a_view->GetVariable(&container, AHZ_CONTAINER_PATH.data()) || !container.IsObject()) {
-                logger::debug("BookMenu opened before _root.AHZWidgetContainer was available"sv);
-                return;
-            }
+            const auto hiddenMovie = s_bookHiddenMovie.load(std::memory_order_acquire);
+            if (hiddenMovie != a_view) {
+                RE::GFxValue container;
+                if (!a_view->GetVariable(&container, AHZ_CONTAINER_PATH.data()) || !container.IsObject()) {
+                    logger::debug("Book suppression began before _root.AHZWidgetContainer was available"sv);
+                    return;
+                }
 
-            RE::GFxValue visibility;
-            const bool wasVisible = !container.GetMember("_visible", &visibility) || !visibility.IsBool() || visibility.GetBool();
-            s_containerWasVisibleBeforeBook.store(wasVisible, std::memory_order_release);
-
-            RE::GFxValue hidden{ false };
-            if (container.SetMember("_visible", hidden)) {
+                RE::GFxValue visibility;
+                const bool wasVisible = !container.GetMember("_visible", &visibility) || !visibility.IsBool() || visibility.GetBool();
+                s_containerWasVisibleBeforeBook.store(wasVisible, std::memory_order_release);
                 s_bookHiddenMovie.store(a_view, std::memory_order_release);
+
                 logger::debug(
-                    "BookMenu opened; hid moreHUD container in GFx movie {} (previously visible: {})"sv,
+                    "Book suppression began in GFx movie {} (container previously visible: {})"sv,
                     static_cast<const void*>(a_view),
                     wasVisible);
-            } else {
-                logger::warn("BookMenu opened, but moreHUD could not hide _root.AHZWidgetContainer"sv);
             }
+
+            // Reassert both states after every relevant HUD message/movie advance.
+            // SetCrosshairTarget can recreate ahzEye after the initial BookMode push.
+            SetAHZContainerVisibility(a_view, false);
+            HideAHZIconContainer(a_view);
         }
 
         void RestoreAHZContainerAfterBook(RE::GFxMovieView* a_view)
         {
             if (!a_view || s_bookHiddenMovie.load(std::memory_order_acquire) != a_view) {
-                logger::debug("BookMenu closed without a moreHUD container hidden by the DLL"sv);
+                logger::debug("Book suppression ended without a moreHUD container hidden by the DLL"sv);
                 s_bookHiddenMovie.store(nullptr, std::memory_order_release);
                 return;
             }
@@ -116,7 +161,7 @@ namespace Events
             }
 
             logger::debug(
-                "BookMenu closed; restored moreHUD container visibility to {} in GFx movie {}"sv,
+                "Book suppression ended; restored moreHUD container visibility to {} in GFx movie {}"sv,
                 restoreVisibility,
                 static_cast<const void*>(a_view));
 
@@ -133,6 +178,11 @@ namespace Events
 
         void ArmHUDReadinessProbe(RE::GFxMovieView* a_view, bool a_forceNewGeneration)
         {
+            if (!a_view) {
+                logger::warn("Cannot arm the moreHUD readiness probe without a HUD movie"sv);
+                return;
+            }
+
             const auto previousView = s_hudMovie.exchange(a_view, std::memory_order_acq_rel);
             const bool newMovie = previousView != a_view;
             if (newMovie || a_forceNewGeneration) {
@@ -177,23 +227,81 @@ namespace Events
             NotifyAHZMovieLoaded();
         }
 
-        class HUDMenuAdvanceHook
+        class HUDMenuHook
         {
         public:
             static void Install()
             {
                 REL::Relocation<std::uintptr_t> vtable{ RE::HUDMenu::VTABLE[0] };
+                if (vtable.address() == 0) {
+                    logger::critical("Cannot install HUDMenu hooks: HUDMenu vtable relocation is unavailable"sv);
+                    return;
+                }
+
+                const auto* entries = reinterpret_cast<const std::uintptr_t*>(vtable.address());
+                if (entries[0x04] == 0 || entries[0x05] == 0) {
+                    logger::critical("Cannot install HUDMenu hooks: one or more original vtable functions are unavailable"sv);
+                    return;
+                }
+
+                _processMessage = vtable.write_vfunc(0x04, ProcessMessage);
                 _advanceMovie = vtable.write_vfunc(0x05, AdvanceMovie);
-                logger::info("Installed HUDMenu::AdvanceMovie readiness hook"sv);
+                if (_processMessage.address() == 0 || _advanceMovie.address() == 0) {
+                    logger::critical("HUDMenu hooks installed without valid original function addresses"sv);
+                    return;
+                }
+
+                logger::info("Installed HUDMenu message and movie-advance hooks"sv);
             }
 
         private:
-            static void AdvanceMovie(RE::HUDMenu* a_menu, float a_interval, std::uint32_t a_currentTime)
+            static RE::UI_MESSAGE_RESULTS ProcessMessage(RE::HUDMenu* a_menu, RE::UIMessage& a_message)
             {
-                _advanceMovie(a_menu, a_interval, a_currentTime);
-                ProbeHUDReadiness(a_menu ? a_menu->uiMovie.get() : nullptr);
+                if (!a_menu || _processMessage.address() == 0) {
+                    logger::error("Skipping HUDMenu::ProcessMessage hook because the menu or original function is unavailable"sv);
+                    return RE::UI_MESSAGE_RESULTS::kPassOn;
+                }
+
+                bool bookModeChanged = false;
+                bool bookModePushed = false;
+
+                if (a_message.type == RE::UI_MESSAGE_TYPE::kUpdate && a_message.data) {
+                    const auto data = skyrim_cast<RE::HUDData*>(a_message.data);
+                    if (data && data->type == RE::HUD_MESSAGE_TYPE::kSetMode && data->text == "BookMode") {
+                        bookModeChanged = true;
+                        bookModePushed = data->show;
+                        s_bookModeActive.store(bookModePushed, std::memory_order_release);
+                        logger::debug("Observed native BookMode {}"sv, bookModePushed ? "push"sv : "pop"sv);
+                    }
+                }
+
+                const auto result = _processMessage(a_menu, a_message);
+                auto* view = a_menu ? a_menu->uiMovie.get() : nullptr;
+                if (IsBookSuppressionActive()) {
+                    HideAHZContainerForBook(view);
+                } else if (bookModeChanged && !bookModePushed) {
+                    RestoreAHZContainerAfterBook(view);
+                }
+
+                return result;
             }
 
+            static void AdvanceMovie(RE::HUDMenu* a_menu, float a_interval, std::uint32_t a_currentTime)
+            {
+                if (!a_menu || _advanceMovie.address() == 0) {
+                    logger::error("Skipping HUDMenu::AdvanceMovie hook because the menu or original function is unavailable"sv);
+                    return;
+                }
+
+                _advanceMovie(a_menu, a_interval, a_currentTime);
+                auto* view = a_menu->uiMovie.get();
+                ProbeHUDReadiness(view);
+                if (IsBookSuppressionActive()) {
+                    HideAHZContainerForBook(view);
+                }
+            }
+
+            static inline REL::Relocation<decltype(ProcessMessage)> _processMessage;
             static inline REL::Relocation<decltype(AdvanceMovie)> _advanceMovie;
         };
     }
@@ -253,7 +361,12 @@ namespace Events
 
     void MenuHandler::Sink()
     {
-        auto ui = RE::UI::GetSingleton();
+        auto* ui = RE::UI::GetSingleton();
+        if (!ui) {
+            logger::critical("Unable to register the menu event sink: UI singleton is unavailable"sv);
+            return;
+        }
+
         ui->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(MenuHandler::GetSingleton()));
     }
 
@@ -268,39 +381,53 @@ namespace Events
                 s_ahzMenuLoadRequested = false;
                 s_ahzMovieLoaded.store(false, std::memory_order_release);
             } else if (s_ahzMenuLoadRequested == false && a_event->menuName == "WSEnemyMeters"sv && a_event->opening) {
-                auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
+                auto* ui = RE::UI::GetSingleton();
+                if (!ui) {
+                    logger::error("The UI singleton is unavailable while opening WSEnemyMeters"sv);
+                    return RE::BSEventNotifyControl::kContinue;
+                }
+
+                auto view = ui->GetMovieView(a_event->menuName);
                 if (view) {
                     RE::GFxValue hudComponent;
                     RE::GFxValue result;
                     RE::GFxValue args[2];
-
-                    if (!view) {
-                        logger::error("The IMenu returned NULL. The moreHUD widgets will not be loaded."sv);
-                    }
 
                     RE::GFxValue _lockroot;
                     _lockroot.SetBoolean(true);
                     view->SetVariable("_lockroot", &_lockroot, RE::GFxMovie::SetVarType::kSticky);
 
                     args[0].SetString("AHZEnemyLevelInstance");
-                    view->Invoke("getNextHighestDepth", &args[1], nullptr, 0);
-                    view->Invoke("createEmptyMovieClip", &hudComponent, args, 2);
+                    if (!view->Invoke("getNextHighestDepth", &args[1], nullptr, 0) || !args[1].IsNumber()) {
+                        logger::error("moreHUD could not obtain the next WSEnemyMeters movie depth"sv);
+                        return RE::BSEventNotifyControl::kContinue;
+                    }
 
-                    if (!hudComponent.IsObject()) {
+                    if (!view->Invoke("createEmptyMovieClip", &hudComponent, args, 2) || !hudComponent.IsObject()) {
                         logger::error("moreHUD could not create an empty movie clip for the WSEnemyMeters. The moreHUD enemy data will not be loaded."sv);
                         return RE::BSEventNotifyControl::kContinue;
                     }
 
                     args[0].SetString("AHZEnemyLevel.swf");
-                    hudComponent.Invoke("loadMovie", &result, &args[0], 1);
+                    if (!hudComponent.Invoke("loadMovie", &result, &args[0], 1)) {
+                        logger::error("moreHUD could not request AHZEnemyLevel.swf for WSEnemyMeters"sv);
+                        return RE::BSEventNotifyControl::kContinue;
+                    }
+
                     s_ahzMenuLoadRequested = true;
                     return RE::BSEventNotifyControl::kContinue;
                 }
             }
         } else if (a_event->menuName == RE::BookMenu::MENU_NAME) {
             s_bookMenuOpen.store(a_event->opening, std::memory_order_release);
-            const auto view = RE::UI::GetSingleton()->GetMovieView(RE::HUDMenu::MENU_NAME);
-            if (a_event->opening) {
+            auto* ui = RE::UI::GetSingleton();
+            if (!ui) {
+                logger::error("The UI singleton is unavailable while processing BookMenu state"sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            const auto view = ui->GetMovieView(RE::HUDMenu::MENU_NAME);
+            if (IsBookSuppressionActive()) {
                 HideAHZContainerForBook(view.get());
             } else {
                 RestoreAHZContainerAfterBook(view.get());
@@ -315,7 +442,13 @@ namespace Events
                 return RE::BSEventNotifyControl::kContinue;
             }
 
-            auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
+            auto* ui = RE::UI::GetSingleton();
+            if (!ui) {
+                logger::error("The UI singleton is unavailable while opening HUDMenu"sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            auto view = ui->GetMovieView(a_event->menuName);
             if (!view) {
                 logger::error("The HUDMenu returned NULL. The moreHUD widgets will not be loaded."sv);
                 return RE::BSEventNotifyControl::kContinue;
@@ -338,10 +471,13 @@ namespace Events
             RE::GFxValue args[2];
 
             args[0].SetString("AHZWidgetContainer");
-            view->Invoke("_root.getNextHighestDepth", &args[1], nullptr, 0);
-            view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2);
+            if (!view->Invoke("_root.getNextHighestDepth", &args[1], nullptr, 0) || !args[1].IsNumber()) {
+                s_ahzMenuLoadRequested = false;
+                logger::error("moreHUD could not obtain the next HUDMenu movie depth"sv);
+                return RE::BSEventNotifyControl::kContinue;
+            }
 
-            if (!hudComponent.IsObject()) {
+            if (!view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2) || !hudComponent.IsObject()) {
                 s_ahzMenuLoadRequested = false;
                 logger::error("moreHUD could not create an empty movie clip for the HUDMenu. The moreHUD widgets will not be loaded."sv);
                 return RE::BSEventNotifyControl::kContinue;
@@ -380,6 +516,11 @@ namespace Events
 
     EventResult CrosshairHandler::ProcessEvent(const SKSE::CrosshairRefEvent* a_event, RE::BSTEventSource<SKSE::CrosshairRefEvent>*)
     {
+        if (!a_event) {
+            logger::warn("Received a null crosshair event"sv);
+            return EventResult::kContinue;
+        }
+
         CAHZTarget::Singleton().SetTarget(a_event->crosshairRef.get());
         return EventResult::kContinue;
     }
@@ -411,7 +552,7 @@ namespace Events
                 SKSE::stl::unrestricted_cast<std::uintptr_t>(Hook_WandLookupREFRByHandle_Impl));
         } else {
             CrosshairHandler::Sink();
-            HUDMenuAdvanceHook::Install();
+            HUDMenuHook::Install();
         }
 
         logger::info("registered crosshair event"sv);

@@ -8,7 +8,7 @@ This branch treats `AHZHudInfo.swf` and its ActionScript 2 member names as a com
 | --- | --- | --- |
 | `9389fcf` CommonLibSSE-NG v6.6.3 | Unrelated dependency/build update | Preserved. |
 | `aabe597` repository development guidance | Unrelated documentation | Preserved. |
-| `3e9b493` bottom-bar reskin layout | Compatibility-sensitive AS2 fix | Replaced with native authored-right-edge detection and the legacy `PLAYER_CARD_WIDTH` member. The AS2 field and behavior are restored to 5.4.0. |
+| `3e9b493` bottom-bar reskin layout | Compatibility-sensitive AS2 fix | Replaced with native authored-right-edge detection and the legacy `PLAYER_CARD_WIDTH` member. The AS2 field and behavior are restored to 5.4.0. Negative local coordinates are accepted because translated replacement movies such as Edge UI legitimately author the player card outside the parent origin. |
 | `e09fcb9` 5.4.1 release and shared NG distribution | Mixed | Preserved the shared build/distribution and Papyrus readiness work. Replaced HUD close/reset/reinjection with native object-existence checks and persistent ownership. |
 | `960539c` CommonLibSSE-NG v6.7.0 | Unrelated dependency update | Preserved. |
 | `9bb9098` direct BookMenu visibility fix | Compatibility-sensitive/lifecycle | Replaced with native container visibility handling. Preserved the fully qualified AS2 event dispatcher calls. |
@@ -50,7 +50,9 @@ The remaining post-5.4.0 AS2 symbols are additive local variables or helper meth
 - The `AHZmoreHUD_MovieLoaded` Papyrus event is emitted once for the current HUD generation.
 - A queued event from an obsolete HUD generation is discarded.
 - BookMenu visibility is applied to the root moreHUD container and restored to its prior value.
-- The bottom-bar authored right edge is applied only when the legacy objects and `PLAYER_CARD_WIDTH` member exist.
+- Native `BookMode` push/pop messages are tracked alongside BookMenu open/close events.
+- While either book state is active, HUD messages and movie advances re-hide both the root container and the legacy static `IconContainer`; this suppresses rollover icons such as `ahzEye`, whose clips are parented beside the vanilla rollover text rather than under the moreHUD container.
+- The bottom-bar authored right edge is applied only when the legacy objects and `PLAYER_CARD_WIDTH` member exist. Any finite local coordinate is valid, including Edge UI's negative right edge.
 
 ## In-game validation matrix
 
@@ -61,3 +63,4 @@ The remaining post-5.4.0 AS2 symbols are additive local variables or helper meth
 5. Test left, right, and center bottom-bar alignment with the stock HUD and a reskin with a different authored gold-field right edge.
 6. Test BTPS 0.8.x against the restored static `AHZHudInfoWidget.IconContainer` member.
 7. Repeat the save-load tests with at least one 5.4.0-era or reskinned `AHZHudInfo.swf` that has no `MovieLoaded()` callback.
+8. With Read Or Take active, open a book while holding its modifier, release the modifier while BookMenu remains open, and confirm `ahzEye` stays hidden until both BookMenu and `BookMode` have ended.
