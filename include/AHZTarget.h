@@ -1,5 +1,11 @@
 #pragma once
 
+namespace Events
+{
+    class CrosshairHandler;
+    bool Hook_WandLookupREFRByHandle_Impl(RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut);
+}
+
 enum class EnchantmentType
 {
     None = 0,
@@ -103,7 +109,6 @@ public:
         return theInstance;
     };
 
-    void              SetTarget(RE::TESObjectREFR* pTargetRef);
     const TargetData& GetTarget() const noexcept { return m_target; };
 
     CAHZTarget(CAHZTarget& other) = delete;
@@ -119,8 +124,12 @@ public:
     //------------------End Native Wrappers -------------------------
 
 private:
+    friend class Events::CrosshairHandler;
+    friend bool Events::Hook_WandLookupREFRByHandle_Impl(RE::RefHandle&, RE::NiPointer<RE::TESObjectREFR>&);
+
     CAHZTarget() = default;
 
+    void SetTarget(RE::TESObjectREFR* pTargetRef);
     void UpdateTarget();
 
     RE::TESObjectREFR* m_pObjectRef = nullptr;

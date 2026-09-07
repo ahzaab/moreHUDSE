@@ -19,6 +19,45 @@ This branch treats `AHZHudInfo.swf` and its ActionScript 2 member names as a com
 | `be5103f` 5.4.2 release metadata | Unrelated release metadata | Preserved. |
 | `63046b8` BTPS compatibility and release cleanup | Mixed | Removed the per-widget `IconContainer` alias workaround because the original static `IconContainer` contract is restored. Preserved `kContinue` event-sink behavior and release cleanup. |
 | `3ffe11a` 5.4.3 release metadata | Unrelated release metadata | Preserved. |
+| `a60ee63` 5.4.4.0 release and native lifecycle hardening | Native hardening | Added event/menu/movie/relocation guards without adding any target lookup, retention, or `SetTarget` caller. The existing SE/AE crosshair event and VR lookup hook remain the only target-update contexts. |
+| `40001fa` / `a146005` 5.4.4.1 gold crash fix and merge | Unrelated native fix | Replaced the unsafe CommonLib gold helper with an `IsGold()` inventory filter. No crosshair target lifecycle changes. |
+| `186f26e` 5.4.5.0 book rollover refresh | **Target lifecycle violation** | Cached `HUDData::crosshairRef`, resolved it after BookMenu close, called `CAHZTarget::SetTarget`, and replayed a target-bearing HUD message outside the SKSE crosshair hook. This path is removed by the pending correction and must not be restored. |
+| Pending 5.4.5.0 correction | Required target lifecycle fix | Uses `PlayerCharacter::UpdateCrosshairs()` only to clear vanilla's `shouldUpdateCrosshair` flag. Skyrim resolves the live reference on its next update, SKSE dispatches the normal crosshair event, and moreHUD rebuilds its pointer-free `TargetData` snapshot inside that event. |
+
+## Crosshair target lifetime audit
+
+The audit covers every commit and release snapshot from `5.4.0.0` through the
+current 5.4.5.0 worktree.
+
+- Releases `5.4.0.0` through `5.4.4.1` have exactly two `SetTarget` contexts:
+  `CrosshairHandler::ProcessEvent` for SE/AE and the hooked
+  `LookupReferenceByHandle` call for VR. Both consume an owning pointer supplied
+  by the active lookup and complete target derivation synchronously.
+- `5.4.5.0` added the only out-of-hook call. The BookMenu restore code retained
+  an `ObjectRefHandle`, resolved it later, and replayed its stale rollover
+  payload. The pending correction deletes the payload cache, handle resolution,
+  fabricated `HUDData`, and direct `SetTarget` call.
+- CommonLib updates in `9389fcf` and `960539c` changed dependencies and VM data
+  accessors, not target ownership. The HUD/BookMenu/Scaleform lifecycle commits
+  from `9bb9098` through `d66f7a8` operate on GFx values and pointer-free state;
+  they did not add a crosshair target access path.
+- `CAHZTarget::UpdateTarget` dereferences its private reference/form/helper
+  pointers only during the synchronous `SetTarget` call. Scaleform reads copies
+  of `TargetData`, which contains IDs, enums, numbers, booleans, strings, and
+  vectors but no engine pointers. The transient internal pointers are now
+  cleared with a scope guard before `SetTarget` returns, including exceptional
+  exits. `SetTarget` is private, and C++ friendship restricts callers to the
+  SE/AE event handler and VR lookup hook so an accidental third caller fails to
+  compile.
+- The enemy-health lookup in `AHZScaleformHook.cpp` is a distinct engine hook:
+  it derives and stores only `CAHZActorData` values while its owning `NiPointer`
+  is in scope. Its saved `lastRefHandle` is compared as an opaque value and is
+  never resolved later. It does not feed `CAHZTarget` or the rollover target.
+
+Mandatory rule: no code may resolve, retain for later use, replay, or
+dereference the crosshair rollover target outside the SE/AE SKSE crosshair event
+or VR's equivalent hooked lookup. A refresh must invalidate vanilla crosshair
+state and allow Skyrim/SKSE to produce a new event from the live reference.
 
 ## Restored AS2 contract
 
