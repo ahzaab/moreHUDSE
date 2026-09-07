@@ -37,6 +37,12 @@ do not treat engine-facing pointers or runtime objects as inherently safe.
 The crosshair rollover target is valid only while Skyrim/SKSE is resolving it.
 This rule is mandatory and must not be weakened or bypassed:
 
+- Skyrim commonly resolves an `ObjectRefHandle` into an owning `NiPointer` and
+  validates the handle-table slot, generation, and object identity before use.
+  That protects the object's lifetime only; it does not prove the reference is
+  still the current crosshair target. This engine pattern does not authorize
+  moreHUD to resolve or consume the target outside the hooks below.
+
 - `CAHZTarget::SetTarget` may be called only synchronously from
   `Events::CrosshairHandler::ProcessEvent` while it is handling an
   `SKSE::CrosshairRefEvent`. For VR, where moreHUD supplies SKSE's equivalent
@@ -53,9 +59,11 @@ This rule is mandatory and must not be weakened or bypassed:
   transient and cleared before the hook returns.
 - When the current target must be refreshed without changing the crosshair,
   request a vanilla refresh with a validated
-  `PlayerCharacter::UpdateCrosshairs()` call. Let Skyrim resolve the live
-  reference and re-enter the normal SKSE crosshair hook; never fabricate or
-  replay a target-bearing HUD message.
+  `PlayerCharacter::UpdateCrosshairs()` call. Address Library ID 40621 is the
+  full native publisher: it resolves the current handle, re-enters the normal
+  SKSE crosshair hook, builds the rollover text, and queues `HUDData`. Do not
+  confuse it with adjacent ID 40622, which only clears the pending-update flag.
+  Never fabricate or replay a target-bearing HUD message.
 - Every native review must search all `SetTarget` call sites and all storage of
   crosshair target pointers/handles. Any new path outside the two authorized
   hook contexts above must be rejected and redesigned before merge or release.

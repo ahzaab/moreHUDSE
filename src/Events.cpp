@@ -124,8 +124,10 @@ namespace Events
 
             // Do not replay a captured reference through CAHZTarget here. The known lifecycle
             // hazard is that a crosshair target can become invalid outside SKSE's lookup hook.
-            // This decoded vanilla call only clears shouldUpdateCrosshair; Skyrim then resolves
-            // the live target and emits the normal CrosshairRefEvent/HUD AS2 callback next frame.
+            // IDA confirms UpdateCrosshairs (Address Library ID 40621) is Skyrim's full native
+            // publisher: it resolves the current handle into an owning NiPointer, re-enters the
+            // SKSE crosshair hook, and queues fresh rollover HUDData. The adjacent ID 40622 is
+            // the flag-only helper; using it here would not rebuild the rollover.
             player->UpdateCrosshairs();
             return true;
         }
