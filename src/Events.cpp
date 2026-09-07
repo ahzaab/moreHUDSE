@@ -15,6 +15,15 @@ namespace Events
         std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
         std::atomic<RE::GFxMovieView*> s_bookHiddenMovie{ nullptr };
         std::atomic_bool s_containerWasVisibleBeforeBook{ true };
+        struct CrosshairRolloverPayload
+        {
+            RE::ObjectRefHandle target;
+            std::string         text;
+            bool                show{ false };
+            bool                valid{ false };
+        };
+        std::mutex               s_crosshairRolloverLock;
+        CrosshairRolloverPayload s_crosshairRollover;
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
         constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
@@ -114,6 +123,60 @@ namespace Events
             return s_bookMenuOpen.load(std::memory_order_acquire) || s_bookModeActive.load(std::memory_order_acquire);
         }
 
+        void CacheCrosshairRollover(const RE::HUDData& a_data)
+        {
+            std::scoped_lock lock{ s_crosshairRolloverLock };
+            if (a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTarget) {
+                s_crosshairRollover.target = a_data.crosshairRef;
+                s_crosshairRollover.text = a_data.text.c_str();
+                s_crosshairRollover.show = a_data.show;
+                s_crosshairRollover.valid = static_cast<bool>(a_data.crosshairRef);
+            } else if (a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTargetTextOnly && s_crosshairRollover.valid) {
+                // Preserve the complete target payload while retaining the latest text update.
+                s_crosshairRollover.text = a_data.text.c_str();
+                s_crosshairRollover.show = a_data.show;
+            }
+        }
+
+        bool QueueCrosshairTargetRefreshAfterBook()
+        {
+            CrosshairRolloverPayload rollover;
+            {
+                std::scoped_lock lock{ s_crosshairRolloverLock };
+                rollover = s_crosshairRollover;
+            }
+
+            const auto target = rollover.target.get();
+            if (!rollover.valid || !target) {
+                logger::debug("Cannot refresh the rollover after BookMenu: no complete target payload was cached"sv);
+                return false;
+            }
+
+            const auto messageQueue = RE::UIMessageQueue::GetSingleton();
+            const auto interfaceStrings = RE::InterfaceStrings::GetSingleton();
+            if (!messageQueue || !interfaceStrings) {
+                logger::warn("Cannot refresh the rollover after BookMenu: HUD messaging is unavailable"sv);
+                return false;
+            }
+
+            const auto data = static_cast<RE::HUDData*>(messageQueue->CreateUIMessageData(interfaceStrings->hudData));
+            if (!data) {
+                logger::warn("Cannot refresh the rollover after BookMenu: HUDData allocation failed"sv);
+                return false;
+            }
+
+            // The book can become read without the crosshair reference changing, so refresh
+            // moreHUD's cached target before replaying the complete rollover message. Reusing
+            // the captured text/show fields avoids blanking reskinned vanilla rollover content.
+            CAHZTarget::Singleton().SetTarget(target.get());
+            data->type = RE::HUD_MESSAGE_TYPE::kSetCrosshairTarget;
+            data->text = rollover.text.c_str();
+            data->crosshairRef = rollover.target;
+            data->show = rollover.show;
+            messageQueue->AddMessage(RE::HUDMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kUpdate, data);
+            return true;
+        }
+
         void HideAHZContainerForBook(RE::GFxMovieView* a_view)
         {
             if (!a_view) {
@@ -165,15 +228,19 @@ namespace Events
                 restoreVisibility,
                 static_cast<const void*>(a_view));
 
+            s_bookHiddenMovie.store(nullptr, std::memory_order_release);
+
             if (restoreVisibility) {
                 RE::GFxValue widget;
                 if (a_view->GetVariable(&widget, AHZ_WIDGET_PATH.data()) && widget.IsObject() && widget.HasMember("RefreshWidgets")) {
                     widget.Invoke("RefreshWidgets");
                     logger::debug("Refreshed moreHUD widgets after BookMenu close"sv);
                 }
-            }
 
-            s_bookHiddenMovie.store(nullptr, std::memory_order_release);
+                if (QueueCrosshairTargetRefreshAfterBook()) {
+                    logger::debug("Queued a crosshair rollover refresh after BookMenu suppression ended"sv);
+                }
+            }
         }
 
         void ArmHUDReadinessProbe(RE::GFxMovieView* a_view, bool a_forceNewGeneration)
@@ -267,11 +334,14 @@ namespace Events
 
                 if (a_message.type == RE::UI_MESSAGE_TYPE::kUpdate && a_message.data) {
                     const auto data = skyrim_cast<RE::HUDData*>(a_message.data);
-                    if (data && data->type == RE::HUD_MESSAGE_TYPE::kSetMode && data->text == "BookMode") {
-                        bookModeChanged = true;
-                        bookModePushed = data->show;
-                        s_bookModeActive.store(bookModePushed, std::memory_order_release);
-                        logger::debug("Observed native BookMode {}"sv, bookModePushed ? "push"sv : "pop"sv);
+                    if (data) {
+                        CacheCrosshairRollover(*data);
+                        if (data->type == RE::HUD_MESSAGE_TYPE::kSetMode && data->text == "BookMode") {
+                            bookModeChanged = true;
+                            bookModePushed = data->show;
+                            s_bookModeActive.store(bookModePushed, std::memory_order_release);
+                            logger::debug("Observed native BookMode {}"sv, bookModePushed ? "push"sv : "pop"sv);
+                        }
                     }
                 }
 
