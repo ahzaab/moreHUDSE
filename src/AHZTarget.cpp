@@ -96,6 +96,17 @@ float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[m
 
 void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
 {
+    // These pointers are a transient calculation context for this crosshair callback only.
+    // Never leave them available for a later Scaleform, menu, task, or timer callback: the
+    // underlying reference can be destroyed as soon as SKSE's crosshair hook returns.
+    const SKSE::stl::scope_exit clearTransientTargetState{ [this]() noexcept {
+        m_pObjectRef = nullptr;
+        m_pForm = nullptr;
+        m_IngredientItem = nullptr;
+        m_AlchemyItem = nullptr;
+        m_SpellItem = nullptr;
+    } };
+
     m_pForm = CAHZFormLookup::Instance().GetTESForm(pTargetRef);
     if (m_pForm) {
         if (m_pForm->GetFormType() == RE::FormType::Reference) {

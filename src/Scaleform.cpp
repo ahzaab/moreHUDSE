@@ -4,7 +4,6 @@
 #include "SKSE/API.h"
 #include "AHZPapyrusMoreHud.h"
 #include "HashUtil.h"
-#include "Events.h"
 #include "CompletionistAPI.h"
 
 namespace Scaleform
@@ -24,15 +23,6 @@ namespace Scaleform
     public:
         void Call([[maybe_unused]] Params& a_params) override
         {
-        }
-    };
-
-    class SKSEScaleform_MovieLoaded : public RE::GFxFunctionHandler
-    {
-    public:
-        void Call([[maybe_unused]] Params& a_params) override
-        {
-            Events::NotifyAHZMovieLoaded();
         }
     };
 
@@ -314,7 +304,6 @@ namespace Scaleform
     auto RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root) -> bool
     {
         RegisterFunction<SKSEScaleform_InstallHooks>(a_root, a_view, "InstallHooks");
-        RegisterFunction<SKSEScaleform_MovieLoaded>(a_root, a_view, "MovieLoaded");
         RegisterFunction<SKSEScaleform_GetTargetObjectData>(a_root, a_view, "GetTargetObjectData");
         RegisterFunction<SKSEScaleform_GetPlayerData>(a_root, a_view, "GetPlayerData");
         RegisterFunction<SKSEScaleform_GetIsValidTarget>(a_root, a_view, "GetIsValidTarget");

@@ -23,7 +23,6 @@ class AHZConfigManager
 			return;
 		}
 		managerSetup = true;
-		exportedTried = false;
 		eventObject = {};
 		gfx.events.EventDispatcher.initialize(eventObject);
 		eventObject.addEventListener("configLoad", a_scope, a_loadedCallBack);
@@ -56,10 +55,6 @@ class AHZConfigManager
 			configObject["useExported"] = exportedTried;
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded successfully");
 			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configObject.useExported: " + configObject.useExported);
-			// The HUD's ActionScript class domain survives unloading AHZHudInfo.swf.
-			// Release the static request guard before notifying the widget so a new
-			// widget created by an in-session save load can read its configuration.
-			managerSetup = false;
 			eventObject.dispatchEvent({type: "configLoad", config: configObject});
 		}
 		else{
@@ -71,7 +66,6 @@ class AHZConfigManager
 			else
 			{
 				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded with error");
-				managerSetup = false;
 				eventObject.dispatchEvent({type: "configError", config: undefined});
 			}
 		}	

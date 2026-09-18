@@ -25,6 +25,8 @@ else
 # A normal VS Code terminal does not automatically inherit the MSVC include and library paths.
 # Import vcvars64 into this PowerShell process only when cl.exe is not already configured.
 $compilerCommand = Get-Command cl.exe -ErrorAction SilentlyContinue
+$gitCommand = Get-Command git.exe -ErrorAction SilentlyContinue
+$gitPath = if ($gitCommand) { Split-Path -Parent $gitCommand.Source } else { $null }
 if (-not $compilerCommand -or -not $env:INCLUDE)
 {
     if (-not $VsDevCmd)
@@ -68,6 +70,16 @@ if (-not $compilerCommand -or -not $env:INCLUDE)
     {
         $env:VCPKG_ROOT = $callerVcpkgRoot
     }
+}
+
+if ($gitCommand)
+{
+    if ($gitPath -and ($env:PATH -notlike "*${gitPath}*"))
+    {
+        $env:PATH = "$gitPath;$env:PATH"
+    }
+
+    $env:GIT_EXECUTABLE = $gitCommand.Source
 }
 
 # Prefer Visual Studio's bundled CMake over PATH so unrelated toolchains cannot take priority.
@@ -138,7 +150,13 @@ if ($DeployTarget)
 Push-Location $PSScriptRoot
 try
 {
-    & $CMakeExe --preset $configurePreset -S $PSScriptRoot "-DCMAKE_MAKE_PROGRAM=$NinjaExe"
+    $cmakeArguments = @('--preset', $configurePreset, '-S', $PSScriptRoot, "-DCMAKE_MAKE_PROGRAM=$NinjaExe")
+    if ($env:GIT_EXECUTABLE)
+    {
+        $cmakeArguments += "-DGIT_EXECUTABLE=$($env:GIT_EXECUTABLE)"
+    }
+
+    & $CMakeExe @cmakeArguments
     if ($LASTEXITCODE -ne 0)
     {
         exit $LASTEXITCODE
