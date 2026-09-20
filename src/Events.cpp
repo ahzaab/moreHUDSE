@@ -114,11 +114,11 @@ namespace Events
             return s_bookMenuOpen.load(std::memory_order_acquire) || s_bookModeActive.load(std::memory_order_acquire);
         }
 
-        bool RequestCrosshairTargetRefreshAfterBook()
+        bool RequestCrosshairTargetRefresh()
         {
             const auto player = RE::PlayerCharacter::GetSingleton();
             if (!player) {
-                logger::warn("Cannot refresh the rollover after BookMenu: PlayerCharacter is unavailable"sv);
+                logger::warn("Cannot refresh the rollover: PlayerCharacter is unavailable"sv);
                 return false;
             }
 
@@ -192,7 +192,7 @@ namespace Events
                     logger::debug("Refreshed moreHUD widgets after BookMenu close"sv);
                 }
 
-                if (RequestCrosshairTargetRefreshAfterBook()) {
+                if (RequestCrosshairTargetRefresh()) {
                     logger::debug("Requested a vanilla crosshair rollover refresh after BookMenu suppression ended"sv);
                 }
             }
@@ -286,15 +286,19 @@ namespace Events
 
                 bool bookModeChanged = false;
                 bool bookModePushed = false;
+                bool hudModePopped = false;
 
                 if (a_message.type == RE::UI_MESSAGE_TYPE::kUpdate && a_message.data) {
                     const auto data = skyrim_cast<RE::HUDData*>(a_message.data);
                     if (data) {
-                        if (data->type == RE::HUD_MESSAGE_TYPE::kSetMode && data->text == "BookMode") {
-                            bookModeChanged = true;
-                            bookModePushed = data->show;
-                            s_bookModeActive.store(bookModePushed, std::memory_order_release);
-                            logger::debug("Observed native BookMode {}"sv, bookModePushed ? "push"sv : "pop"sv);
+                        if (data->type == RE::HUD_MESSAGE_TYPE::kSetMode) {
+                            hudModePopped = !data->show;
+                            if (data->text == "BookMode") {
+                                bookModeChanged = true;
+                                bookModePushed = data->show;
+                                s_bookModeActive.store(bookModePushed, std::memory_order_release);
+                                logger::debug("Observed native BookMode {}"sv, bookModePushed ? "push"sv : "pop"sv);
+                            }
                         }
                     }
                 }
@@ -305,6 +309,11 @@ namespace Events
                     HideAHZContainerForBook(view);
                 } else if (bookModeChanged && !bookModePushed) {
                     RestoreAHZContainerAfterBook(view);
+                } else if (hudModePopped && RequestCrosshairTargetRefresh()) {
+                    // The original HUD handler has already restored its rollover mode.
+                    // Re-enter Skyrim's normal crosshair publisher so native-gated icons
+                    // are rebuilt for the current target without replaying a saved target.
+                    logger::debug("Requested a vanilla crosshair rollover refresh after HUD mode pop"sv);
                 }
 
                 return result;
