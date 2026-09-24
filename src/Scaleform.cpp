@@ -4,41 +4,71 @@
 #include "SKSE/API.h"
 #include "AHZPapyrusMoreHud.h"
 #include "HashUtil.h"
+#include "CompletionistAPI.h"
 
 namespace Scaleform
 {
-	struct moreHUDmessage {
-
-		RE::FormID m_formID;
-		bool m_icontype; // false = New, true = Found
-		bool m_display;
-	};
-
-    moreHUDmessage s_messageFromCompletionist{};
-    
-
-    void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+    namespace
     {
-        if (a_msg->type != 1)
+        constexpr auto HUD_BASE_PATH = "_root.HUDMovieBaseInstance"sv;
+        constexpr auto HUD_ROLLOVER_TEXT_PATH = "_root.HUDMovieBaseInstance.RolloverText"sv;
+        constexpr auto VANILLA_ROLLOVER_PATH = "_root.HUDMovieBaseInstance.RolloverNameInstance"sv;
+        constexpr auto SKYHUD_ROLLOVER_CONTAINER_PATH = "_root.HUDMovieBaseInstance.RolloverName_mc"sv;
+        constexpr auto SKYHUD_ROLLOVER_PATH = "_root.HUDMovieBaseInstance.RolloverName_mc.RolloverNameInstance"sv;
+
+        bool IsDisplayObjectVisible(const RE::GFxValue& a_object)
         {
-            return;
+            if (!a_object.IsDisplayObject()) {
+                return false;
+            }
+
+            RE::GFxValue::DisplayInfo displayInfo;
+            return a_object.GetDisplayInfo(&displayInfo) && displayInfo.GetVisible() && displayInfo.GetAlpha() > 0.0;
         }
 
-        if (!a_msg->data)
+        bool IsRolloverTextVisible(RE::GFxMovie* a_movie)
         {
-            return;
-        }
+            if (!a_movie) {
+                logger::trace("Cannot query rollover visibility without a GFx movie"sv);
+                return false;
+            }
 
-        s_messageFromCompletionist = *static_cast<moreHUDmessage*>(a_msg->data);
+            // moreHUD's SetCrosshairTarget hook runs after the HUD movie's original
+            // handler, so these display properties already contain vanilla's current
+            // HUD-mode decision. This also honors replacement movies that redirect
+            // RolloverText to a different display object.
+            RE::GFxValue hudBase;
+            if (!a_movie->GetVariable(&hudBase, HUD_BASE_PATH.data()) || !IsDisplayObjectVisible(hudBase)) {
+                return false;
+            }
+
+            RE::GFxValue rolloverText;
+            if (a_movie->GetVariable(&rolloverText, HUD_ROLLOVER_TEXT_PATH.data()) && rolloverText.IsDisplayObject()) {
+                return IsDisplayObjectVisible(rolloverText);
+            }
+
+            if (a_movie->GetVariable(&rolloverText, VANILLA_ROLLOVER_PATH.data()) && rolloverText.IsDisplayObject()) {
+                return IsDisplayObjectVisible(rolloverText);
+            }
+
+            RE::GFxValue rolloverContainer;
+            if (!a_movie->GetVariable(&rolloverContainer, SKYHUD_ROLLOVER_CONTAINER_PATH.data()) ||
+                !IsDisplayObjectVisible(rolloverContainer) ||
+                !a_movie->GetVariable(&rolloverText, SKYHUD_ROLLOVER_PATH.data()) || !rolloverText.IsDisplayObject()) {
+                logger::trace("The HUD movie does not expose a supported rollover text display object"sv);
+                return false;
+            }
+
+            return IsDisplayObjectVisible(rolloverText);
+        }
     }
 
-    void RegisterMessageListener()
+    void InitializeCompletionistAPI()
     {
-        if (GetModuleHandle(L"Completionist"))
-        {
-            logger::info("Completionist is installed, registering listener"sv);        
-            auto messageInterface = SKSE::GetMessagingInterface();
-            messageInterface->RegisterListener("Completionist", MessageHandler); 
+        if (CompletionistAPI::Init()) {
+            logger::info("Initialized Completionist API V20"sv);
+        } else {
+            logger::info("Completionist API V20 is not available"sv);
         }
     }
 
@@ -94,6 +124,16 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.retVal) {
+                logger::trace("GetIsBookAndWasRead called without a return value"sv);
+                return;
+            }
+
+            if (!IsRolloverTextVisible(a_params.movie)) {
+                a_params.retVal->SetBoolean(false);
+                return;
+            }
+
             const auto ref = CAHZTarget::Singleton().GetTarget();
 
             // If the target is not valid or it can't be picked up by the player
@@ -179,6 +219,16 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.retVal) {
+                logger::trace("IsAKnownEnchantedItem called without a return value"sv);
+                return;
+            }
+
+            if (!IsRolloverTextVisible(a_params.movie)) {
+                a_params.retVal->SetNumber(0);
+                return;
+            }
+
             const auto ref = CAHZTarget::Singleton().GetTarget();
 
             // If the target is not valid or it can't be picked up by the player
@@ -221,7 +271,17 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal) {
+                logger::trace("GetFormIcons called without a movie or return value"sv);
+                return;
+            }
+
             a_params.movie->CreateArray(a_params.retVal);
+            if (!IsRolloverTextVisible(a_params.movie)) {
+                a_params.retVal->SetArraySize(0);
+                return;
+            }
+
             const auto ref = CAHZTarget::Singleton().GetTarget();
             // If the target is not valid then return an empty array
             if (!ref.isValid) {
@@ -232,9 +292,12 @@ namespace Scaleform
             auto formId = ref.formId;
             auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
 
-            if (s_messageFromCompletionist.m_display && s_messageFromCompletionist.m_formID == formId)
-            {
-                customIcons.emplace_back(s_messageFromCompletionist.m_icontype ? "cmpFound"sv : "cmpNew"sv);
+            if (auto* object = RE::TESForm::LookupByID<RE::TESBoundObject>(formId)) {
+                const auto iconInfo = CompletionistAPI::GetIconInfo(object);
+                const auto* completionistIcon = iconInfo.GetRequiredIconName();
+                if (completionistIcon[0] != '\0') {
+                    customIcons.emplace_back(completionistIcon);
+                }
             }
 
             if (!customIcons.empty()) {
@@ -256,8 +319,16 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
-            assert(a_params.args);
-            assert(a_params.argCount);
+            if (!a_params.retVal) {
+                logger::trace("IsTargetInIconList called without a return value"sv);
+                return;
+            }
+
+            a_params.retVal->SetBoolean(false);
+            if (!IsRolloverTextVisible(a_params.movie) || !a_params.args || a_params.argCount == 0) {
+                return;
+            }
+
             if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
                 auto iconName = string(a_params.args[0].GetString());
 
@@ -288,7 +359,6 @@ namespace Scaleform
                 a_params.retVal->SetBoolean(resultIconName == iconName);
                 return;
             }
-            a_params.retVal->SetBoolean(false);
         }
     };
 

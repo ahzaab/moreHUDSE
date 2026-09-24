@@ -32,5 +32,5 @@ namespace Scaleform
     };
 
     void RegisterCallbacks();
-    void RegisterMessageListener();
+    void InitializeCompletionistAPI();
 }
