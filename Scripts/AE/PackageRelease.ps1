@@ -6,6 +6,7 @@ param(
     [string]$SourceDataDirectory,
     [string]$PluginDll,
     [string]$PluginPdb,
+    [string]$LicenseFile,
     [string]$OutputDirectory,
     [string]$ArchiveExe,
     [string]$SevenZipExe
@@ -28,6 +29,10 @@ if (-not $PluginPdb)
 {
     $PluginPdb = Join-Path $repositoryRoot 'contrib\Distribution\PluginRelease\AHZmoreHUDPlugin.pdb'
 }
+if (-not $LicenseFile)
+{
+    $LicenseFile = Join-Path $repositoryRoot 'LICENSE.txt'
+}
 
 
 if (-not $OutputDirectory)
@@ -39,6 +44,7 @@ if (-not $OutputDirectory)
 $requiredFiles = @(
     $PluginDll,
     $PluginPdb,
+    $LicenseFile,
     (Join-Path $SourceDataDirectory 'AHZmoreHUD.esp'),
     (Join-Path $SourceDataDirectory 'AHZmoreHUD.esl'),
     (Join-Path $SourceDataDirectory 'Interface\AHZHudInfo.swf'),
@@ -157,7 +163,8 @@ try
             Remove-Item -LiteralPath $versionDirectory -Recurse -Force
         }
 
-        $packageDataDirectory = Join-Path $versionDirectory 'staging\Data'
+        $packageStagingDirectory = Join-Path $versionDirectory 'staging'
+        $packageDataDirectory = Join-Path $packageStagingDirectory 'Data'
         $packagePluginDirectory = Join-Path $packageDataDirectory 'SKSE\Plugins'
         New-Item -ItemType Directory -Path $packagePluginDirectory -Force | Out-Null
 
@@ -168,21 +175,56 @@ try
         Copy-Item -LiteralPath $PluginDll -Destination (Join-Path $packagePluginDirectory 'AHZmoreHUDPlugin.dll') -Force
         Copy-Item -LiteralPath $PluginPdb -Destination (Join-Path $packagePluginDirectory 'AHZmoreHUDPlugin.pdb') -Force
 
+        # Keep the GPL text at the package root, beside Data. Mod managers can expose it
+        # to users without treating it as a Skyrim Data file during installation/deployment.
+        Copy-Item -LiteralPath $LicenseFile -Destination (Join-Path $packageStagingDirectory 'LICENSE.txt') -Force
+
         # Keep loose copies beside the final archive for inspection and Nexus troubleshooting.
         Copy-Item -LiteralPath $builtBsa -Destination (Join-Path $versionDirectory 'AHZmoreHUD.bsa') -Force
         Copy-Item -LiteralPath $pluginSource -Destination (Join-Path $versionDirectory $pluginName) -Force
 
         $archiveName = 'AHZmoreHUD' + $packageVersion.Replace('.', '_') + '.7z'
         $releaseArchive = Join-Path $versionDirectory $archiveName
-        & $SevenZipExe a $releaseArchive $packageDataDirectory '-mx5' '-t7z' | Out-Host
-        if ($LASTEXITCODE -ne 0)
+        Push-Location -LiteralPath $packageStagingDirectory
+        try
         {
-            throw "7-Zip failed for $($package.Kind) with exit code $LASTEXITCODE."
+            & $SevenZipExe a $releaseArchive 'Data' 'LICENSE.txt' '-mx5' '-t7z' | Out-Host
+            $sevenZipExitCode = $LASTEXITCODE
+        }
+        finally
+        {
+            Pop-Location
+        }
+
+        if ($sevenZipExitCode -ne 0)
+        {
+            throw "7-Zip failed for $($package.Kind) with exit code $sevenZipExitCode."
         }
 
         if (-not (Test-Path -LiteralPath $releaseArchive -PathType Leaf))
         {
             throw "7-Zip did not create $releaseArchive."
+        }
+
+        $archiveListing = & $SevenZipExe l -slt $releaseArchive
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "7-Zip could not verify $releaseArchive."
+        }
+
+        $archivePaths = $archiveListing | ForEach-Object {
+            if ($_ -match '^Path = (.+)$')
+            {
+                $Matches[1]
+            }
+        }
+        if ($archivePaths -notcontains 'LICENSE.txt')
+        {
+            throw "The package license is missing from the root of $releaseArchive."
+        }
+        if ($archivePaths -contains 'Data\LICENSE.txt')
+        {
+            throw "The package license must not be deployed under Data in $releaseArchive."
         }
 
         Remove-Item -LiteralPath (Join-Path $versionDirectory 'staging') -Recurse -Force
