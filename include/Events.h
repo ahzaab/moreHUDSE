@@ -8,6 +8,7 @@ namespace Events
 
     bool IsAHZMovieLoaded() noexcept;
     void NotifyAHZMovieLoaded();
+    void SetLocationStatusOptions(bool a_enabled, bool a_dungeonsOnly, bool a_hideUnvisited, bool a_exteriorOnly) noexcept;
 
     class MenuHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
     {

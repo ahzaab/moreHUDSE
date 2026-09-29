@@ -23,6 +23,12 @@ struct TargetData
     bool                             isValid{};
     bool                             canCarry{};
     bool                             bookRead{};
+    bool                             hasInteriorCellDestination{};
+    bool                             interiorCellVisited{};
+    bool                             interiorCellCleared{};
+    bool                             interiorCellIsDungeon{};
+    bool                             interiorCellIsClearable{};
+    bool                             interiorCellIsExteriorEntrance{};
     RE::FormType                     formType{ RE::FormType::None };
     RE::FormID                       formId;
     std::string                      effectsDescription{};
@@ -79,6 +85,12 @@ private:
         isValid = false;
         canCarry = false;
         bookRead = false;
+        hasInteriorCellDestination = false;
+        interiorCellVisited = false;
+        interiorCellCleared = false;
+        interiorCellIsDungeon = false;
+        interiorCellIsClearable = false;
+        interiorCellIsExteriorEntrance = false;
         formType = RE::FormType::None;
         formId = static_cast<RE::FormID>(0);
         effectsDescription.clear();
@@ -171,6 +183,7 @@ private:
     [[nodiscard]] RE::SpellItem*                   GetSpellItem();
     [[nodiscard]] std::string                      GetTargetName();
     [[nodiscard]] std::string                      GetTargetSoulLevelName();
+    void                                           UpdateInteriorCellDestination();
     [[nodiscard]] void                             GetMagicItemDescription(RE::MagicItem* item, std::string& description);
 
     [[nodiscard]] static RE::IngredientItem* GetIngredientFromLeveledList(RE::TESForm* thisObject);

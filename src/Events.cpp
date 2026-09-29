@@ -15,6 +15,10 @@ namespace Events
         std::atomic<RE::GFxMovieView*> s_hudMovie{ nullptr };
         std::atomic<RE::GFxMovieView*> s_bookHiddenMovie{ nullptr };
         std::atomic_bool s_containerWasVisibleBeforeBook{ true };
+        std::atomic_bool s_locationStatusEnabled{ true };
+        std::atomic_bool s_locationStatusDungeonsOnly{ false };
+        std::atomic_bool s_locationStatusHideUnvisited{ false };
+        std::atomic_bool s_locationStatusExteriorOnly{ true };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
         constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;
         constexpr auto   AHZ_CONTAINER_PATH = "_root.AHZWidgetContainer"sv;
@@ -249,6 +253,89 @@ namespace Events
             NotifyAHZMovieLoaded();
         }
 
+        bool IsCrosshairRolloverMessage(const RE::HUDData& a_data)
+        {
+            if (a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTarget ||
+                a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTargetTextOnly ||
+                a_data.type == RE::HUD_MESSAGE_TYPE::kSetLoadDoorInfo) {
+                return true;
+            }
+
+            return REL::Module::IsVR() &&
+                   (a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTargetGamepad ||
+                    a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTargetLeft ||
+                    a_data.type == RE::HUD_MESSAGE_TYPE::kSetCrosshairTargetRight);
+        }
+
+        void AddInteriorCellStatus(RE::HUDData& a_data)
+        {
+            if (!s_locationStatusEnabled.load(std::memory_order_acquire) ||
+                !IsCrosshairRolloverMessage(a_data) || a_data.text.empty()) {
+                return;
+            }
+
+            // Use only the pointer-free snapshot built synchronously by the authorized
+            // crosshair hook. Never resolve or consume HUDData::crosshairRef here.
+            const auto& target = CAHZTarget::Singleton().GetTarget();
+            if (!target.hasInteriorCellDestination) {
+                return;
+            }
+
+            if (s_locationStatusDungeonsOnly.load(std::memory_order_acquire) && !target.interiorCellIsDungeon) {
+                return;
+            }
+
+            if (s_locationStatusExteriorOnly.load(std::memory_order_acquire) && !target.interiorCellIsExteriorEntrance) {
+                return;
+            }
+
+            if (s_locationStatusHideUnvisited.load(std::memory_order_acquire) && !target.interiorCellVisited) {
+                return;
+            }
+
+            const char* translationKey = "$mHUD_LocationStatusUnvisited";
+            const char* fallbackLabel = "Unvisited";
+            if (target.interiorCellCleared) {
+                translationKey = "$mHUD_LocationStatusCleared";
+                fallbackLabel = "Cleared";
+            } else if (target.interiorCellVisited) {
+                if (target.interiorCellIsDungeon && target.interiorCellIsClearable) {
+                    translationKey = "$mHUD_LocationStatusVisitedNotCleared";
+                    fallbackLabel = "Visited (Not Cleared)";
+                } else {
+                    translationKey = "$mHUD_LocationStatusVisited";
+                    fallbackLabel = "Visited";
+                }
+            }
+
+            std::string localizedLabel{ fallbackLabel };
+            SKSE::Translation::Translate(translationKey, localizedLabel);
+
+            const auto interfaceStrings = RE::InterfaceStrings::GetSingleton();
+            if (!interfaceStrings) {
+                logger::warn("Cannot add the location status: InterfaceStrings is unavailable"sv);
+                return;
+            }
+
+            const RE::BSFixedString* diamondMarker = nullptr;
+            if (REL::Module::IsVR()) {
+                diamondMarker = std::addressof(interfaceStrings->GetVRRuntimeData().diamondMarker);
+            } else if (REL::Module::IsAE()) {
+                diamondMarker = std::addressof(interfaceStrings->GetAERuntimeData().diamondMarker);
+            } else {
+                diamondMarker = std::addressof(interfaceStrings->GetRuntimeData().diamondMarker);
+            }
+
+            if (!diamondMarker || diamondMarker->empty()) {
+                logger::warn("Cannot add the location status: Skyrim's diamond marker is unavailable"sv);
+                return;
+            }
+
+            std::string decoratedText{ a_data.text.c_str() };
+            // Match TESObjectCONT::GetActivateText: newline, InterfaceStrings::diamondMarker, label.
+            decoratedText.append("\n").append(diamondMarker->c_str()).append(localizedLabel);
+            a_data.text = decoratedText.c_str();
+        }
         class HUDMenuHook
         {
         public:
@@ -291,6 +378,8 @@ namespace Events
                 if (a_message.type == RE::UI_MESSAGE_TYPE::kUpdate && a_message.data) {
                     const auto data = skyrim_cast<RE::HUDData*>(a_message.data);
                     if (data) {
+                        AddInteriorCellStatus(*data);
+
                         if (data->type == RE::HUD_MESSAGE_TYPE::kSetMode) {
                             hudModePopped = !data->show;
                             if (data->text == "BookMode") {
@@ -344,6 +433,20 @@ namespace Events
     bool IsAHZMovieLoaded() noexcept
     {
         return s_ahzMovieLoaded.load(std::memory_order_acquire);
+    }
+
+    void SetLocationStatusOptions(bool a_enabled, bool a_dungeonsOnly, bool a_hideUnvisited, bool a_exteriorOnly) noexcept
+    {
+        s_locationStatusEnabled.store(a_enabled, std::memory_order_release);
+        s_locationStatusDungeonsOnly.store(a_dungeonsOnly, std::memory_order_release);
+        s_locationStatusHideUnvisited.store(a_hideUnvisited, std::memory_order_release);
+        s_locationStatusExteriorOnly.store(a_exteriorOnly, std::memory_order_release);
+        logger::info(
+            "Location status options updated (enabled: {}, dungeons only: {}, hide unvisited: {}, exterior only: {})"sv,
+            a_enabled,
+            a_dungeonsOnly,
+            a_hideUnvisited,
+            a_exteriorOnly);
     }
 
     void NotifyAHZMovieLoaded()

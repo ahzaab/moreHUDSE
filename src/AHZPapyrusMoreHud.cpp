@@ -22,6 +22,16 @@ auto PapyrusMoreHud::IsMovieLoaded([[maybe_unused]] RE::StaticFunctionTag* base)
     return Events::IsAHZMovieLoaded();
 }
 
+void PapyrusMoreHud::SetLocationStatusOptions(
+    [[maybe_unused]] RE::StaticFunctionTag* base,
+    bool enabled,
+    bool dungeonsOnly,
+    bool hideUnvisited,
+    bool exteriorOnly)
+{
+    Events::SetLocationStatusOptions(enabled, dungeonsOnly, hideUnvisited, exteriorOnly);
+}
+
 void PapyrusMoreHud::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
 {
     logger::trace("RegisterIconFormList");
@@ -180,6 +190,7 @@ auto PapyrusMoreHud::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> b
 {
     a_vm->RegisterFunction("GetVersion", "AhzMoreHud", GetVersion, true);
     a_vm->RegisterFunction("IsMovieLoaded", "AhzMoreHud", IsMovieLoaded, true);
+    a_vm->RegisterFunction("SetLocationStatusOptions", "AhzMoreHud", SetLocationStatusOptions, true);
     a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHud", IsIconItemRegistered);
     a_vm->RegisterFunction("AddIconItem", "AhzMoreHud", AddIconItem);
     a_vm->RegisterFunction("RemoveIconItem", "AhzMoreHud", RemoveIconItem);

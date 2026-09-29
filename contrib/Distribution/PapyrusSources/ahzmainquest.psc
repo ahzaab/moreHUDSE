@@ -44,6 +44,11 @@ GlobalVariable Property AHZIconSize Auto
 ; Keeps track of the revision
 int Property iVersion Auto
 int Property iToggleOn Auto
+bool Property AHZShowLocationStatus Auto
+bool Property AHZLocationStatusDungeonsOnly Auto
+bool Property AHZHideUnvisitedLocationStatus Auto
+bool Property AHZLocationStatusExteriorOnly Auto
+int Property AHZLocationStatusSettingsVersion Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
 ; <--- Edit These value when updating
@@ -101,6 +106,17 @@ Function Maintenance()
     EndIf
 
 	; Other maintenance code that only needs to run once per save load
+    if AHZLocationStatusSettingsVersion < 1
+        AHZShowLocationStatus = true
+        AHZLocationStatusDungeonsOnly = false
+        AHZHideUnvisitedLocationStatus = false
+        AHZLocationStatusSettingsVersion = 1
+    endif
+    if AHZLocationStatusSettingsVersion < 2
+        AHZLocationStatusExteriorOnly = true
+        AHZLocationStatusSettingsVersion = 2
+    endif
+    SyncLocationStatusSettings()
 
     ; The DLL loads the widget independently of SkyUI's widget framework. Register
     ; before checking the retained native state so neither load ordering can be missed.
@@ -122,6 +138,10 @@ EndFunction
 
 function RefreshWidgets()
     UI.Invoke("HUD Menu", WidgetRoot + ".RefreshWidgets")
+EndFunction
+
+Function SyncLocationStatusSettings()
+    AhzMoreHud.SetLocationStatusOptions(AHZShowLocationStatus, AHZLocationStatusDungeonsOnly, AHZHideUnvisitedLocationStatus, AHZLocationStatusExteriorOnly)
 EndFunction
 
 function UpdateSettings(bool disable)
@@ -223,6 +243,12 @@ function UpdateSettings(bool disable)
         UnregisterForAllKeys()
     else
         RefreshHotkeyRegistration()
+    endif
+
+    if disable
+        AhzMoreHud.SetLocationStatusOptions(false, AHZLocationStatusDungeonsOnly, AHZHideUnvisitedLocationStatus, AHZLocationStatusExteriorOnly)
+    else
+        SyncLocationStatusSettings()
     endif
 
     iToggleOn = AHZToggleState.GetValueInt()

@@ -7,6 +7,9 @@ int Function GetVersion() global native
 bool Function IsMovieLoaded() global native
 {Returns true after AHZHudInfo.swf has acknowledged that its widget is initialized}
 
+Function SetLocationStatusOptions(bool enabled, bool dungeonsOnly, bool hideUnvisited, bool exteriorOnly) global native
+{Updates the native rollover location-status display options}
+
 ;iEquip Functions ---------------------------------------
 
 bool Function IsIconItemRegistered(int aItemId) global native

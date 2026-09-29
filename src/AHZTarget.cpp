@@ -132,6 +132,8 @@ void CAHZTarget::UpdateTarget()
         return;
     }
 
+    UpdateInteriorCellDestination();
+
     m_IngredientItem = GetIngredient();
     m_AlchemyItem = GetAlchemyItem();
     m_SpellItem = GetSpellItem();
@@ -190,6 +192,57 @@ void CAHZTarget::UpdateTarget()
     m_target.weaponType = GetWeaponType();
     m_target.enchantmentType = GetIsKnownEnchantment();
     m_target.isBoltAmmo = GetIsBoltAmmo();
+}
+
+void CAHZTarget::UpdateInteriorCellDestination()
+{
+    if (!IsReference() || GetForm()->GetFormType() != RE::FormType::Door) {
+        return;
+    }
+
+    const auto linkedDoor = GetReference()->extraList.GetTeleportLinkedDoor().get();
+    if (!linkedDoor) {
+        return;
+    }
+
+    const auto destinationCell = linkedDoor->GetParentCell();
+    if (!destinationCell || !destinationCell->IsInteriorCell()) {
+        return;
+    }
+
+    m_target.hasInteriorCellDestination = true;
+    const auto sourceCell = GetReference()->GetParentCell();
+    m_target.interiorCellIsExteriorEntrance = sourceCell && !sourceCell->IsInteriorCell();
+
+    const auto location = destinationCell->GetLocation();
+    m_target.interiorCellCleared = location && (location->IsCleared() || location->everCleared);
+
+    const auto dungeonKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("LocTypeDungeon");
+    const auto defaultObjectManager = RE::BGSDefaultObjectManager::GetSingleton();
+    const auto clearableKeywordObject = defaultObjectManager ?
+        defaultObjectManager->GetObject<RE::BGSKeyword>(RE::DefaultObjectID::kKeywordClearableLocation) :
+        nullptr;
+    const auto clearableKeyword = clearableKeywordObject ? *clearableKeywordObject : nullptr;
+    constexpr std::size_t maxLocationParentDepth = 64;
+    std::size_t           locationParentDepth = 0;
+    for (auto currentLocation = location;
+         currentLocation && locationParentDepth < maxLocationParentDepth;
+         currentLocation = currentLocation->parentLoc, ++locationParentDepth) {
+        if (dungeonKeyword && currentLocation->HasKeyword(dungeonKeyword)) {
+            m_target.interiorCellIsDungeon = true;
+        }
+
+        if (!m_target.interiorCellIsClearable && clearableKeyword && currentLocation->HasKeyword(clearableKeyword)) {
+            m_target.interiorCellIsClearable = true;
+            m_target.interiorCellCleared = currentLocation->IsCleared() || currentLocation->everCleared;
+        }
+    }
+
+    const auto player = RE::PlayerCharacter::GetSingleton();
+    m_target.interiorCellVisited =
+        m_target.interiorCellCleared ||
+        (player && player->GetParentCell() == destinationCell) ||
+        destinationCell->extraList.HasType<RE::ExtraDetachTime>();
 }
 
 EnchantmentType CAHZTarget::GetIsKnownEnchantment()
