@@ -42,6 +42,10 @@ GlobalVariable Property AHZShowEnemyStaminaStats Auto
 GlobalVariable Property AHZShowEnemyHealthStats Auto
 GlobalVariable Property AHZShowInventoryCountWithZero Auto
 GlobalVariable Property AHZIconSize Auto
+GlobalVariable Property AHZShowLocationStatus Auto
+GlobalVariable Property AHZLocationStatusDungeonsOnly Auto
+GlobalVariable Property AHZHideUnvisitedLocationStatus Auto
+GlobalVariable Property AHZLocationStatusExteriorOnly Auto
 
 Quest Property AHZMainQuestREF  Auto  
 
@@ -255,22 +259,14 @@ endEvent
 ; @implements SKI_ConfigBase
 event OnPageReset(string a_page)
     {Called when a new page is selected, including the initial empty page}
-    AHZMainQuest mainQuest = AHZMainQuestREF as AHZMainQuest
-    int locationMasterFlags = OPTION_FLAG_DISABLED
+    int locationMasterFlags = OPTION_FLAG_NONE
     int locationChildFlags = OPTION_FLAG_DISABLED
-    bool showLocationStatus = false
-    bool locationStatusDungeonsOnly = false
-    bool hideUnvisitedLocationStatus = false
-    bool locationStatusExteriorOnly = false
-    if mainQuest
-        locationMasterFlags = OPTION_FLAG_NONE
-        showLocationStatus = mainQuest.AHZShowLocationStatus
-        locationStatusDungeonsOnly = mainQuest.AHZLocationStatusDungeonsOnly
-        hideUnvisitedLocationStatus = mainQuest.AHZHideUnvisitedLocationStatus
-        locationStatusExteriorOnly = mainQuest.AHZLocationStatusExteriorOnly
-        if showLocationStatus
-            locationChildFlags = OPTION_FLAG_NONE
-        endif
+    bool showLocationStatus = AHZShowLocationStatus.GetValueInt() != 0
+    bool locationStatusDungeonsOnly = AHZLocationStatusDungeonsOnly.GetValueInt() != 0
+    bool hideUnvisitedLocationStatus = AHZHideUnvisitedLocationStatus.GetValueInt() != 0
+    bool locationStatusExteriorOnly = AHZLocationStatusExteriorOnly.GetValueInt() != 0
+    if showLocationStatus
+        locationChildFlags = OPTION_FLAG_NONE
     endif
 
     if (a_page == "")
@@ -435,36 +431,45 @@ event OnOptionSelect(int a_option)
     int locationChildFlags = OPTION_FLAG_DISABLED
     
     ; Toggle rollover location status
-    if (a_option == _toggle24OID_B) && mainQuest
-        mainQuest.AHZShowLocationStatus = !mainQuest.AHZShowLocationStatus
-        SetToggleOptionValue(_toggle24OID_B, mainQuest.AHZShowLocationStatus)
-        if mainQuest.AHZShowLocationStatus
+    if a_option == _toggle24OID_B
+        ToggleGlobalInt(AHZShowLocationStatus)
+        SetToggleOptionValue(_toggle24OID_B, AHZShowLocationStatus.GetValueInt())
+        if AHZShowLocationStatus.GetValueInt() != 0
             locationChildFlags = OPTION_FLAG_NONE
         endif
         SetOptionFlags(_toggle25OID_B, locationChildFlags)
         SetOptionFlags(_toggle26OID_B, locationChildFlags)
         SetOptionFlags(_toggle27OID_B, locationChildFlags)
-        mainQuest.SyncLocationStatusSettings()
+        if mainQuest
+            mainQuest.SyncLocationStatusSettings()
+        endif
     endif
 
     ; Limit rollover location status to dungeons
-    if (a_option == _toggle25OID_B) && mainQuest
-        mainQuest.AHZLocationStatusDungeonsOnly = !mainQuest.AHZLocationStatusDungeonsOnly
-        SetToggleOptionValue(_toggle25OID_B, mainQuest.AHZLocationStatusDungeonsOnly)
-        mainQuest.SyncLocationStatusSettings()
+    if a_option == _toggle25OID_B
+        ToggleGlobalInt(AHZLocationStatusDungeonsOnly)
+        SetToggleOptionValue(_toggle25OID_B, AHZLocationStatusDungeonsOnly.GetValueInt())
+        if mainQuest
+            mainQuest.SyncLocationStatusSettings()
+        endif
     endif
 
     ; Hide the unvisited rollover location status
-    if (a_option == _toggle26OID_B) && mainQuest
-        mainQuest.AHZHideUnvisitedLocationStatus = !mainQuest.AHZHideUnvisitedLocationStatus
-        SetToggleOptionValue(_toggle26OID_B, mainQuest.AHZHideUnvisitedLocationStatus)
-        mainQuest.SyncLocationStatusSettings()
+    if a_option == _toggle26OID_B
+        ToggleGlobalInt(AHZHideUnvisitedLocationStatus)
+        SetToggleOptionValue(_toggle26OID_B, AHZHideUnvisitedLocationStatus.GetValueInt())
+        if mainQuest
+            mainQuest.SyncLocationStatusSettings()
+        endif
     endif
+
     ; Limit rollover location status to exterior-to-interior entrances
-    if (a_option == _toggle27OID_B) && mainQuest
-        mainQuest.AHZLocationStatusExteriorOnly = !mainQuest.AHZLocationStatusExteriorOnly
-        SetToggleOptionValue(_toggle27OID_B, mainQuest.AHZLocationStatusExteriorOnly)
-        mainQuest.SyncLocationStatusSettings()
+    if a_option == _toggle27OID_B
+        ToggleGlobalInt(AHZLocationStatusExteriorOnly)
+        SetToggleOptionValue(_toggle27OID_B, AHZLocationStatusExteriorOnly.GetValueInt())
+        if mainQuest
+            mainQuest.SyncLocationStatusSettings()
+        endif
     endif
     ; Toggle books read
     if (a_option == _toggle8OID_B)
@@ -1083,7 +1088,6 @@ endEvent
 
 function FISS_SAVE()
 
-    AHZMainQuest mainQuest = AHZMainQuestREF as AHZMainQuest
     fissinterface fiss = FISSfactory.getFISS()
     if !fiss
         ShowMessage("$mHUD_FissMiss", false)
@@ -1091,13 +1095,11 @@ function FISS_SAVE()
     endIf
     fiss.beginSave("MoreHUD.xml", "MoreHUD")
     fiss.saveBool("fissExists", true)
-    if mainQuest
-        fiss.saveInt("AHZLocationStatusPresetVersion", 2)
-        fiss.saveBool("AHZShowLocationStatus", mainQuest.AHZShowLocationStatus)
-        fiss.saveBool("AHZLocationStatusDungeonsOnly", mainQuest.AHZLocationStatusDungeonsOnly)
-        fiss.saveBool("AHZHideUnvisitedLocationStatus", mainQuest.AHZHideUnvisitedLocationStatus)
-        fiss.saveBool("AHZLocationStatusExteriorOnly", mainQuest.AHZLocationStatusExteriorOnly)
-    endif
+    fiss.saveInt("AHZLocationStatusPresetVersion", 2)
+    fiss.saveBool("AHZShowLocationStatus", AHZShowLocationStatus.GetValueInt() != 0)
+    fiss.saveBool("AHZLocationStatusDungeonsOnly", AHZLocationStatusDungeonsOnly.GetValueInt() != 0)
+    fiss.saveBool("AHZHideUnvisitedLocationStatus", AHZHideUnvisitedLocationStatus.GetValueInt() != 0)
+    fiss.saveBool("AHZLocationStatusExteriorOnly", AHZLocationStatusExteriorOnly.GetValueInt() != 0)
     fiss.saveInt("AHZActivationMode", AHZActivationMode.GetValueInt())
     fiss.saveInt("AHZIngredientsWidgetStyle", AHZIngredientsWidgetStyle.GetValueInt())
     fiss.saveInt("AHZEffectsWidgetStyle", AHZEffectsWidgetStyle.GetValueInt())
@@ -1153,13 +1155,13 @@ function FISS_LOAD()
     endIf
     fiss.beginLoad("MoreHUD.xml")
     if fiss.loadBool("fissExists")
-        if mainQuest && fiss.loadInt("AHZLocationStatusPresetVersion") >= 1
-            mainQuest.AHZShowLocationStatus = fiss.loadBool("AHZShowLocationStatus")
-            mainQuest.AHZLocationStatusDungeonsOnly = fiss.loadBool("AHZLocationStatusDungeonsOnly")
-            mainQuest.AHZHideUnvisitedLocationStatus = fiss.loadBool("AHZHideUnvisitedLocationStatus")
+        if fiss.loadInt("AHZLocationStatusPresetVersion") >= 1
+            AHZShowLocationStatus.SetValueInt(fiss.loadBool("AHZShowLocationStatus") as Int)
+            AHZLocationStatusDungeonsOnly.SetValueInt(fiss.loadBool("AHZLocationStatusDungeonsOnly") as Int)
+            AHZHideUnvisitedLocationStatus.SetValueInt(fiss.loadBool("AHZHideUnvisitedLocationStatus") as Int)
         endif
-        if mainQuest && fiss.loadInt("AHZLocationStatusPresetVersion") >= 2
-            mainQuest.AHZLocationStatusExteriorOnly = fiss.loadBool("AHZLocationStatusExteriorOnly")
+        if fiss.loadInt("AHZLocationStatusPresetVersion") >= 2
+            AHZLocationStatusExteriorOnly.SetValueInt(fiss.loadBool("AHZLocationStatusExteriorOnly") as Int)
         endif
         AHZActivationMode.SetValueInt(fiss.loadInt("AHZActivationMode"))
         AHZIngredientsWidgetStyle.SetValueInt(fiss.loadInt("AHZIngredientsWidgetStyle"))
@@ -1262,7 +1264,6 @@ endState
 
 state SaveCurrentConfigBN
     event OnSelectST()
-        AHZMainQuest mainQuest = AHZMainQuestREF as AHZMainQuest
         string file = "..\\moreHUD\\" + sConfigNameCurrent
             JSONUtil.SetPathIntValue(file, ".!AHZActivationMode", AHZActivationMode.GetValueInt())
             JSONUtil.SetPathIntValue(file, ".!AHZHotKey", AHZHotKey.GetValueInt())
@@ -1303,12 +1304,10 @@ state SaveCurrentConfigBN
             JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt())
             JSONUtil.SetPathIntValue(file, ".!AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt())
             JSONUtil.SetPathFloatValue(file, ".!AHZIconSize", AHZIconSize.GetValue())
-            if mainQuest
-                JSONUtil.SetPathIntValue(file, ".!AHZShowLocationStatus", mainQuest.AHZShowLocationStatus as Int)
-                JSONUtil.SetPathIntValue(file, ".!AHZLocationStatusDungeonsOnly", mainQuest.AHZLocationStatusDungeonsOnly as Int)
-                JSONUtil.SetPathIntValue(file, ".!AHZHideUnvisitedLocationStatus", mainQuest.AHZHideUnvisitedLocationStatus as Int)
-                JSONUtil.SetPathIntValue(file, ".!AHZLocationStatusExteriorOnly", mainQuest.AHZLocationStatusExteriorOnly as Int)
-            endif
+            JSONUtil.SetPathIntValue(file, ".!AHZShowLocationStatus", AHZShowLocationStatus.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZLocationStatusDungeonsOnly", AHZLocationStatusDungeonsOnly.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZHideUnvisitedLocationStatus", AHZHideUnvisitedLocationStatus.GetValueInt())
+            JSONUtil.SetPathIntValue(file, ".!AHZLocationStatusExteriorOnly", AHZLocationStatusExteriorOnly.GetValueInt())
         JSONUtil.save(file)
         SetTextOptionValueST("$mHUD_Done")
     endEvent
@@ -1390,11 +1389,11 @@ state LoadSelectedConfigBN
             AHZShowEnemyStaminaStats.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyStaminaStats", AHZShowEnemyStaminaStats.GetValueInt()))
             AHZShowEnemyHealthStats.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowEnemyHealthStats", AHZShowEnemyHealthStats.GetValueInt()))
             AHZIconSize.SetValue(JSONUtil.GetPathFloatValue(file, ".!AHZIconSize", AHZIconSize.GetValue()))
+            AHZShowLocationStatus.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZShowLocationStatus", AHZShowLocationStatus.GetValueInt()))
+            AHZLocationStatusDungeonsOnly.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZLocationStatusDungeonsOnly", AHZLocationStatusDungeonsOnly.GetValueInt()))
+            AHZHideUnvisitedLocationStatus.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZHideUnvisitedLocationStatus", AHZHideUnvisitedLocationStatus.GetValueInt()))
+            AHZLocationStatusExteriorOnly.SetValueInt(JSONUtil.GetPathIntValue(file, ".!AHZLocationStatusExteriorOnly", AHZLocationStatusExteriorOnly.GetValueInt()))
             if mainQuest
-                mainQuest.AHZShowLocationStatus = JSONUtil.GetPathIntValue(file, ".!AHZShowLocationStatus", mainQuest.AHZShowLocationStatus as Int) != 0
-                mainQuest.AHZLocationStatusDungeonsOnly = JSONUtil.GetPathIntValue(file, ".!AHZLocationStatusDungeonsOnly", mainQuest.AHZLocationStatusDungeonsOnly as Int) != 0
-                mainQuest.AHZHideUnvisitedLocationStatus = JSONUtil.GetPathIntValue(file, ".!AHZHideUnvisitedLocationStatus", mainQuest.AHZHideUnvisitedLocationStatus as Int) != 0
-                mainQuest.AHZLocationStatusExteriorOnly = JSONUtil.GetPathIntValue(file, ".!AHZLocationStatusExteriorOnly", mainQuest.AHZLocationStatusExteriorOnly as Int) != 0
                 mainQuest.SyncLocationStatusSettings()
             endif
     endEvent

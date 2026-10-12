@@ -16,8 +16,8 @@ namespace Events
         std::atomic<RE::GFxMovieView*> s_bookHiddenMovie{ nullptr };
         std::atomic_bool s_containerWasVisibleBeforeBook{ true };
         std::atomic_bool s_locationStatusEnabled{ true };
-        std::atomic_bool s_locationStatusDungeonsOnly{ false };
-        std::atomic_bool s_locationStatusHideUnvisited{ false };
+        std::atomic_bool s_locationStatusDungeonsOnly{ true };
+        std::atomic_bool s_locationStatusHideUnvisited{ true };
         std::atomic_bool s_locationStatusExteriorOnly{ true };
         constexpr auto   AHZ_MOVIE_LOADED_EVENT = "AHZmoreHUD_MovieLoaded"sv;
         constexpr auto   AHZ_BOTTOM_BAR_PATH = "_root.AHZWidgetContainer.AHZWidget.AHZBottomBar_mc"sv;

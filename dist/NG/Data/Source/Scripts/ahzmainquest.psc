@@ -40,14 +40,14 @@ GlobalVariable Property AHZShowEnemyMagickaStats Auto
 GlobalVariable Property AHZShowEnemyStaminaStats Auto
 GlobalVariable Property AHZShowEnemyHealthStats Auto
 GlobalVariable Property AHZIconSize Auto
+GlobalVariable Property AHZShowLocationStatus Auto
+GlobalVariable Property AHZLocationStatusDungeonsOnly Auto
+GlobalVariable Property AHZHideUnvisitedLocationStatus Auto
+GlobalVariable Property AHZLocationStatusExteriorOnly Auto
 
 ; Keeps track of the revision
 int Property iVersion Auto
 int Property iToggleOn Auto
-bool Property AHZShowLocationStatus Auto
-bool Property AHZLocationStatusDungeonsOnly Auto
-bool Property AHZHideUnvisitedLocationStatus Auto
-bool Property AHZLocationStatusExteriorOnly Auto
 int Property AHZLocationStatusSettingsVersion Auto
 
 ; Constants -------------------------------------------------------------------------------------------------
@@ -107,14 +107,11 @@ Function Maintenance()
 
 	; Other maintenance code that only needs to run once per save load
     if AHZLocationStatusSettingsVersion < 1
-        AHZShowLocationStatus = true
-        AHZLocationStatusDungeonsOnly = false
-        AHZHideUnvisitedLocationStatus = false
+        AHZShowLocationStatus.SetValueInt(1)
+        AHZLocationStatusDungeonsOnly.SetValueInt(1)
+        AHZHideUnvisitedLocationStatus.SetValueInt(1)
+        AHZLocationStatusExteriorOnly.SetValueInt(1)
         AHZLocationStatusSettingsVersion = 1
-    endif
-    if AHZLocationStatusSettingsVersion < 2
-        AHZLocationStatusExteriorOnly = true
-        AHZLocationStatusSettingsVersion = 2
     endif
     SyncLocationStatusSettings()
 
@@ -141,7 +138,7 @@ function RefreshWidgets()
 EndFunction
 
 Function SyncLocationStatusSettings()
-    AhzMoreHud.SetLocationStatusOptions(AHZShowLocationStatus, AHZLocationStatusDungeonsOnly, AHZHideUnvisitedLocationStatus, AHZLocationStatusExteriorOnly)
+    AhzMoreHud.SetLocationStatusOptions(AHZShowLocationStatus.GetValueInt() != 0, AHZLocationStatusDungeonsOnly.GetValueInt() != 0, AHZHideUnvisitedLocationStatus.GetValueInt() != 0, AHZLocationStatusExteriorOnly.GetValueInt() != 0)
 EndFunction
 
 function UpdateSettings(bool disable)
@@ -246,7 +243,7 @@ function UpdateSettings(bool disable)
     endif
 
     if disable
-        AhzMoreHud.SetLocationStatusOptions(false, AHZLocationStatusDungeonsOnly, AHZHideUnvisitedLocationStatus, AHZLocationStatusExteriorOnly)
+        AhzMoreHud.SetLocationStatusOptions(false, AHZLocationStatusDungeonsOnly.GetValueInt() != 0, AHZHideUnvisitedLocationStatus.GetValueInt() != 0, AHZLocationStatusExteriorOnly.GetValueInt() != 0)
     else
         SyncLocationStatusSettings()
     endif
