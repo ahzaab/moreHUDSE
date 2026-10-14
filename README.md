@@ -164,6 +164,8 @@ To republish all FLA files through the pinned `flc` package before creating the 
 
 `AHZHudInfo.swf` is intentionally installed in both `Data\Interface` and `Data\Interface\exported` for compatibility with vanilla UI and SkyUI. The package builder validates both copies before creating the BSA.
 
+`BuildRelease.ps1` also checks both main HUD movies against the verified 5.4.5.0 SHA-256 so backend-only releases cannot reuse an experimental cached SWF. For a deliberate main-movie update, inspect the published output and pass its verified hash with `-ExpectedMainMovieSha256`.
+
 Release archives are written beneath `release\AE`:
 
 * `<version>\AHZmoreHUD<version>.7z` contains the legacy ESP.

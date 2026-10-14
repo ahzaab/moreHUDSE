@@ -39,6 +39,8 @@ class CAHZWeaponInfo
 public:
     CAHZWeaponInfo() = default;
     ~CAHZWeaponInfo() = default;
+private:
+    friend class CAHZTarget;
     static AHZWeaponData GetLeftHandWeapon(void);
     static AHZWeaponData GetRightHandWeapon(void);
     static AHZWeaponData GetEquippedAmmo(void);

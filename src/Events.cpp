@@ -132,7 +132,13 @@ namespace Events
             // publisher: it resolves the current handle into an owning NiPointer, re-enters the
             // SKSE crosshair hook, and queues fresh rollover HUDData. The adjacent ID 40622 is
             // the flag-only helper; using it here would not rebuild the rollover.
-            player->UpdateCrosshairs();
+            using Refresh = decltype(&RE::PlayerCharacter::UpdateCrosshairs);
+            static REL::Relocation<Refresh> refresh{ RELOCATION_ID(39535, 40621) };
+            if (!refresh.address()) {
+                logger::warn("Cannot refresh the rollover: UpdateCrosshairs relocation is unavailable"sv);
+                return false;
+            }
+            refresh(player);
             return true;
         }
 
@@ -276,7 +282,7 @@ namespace Events
 
             // Use only the pointer-free snapshot built synchronously by the authorized
             // crosshair hook. Never resolve or consume HUDData::crosshairRef here.
-            const auto& target = CAHZTarget::Singleton().GetTarget();
+            const auto target = CAHZTarget::Singleton().GetTarget();
             if (!target.hasInteriorCellDestination) {
                 return;
             }
@@ -293,47 +299,11 @@ namespace Events
                 return;
             }
 
-            const char* translationKey = "$mHUD_LocationStatusUnvisited";
-            const char* fallbackLabel = "Unvisited";
-            if (target.interiorCellCleared) {
-                translationKey = "$mHUD_LocationStatusCleared";
-                fallbackLabel = "Cleared";
-            } else if (target.interiorCellVisited) {
-                if (target.interiorCellIsDungeon && target.interiorCellIsClearable) {
-                    translationKey = "$mHUD_LocationStatusVisitedNotCleared";
-                    fallbackLabel = "Visited (Not Cleared)";
-                } else {
-                    translationKey = "$mHUD_LocationStatusVisited";
-                    fallbackLabel = "Visited";
-                }
-            }
-
-            std::string localizedLabel{ fallbackLabel };
-            SKSE::Translation::Translate(translationKey, localizedLabel);
-
-            const auto interfaceStrings = RE::InterfaceStrings::GetSingleton();
-            if (!interfaceStrings) {
-                logger::warn("Cannot add the location status: InterfaceStrings is unavailable"sv);
+            if (target.locationStatusText.empty()) {
                 return;
             }
-
-            const RE::BSFixedString* diamondMarker = nullptr;
-            if (REL::Module::IsVR()) {
-                diamondMarker = std::addressof(interfaceStrings->GetVRRuntimeData().diamondMarker);
-            } else if (REL::Module::IsAE()) {
-                diamondMarker = std::addressof(interfaceStrings->GetAERuntimeData().diamondMarker);
-            } else {
-                diamondMarker = std::addressof(interfaceStrings->GetRuntimeData().diamondMarker);
-            }
-
-            if (!diamondMarker || diamondMarker->empty()) {
-                logger::warn("Cannot add the location status: Skyrim's diamond marker is unavailable"sv);
-                return;
-            }
-
             std::string decoratedText{ a_data.text.c_str() };
-            // Match TESObjectCONT::GetActivateText: newline, InterfaceStrings::diamondMarker, label.
-            decoratedText.append("\n").append(diamondMarker->c_str()).append(localizedLabel);
+            decoratedText.append(target.locationStatusText);
             a_data.text = decoratedText.c_str();
         }
         class HUDMenuHook
@@ -433,6 +403,11 @@ namespace Events
     bool IsAHZMovieLoaded() noexcept
     {
         return s_ahzMovieLoaded.load(std::memory_order_acquire);
+    }
+
+    bool IsBookRolloverSuppressed() noexcept
+    {
+        return IsBookSuppressionActive();
     }
 
     void SetLocationStatusOptions(bool a_enabled, bool a_dungeonsOnly, bool a_hideUnvisited, bool a_exteriorOnly) noexcept

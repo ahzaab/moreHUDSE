@@ -1,6 +1,12 @@
 ﻿#include "pch.h"
 #include "AHZTarget.h"
 #include "AHZFormLookup.h"
+#include "AHZPlayerInfo.h"
+#include "AHZPapyrusMoreHud.h"
+#include "AHZArmorInfo.h"
+#include "AHZWeaponInfo.h"
+#include "CompletionistAPI.h"
+#include "ActorValueList.h"
 #include "Offsets-VR.h"
 #include "Offsets-SE.h"
 #include "Offsets-AE.h"
@@ -9,20 +15,15 @@ namespace
 {
     std::string GetSoulLevelName(uint8_t soulLevel)
     {
-        static std::map<uint8_t, std::string> s_soulMap;
-        if (s_soulMap.empty())  //Cache it,  No need to hit the game setting every time
-        {
-            auto settings = RE::GameSettingCollection::GetSingleton();
-            s_soulMap[1] = std::string(settings->GetSetting("sSoulLevelNamePetty")->GetString());
-            s_soulMap[2] = std::string(settings->GetSetting("sSoulLevelNameLesser")->GetString());
-            s_soulMap[3] = std::string(settings->GetSetting("sSoulLevelNameCommon")->GetString());
-            s_soulMap[4] = std::string(settings->GetSetting("sSoulLevelNameGreater")->GetString());
-            s_soulMap[5] = std::string(settings->GetSetting("sSoulLevelNameGrand")->GetString());
+        constexpr const char* names[] = { "", "sSoulLevelNamePetty", "sSoulLevelNameLesser",
+            "sSoulLevelNameCommon", "sSoulLevelNameGreater", "sSoulLevelNameGrand" };
+        const auto settings = RE::GameSettingCollection::GetSingleton();
+        if (!settings || soulLevel == 0 || soulLevel >= std::size(names)) {
+            return {};
         }
-        if (s_soulMap.find(soulLevel) == s_soulMap.end()) {
-            return std::string{};
-        }
-        return s_soulMap[soulLevel];
+        const auto setting = settings->GetSetting(names[soulLevel]);
+        const auto name = setting ? setting->GetString() : nullptr;
+        return name ? std::string{name} : std::string{};
     }
 
     float mRound(float r)
@@ -55,6 +56,10 @@ void CAHZTarget::GetMagicItemDescription_Native(void*, RE::TESForm* a1, RE::BSSt
         moreHUDSE::SE::Offsets::GetMagicItemDescription.id(),
         moreHUDSE::AE::Offsets::GetMagicItemDescription.id(),
         moreHUDSE::VR::Offsets::GetMagicItemDescription.offset() } };
+    if (!a1 || !a2 || !func.address()) {
+        logger::warn("Cannot derive magic description: form, output or relocation is unavailable"sv);
+        return;
+    }
     func(nullptr, a1, a2);
 }
 
@@ -65,7 +70,7 @@ char* CAHZTarget::ProcessSurvivalMode_Native([[maybe_unused]]RE::BSString* a2)
         using func_t = decltype(&CAHZTarget::ProcessSurvivalMode_Native);
         REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::ProcessSurvivalMode.id(),
             moreHUDSE::AE::Offsets::ProcessSurvivalMode.id() } };
-            return func(a2);
+            return a2 && func.address() ? func(a2) : nullptr;
         }
         return nullptr;
     }
@@ -76,7 +81,7 @@ float CAHZTarget::GetArmorWarmthRating_Native([[maybe_unused]]RE::TESForm* a1)
     if (REL::Module::IsSE() || REL::Module::IsAE()) {
         using func_t = decltype(&CAHZTarget::GetArmorWarmthRating_Native);
         REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::GetArmorWarmthRating.id(), moreHUDSE::AE::Offsets::GetArmorWarmthRating.id() } };
-        return func(a1);
+        return a1 && func.address() ? func(a1) : 0.0F;
     }
     return 0;
 }
@@ -87,7 +92,7 @@ float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[m
     if (REL::Module::IsSE() || REL::Module::IsAE()) {
         using func_t = decltype(&CAHZTarget::GetActorWarmthRating_Native);
         REL::Relocation<func_t> func{ REL::RelocationID{ moreHUDSE::SE::Offsets::GetActorWarmthRating.id(), moreHUDSE::AE::Offsets::GetActorWarmthRating.id() } };
-        return func(a1, s2);
+        return a1 && func.address() ? func(a1, s2) : 0.0F;
     }
     return 0;
 }
@@ -95,6 +100,20 @@ float CAHZTarget::GetActorWarmthRating_Native([[maybe_unused]]RE::Actor* a1, [[m
 //------------------End Native Wrappers -------------------------
 
 void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
+{
+    // Hook calls may be concurrent or reentrant. Keep all borrowed engine state local
+    // to this invocation, while Skyrim/SKSE owns the reference passed by the hook.
+    const auto sequence = m_nextSnapshotSequence.fetch_add(1, std::memory_order_relaxed) + 1;
+    CAHZTarget derivation;
+    derivation.DeriveTarget(pTargetRef);
+    std::lock_guard lock(m_snapshotMutex);
+    if (sequence > m_publishedSnapshotSequence) {
+        m_publishedTarget = std::move(derivation.m_target);
+        m_publishedSnapshotSequence = sequence;
+    }
+}
+
+void CAHZTarget::DeriveTarget(RE::TESObjectREFR* pTargetRef)
 {
     // These pointers are a transient calculation context for this crosshair callback only.
     // Never leave them available for a later Scaleform, menu, task, or timer callback: the
@@ -123,6 +142,63 @@ void CAHZTarget::SetTarget(RE::TESObjectREFR* pTargetRef)
     }
 
     UpdateTarget();
+    CaptureRolloverData();
+}
+
+void CAHZTarget::CaptureRolloverData()
+{
+    if (m_target.hasInteriorCellDestination) {
+        const char* key = "$mHUD_LocationStatusUnvisited";
+        std::string label = "Unvisited";
+        if (m_target.interiorCellCleared) {
+            key = "$mHUD_LocationStatusCleared";
+            label = "Cleared";
+        } else if (m_target.interiorCellVisited) {
+            if (m_target.interiorCellIsDungeon && m_target.interiorCellIsClearable) {
+                key = "$mHUD_LocationStatusVisitedNotCleared";
+                label = "Visited (Not Cleared)";
+            } else {
+                key = "$mHUD_LocationStatusVisited";
+                label = "Visited";
+            }
+        }
+        SKSE::Translation::Translate(key, label);
+        if (const auto strings = RE::InterfaceStrings::GetSingleton()) {
+            const auto& marker = REL::Module::IsVR() ? strings->GetVRRuntimeData().diamondMarker :
+                REL::Module::IsAE() ? strings->GetAERuntimeData().diamondMarker :
+                                     strings->GetRuntimeData().diamondMarker;
+            if (!marker.empty()) {
+                m_target.locationStatusText = std::string{"\n"} + marker.c_str() + label;
+            }
+        }
+    }
+
+    if (!m_target.isValid) {
+        return;
+    }
+
+    m_target.inventoryCount = CAHZPlayerInfo::GetItemAmount(m_target.formId);
+    m_target.formListIcons = PapyrusMoreHud::GetFormIcons(m_target.formId);
+    m_target.armorWeightClass = GetArmorWeightClass(m_target);
+    m_target.bookSkillText = GetBookSkillText(m_target);
+    if (CompletionistAPI::IsReady()) {
+        if (const auto object = GetForm() ? GetForm()->As<RE::TESBoundObject>() : nullptr) {
+            m_target.completionistIcon = CompletionistAPI::GetIconInfo(object).GetRequiredIconName();
+        }
+    }
+
+    if (m_target.formType == RE::FormType::Weapon || m_target.formType == RE::FormType::Ammo) {
+        m_target.equippedRatingOrDamage = GetTotalActualWeaponDamage();
+        m_target.ratingOrDamageDifference = GetWeaponDamageDiff(m_target);
+    } else if (m_target.formType == RE::FormType::Armor) {
+        m_target.equippedRatingOrDamage = GetTotalActualArmorRating();
+        m_target.ratingOrDamageDifference = GetArmorRatingDiff(m_target);
+        m_target.isSurvivalMode = IsSurvivalMode();
+        if (m_target.isSurvivalMode) {
+            m_target.totalWarmthRating = GetTotalWarmthRating();
+            m_target.warmthDifference = GetWarmthRatingDiff(m_target);
+        }
+    }
 }
 
 void CAHZTarget::UpdateTarget()
@@ -200,7 +276,8 @@ void CAHZTarget::UpdateInteriorCellDestination()
         return;
     }
 
-    const auto linkedDoor = GetReference()->extraList.GetTeleportLinkedDoor().get();
+    const auto linkedDoorOwner = GetReference()->extraList.GetTeleportLinkedDoor();
+    const auto linkedDoor = linkedDoorOwner.get();
     if (!linkedDoor) {
         return;
     }
@@ -1090,4 +1167,586 @@ bool CAHZTarget::MagicDisallowEnchanting(const RE::BGSKeywordForm* pKeywords)
         }
     }
     return false;
+}
+
+auto CAHZTarget::GetActualDamage(AHZWeaponData* weaponData) -> float
+{
+    if (!weaponData || !weaponData->equipData.boundObject)
+        return 0.0f;
+
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (pPC) {
+        RE::InventoryEntryData objDesc(weaponData->equipData.boundObject, 0);
+        if (weaponData->equipData.pExtraData) {
+            objDesc.AddExtraList(weaponData->equipData.pExtraData);
+        }
+
+        float fDamage = pPC->GetDamage(&objDesc);
+
+        return mRound(fDamage);
+    }
+
+    return 0.0;
+}
+
+auto CAHZTarget::GetArmorWarmthRating(AHZArmorData* armorData) -> float
+{
+    if (!armorData || !armorData->armor || !armorData->equipData.boundObject)
+        return 0.0f;
+
+    auto fRating = CAHZTarget::GetArmorWarmthRating_Native(armorData->equipData.boundObject);
+
+    return mRound(fRating);
+}
+
+auto CAHZTarget::GetActualArmorRating(AHZArmorData* armorData) -> float
+{
+    if (!armorData || !armorData->armor || !armorData->equipData.boundObject)
+        return 0.0f;
+
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (pPC) {
+        RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
+        if (armorData->equipData.pExtraData) {
+            objDesc.AddExtraList(armorData->equipData.pExtraData);
+        }
+
+        auto fRating = pPC->GetArmorValue(&objDesc);
+
+        return mRound(fRating);
+    }
+
+    return 0.0;
+}
+
+// TODO: Port Note, I should probably decode the function that already does this
+auto CAHZTarget::GetTotalActualArmorRating() -> float
+{
+    float totalRating = 0.0f;
+    // Keep a list of items to make sure they are not added more than once
+    // Some items take up more than one slot
+    std::list<const RE::TESForm*> clist;
+    for (uint64_t slot = 1; slot <= static_cast<uint64_t>(0x2000); slot <<= 1) {
+        AHZArmorData armorData = CAHZArmorInfo::GetArmorFromSlotMask(static_cast<RE::BIPED_MODEL::BipedObjectSlot>(slot));
+        if (armorData.equipData.boundObject) {
+            if (std::find(clist.begin(), clist.end(), armorData.equipData.boundObject) == clist.end()) {
+                clist.push_front(armorData.equipData.boundObject);
+                if (armorData.armor) {
+                    totalRating += GetActualArmorRating(&armorData);
+                }
+            }
+        }
+    }
+    return mRound(totalRating);
+}
+
+auto CAHZTarget::GetTotalWarmthRating() -> float
+{
+    auto pPC = RE::PlayerCharacter::GetSingleton();
+
+    if (!pPC) {
+        return 0.0;
+    }
+
+    return CAHZTarget::GetActorWarmthRating_Native(pPC, 0.0);
+}
+
+auto CAHZTarget::mRound(float r) -> float
+{
+    return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
+}
+
+float CAHZTarget::GetArmorRatingDiff(const TargetData& target)
+{
+    float oldArmorRating = 0.0f;
+    float newArmorRating = 0.0f;
+    float oldTotalArmorRating = 0.0f;
+    float newTotalArmorRating = 0.0f;
+    float deltaRating = 0.0f;
+    if (!target.isValid)
+        return 0.0f;
+
+    if (target.formType != RE::FormType::Armor)
+        return 0.0f;
+
+    newArmorRating = target.armorRating;
+
+    // Get the armor rating from the armor that shares the same slot
+    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(
+        target.armorslotMask);
+    if (sameSlotData.armor) {
+        oldArmorRating = GetActualArmorRating(&sameSlotData);
+    }
+
+    // Get the total
+    oldTotalArmorRating = GetTotalActualArmorRating();
+
+    newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
+
+    deltaRating = newTotalArmorRating - oldTotalArmorRating;
+
+    return deltaRating;
+}
+
+auto CAHZTarget::GetWarmthRatingDiff(const TargetData& target) -> float
+{
+    float oldArmorRating = 0.0f;
+    float newArmorRating = 0.0f;
+    float oldTotalArmorRating = 0.0f;
+    float newTotalArmorRating = 0.0f;
+    float deltaRating = 0.0f;
+    if (!target.isValid)
+        return 0.0f;
+
+    if (target.formType != RE::FormType::Armor)
+        return 0.0;
+
+    newArmorRating = target.armorWarmthRating;
+
+    // Get the armor rating from the armor that shares the same slot
+    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(target.armorslotMask);
+    if (sameSlotData.armor) {
+        oldArmorRating = GetArmorWarmthRating(&sameSlotData);
+    }
+
+    // Get the total
+    oldTotalArmorRating = GetTotalWarmthRating();
+
+    newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
+
+    deltaRating = newTotalArmorRating - oldTotalArmorRating;
+
+    return deltaRating;
+}
+
+auto CAHZTarget::GetTotalActualWeaponDamage() -> float
+{
+    float         totalWeaponDamage = 0.0;
+    bool          is2Handed = false;
+    AHZWeaponData leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
+    AHZWeaponData rightWeapon = CAHZWeaponInfo::GetRightHandWeapon();
+    AHZWeaponData equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
+
+    if (leftWeapon.weapon) {
+        if (IsBow(leftWeapon.weapon)) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&leftWeapon);
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
+                totalWeaponDamage += GetActualDamage(&equippedAmmo);
+            }
+        } else if (IsCrossBow(leftWeapon.weapon)) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&leftWeapon);
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
+                totalWeaponDamage += GetActualDamage(&equippedAmmo);
+            }
+        } else if (IsTwoHanded(leftWeapon.weapon)) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&leftWeapon);
+        } else if (IsOneHanded(leftWeapon.weapon)) {
+            totalWeaponDamage = GetActualDamage(&leftWeapon);
+        }
+    }
+
+    if (rightWeapon.weapon) {
+        if (IsBow(rightWeapon.weapon) && !is2Handed) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&rightWeapon);
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
+                totalWeaponDamage += GetActualDamage(&equippedAmmo);
+            }
+        } else if (IsCrossBow(rightWeapon.weapon) && !is2Handed) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&rightWeapon);
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
+                totalWeaponDamage += GetActualDamage(&equippedAmmo);
+            }
+        } else if (IsTwoHanded(rightWeapon.weapon) && !is2Handed) {
+            is2Handed = true;
+            totalWeaponDamage = GetActualDamage(&rightWeapon);
+        } else if (IsOneHanded(rightWeapon.weapon)) {
+            // Add the damage from the second weapon
+            totalWeaponDamage += GetActualDamage(&rightWeapon);
+        }
+    }
+    return totalWeaponDamage;
+}
+
+auto CAHZTarget::isBolt(RE::TESAmmo* thisAmmo) -> bool
+{
+    return thisAmmo && thisAmmo->IsBolt();
+}
+
+auto CAHZTarget::GetWeaponDamageDiff(const TargetData& target) -> float
+{
+    float         totalWeaponDamage = 0.0f;
+    float         targetArrowDamage = 0.0f;
+    AHZWeaponData leftWeapon;
+    AHZWeaponData rightWeapon;
+    AHZWeaponData equippedAmmo;
+
+    if (!target.isValid)
+        return 0.0f;
+
+    equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
+
+    //DumpClass(targetWeapon.ammo, 256);
+
+    // Must be a weapon or armor targeted
+    if (target.formType == RE::FormType::Weapon) {
+        if (equippedAmmo.ammo) {
+            // TODO Try to get the equipped arrow with extra data
+            if (IsBow(target) && !isBolt(equippedAmmo.ammo)) {
+                targetArrowDamage = GetActualDamage(&equippedAmmo);
+            } else if (IsCrossBow(target) && isBolt(equippedAmmo.ammo)) {
+                targetArrowDamage = GetActualDamage(&equippedAmmo);
+            }
+        }
+    } else if (target.formType == RE::FormType::Ammo) {
+        //targetAmmo = targetWeapon.ammo;
+    } else {
+        return 0.0f;
+    }
+
+    rightWeapon = CAHZWeaponInfo::GetRightHandWeapon();
+    leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
+
+    if (leftWeapon.weapon) {
+        if (IsBow(leftWeapon.weapon)) {
+            float tempDamage = GetActualDamage(&leftWeapon);
+            float tempArrowDamage = 0.0f;
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
+                tempArrowDamage = GetActualDamage(&equippedAmmo);
+                tempDamage += tempArrowDamage;
+            }
+
+            if (target.formType == RE::FormType::Weapon) {
+                return (target.damage + targetArrowDamage) - tempDamage;
+            } else if (target.formType == RE::FormType::Ammo && !target.isBoltAmmo) {
+                return ((tempDamage - tempArrowDamage) + target.damage) - tempDamage;
+            } else {
+                return 0.0f;
+            }
+        } else if (IsCrossBow(leftWeapon.weapon)) {
+            auto  tempDamage = GetActualDamage(&leftWeapon);
+            float tempArrowDamage = 0.0f;
+
+            // Add the arrow damage
+            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
+                tempArrowDamage = GetActualDamage(&equippedAmmo);
+                tempDamage += tempArrowDamage;
+            }
+
+            if (target.formType == RE::FormType::Weapon) {
+                return (target.damage + targetArrowDamage) - tempDamage;
+            } else if (target.formType == RE::FormType::Ammo && target.isBoltAmmo) {
+                return ((tempDamage - tempArrowDamage) + target.damage - tempDamage);
+            } else {
+                return 0.0f;
+            }
+        } else if (IsTwoHanded(leftWeapon.weapon) && target.formType == RE::FormType::Weapon) {
+            return (target.damage + targetArrowDamage) - GetActualDamage(&leftWeapon);
+        } else if (IsOneHanded(leftWeapon.weapon)) {
+            totalWeaponDamage = GetActualDamage(&leftWeapon);
+        }
+    }
+
+    if (rightWeapon.weapon) {
+        if (IsOneHanded(rightWeapon.weapon)) {
+            // Add the damage from the second weapon
+            totalWeaponDamage += GetActualDamage(&rightWeapon);
+        }
+    }
+
+    // If we made it this far either no weapon is equipped or single handed weapons are equipped
+    if (target.formType == RE::FormType::Weapon) {
+        return (target.damage + targetArrowDamage) - totalWeaponDamage;
+    }
+
+    return 0.0f;
+}
+
+auto CAHZTarget::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
+{
+    if (!thisWeapon) { return false; }
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon->IsTwoHandedSword() ||
+            thisWeapon->IsTwoHandedAxe() ||
+            thisWeapon->IsBow() ||
+            thisWeapon->IsCrossbow() ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_2HS) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_2HA) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
+}
+
+auto CAHZTarget::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
+{
+    if (!thisWeapon) { return false; }
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon->IsOneHandedSword() ||
+            thisWeapon->IsOneHandedDagger() ||
+            thisWeapon->IsOneHandedAxe() ||
+            thisWeapon->IsOneHandedMace() ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HS) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HD) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HA) ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HM));
+}
+
+bool CAHZTarget::IsBow(RE::TESObjectWEAP* thisWeapon)
+{
+    if (!thisWeapon) { return false; }
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon->IsBow() ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
+}
+
+bool CAHZTarget::IsBow(const TargetData& thisWeapon)
+{
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon.weaponType == RE::WEAPON_TYPE::kBow ||
+            thisWeapon.weaponType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
+}
+
+bool CAHZTarget::IsCrossBow(RE::TESObjectWEAP* thisWeapon)
+{
+    if (!thisWeapon) { return false; }
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon->IsCrossbow() ||
+            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
+}
+
+bool CAHZTarget::IsCrossBow(const TargetData& thisWeapon)
+{
+    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
+    // for now we better stick with the values that were used prior to port
+    enum  // type
+    {
+        kType_HandToHandMelee = 0,
+        kType_OneHandSword,
+        kType_OneHandDagger,
+        kType_OneHandAxe,
+        kType_OneHandMace,
+        kType_TwoHandSword,
+        kType_TwoHandAxe,
+        kType_Bow,
+        kType_Staff,
+        kType_CrossBow,
+        kType_H2H,
+        kType_1HS,
+        kType_1HD,
+        kType_1HA,
+        kType_1HM,
+        kType_2HS,
+        kType_2HA,
+        kType_Bow2,
+        kType_Staff2,
+        kType_CBow
+    };
+
+    return (thisWeapon.weaponType == RE::WEAPON_TYPE::kCrossbow ||
+            thisWeapon.weaponType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
+}
+
+auto CAHZTarget::GetArmorWeightClass(const TargetData& target) -> std::string
+{
+    std::string desc;
+
+    if (!target.isValid)
+        return desc;
+
+    if (target.formType != RE::FormType::Armor)
+        return desc;
+
+    auto avList = SKSE::ActorValueList::GetSingleton();
+    if (!avList) { return desc; }
+    if (target.armorType == RE::BIPED_MODEL::ArmorType::kLightArmor || target.armorType == RE::BIPED_MODEL::ArmorType::kHeavyArmor) {
+        // Utilize the AV value to get the localized name for "Light Armor"
+        if (target.armorType == RE::BIPED_MODEL::ArmorType::kLightArmor) {
+            auto info = avList->GetActorValue(RE::ActorValue::kLightArmor);
+            if (info) {
+                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
+                desc.append(info->GetFullName());
+                desc.append("<\\FONT>");
+            }
+        }
+
+        // Utilize the AV value to get the localized name for "Heavy Armor"
+        else if (target.armorType == RE::BIPED_MODEL::ArmorType::kHeavyArmor) {
+            auto info = avList->GetActorValue(RE::ActorValue::kHeavyArmor);
+            if (info) {
+                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
+                desc.append(info->GetFullName());
+                desc.append("<\\FONT>");
+            }
+        }
+    }
+    return desc;
+};
+
+auto CAHZTarget::GetBookSkillText(const TargetData& target) -> std::string
+{
+    std::string desc;
+
+    if (!target.isValid)
+        return desc;
+
+    if (target.formType == RE::FormType::Book) {
+        // If this is a spell book, then it is not a skill book
+        if (target.isSpellTome)
+            return desc;
+
+        if (target.bookSkill != RE::ActorValue::kNone) {
+            auto avList = SKSE::ActorValueList::GetSingleton();
+    if (!avList) { return desc; }
+            if (avList) {
+                auto info = avList->GetActorValue(target.bookSkill);
+                if (info) {
+                    desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">       )");
+                    desc.append(info->GetFullName());
+                    desc.append("<\\FONT>");
+                }
+            }
+        }
+    }
+    return desc;
 }

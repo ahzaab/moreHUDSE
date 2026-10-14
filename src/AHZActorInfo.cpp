@@ -9,20 +9,20 @@
 auto CAHZActorInfo::IsSentient(RE::Actor* actor) -> uint32_t
 {
     using func_t = decltype(&CAHZActorInfo::IsSentient);
-    REL::Relocation<func_t> func{ REL::VariantID{ 
-        moreHUDSE::SE::Offsets::IsSentient.id(), 
+    REL::Relocation<func_t> func{ REL::VariantID{
+        moreHUDSE::SE::Offsets::IsSentient.id(),
         moreHUDSE::AE::Offsets::IsSentient.id(),
         moreHUDSE::VR::Offsets::IsSentient.offset() } };
-    return func(actor);
+    return actor && func.address() ? func(actor) : 0;
 }
 
 // 1403D91A0 1.6.318
 auto CAHZActorInfo::GetSoulType(uint16_t actorLevel, uint8_t isActorSentient) -> uint32_t
 {
     using func_t = decltype(&CAHZActorInfo::GetSoulType);
-    REL::Relocation<func_t> func{ REL::VariantID{ 
-        moreHUDSE::SE::Offsets::GetSoulType.id(), 
+    REL::Relocation<func_t> func{ REL::VariantID{
+        moreHUDSE::SE::Offsets::GetSoulType.id(),
         moreHUDSE::AE::Offsets::GetSoulType.id(),
         moreHUDSE::VR::Offsets::GetSoulType.offset() } };
-    return func(actorLevel, isActorSentient);
+    return func.address() ? func(actorLevel, isActorSentient) : 0;
 }

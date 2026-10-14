@@ -1,4 +1,9 @@
 #pragma once
+#include <mutex>
+#include <atomic>
+
+class AHZWeaponData;
+class AHZArmorData;
 
 namespace Events
 {
@@ -30,7 +35,7 @@ struct TargetData
     bool                             interiorCellIsClearable{};
     bool                             interiorCellIsExteriorEntrance{};
     RE::FormType                     formType{ RE::FormType::None };
-    RE::FormID                       formId;
+    RE::FormID                       formId{};
     std::string                      effectsDescription{};
     std::string                      description{};
     float                            damage{};
@@ -45,8 +50,21 @@ struct TargetData
     RE::WEAPON_TYPE                  weaponType{};
     EnchantmentType                  enchantmentType{};
     bool                             isSpellTome{};
-    RE::ActorValue                   bookSkill{};
+    RE::ActorValue                   bookSkill{ RE::ActorValue::kNone };
     bool                             isBoltAmmo{};
+
+    // Owning, pointer-free values captured synchronously in the crosshair hook.
+    uint32_t inventoryCount{};
+    float equippedRatingOrDamage{};
+    float ratingOrDamageDifference{};
+    bool isSurvivalMode{};
+    float totalWarmthRating{};
+    float warmthDifference{};
+    std::string armorWeightClass{};
+    std::string bookSkillText{};
+    std::string completionistIcon{};
+    std::vector<std::string> formListIcons{};
+    std::string locationStatusText{};
 
     void Dump() const
     {
@@ -82,34 +100,9 @@ struct TargetData
 private:
     void Reset()
     {
-        isValid = false;
-        canCarry = false;
-        bookRead = false;
-        hasInteriorCellDestination = false;
-        interiorCellVisited = false;
-        interiorCellCleared = false;
-        interiorCellIsDungeon = false;
-        interiorCellIsClearable = false;
-        interiorCellIsExteriorEntrance = false;
-        formType = RE::FormType::None;
-        formId = static_cast<RE::FormID>(0);
-        effectsDescription.clear();
-        description.clear();
-        bookSkill = RE::ActorValue::kNone;
-        isSpellTome = false;
-        damage = 0;
-        armorType = RE::BIPED_MODEL::ArmorType::kLightArmor;  //0
-        armorRating = 0;
-        armorWarmthRating = 0;
-        armorslotMask = RE::BIPED_MODEL::BipedObjectSlot::kNone;
-        knownIngredientEffects.clear();
-        name.clear();
-        displayName.clear();
-        weight = 0;
-        weaponType = RE::WEAPON_TYPE::kHandToHandMelee;  //0
-        enchantmentType = EnchantmentType::None;
-        isBoltAmmo = false;
+        *this = TargetData{};
     }
+
 };
 
 class CAHZTarget
@@ -121,11 +114,16 @@ public:
         return theInstance;
     };
 
-    const TargetData& GetTarget() const noexcept { return m_target; };
+    [[nodiscard]] TargetData GetTarget() const
+    {
+        std::lock_guard lock(m_snapshotMutex);
+        return m_publishedTarget;
+    }
 
     CAHZTarget(CAHZTarget& other) = delete;
     void operator=(const CAHZTarget&) = delete;
 
+private:
     static bool IsSurvivalMode();
 
     //------------------Native Wrappers -----------------------------
@@ -142,11 +140,36 @@ private:
     CAHZTarget() = default;
 
     void SetTarget(RE::TESObjectREFR* pTargetRef);
+    void DeriveTarget(RE::TESObjectREFR* pTargetRef);
     void UpdateTarget();
+    void CaptureRolloverData();
+    static std::string GetArmorWeightClass(const TargetData& target);
+    static std::string GetBookSkillText(const TargetData& target);
+    static float GetActualDamage(AHZWeaponData* weaponData);
+    static float GetActualArmorRating(AHZArmorData* armorData);
+    static float GetArmorWarmthRating(AHZArmorData* armorData);
+    static float GetTotalWarmthRating();
+    static float GetTotalActualArmorRating();
+    static float GetArmorRatingDiff(const TargetData& target);
+    static float GetWarmthRatingDiff(const TargetData& target);
+    static float GetWeaponDamageDiff(const TargetData& target);
+    static float GetTotalActualWeaponDamage();
+    static bool IsTwoHanded(RE::TESObjectWEAP* weapon);
+    static bool IsOneHanded(RE::TESObjectWEAP* weapon);
+    static bool IsBow(RE::TESObjectWEAP* weapon);
+    static bool IsBow(const TargetData& target);
+    static bool IsCrossBow(RE::TESObjectWEAP* weapon);
+    static bool IsCrossBow(const TargetData& target);
+    static bool isBolt(RE::TESAmmo* ammo);
+    static float mRound(float value);
 
     RE::TESObjectREFR* m_pObjectRef = nullptr;
     RE::TESForm*       m_pForm = nullptr;
     TargetData         m_target{};
+    TargetData         m_publishedTarget{};
+    mutable std::mutex m_snapshotMutex;
+    std::atomic_uint64_t m_nextSnapshotSequence{ 0 };
+    uint64_t m_publishedSnapshotSequence{};
 
     RE::IngredientItem* m_IngredientItem = nullptr;
     RE::AlchemyItem*    m_AlchemyItem = nullptr;

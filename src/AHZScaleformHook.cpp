@@ -12,61 +12,46 @@
 
 // 1408B2880 1.6.318
 // constexpr REL::ID   EnemyUpdateHookBase(static_cast<std::uint64_t>(51671));
-uintptr_t           EnemyUpdateHook = (moreHUDSE::AE::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
+uintptr_t           EnemyUpdateHook = 0;
 SafeEnemyDataHolder AHZEnemyHealthUpdateHook::ahzEnemyData;
-RE::RefHandle       AHZEnemyHealthUpdateHook::lastRefHandle = 0;
-RE::BGSKeyword*     AHZEnemyHealthUpdateHook::NoSoulTrapRace = nullptr;
+std::atomic<RE::RefHandle> AHZEnemyHealthUpdateHook::lastRefHandle{ 0 };
 
 bool AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut)
 {
-    auto               result = RE::LookupReferenceByHandle(refHandle, refrOut);
-    RE::TESObjectREFR* reference = refrOut.get();
-    if (!reference) {
-        return result;
-    }
-
-    bool     targetChanged = (lastRefHandle != refHandle);
-    uint16_t npcLevel = 0;
-    uint32_t isSentient = 0;
-    float    maxHealth = 0;
-    float    health = 0;
-    float    maxMagicka = 0;
-    float    magicka = 0;
-    float    maxStamina = 0;
-    float    stamina = 0;
-    lastRefHandle = refHandle;
-
-    if (reference) {
-        if (reference->GetBaseObject()->formType == RE::FormType::NPC ||
-            reference->GetBaseObject()->formType == RE::FormType::ActorCharacter) {
-            auto pNPC = reference->As<RE::Actor>();
-            if (pNPC) {
-                npcLevel = pNPC->GetLevel();
-                if (NoSoulTrapRace == nullptr) {
-                    NoSoulTrapRace = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("NoSoulTrap");
-                }
-                auto noSoulTrapRace = NoSoulTrapRace && pNPC->GetRace()->HasKeyword(NoSoulTrapRace);
-                isSentient = CAHZActorInfo::IsSentient(pNPC) != 0 || noSoulTrapRace;
-                maxHealth = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth);
-                health = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
-                maxMagicka = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kMagicka);
-                magicka = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka);
-                maxStamina = pNPC->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kStamina);
-                stamina = pNPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
+    const auto result = RE::LookupReferenceByHandle(refHandle, refrOut);
+    CAHZActorData data;
+    data.targetChanged = lastRefHandle.exchange(refHandle, std::memory_order_relaxed) != refHandle;
+    // The enemy hook has its own owning lookup result. Never replay the crosshair target here.
+    const auto actor = result && refrOut ? refrOut->As<RE::Actor>() : nullptr;
+    const auto player = RE::PlayerCharacter::GetSingleton();
+    if (actor && player) {
+        const auto values = actor->AsActorValueOwner();
+        const auto race = actor->GetRace();
+        const auto noSoulTrapKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("NoSoulTrap");
+        data.Level = actor->GetLevel();
+        data.playerLevel = player->GetLevel();
+        data.IsSentient = CAHZActorInfo::IsSentient(actor) != 0 ||
+            (race && noSoulTrapKeyword && race->HasKeyword(noSoulTrapKeyword));
+        if (values) {
+            data.maxHealth = values->GetPermanentActorValue(RE::ActorValue::kHealth);
+            data.health = values->GetActorValue(RE::ActorValue::kHealth);
+            data.maxMagicka = values->GetPermanentActorValue(RE::ActorValue::kMagicka);
+            data.magicka = values->GetActorValue(RE::ActorValue::kMagicka);
+            data.maxStamina = values->GetPermanentActorValue(RE::ActorValue::kStamina);
+            data.stamina = values->GetActorValue(RE::ActorValue::kStamina);
+        }
+        if (data.Level && !data.IsSentient) {
+            const auto soul = CAHZActorInfo::GetSoulType(data.Level, 0);
+            constexpr const char* soulSettings[] = { "", "sSoulLevelNamePetty", "sSoulLevelNameLesser",
+                "sSoulLevelNameCommon", "sSoulLevelNameGreater", "sSoulLevelNameGrand" };
+            const auto settings = RE::GameSettingCollection::GetSingleton();
+            if (settings && soul > 0 && soul < std::size(soulSettings)) {
+                const auto setting = settings->GetSetting(soulSettings[soul]);
+                const auto name = setting ? setting->GetString() : nullptr;
+                if (name) { data.soulName = name; }
             }
         }
     }
-
-    CAHZActorData data;
-    data.targetChanged = targetChanged;
-    data.Level = npcLevel;
-    data.IsSentient = isSentient;
-    data.maxHealth = maxHealth;
-    data.health = health;
-    data.maxMagicka = maxMagicka;
-    data.magicka = magicka;
-    data.maxStamina = maxStamina;
-    data.stamina = stamina;
     ahzEnemyData.SetData(data);
     return result;
 }
@@ -75,14 +60,14 @@ void AHZEnemyHealthUpdateHook::Install()
 {
     auto& trampoline = SKSE::GetTrampoline();
 
-    if (REL::Module::IsSE()) 
-    {
-        EnemyUpdateHook = (moreHUDSE::SE::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
+    const auto base = REL::Module::IsSE() ? moreHUDSE::SE::Offsets::EnemyUpdateHookBase.address() :
+        REL::Module::IsVR() ? moreHUDSE::VR::Offsets::EnemyUpdateHookBase.address() :
+                             moreHUDSE::AE::Offsets::EnemyUpdateHookBase.address();
+    if (!base) {
+        logger::error("Cannot install enemy lookup hook: relocation is unavailable"sv);
+        return;
     }
-    else if (REL::Module::IsVR())
-    {
-        EnemyUpdateHook = (moreHUDSE::VR::Offsets::EnemyUpdateHookBase.address() + HOOK_OFFSET);
-    }
+    EnemyUpdateHook = base + HOOK_OFFSET;
     trampoline.write_call<5>(
         SKSE::stl::unrestricted_cast<std::uintptr_t>(EnemyUpdateHook),
         SKSE::stl::unrestricted_cast<std::uintptr_t>(AHZEnemyHealthUpdateHook::Hook_EnemyHealthLookupReferenceByHandle_impl));

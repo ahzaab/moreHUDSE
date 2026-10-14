@@ -3,8 +3,11 @@
 #include "AHZScaleform.h"
 #include "SKSE/API.h"
 #include "AHZPapyrusMoreHud.h"
+#include "AHZPlayerInfo.h"
 #include "HashUtil.h"
 #include "CompletionistAPI.h"
+#include "AHZUtilities.h"
+#include "Events.h"
 
 namespace Scaleform
 {
@@ -65,6 +68,10 @@ namespace Scaleform
 
     void InitializeCompletionistAPI()
     {
+        if (CAHZUtilities::GetConfigOption("Compatibility", "EnableCompletionistAPI") == "0") {
+            logger::info("Completionist API disabled by Compatibility.EnableCompletionistAPI"sv);
+            return;
+        }
         if (CompletionistAPI::Init()) {
             logger::info("Initialized Completionist API V20"sv);
         } else {
@@ -72,7 +79,7 @@ namespace Scaleform
         }
     }
 
-    
+
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
     {
     public:
@@ -86,6 +93,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal || !a_params.args || a_params.argCount < 1 ||
+                !a_params.args[0].IsObject()) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessTargetObject(ref, a_params);
         }
@@ -96,6 +107,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal || !a_params.args || a_params.argCount < 1 ||
+                !a_params.args[0].IsObject()) {
+                return;
+            }
             CAHZScaleform::ProcessPlayerData(a_params);
         }
     };
@@ -105,6 +120,9 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal) {
+                return;
+            }
             a_params.retVal->SetBoolean(CAHZPlayerInfo::GetIsInCombat());
         }
     };
@@ -114,6 +132,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal || !a_params.args || a_params.argCount < 2 ||
+                !a_params.args[0].IsObject() || !a_params.args[1].IsBool()) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessTargetEffects(ref, a_params);
         }
@@ -129,7 +151,10 @@ namespace Scaleform
                 return;
             }
 
-            if (!IsRolloverTextVisible(a_params.movie)) {
+            // The read state is a snapshot fact, not a transient GFx alpha/visibility
+            // measurement. The existing movie controls display alongside its rollover
+            // text; keep only the explicit BookMenu/BookMode suppression here.
+            if (Events::IsBookRolloverSuppressed()) {
                 a_params.retVal->SetBoolean(false);
                 return;
             }
@@ -150,6 +175,9 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessArmorClass(ref, a_params);
         }
@@ -160,6 +188,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.args || a_params.argCount < 2 || !a_params.retVal ||
+                !a_params.args[0].IsString() || !a_params.args[1].IsString()) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessValueToWeight(ref, a_params);
         }
@@ -170,6 +202,9 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             a_params.retVal->SetNumber(ref.armorWarmthRating);
         }
@@ -180,6 +215,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.args || a_params.argCount < 1 ||
+                !a_params.args[0].IsString()) {
+                return;
+            }
             assert(a_params.argCount);
             logger::trace("{}", a_params.args[0].GetString());
         }
@@ -190,6 +229,9 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessBookSkill(ref, a_params);
         }
@@ -200,6 +242,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal || !a_params.args || a_params.argCount < 1 ||
+                !a_params.args[0].IsObject()) {
+                return;
+            }
             const auto ref = CAHZTarget::Singleton().GetTarget();
             CAHZScaleform::ProcessValidTarget(ref, a_params);
         }
@@ -210,6 +256,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.retVal || !a_params.args || a_params.argCount < 1 ||
+                !a_params.args[0].IsObject()) {
+                return;
+            }
             CAHZScaleform::ProcessEnemyInformation(a_params);
         }
     };
@@ -245,6 +295,10 @@ namespace Scaleform
     public:
         void Call(Params& a_params) override
         {
+            if (!a_params.movie || !a_params.args || a_params.argCount < 1 || !a_params.retVal ||
+                !a_params.args[0].IsString()) {
+                return;
+            }
             assert(a_params.args);
             assert(a_params.argCount);
             if (a_params.args[0].GetType() == RE::GFxValue::ValueType::kString) {
@@ -257,7 +311,8 @@ namespace Scaleform
 
                 auto keyName = string(a_params.args[0].GetString());
 
-                a_params.retVal->SetBoolean(PapyrusMoreHud::HasForm(keyName, ref.formId));
+                a_params.retVal->SetBoolean(std::find(ref.formListIcons.begin(), ref.formListIcons.end(), keyName) !=
+                    ref.formListIcons.end());
                 return;
             }
 
@@ -289,15 +344,10 @@ namespace Scaleform
                 return;
             }
 
-            auto formId = ref.formId;
-            auto customIcons = PapyrusMoreHud::GetFormIcons(formId);
+            auto customIcons = ref.formListIcons;
 
-            if (auto* object = RE::TESForm::LookupByID<RE::TESBoundObject>(formId)) {
-                const auto iconInfo = CompletionistAPI::GetIconInfo(object);
-                const auto* completionistIcon = iconInfo.GetRequiredIconName();
-                if (completionistIcon[0] != '\0') {
-                    customIcons.emplace_back(completionistIcon);
-                }
+            if (!ref.completionistIcon.empty()) {
+                customIcons.emplace_back(ref.completionistIcon.c_str());
             }
 
             if (!customIcons.empty()) {
@@ -305,7 +355,7 @@ namespace Scaleform
                 a_params.retVal->SetArraySize(static_cast<uint32_t>(customIcons.size()));
                 auto idx = 0;
                 for (auto& ci : customIcons) {
-                    entry.SetString(ci);
+                    a_params.movie->CreateString(&entry, ci.c_str());
                     a_params.retVal->SetElement(idx++, entry);
                 }
             } else {
@@ -395,6 +445,9 @@ namespace Scaleform
 
     auto RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root) -> bool
     {
+        if (!a_view || !a_root || !a_root->IsObject()) {
+            return false;
+        }
         RegisterFunction<SKSEScaleform_InstallHooks>(a_root, a_view, "InstallHooks");
         RegisterFunction<SKSEScaleform_GetTargetObjectData>(a_root, a_view, "GetTargetObjectData");
         RegisterFunction<SKSEScaleform_GetPlayerData>(a_root, a_view, "GetPlayerData");
@@ -419,6 +472,10 @@ namespace Scaleform
     void RegisterCallbacks()
     {
         auto scaleform = SKSE::GetScaleformInterface();
+        if (!scaleform) {
+            logger::error("Cannot register callbacks: SKSE Scaleform interface is unavailable"sv);
+            return;
+        }
         scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDPlugin");
         logger::info("Registered all scaleform callbacks");
     }

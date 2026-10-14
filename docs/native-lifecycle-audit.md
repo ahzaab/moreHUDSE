@@ -95,6 +95,72 @@ The remaining post-5.4.0 AS2 symbols are additive local variables or helper meth
 
 ## In-game validation matrix
 
+The 5.4.6.0 package accidentally reused a generated main HUD movie containing
+`ProcessInteriorCellStatus()` and a call to the unregistered `GetInteriorCellStatus()`
+native function. FFDec comparison against the 5.4.5.0 BSA shows that extra function and
+call as the only widget-script difference. The local distribution inputs have been
+restored byte-for-byte to the 5.4.5.0 main movie (SHA-256
+`CBD14647151F932D78305797F289CF31DD9BBEA77B7DDB1F52E28B700F0F7649`).
+The release wrapper now requires that verified hash unless an intentional movie update
+supplies a different expected hash. Authored AS2/FLA files are unchanged by this repair.
+
+Separately, the 5.4.6.0 native read-book query gated its snapshot fact on transient HUD
+visibility/alpha. The repair returns the snapshot's book-read fact independently of
+those measurements, retaining explicit BookMenu/BookMode suppression. The unchanged
+movie controls whether to draw the eye beside its rollover text. A callback regression
+test verifies that alternating movie visibility cannot change the fact returned to AS2.
+These findings identify a broken movie/native contract and a timing-sensitive gate;
+the reported in-game flashing still requires confirmation with the repaired package.
+
+The post-5.4.6.0 snapshot refactor moves target inventory counts,
+equipment comparisons, localized armor/book skill names, Completionist icon lookup,
+registered form-list membership queries, and location-status translation/marker reads
+into `CAHZTarget::SetTarget` derivation.
+Only the SE/AE crosshair event and VR wand lookup hook can enter that private path.
+The published `TargetData` contains owning strings and scalar values, is copied under
+a mutex, and contains no engine pointers or handles. Target helper pointers are cleared
+before the hook returns. Scaleform callbacks read snapshots and perform GFx operations;
+HUD message decoration appends the previously captured location-status string.
+Each invocation uses its own transient derivation context, so concurrent or reentrant
+hooks cannot share borrowed target pointers or partially constructed snapshot strings.
+Publication uses invocation sequence numbers so an older derivation finishing later
+cannot replace a newer published snapshot.
+Hook placement alone does not establish arbitrary engine-member lifetime or thread
+safety; the snapshot boundary prevents those pointers from escaping to later callbacks.
+
+Enemy meters retain their distinct owning enemy-reference lookup hook, including player
+level and localized soul-name capture. Their UI callback also consumes a pointer-free
+snapshot. This preserves continuous meter updates when the crosshair points elsewhere.
+UI movie operations, hook installation and validated vanilla crosshair refresh requests
+remain in their required UI/lifecycle contexts; they do not derive target game data.
+The restriction applies to game objects directly related to the current target.
+Papyrus APIs may still access their own object arguments, and independent player-only
+queries (gold, carry weight and combat state) retain their live reads. GFx/UI objects,
+startup form-table initialization and SKSE setup interfaces remain available in their
+normal contexts. Vanilla refresh resolves the live
+target through the normal engine publisher and re-enters the authorized crosshair hook;
+moreHUD never looks up or replays a saved target from the refresh request.
+
+Run `python Scripts/VerifySnapshotBoundary.py` alongside the native build to check the
+producer/consumer boundary. In-game testing must also confirm updates while keeping the
+crosshair still after inventory/equipment changes, and enemy meter updates while looking
+away. A successful build and boundary audit do not demonstrate that the reported
+Scaleform object corruption has been eliminated.
+
+For a controlled Completionist API comparison, set the following in
+`Data/SKSE/Plugins/AHZmoreHUDPlugin.ini` and restart Skyrim:
+
+```ini
+[Compatibility]
+EnableCompletionistAPI=0
+```
+
+This disables moreHUD's API initialization and icon queries while leaving Completionist
+installed. The default remains enabled when the setting is absent; set it to `1` and
+restart to re-enable. Check `moreHUDSE.log` for the disabled diagnostic. This comparison
+isolates the new API-driven integration and its icons; it does not disable Completionist's
+own hooks or prove which component caused the original corruption.
+
 1. Start a game and confirm the first HUD creates one moreHUD container.
 2. Load two or more saves during the same process and confirm the retained container is reused without another injection.
 3. Force a genuine HUD movie recreation and confirm one new injection and one readiness event.

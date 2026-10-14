@@ -1,8 +1,7 @@
 #pragma once
 #include "AHZActorInfo.h"
 #include <mutex>
-
-static std::recursive_mutex mtx;
+#include <atomic>
 
 class SafeEnemyDataHolder
 {
@@ -12,7 +11,7 @@ public:
 
     CAHZActorData GetData()
     {
-        std::lock_guard<std::recursive_mutex> lock(mtx);
+        std::lock_guard<std::recursive_mutex> lock(m_mutex);
         CAHZActorData                         data;
         data = m_data;
         return data;
@@ -20,12 +19,13 @@ public:
 
     void SetData(const CAHZActorData& data)
     {
-        std::lock_guard<std::recursive_mutex> lock(mtx);
+        std::lock_guard<std::recursive_mutex> lock(m_mutex);
         m_data = data;
     };
 
 private:
     CAHZActorData m_data;
+    std::recursive_mutex m_mutex;
 };
 
 class AHZEnemyHealthUpdateHook
@@ -36,7 +36,6 @@ public:
 
 private:
     static SafeEnemyDataHolder ahzEnemyData;
-    static RE::RefHandle       lastRefHandle;
+    static std::atomic<RE::RefHandle> lastRefHandle;
     static bool                Hook_EnemyHealthLookupReferenceByHandle_impl(const RE::RefHandle& refHandle, RE::NiPointer<RE::TESObjectREFR>& refrOut);
-    static RE::BGSKeyword*     NoSoulTrapRace;
 };

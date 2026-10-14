@@ -18,25 +18,12 @@ class CAHZFormLookup
 {
 public:
     static CAHZFormLookup& Instance();
-    RE::TESForm*           GetTESForm(RE::TESObjectREFR* targetReference);
     void                   AddScriptVarable(std::string vmVariableName);
     void                   AddFormID(std::string baseFormModName, uint32_t baseFormID, std::string targetFormModName, uint32_t targetFormID);
 
-    inline static RE::TESObjectREFR* GetReference(RE::TESForm* theForm)
-    {
-        if (!theForm) {
-            return nullptr;
-        }
-
-        if (theForm->GetFormType() == RE::FormType::Reference) {
-            auto reference = theForm->As<RE::TESObjectREFR>();
-            return reference;
-        } else {
-            return nullptr;
-        }
-    }
-
 private:
+    friend class CAHZTarget;
+    RE::TESForm* GetTESForm(RE::TESObjectREFR* targetReference);
     // Force singleton
     CAHZFormLookup() = default;
     ~CAHZFormLookup() = default;

@@ -56,6 +56,7 @@ void CAHZFormLookup::AddScriptVarable(std::string vmVariableName)
 void CAHZFormLookup::AddFormID(std::string baseFormModName, uint32_t baseFormID, std::string targetFormModName, uint32_t targetFormID)
 {
     auto dataHandler = RE::TESDataHandler::GetSingleton();
+    if (!dataHandler) { return; }
 
     auto isBaseLight = false;
 

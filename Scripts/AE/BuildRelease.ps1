@@ -9,6 +9,9 @@ param(
     [string]$NpmExe,
     [string]$ArchiveExe,
     [string]$SevenZipExe,
+    # The unchanged production main movie from 5.4.5.0. Override only for a deliberate, verified movie update.
+    [ValidatePattern('^[A-Fa-f0-9]{64}$')]
+    [string]$ExpectedMainMovieSha256 = 'CBD14647151F932D78305797F289CF31DD9BBEA77B7DDB1F52E28B700F0F7649',
     [switch]$BuildScaleform,
     [switch]$SkipBuild,
     [switch]$SkipPapyrus
@@ -205,6 +208,16 @@ else
         }
 
         Write-Host "Hydrated unchanged main SWF from $BaseBsaPath"
+    }
+}
+
+foreach ($relativeMovie in @('Interface\AHZHudInfo.swf', 'Interface\exported\AHZHudInfo.swf'))
+{
+    $moviePath = Join-Path $sourceDataDirectory $relativeMovie
+    $movieHash = (Get-FileHash -LiteralPath $moviePath -Algorithm SHA256).Hash
+    if ($movieHash -ne $ExpectedMainMovieSha256)
+    {
+        throw "Unexpected main HUD movie: $moviePath (SHA256 $movieHash). Restore the verified production movie; override -ExpectedMainMovieSha256 only for a deliberate movie update."
     }
 }
 

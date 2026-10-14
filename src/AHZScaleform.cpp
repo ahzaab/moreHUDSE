@@ -6,553 +6,10 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
-#include "AHZArmorInfo.h"
-#include "AHZWeaponInfo.h"
 #include "AHZScaleform.h"
+#include "AHZPlayerInfo.h"
 #include "AHZScaleformHook.h"
-#include "AHZFormLookup.h"
 #include "AHZUtilities.h"
-#include "ActorValueList.h"
-
-static std::map<uint8_t, string> m_soulMap;
-
-auto CAHZScaleform::GetSoulLevelName(uint8_t soulLevel) -> string
-{
-    if (m_soulMap.empty())  //Cache it,  No need to hit the game setting every time
-    {
-        auto settings = RE::GameSettingCollection::GetSingleton();
-        m_soulMap[1] = string(settings->GetSetting("sSoulLevelNamePetty")->GetString());
-        m_soulMap[2] = string(settings->GetSetting("sSoulLevelNameLesser")->GetString());
-        m_soulMap[3] = string(settings->GetSetting("sSoulLevelNameCommon")->GetString());
-        m_soulMap[4] = string(settings->GetSetting("sSoulLevelNameGreater")->GetString());
-        m_soulMap[5] = string(settings->GetSetting("sSoulLevelNameGrand")->GetString());
-    }
-    if (m_soulMap.find(soulLevel) == m_soulMap.end()) {
-        return string("");
-    }
-    return m_soulMap[soulLevel];
-}
-
-auto CAHZScaleform::GetActualDamage(AHZWeaponData* weaponData) -> float
-{
-    if (!weaponData)
-        return 0.0f;
-
-    auto pPC = RE::PlayerCharacter::GetSingleton();
-
-    if (pPC) {
-        RE::InventoryEntryData objDesc(weaponData->equipData.boundObject, 0);
-        if (weaponData->equipData.pExtraData) {
-            objDesc.AddExtraList(weaponData->equipData.pExtraData);
-        }
-
-        float fDamage = pPC->GetDamage(&objDesc);
-
-        return mRound(fDamage);
-    }
-
-    return 0.0;
-}
-
-auto CAHZScaleform::GetArmorWarmthRating(AHZArmorData* armorData) -> float
-{
-    if (!armorData->armor)
-        return 0.0f;
-
-    auto fRating = CAHZTarget::GetArmorWarmthRating_Native(armorData->equipData.boundObject);
-
-    return mRound(fRating);
-}
-
-auto CAHZScaleform::GetPlayerWarmthRating() -> float
-{
-    return 0.0f;
-}
-
-auto CAHZScaleform::GetActualArmorRating(AHZArmorData* armorData) -> float
-{
-    if (!armorData->armor)
-        return 0.0f;
-
-    auto pPC = RE::PlayerCharacter::GetSingleton();
-
-    if (pPC) {
-        RE::InventoryEntryData objDesc(armorData->equipData.boundObject, 0);
-        if (armorData->equipData.pExtraData) {
-            objDesc.AddExtraList(armorData->equipData.pExtraData);
-        }
-
-        auto fRating = pPC->GetArmorValue(&objDesc);
-
-        return mRound(fRating);
-    }
-
-    return 0.0;
-}
-
-// TODO: Port Note, I should probably decode the function that already does this
-auto CAHZScaleform::GetTotalActualArmorRating() -> float
-{
-    float totalRating = 0.0f;
-    // Keep a list of items to make sure they are not added more than once
-    // Some items take up more than one slot
-    std::list<const RE::TESForm*> clist;
-    for (uint64_t slot = 1; slot <= static_cast<uint64_t>(0x2000); slot <<= 1) {
-        AHZArmorData armorData = CAHZArmorInfo::GetArmorFromSlotMask(static_cast<RE::BIPED_MODEL::BipedObjectSlot>(slot));
-        if (armorData.equipData.boundObject) {
-            if (find(clist.begin(), clist.end(), armorData.equipData.boundObject) == clist.end()) {
-                clist.push_front(armorData.equipData.boundObject);
-                if (armorData.armor) {
-                    totalRating += GetActualArmorRating(&armorData);
-                }
-            }
-        }
-    }
-    return mRound(totalRating);
-}
-
-auto CAHZScaleform::GetTotalWarmthRating() -> float
-{
-    auto pPC = RE::PlayerCharacter::GetSingleton();
-
-    if (!pPC) {
-        return 0.0;
-    }
-
-    return CAHZTarget::GetActorWarmthRating_Native(pPC, 0.0);
-}
-
-auto CAHZScaleform::mRound(float r) -> float
-{
-    return (r >= 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
-}
-
-float CAHZScaleform::GetArmorRatingDiff(const TargetData& target)
-{
-    float oldArmorRating = 0.0f;
-    float newArmorRating = 0.0f;
-    float oldTotalArmorRating = 0.0f;
-    float newTotalArmorRating = 0.0f;
-    float deltaRating = 0.0f;
-    if (!target.isValid)
-        return 0.0f;
-
-    if (target.formType != RE::FormType::Armor)
-        return 0.0f;
-
-    newArmorRating = target.armorRating;
-
-    // Get the armor rating from the armor that shares the same slot
-    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(
-        target.armorslotMask);
-    if (sameSlotData.armor) {
-        oldArmorRating = GetActualArmorRating(&sameSlotData);
-    }
-
-    // Get the total
-    oldTotalArmorRating = GetTotalActualArmorRating();
-
-    newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
-
-    deltaRating = newTotalArmorRating - oldTotalArmorRating;
-
-    return deltaRating;
-}
-
-auto CAHZScaleform::GetWarmthRatingDiff(const TargetData& target) -> float
-{
-    float oldArmorRating = 0.0f;
-    float newArmorRating = 0.0f;
-    float oldTotalArmorRating = 0.0f;
-    float newTotalArmorRating = 0.0f;
-    float deltaRating = 0.0f;
-    if (!target.isValid)
-        return 0.0f;
-
-    if (target.formType != RE::FormType::Armor)
-        return 0.0;
-
-    newArmorRating = target.armorWarmthRating;
-
-    // Get the armor rating from the armor that shares the same slot
-    AHZArmorData sameSlotData = CAHZArmorInfo::GetArmorFromSlotMask(target.armorslotMask);
-    if (sameSlotData.armor) {
-        oldArmorRating = GetArmorWarmthRating(&sameSlotData);
-    }
-
-    // Get the total
-    oldTotalArmorRating = GetTotalWarmthRating();
-
-    newTotalArmorRating = (oldTotalArmorRating - oldArmorRating) + newArmorRating;
-
-    deltaRating = newTotalArmorRating - oldTotalArmorRating;
-
-    return deltaRating;
-}
-
-auto CAHZScaleform::GetTotalActualWeaponDamage() -> float
-{
-    float         totalWeaponDamage = 0.0;
-    bool          is2Handed = false;
-    AHZWeaponData leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
-    AHZWeaponData rightWeapon = CAHZWeaponInfo::GetRightHandWeapon();
-    AHZWeaponData equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
-
-    if (leftWeapon.weapon) {
-        if (IsBow(leftWeapon.weapon)) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&leftWeapon);
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
-                totalWeaponDamage += GetActualDamage(&equippedAmmo);
-            }
-        } else if (IsCrossBow(leftWeapon.weapon)) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&leftWeapon);
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
-                totalWeaponDamage += GetActualDamage(&equippedAmmo);
-            }
-        } else if (IsTwoHanded(leftWeapon.weapon)) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&leftWeapon);
-        } else if (IsOneHanded(leftWeapon.weapon)) {
-            totalWeaponDamage = GetActualDamage(&leftWeapon);
-        }
-    }
-
-    if (rightWeapon.weapon) {
-        if (IsBow(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&rightWeapon);
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
-                totalWeaponDamage += GetActualDamage(&equippedAmmo);
-            }
-        } else if (IsCrossBow(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&rightWeapon);
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
-                totalWeaponDamage += GetActualDamage(&equippedAmmo);
-            }
-        } else if (IsTwoHanded(rightWeapon.weapon) && !is2Handed) {
-            is2Handed = true;
-            totalWeaponDamage = GetActualDamage(&rightWeapon);
-        } else if (IsOneHanded(rightWeapon.weapon)) {
-            // Add the damage from the second weapon
-            totalWeaponDamage += GetActualDamage(&rightWeapon);
-        }
-    }
-    return totalWeaponDamage;
-}
-
-auto CAHZScaleform::isBolt(RE::TESAmmo* thisAmmo) -> bool
-{
-    return (thisAmmo->IsBolt());
-}
-
-auto CAHZScaleform::GetWeaponDamageDiff(const TargetData& target) -> float
-{
-    float         totalWeaponDamage = 0.0f;
-    float         targetArrowDamage = 0.0f;
-    AHZWeaponData leftWeapon;
-    AHZWeaponData rightWeapon;
-    AHZWeaponData equippedAmmo;
-
-    if (!target.isValid)
-        return 0.0f;
-
-    equippedAmmo = CAHZWeaponInfo::GetEquippedAmmo();
-
-    //DumpClass(targetWeapon.ammo, 256);
-
-    // Must be a weapon or armor targeted
-    if (target.formType == RE::FormType::Weapon) {
-        if (equippedAmmo.ammo) {
-            // TODO Try to get the equipped arrow with extra data
-            if (IsBow(target) && !isBolt(equippedAmmo.ammo)) {
-                targetArrowDamage = GetActualDamage(&equippedAmmo);
-            } else if (IsCrossBow(target) && isBolt(equippedAmmo.ammo)) {
-                targetArrowDamage = GetActualDamage(&equippedAmmo);
-            }
-        }
-    } else if (target.formType == RE::FormType::Ammo) {
-        //targetAmmo = targetWeapon.ammo;
-    } else {
-        return 0.0f;
-    }
-
-    rightWeapon = CAHZWeaponInfo::GetRightHandWeapon();
-    leftWeapon = CAHZWeaponInfo::GetLeftHandWeapon();
-
-    if (leftWeapon.weapon) {
-        if (IsBow(leftWeapon.weapon)) {
-            float tempDamage = GetActualDamage(&leftWeapon);
-            float tempArrowDamage = 0.0f;
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && !isBolt(equippedAmmo.ammo)) {
-                tempArrowDamage = GetActualDamage(&equippedAmmo);
-                tempDamage += tempArrowDamage;
-            }
-
-            if (target.formType == RE::FormType::Weapon) {
-                return (target.damage + targetArrowDamage) - tempDamage;
-            } else if (target.formType == RE::FormType::Ammo && !target.isBoltAmmo) {
-                return ((tempDamage - tempArrowDamage) + target.damage) - tempDamage;
-            } else {
-                return 0.0f;
-            }
-        } else if (IsCrossBow(leftWeapon.weapon)) {
-            auto  tempDamage = GetActualDamage(&leftWeapon);
-            float tempArrowDamage = 0.0f;
-
-            // Add the arrow damage
-            if (equippedAmmo.ammo && isBolt(equippedAmmo.ammo)) {
-                tempArrowDamage = GetActualDamage(&equippedAmmo);
-                tempDamage += tempArrowDamage;
-            }
-
-            if (target.formType == RE::FormType::Weapon) {
-                return (target.damage + targetArrowDamage) - tempDamage;
-            } else if (target.formType == RE::FormType::Ammo && target.isBoltAmmo) {
-                return ((tempDamage - tempArrowDamage) + target.damage - tempDamage);
-            } else {
-                return 0.0f;
-            }
-        } else if (IsTwoHanded(leftWeapon.weapon) && target.formType == RE::FormType::Weapon) {
-            return (target.damage + targetArrowDamage) - GetActualDamage(&leftWeapon);
-        } else if (IsOneHanded(leftWeapon.weapon)) {
-            totalWeaponDamage = GetActualDamage(&leftWeapon);
-        }
-    }
-
-    if (rightWeapon.weapon) {
-        if (IsOneHanded(rightWeapon.weapon)) {
-            // Add the damage from the second weapon
-            totalWeaponDamage += GetActualDamage(&rightWeapon);
-        }
-    }
-
-    // If we made it this far either no weapon is equipped or single handed weapons are equipped
-    if (target.formType == RE::FormType::Weapon) {
-        return (target.damage + targetArrowDamage) - totalWeaponDamage;
-    }
-
-    return 0.0f;
-}
-
-auto CAHZScaleform::IsTwoHanded(RE::TESObjectWEAP* thisWeapon) -> bool
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon->IsTwoHandedSword() ||
-            thisWeapon->IsTwoHandedAxe() ||
-            thisWeapon->IsBow() ||
-            thisWeapon->IsCrossbow() ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_2HS) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_2HA) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
-}
-
-auto CAHZScaleform::IsOneHanded(RE::TESObjectWEAP* thisWeapon) -> bool
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon->IsOneHandedSword() ||
-            thisWeapon->IsOneHandedDagger() ||
-            thisWeapon->IsOneHandedAxe() ||
-            thisWeapon->IsOneHandedMace() ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HS) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HD) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HA) ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_1HM));
-}
-
-bool CAHZScaleform::IsBow(RE::TESObjectWEAP* thisWeapon)
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon->IsBow() ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
-}
-
-bool CAHZScaleform::IsBow(const TargetData& thisWeapon)
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon.weaponType == RE::WEAPON_TYPE::kBow ||
-            thisWeapon.weaponType == static_cast<RE::WEAPON_TYPE>(kType_Bow2));
-}
-
-bool CAHZScaleform::IsCrossBow(RE::TESObjectWEAP* thisWeapon)
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon->IsCrossbow() ||
-            thisWeapon->weaponData.animationType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
-}
-
-bool CAHZScaleform::IsCrossBow(const TargetData& thisWeapon)
-{
-    // TODO: Port Note, this is quite different, SKSE had more types defined.  So
-    // for now we better stick with the values that were used prior to port
-    enum  // type
-    {
-        kType_HandToHandMelee = 0,
-        kType_OneHandSword,
-        kType_OneHandDagger,
-        kType_OneHandAxe,
-        kType_OneHandMace,
-        kType_TwoHandSword,
-        kType_TwoHandAxe,
-        kType_Bow,
-        kType_Staff,
-        kType_CrossBow,
-        kType_H2H,
-        kType_1HS,
-        kType_1HD,
-        kType_1HA,
-        kType_1HM,
-        kType_2HS,
-        kType_2HA,
-        kType_Bow2,
-        kType_Staff2,
-        kType_CBow
-    };
-
-    return (thisWeapon.weaponType == RE::WEAPON_TYPE::kCrossbow ||
-            thisWeapon.weaponType == static_cast<RE::WEAPON_TYPE>(kType_CBow));
-}
-
-static uint32_t lasttargetRef;
 
 static auto DoubleCompare(double a, double b) -> bool
 {
@@ -582,22 +39,9 @@ static auto GetPct(double current, double max) -> double
 
 void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args)
 {
-    auto          pPC = RE::PlayerCharacter::GetSingleton();
-    CAHZActorData actorData;
-    actorData.Level = 0;
-    actorData.IsSentient = 0;
-    uint16_t playerLevel = 0;
-    uint32_t soulType = 0;
-
-    if (pPC) {
-        actorData = AHZEnemyHealthUpdateHook::GetCurrentEnemyData();
-        if (actorData.Level) {
-            playerLevel = pPC->GetLevel();
-            if (!actorData.IsSentient) {  // If sentient, then don't bother all sentients have grand soul gem levels
-                soulType = CAHZActorInfo::GetSoulType(actorData.Level, static_cast<uint8_t>(actorData.IsSentient));
-            }
-        }
-    }
+    const auto actorData = AHZEnemyHealthUpdateHook::GetCurrentEnemyData();
+    const auto playerLevel = actorData.playerLevel;
+    const auto& soulName = actorData.soulName;
 
     if (!REL::Module::IsVR()) {
         RE::GFxValue enemyObj;
@@ -607,8 +51,7 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
 
         RegisterNumber(&enemyObj, "level", actorData.Level);
         RegisterNumber(&playerObj, "level", playerLevel);
-        string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
-        if (soulType && soulName.length()) {
+        if (!soulName.empty()) {
             RegisterString(&enemyObj, "soul", soulName.c_str());
         }
         RegisterNumber(&enemyObj, "maxHealth", ceil(actorData.maxHealth));
@@ -632,11 +75,9 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
         RE::GFxValue legacyObj;
         args.movie->CreateObject(&legacyObj);
         if (actorData.Level) {
-            playerLevel = pPC->GetLevel();
             RegisterNumber(&legacyObj, "EnemyLevel", actorData.Level);
             RegisterNumber(&legacyObj, "PlayerLevel", playerLevel);
-            std::string soulName = GetSoulLevelName(static_cast<uint8_t>(soulType));
-            if (soulType && soulName.length()) {
+            if (!soulName.empty()) {
                 RegisterString(&legacyObj, "Soul", soulName.c_str());
             }
         }
@@ -645,41 +86,6 @@ void CAHZScaleform::ProcessEnemyInformation(RE::GFxFunctionHandler::Params& args
         }
     }
 }
-
-auto CAHZScaleform::GetArmorWeightClass(const TargetData& target) -> string
-{
-    string desc;
-
-    if (!target.isValid)
-        return desc;
-
-    if (target.formType != RE::FormType::Armor)
-        return desc;
-
-    auto avList = SKSE::ActorValueList::GetSingleton();
-    if (target.armorType == RE::BIPED_MODEL::ArmorType::kLightArmor || target.armorType == RE::BIPED_MODEL::ArmorType::kHeavyArmor) {
-        // Utilize the AV value to get the localized name for "Light Armor"
-        if (target.armorType == RE::BIPED_MODEL::ArmorType::kLightArmor) {
-            auto info = avList->GetActorValue(RE::ActorValue::kLightArmor);
-            if (info) {
-                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
-                desc.append(info->GetFullName());
-                desc.append("<\\FONT>");
-            }
-        }
-
-        // Utilize the AV value to get the localized name for "Heavy Armor"
-        else if (target.armorType == RE::BIPED_MODEL::ArmorType::kHeavyArmor) {
-            auto info = avList->GetActorValue(RE::ActorValue::kHeavyArmor);
-            if (info) {
-                desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">     )");
-                desc.append(info->GetFullName());
-                desc.append("<\\FONT>");
-            }
-        }
-    }
-    return desc;
-};
 
 auto CAHZScaleform::GetValueToWeight(const char* stringFromHUD, const char* vmTranslated) -> string
 {
@@ -751,33 +157,6 @@ auto CAHZScaleform::GetValueToWeight(const char* stringFromHUD, const char* vmTr
     return desc;
 };
 
-auto CAHZScaleform::GetBookSkill(const TargetData& target) -> string
-{
-    string desc;
-
-    if (!target.isValid)
-        return desc;
-
-    if (target.formType == RE::FormType::Book) {
-        // If this is a spell book, then it is not a skill book
-        if (target.isSpellTome)
-            return desc;
-
-        if (target.bookSkill != RE::ActorValue::kNone) {
-            auto avList = SKSE::ActorValueList::GetSingleton();
-            if (avList) {
-                auto info = avList->GetActorValue(target.bookSkill);
-                if (info) {
-                    desc.append(R"(<FONT FACE="$EverywhereMediumFont"SIZE="15"COLOR="#999999"KERNING="0">       )");
-                    desc.append(info->GetFullName());
-                    desc.append("<\\FONT>");
-                }
-            }
-        }
-    }
-    return desc;
-}
-
 void CAHZScaleform::ProcessTargetEffects(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
     string name;
@@ -836,55 +215,46 @@ void CAHZScaleform::ProcessTargetEffects(const TargetData& target, RE::GFxFuncti
 
 void CAHZScaleform::ProcessArmorClass(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string weightClass;
-
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
         SetResultString(args, "");
         return;
     }
 
-    weightClass.clear();
-    weightClass.append(GetArmorWeightClass(target).c_str());
-
-    SetResultString(args, weightClass.c_str());
+    SetResultString(args, target.armorWeightClass.c_str());
 };
 
 void CAHZScaleform::ProcessValueToWeight(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string valueToWeight;
-
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
         SetResultString(args, "");
         return;
     }
 
-    valueToWeight.clear();
-    valueToWeight.append(GetValueToWeight(args.args[0].GetString(), args.args[1].GetString()).c_str());
+    const auto valueToWeight = GetValueToWeight(args.args[0].GetString(), args.args[1].GetString());
 
     SetResultString(args, valueToWeight.c_str());
 };
 
 void CAHZScaleform::ProcessBookSkill(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    static string bookSkill;
-
     // If the target is not valid or it can't be picked up by the player
     if (!target.isValid) {
         SetResultString(args, "");
         return;
     }
 
-    bookSkill.clear();
-    bookSkill.append(GetBookSkill(target).c_str());
-
-    SetResultString(args, bookSkill.c_str());
+    SetResultString(args, target.bookSkillText.c_str());
 };
 
 void CAHZScaleform::SetResultString(RE::GFxFunctionHandler::Params& args, const char* str)
 {
-    args.retVal->SetString(str);
+    if (!args.movie || !args.retVal) {
+        return;
+    }
+    // Copy into the movie's string storage; never return a pointer into a temporary snapshot.
+    args.movie->CreateString(args.retVal, str ? str : "");
 };
 
 void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -899,13 +269,6 @@ void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string
 
 void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
-    float totalArmorOrWeapon = 0.0;
-    float difference = 0.0;
-    float totalWarmthRating = 0.0;
-    float warmthDifference = 0.0;
-    bool  isSurvivalMode = false;
-    float warmthRating = 0.0;
-
     if (!target.isValid) {
         args.args[0].DeleteMember("targetObj");
         return;
@@ -913,25 +276,12 @@ void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctio
 
     RE::GFxValue obj;
     args.movie->CreateObject(&obj);
-
-    //auto baseForm = pTargetReference->GetBaseObject();
-
-    if (target.formType == RE::FormType::Weapon ||
-        target.formType == RE::FormType::Ammo) {
-        // If ammo is NULL, it is OK
-        totalArmorOrWeapon = GetTotalActualWeaponDamage();
-        difference = GetWeaponDamageDiff(target);
-    } else if (target.formType == RE::FormType::Armor) {
-        totalArmorOrWeapon = GetTotalActualArmorRating();
-        difference = GetArmorRatingDiff(target);
-
-        if (CAHZTarget::IsSurvivalMode()) {
-            isSurvivalMode = true;
-            totalWarmthRating = GetTotalWarmthRating();
-            warmthDifference = GetWarmthRatingDiff(target);
-            warmthRating = target.armorWarmthRating;
-        }
-    }
+    const auto totalArmorOrWeapon = target.equippedRatingOrDamage;
+    const auto difference = target.ratingOrDamageDifference;
+    const auto totalWarmthRating = target.totalWarmthRating;
+    const auto warmthDifference = target.warmthDifference;
+    const auto isSurvivalMode = target.isSurvivalMode;
+    const auto warmthRating = isSurvivalMode ? target.armorWarmthRating : 0.0F;
 
     // Enter the data into the Scaleform function
     RegisterNumber(&obj, "ratingOrDamage", totalArmorOrWeapon);
@@ -949,38 +299,6 @@ void CAHZScaleform::ProcessTargetObject(const TargetData& target, RE::GFxFunctio
     RegisterNumber(&obj, "formType", static_cast<uint32_t>(target.formType));
     args.args[0].SetMember("targetObj", obj);
 };
-
-auto CAHZScaleform::GetIsNthEffectKnown(RE::IngredientItem* thisMagic, uint32_t index) -> bool
-{
-    bool isKnown = false;
-
-    enum  // type - these are flags
-    {
-        kType_NoEffect = 0,
-        kType_FirstEffect = 1 << 0,
-        kType_SecondEffect = 1 << 1,
-        kType_ThirdEffect = 1 << 2,
-        kType_FourthEffect = 1 << 3
-    };
-
-    switch (index) {
-    case 0:
-        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_FirstEffect) == kType_FirstEffect);
-        break;
-    case 1:
-        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_SecondEffect) == kType_SecondEffect);
-        break;
-    case 2:
-        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_ThirdEffect) == kType_ThirdEffect);
-        break;
-    case 3:
-        isKnown = ((thisMagic->gamedata.knownEffectFlags & kType_FourthEffect) == kType_FourthEffect);
-        break;
-    default:
-        break;
-    }
-    return isKnown;
-}
 
 void CAHZScaleform::BuildIngredientObject(const TargetData& target, RE::GFxFunctionHandler::Params& args)
 {
@@ -1024,7 +342,7 @@ void CAHZScaleform::BuildInventoryObject(const TargetData& target, RE::GFxFuncti
     }
 
     // Get the number of this in the inventory
-    itemCount = CAHZPlayerInfo::GetItemAmount(target.formId);
+    itemCount = target.inventoryCount;
 
     name = target.displayName;
 
@@ -1091,8 +409,13 @@ void CAHZScaleform::ProcessPlayerData(RE::GFxFunctionHandler::Params& args)
     args.movie->CreateObject(&obj);
     auto pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto encumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kInventoryWeight);
-        auto maxEncumbranceNumber = pPC->AsActorValueOwner()->GetActorValue(RE::ActorValue::kCarryWeight);
+        const auto values = pPC->AsActorValueOwner();
+        if (!values) {
+            logger::debug("Cannot read player data: actor value owner is unavailable"sv);
+            return;
+        }
+        auto encumbranceNumber = values->GetActorValue(RE::ActorValue::kInventoryWeight);
+        auto maxEncumbranceNumber = values->GetActorValue(RE::ActorValue::kCarryWeight);
 
         // Enter the data into the Scaleform function
         RegisterNumber(&obj, "encumbranceNumber", encumbranceNumber);

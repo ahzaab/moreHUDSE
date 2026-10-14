@@ -12,6 +12,8 @@ public:
     float    maxStamina;
     float    stamina;
     bool     targetChanged;
+    uint16_t playerLevel{};
+    std::string soulName{};
 
     CAHZActorData()
     {
@@ -37,6 +39,8 @@ public:
         IsSentient = data.IsSentient;
         Level = data.Level;
         targetChanged = data.targetChanged;
+        playerLevel = data.playerLevel;
+        soulName = data.soulName;
     };
 };
 
@@ -46,6 +50,8 @@ public:
     CAHZActorInfo() = default;
     ~CAHZActorInfo() = default;
 
+private:
+    friend class AHZEnemyHealthUpdateHook;
     static uint32_t IsSentient(RE::Actor* actor);
     static uint32_t GetSoulType(uint16_t actorLevel, uint8_t isActorSentient);
 };

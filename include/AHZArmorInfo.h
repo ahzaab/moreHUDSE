@@ -30,6 +30,8 @@ class CAHZArmorInfo
 public:
     CAHZArmorInfo() = default;
     ~CAHZArmorInfo() = default;
+private:
+    friend class CAHZTarget;
     static AHZArmorData GetArmorFromSlotMask(RE::BIPED_MODEL::BipedObjectSlot slotMask);
 
 private:

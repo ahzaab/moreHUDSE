@@ -4,7 +4,7 @@
 #include "Events.h"
 #include <mutex>
 
-using AhzIconItemCache = std::map<uint32_t, RE::BSFixedString>;
+using AhzIconItemCache = std::map<uint32_t, std::string>;
 using AhzIconFormListCache = std::map<std::string, RE::BGSListForm*>;
 static AhzIconItemCache     s_ahzRegisteredIcons;
 static AhzIconFormListCache s_ahzRegisteredIconFormLists;
@@ -55,10 +55,10 @@ void PapyrusMoreHud::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSF
     }
 }
 
-std::vector<std::string_view> PapyrusMoreHud::GetFormIcons(RE::FormID formId)
+std::vector<std::string> PapyrusMoreHud::GetFormIcons(RE::FormID formId)
 {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    std::vector<std::string_view>         results;
+    std::vector<std::string>              results;
     for (auto& kvp : s_ahzRegisteredIconFormLists) {
         auto list = s_ahzRegisteredIconFormLists[kvp.first];
 
@@ -91,26 +91,6 @@ auto PapyrusMoreHud::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctio
     return IsIconFormListRegistered_Internal(iconName.c_str());
 }
 
-auto PapyrusMoreHud::HasForm(std::string iconName, uint32_t formId) -> bool
-{
-    logger::trace("HasForm");
-    std::lock_guard<std::recursive_mutex> lock(mtx);
-    if (IsIconFormListRegistered_Internal(iconName)) {
-        auto formList = s_ahzRegisteredIconFormLists[iconName];
-
-        if (!formId)
-            return false;
-
-        auto formFromId = RE::TESForm::LookupByID(formId);
-
-        if (!formFromId)
-            return false;
-
-        return formList->HasForm(formFromId);
-    }
-    return false;
-}
-
 auto PapyrusMoreHud::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag* base, uint32_t itemID) -> bool
 {
     logger::trace("IsIconItemRegistered");
@@ -130,7 +110,7 @@ void PapyrusMoreHud::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, R
     logger::trace("AddIconItem");
     std::lock_guard<std::recursive_mutex> lock(mtx);
     if (!IsIconItemRegistered(base, itemID)) {
-        s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName));
+        s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName.c_str()));
     }
 }
 

@@ -17,7 +17,7 @@ public:
             if (pEntryData->extraLists) {
                 for (auto it = pEntryData->extraLists->begin(); it != pEntryData->extraLists->end(); ++it) {
                     auto extraList = *it;
-                    if (extraList->HasType(RE::ExtraDataType::kWorn)) {
+                    if (extraList && extraList->HasType(RE::ExtraDataType::kWorn)) {
                         ammoData.equipData.boundObject = pEntryData->object;
                         ammoData.equipData.pExtraData = extraList;
                         ammoData.ammo = ammoData.equipData.boundObject->As<RE::TESAmmo>();
@@ -37,7 +37,11 @@ auto CAHZWeaponInfo::GetLeftHandWeapon() -> AHZWeaponData
     AHZWeaponData weaponData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto list = pPC->GetInventoryChanges()->entryList;
+        const auto changes = pPC->GetInventoryChanges();
+        const auto list = changes ? changes->entryList : nullptr;
+        if (!list) {
+            return weaponData;
+        }
         auto equippedItem = pPC->GetEquippedObject(true);
 
         if (!equippedItem) {
@@ -72,7 +76,11 @@ auto CAHZWeaponInfo::GetRightHandWeapon() -> AHZWeaponData
     AHZWeaponData weaponData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto list = pPC->GetInventoryChanges()->entryList;
+        const auto changes = pPC->GetInventoryChanges();
+        const auto list = changes ? changes->entryList : nullptr;
+        if (!list) {
+            return weaponData;
+        }
         auto equippedItem = pPC->GetEquippedObject(false);
 
         if (!equippedItem) {
@@ -109,7 +117,11 @@ auto CAHZWeaponInfo::GetEquippedAmmo() -> AHZWeaponData
     AHZWeaponData ammoData;
     auto          pPC = RE::PlayerCharacter::GetSingleton();
     if (pPC) {
-        auto list = pPC->GetInventoryChanges()->entryList;
+        const auto changes = pPC->GetInventoryChanges();
+        const auto list = changes ? changes->entryList : nullptr;
+        if (!list) {
+            return ammoData;
+        }
 
         for (auto it = list->begin(); it != list->end(); ++it) {
             auto entry = *it;

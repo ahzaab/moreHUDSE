@@ -7,6 +7,7 @@ namespace Events
     using EventResult = RE::BSEventNotifyControl;
 
     bool IsAHZMovieLoaded() noexcept;
+    bool IsBookRolloverSuppressed() noexcept;
     void NotifyAHZMovieLoaded();
     void SetLocationStatusOptions(bool a_enabled, bool a_dungeonsOnly, bool a_hideUnvisited, bool a_exteriorOnly) noexcept;
 

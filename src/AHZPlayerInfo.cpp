@@ -10,7 +10,8 @@ auto CAHZPlayerInfo::GetItemAmount(uint32_t formID) -> uint32_t
     if (!pPC)
         return 0;
 
-    auto pContainer = pPC->GetBaseObject()->As<RE::TESContainer>();
+    const auto base = pPC->GetBaseObject();
+    auto pContainer = base ? base->As<RE::TESContainer>() : nullptr;
     if (!pContainer)
         return 0;
 

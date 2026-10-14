@@ -33,7 +33,11 @@ public:
 	{
 		using GetInterfaceProc = InterfaceV20 * (*)();
 
+		_interface = nullptr;
 		const auto dllHandle = GetModuleHandleA(SERVER_PLUGIN_NAME);
+		if (!dllHandle) {
+			return false;
+		}
 		const auto getInterfaceProc = reinterpret_cast<GetInterfaceProc>(GetProcAddress(dllHandle, "GetCompletionistInterfaceV20"));
 
 		if (getInterfaceProc) {
@@ -134,7 +138,7 @@ public:
 		IconInfo info{};
 		info.object = object;
 
-		if (_interface) {
+		if (_interface && object) {
 			_interface->GetIconInfo(&info, 1);
 		}
 
