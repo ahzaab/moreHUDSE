@@ -334,7 +334,7 @@ namespace Scaleform
             }
 
             a_params.movie->CreateArray(a_params.retVal);
-            if (!IsRolloverTextVisible(a_params.movie)) {
+            if (Events::IsBookRolloverSuppressed()) {
                 a_params.retVal->SetArraySize(0);
                 return;
             }
