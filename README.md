@@ -156,7 +156,9 @@ Build both Nexus packages using the version from `CMakeLists.txt`:
 & .\Scripts\AE\BuildRelease.ps1
 ```
 
-To republish all FLA files through the pinned `flc` package before creating the BSA, ensure `npm` is on `PATH` and run:
+To republish the FLAs through the pinned `flc` package, put `npm` on `PATH` and stage the SkyUI compiler sources at the paths used by the authored classpath. Copy the contents of the SkyUI `src/CLIK` directory into `dist/NG/CLIK` and the contents of `src/common` into `dist/NG/Common`. Remove both temporary directories after verifying the published SWFs.
+
+Run the publisher with the release build.
 
 ```powershell
 & .\Scripts\AE\BuildRelease.ps1 -BuildScaleform

@@ -274,7 +274,9 @@ namespace Scaleform
                 return;
             }
 
-            if (!IsRolloverTextVisible(a_params.movie)) {
+            // BTPS can hide the vanilla text field while displaying its own rollover.
+            // Return the enchantment state so the widget can place the icon.
+            if (Events::IsBookRolloverSuppressed()) {
                 a_params.retVal->SetNumber(0);
                 return;
             }
